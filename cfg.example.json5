@@ -1,0 +1,127 @@
+{
+    facebook: {
+        "ruthenia.info":     ["437187253394576", "v3.0"],
+        "www.ruthenia.info": ["437187253394576", "v3.0"],
+        "www.dumaj.org.ua":  ["908038745957627", "v3.0"],
+        "dumaj.org.ua":      ["908038745957627", "v3.0"],
+    },
+
+    credentials: {
+        "": {
+            salt: "",
+            password_min_length: "6",
+        },
+    },
+
+    identity: {
+        "": {
+            domain: "dumaj.org.ua",
+            path: "user",
+            id: "1"
+        },
+    },
+
+
+    server: {
+        "": {
+            port: 80,
+        },
+
+        notebook: {
+            port: 443,
+            tls_cert_file: "",
+            tls_key_file:  ""
+        },
+
+    },
+
+
+    mysql: {
+        "": {
+            Host: "localhost",
+            Port: 3306,
+            User: "",
+            Pass: "",
+            Path: "confidence",
+        },
+        test: {
+            Host: "localhost",
+            Port: 3306,
+            User: "",
+            Pass: "",
+            Path: "confidence_test",
+        },
+    },
+
+    bolt: {
+        "": {
+            Path: "",
+        },
+    },
+
+    sender: {
+        "": {
+            from: "no-reply@dumaj.org.ua",
+        },
+
+        test: {
+            from: "no-reply@dumaj.org.ua",
+        },
+    },
+
+    smtp: {
+        "": {
+            Host: "smtp.mailtrap.io",
+            Port: 2525,
+            User: "",
+            Pass: "",
+        },
+    },
+
+    pop3: {
+        "": {
+            Host: "pop.zoho.com:995",
+            User: "",
+            Pass: "",
+        },
+    },
+
+
+    fileslocal: {
+        "": {
+            repository_path: "",
+        },
+    },
+
+    system: {
+        root_path: "",
+        unrtf_path: "",
+        browser_root_path: "",
+        px_preview: "80",
+    },
+
+    twitter: {
+        "": {
+            key: "Consumer Key (API Key)",
+            secret: "Consumer Secret (API Secret)",
+            token: "Access Token",
+            token_secret: "Access Token Secret",
+        },
+    },
+
+    google: {
+        "": {
+            api_key: "API KEY",
+            user_id: "USER ID",
+            secret: "USER SECRET",
+        }
+    },
+
+    instagram: {
+        "": {
+            client_id: "Client_ID",
+            client_secret: "Client Secret",
+            access_token: "Access Token",
+        },
+    },
+}

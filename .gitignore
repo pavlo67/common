@@ -1,0 +1,10 @@
+config.json5
+config.remote.json5
+cfg.json5
+cfg.remote.json5
+
+*.test
+.idea
+.env
+_storage/*
+*/_storage/*
