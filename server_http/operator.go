@@ -8,13 +8,12 @@ import (
 	"github.com/pavlo67/punctum/basis/config"
 	"github.com/pavlo67/punctum/basis/program"
 	"github.com/pavlo67/punctum/identity"
-	"github.com/pavlo67/punctum/server"
 )
 
 const InterfaceKey program.InterfaceKey = "server_http"
 
 type Operator interface {
-	server.Operator
+	Start()
 
 	HandleFile(serverPath, localPath string, mimeType *string) error
 	HandleString(serverPath, str string, mimeType *string)

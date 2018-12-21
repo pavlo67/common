@@ -1,4 +1,4 @@
-package node_http_jschmhr
+package server_http_jschmhr
 
 import (
 	"net/http"
@@ -9,28 +9,35 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/punctum/node"
+	"github.com/pavlo67/punctum/identity"
+	"github.com/pavlo67/punctum/server_http"
 )
 
-// node_http_jschmhr ----------------------------------------------------------------------------------------------------------
+var _ server_http.Operator = &server_http_jschmhr{}
 
-type node_http_jschmhr struct {
+type server_http_jschmhr struct {
 	httpServer   *http.Server
 	httpServeMux *httprouter.Router
+	certFileTLS  string
+	keyFileTLS   string
+	identOp      identity.Operator
 
-	certFileTLS string
-	keyFileTLS  string
+	htmlTemplate string
+	templator    server_http.Templator
 }
 
-func New(port int, certFileTLS, keyFileTLS string) (node.Operator, error) {
-
+func New(port int, certFileTLS, keyFileTLS string, identOp identity.Operator, htmlTemplate string) (server_http.Operator, error) {
 	if port <= 0 {
 		return nil, errors.Errorf("serverOp hasn't started: no correct data for http port: %d", port)
 	}
 
+	if identOp == nil {
+		l.Warn("no identity.Operator for server_http_jschmhr.New()")
+	}
+
 	router := httprouter.New()
 
-	return &node_http_jschmhr{
+	return &server_http_jschmhr{
 		httpServer: &http.Server{
 			Addr:           ":" + strconv.Itoa(port),
 			Handler:        router,
@@ -42,34 +49,32 @@ func New(port int, certFileTLS, keyFileTLS string) (node.Operator, error) {
 
 		certFileTLS: certFileTLS,
 		keyFileTLS:  keyFileTLS,
+
+		identOp: identOp,
+
+		htmlTemplate: htmlTemplate,
 	}, nil
 }
 
-type Handler = httprouter.Handle
-
-func redirect(w http.ResponseWriter, req *http.Request) {
-	// remove/add not default ports from req.Host
-	target := "https://" + req.Host + req.URL.Path
-	if len(req.URL.RawQuery) > 0 {
-		target += "?" + req.URL.RawQuery
-	}
-	http.Redirect(w, req, target, http.StatusTemporaryRedirect)
-}
-
 // start wraps and verbalizes http.Server.ListenAndServe method.
-func (s *node_http_jschmhr) Start() {
+func (s *server_http_jschmhr) Start() {
 	l.Info("Server is starting on address", s.httpServer.Addr)
+
+	var err error
+
 	if s.certFileTLS != "" && s.keyFileTLS != "" {
-		go http.ListenAndServe(":80", http.HandlerFunc(redirect))
-		l.Info(s.httpServer.ListenAndServeTLS(s.certFileTLS, s.keyFileTLS))
+		go http.ListenAndServe(":80", http.HandlerFunc(server_http.Redirect))
+		err = s.httpServer.ListenAndServeTLS(s.certFileTLS, s.keyFileTLS)
 	} else {
-		l.Info(s.httpServer.ListenAndServe())
+		err = s.httpServer.ListenAndServe()
 	}
-	// ??? panic on serverOp fault
+
+	if err != nil {
+		l.Error(err)
+	}
 }
 
-// HandleFunc wraps and verbalizes node_http_jschmhr.Handler.HandleFunc method.
-func (s *node_http_jschmhr) Handle(method, path string, handler Handler) {
+func (s *server_http_jschmhr) handleFunc(method, path string, handler httprouter.Handle) {
 	if handler == nil {
 		l.Error(method, " --> ", path, "\t!!! NULL HANDLER ISN'T DISPATCHED !!!")
 		return
