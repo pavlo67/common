@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/GehirnInc/crypt"
 	_ "github.com/GehirnInc/crypt/sha256_crypt"
 	"github.com/pkg/errors"
 )
@@ -33,24 +32,4 @@ func PasswordValidation(password string, minLength int) (string, error) {
 		return "", fmt.Errorf("закороткий пароль, повинно бути не менше %d символів", minLength)
 	}
 	return password, nil
-}
-
-func PasswordHashing(password, salt string) (string, error) {
-	crypt := crypt.SHA256.New()
-	passwordHash, err := crypt.Generate([]byte(password), []byte(salt))
-
-	return passwordHash, errors.Wrap(err, "error hashing password")
-}
-
-func GetEncodedPassword(password string, salt string, minLength int) (encodedPassword *Hash, err error) {
-	password, err = PasswordValidation(password, minLength)
-	if err != nil {
-		return nil, errors.Wrap(err, "error encoded password")
-	}
-
-	passhash, err := PasswordHashing(password, salt)
-	if err != nil {
-		return nil, errors.Wrap(err, "error encoded password")
-	}
-	return &Hash{passhash, CryptypePreferred}, nil
 }

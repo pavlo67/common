@@ -7,17 +7,18 @@ import (
 
 const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
-var r *rand.Rand // Rand for this package.
+var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 
-func init() {
-	r = rand.New(rand.NewSource(time.Now().UnixNano()))
-}
-
-// RandomString ...
 func RandomString(strlen int) string {
+	if strlen < 1 {
+		return ""
+	}
+
 	result := make([]byte, strlen)
+
 	for i := range result {
 		result[i] = chars[r.Intn(len(chars))]
 	}
+
 	return string(result)
 }

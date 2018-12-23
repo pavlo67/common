@@ -7,17 +7,26 @@ import (
 
 const InterfaceKey program.InterfaceKey = "identity"
 
+type Access struct {
+	ID    basis.ID `bson:"id"              json:"id"`
+	Right Right    `bson:"right,omitempty" json:"right,omitempty"`
+	Label string   `bson:"label,omitempty" json:"label,omitempty"`
+}
+
 type User struct {
-	ID       basis.ID `bson:"id"       json:"id"`
-	Nickname string   `bson:"nickname" json:"nickname"`
+	ID       basis.ID `bson:"id"                 json:"id"`
+	Nickname string   `bson:"nickname"           json:"nickname"`
+	Accesses []Access `bson:"accesses,omitempty" json:"accesses,omitempty"`
 }
 
 type Operator interface {
-	// Use can require multi-steps...
-	// It autenticates the user (using his own or admin's creds) and can also add, update or remove user's creds.
-	// It can create a new user if no toAuth-creds sent
-	Identify(toAuth []Creds, toSet ...Creds) (*User, basis.Values, error)
-	HasRights(user *User, allowedIDs ...basis.ID) bool
+	// SetCreds can require multi-steps (using returned []Creds)...
+	SetCreds(userID *basis.ID, toSet []Creds, toAuth ...Creds) (*User, []Creds, error)
+
+	// Authorize can require multi-steps (using returned []Creds)...
+	Authorize(toAuth ...Creds) (*User, []Creds, error)
+
+	Accepts() ([]CredsType, error)
 }
 
 // callbacks can be used for partial implementations of identity.Operator (in their own interfaces)

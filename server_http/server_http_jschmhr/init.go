@@ -49,7 +49,7 @@ func (ss *server_http_jschmhrStarter) Prepare(conf *config.PunctumConfig, params
 
 	templatePath := params.StringKeyDefault("template_path", "")
 	if templatePath == "" {
-		l.Warn(`on server_http_jschmhr.Prepare(): empty params["template_path"]`)
+		l.Warn(`on serverHTTPJschmhr.Prepare(): empty params["template_path"]`)
 
 	} else {
 		if templatePath[0] != '/' {
@@ -77,22 +77,35 @@ func (ss *server_http_jschmhrStarter) Setup() error {
 }
 
 func (ss *server_http_jschmhrStarter) Init(joiner program.Joiner) error {
-	identOp, _ := joiner.Interface(identity.InterfaceKey).(identity.Operator)
+	identOpsMap := map[identity.CredsType][]identity.Operator{}
+
+	identOpsPtr := joiner.InterfacesAll(identity.InterfaceKey)
+	for _, identOpIntf := range identOpsPtr {
+		if identOp, ok := identOpIntf.Interface.(identity.Operator); ok {
+			credsTypes, err := identOp.Accepts()
+			if err != nil {
+				l.Error(err)
+			}
+			for _, credsType := range credsTypes {
+				identOpsMap[credsType] = append(identOpsMap[credsType], identOp)
+			}
+		}
+	}
 
 	srvOp, err := New(
 		ss.config.Port,
 		ss.config.TLSCertFile,
 		ss.config.TLSKeyFile,
-		identOp,
+		identOpsMap,
 		ss.htmlTemplate,
 	)
 	if err != nil {
-		return errors.Wrap(err, "can't init node_http_jschmhr.Operator")
+		return errors.Wrap(err, "can't init serverHTTPJschmhr.Operator")
 	}
 
 	err = joiner.JoinInterface(srvOp, ss.interfaceKey)
 	if err != nil {
-		return errors.Wrapf(err, "can't join node_http_jschmhr srvOp as node.Operator with key '%s'", ss.interfaceKey)
+		return errors.Wrapf(err, "can't join serverHTTPJschmhr srvOp as server.Operator with key '%s'", ss.interfaceKey)
 	}
 
 	return nil

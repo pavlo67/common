@@ -18,9 +18,9 @@ type Interface struct {
 }
 
 type Joiner interface {
-	JoinInterface(intrfc interface{}, key InterfaceKey) error
-	Interface(key InterfaceKey) interface{}
-	InterfacesAll(ptrToInterface interface{}, key InterfaceKey) []Interface
+	JoinInterface(interface{}, InterfaceKey) error
+	Interface(InterfaceKey) interface{}
+	InterfacesAll(InterfaceKey) []Interface
 	CloseAll()
 }
 
@@ -74,9 +74,9 @@ func (j *joiner) Interface(key InterfaceKey) interface{} {
 	return nil
 }
 
-func (j *joiner) InterfacesAll(ptrToInterface interface{}, key InterfaceKey) []Interface {
+func (j *joiner) InterfacesAll(key InterfaceKey) []Interface {
 	if j == nil {
-		log.Printf("on Joiner.InterfacesAll(%T, %s): null Joiner item", ptrToInterface, key)
+		log.Printf("on Joiner.InterfacesAll(%s): null Joiner item", key)
 	}
 
 	apps := []Interface{}
@@ -85,14 +85,16 @@ func (j *joiner) InterfacesAll(ptrToInterface interface{}, key InterfaceKey) []I
 	defer j.mutex.Unlock()
 
 	for _, app := range j.appInterfaces {
-
-		if key != "" && app.Key != key {
-			continue
-		}
-
-		if ptrToInterface == nil || checkInterface(app, ptrToInterface) {
+		if app.Key == key {
 			apps = append(apps, app)
 		}
+
+		//if key != "" && app.Key != key {
+		//	continue
+		//}
+		//if ptrToInterface == nil || checkInterface(app, ptrToInterface) {
+		//	apps = append(apps, app)
+		//}
 
 	}
 

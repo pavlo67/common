@@ -12,7 +12,7 @@ import (
 
 var reHTMLExt = regexp.MustCompile(`\.html?$`)
 
-func (s *server_http_jschmhr) HandleFile(serverPath, localPath string, mimeType *string) error {
+func (s *serverHTTPJschmhr) HandleFile(serverPath, localPath string, mimeType *string) error {
 	l.Info("FILES: "+localPath, "\t-->", serverPath)
 
 	// TODO: check localPath
@@ -41,7 +41,7 @@ func (s *server_http_jschmhr) HandleFile(serverPath, localPath string, mimeType 
 //	l.Error("can't read MIMEType for file: ", localPath+"/"+r.URL.Path, err)
 // }
 
-func (s *server_http_jschmhr) HandleString(serverPath, str string, mimeType *string) {
+func (s *serverHTTPJschmhr) HandleString(serverPath, str string, mimeType *string) {
 	s.handleFunc("GET", serverPath, func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 		if mimeType != nil {
 			// "application/javascript"

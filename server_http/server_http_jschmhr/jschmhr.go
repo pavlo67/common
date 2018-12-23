@@ -13,31 +13,31 @@ import (
 	"github.com/pavlo67/punctum/server_http"
 )
 
-var _ server_http.Operator = &server_http_jschmhr{}
+var _ server_http.Operator = &serverHTTPJschmhr{}
 
-type server_http_jschmhr struct {
+type serverHTTPJschmhr struct {
 	httpServer   *http.Server
 	httpServeMux *httprouter.Router
 	certFileTLS  string
 	keyFileTLS   string
-	identOp      identity.Operator
+	identOpsMap  map[identity.CredsType][]identity.Operator
 
 	htmlTemplate string
 	templator    server_http.Templator
 }
 
-func New(port int, certFileTLS, keyFileTLS string, identOp identity.Operator, htmlTemplate string) (server_http.Operator, error) {
+func New(port int, certFileTLS, keyFileTLS string, identOpsMap map[identity.CredsType][]identity.Operator, htmlTemplate string) (server_http.Operator, error) {
 	if port <= 0 {
 		return nil, errors.Errorf("serverOp hasn't started: no correct data for http port: %d", port)
 	}
 
-	if identOp == nil {
-		l.Warn("no identity.Operator for server_http_jschmhr.New()")
+	if len(identOpsMap) < 1 {
+		l.Warn("no one identity.Operator for serverHTTPJschmhr.New()")
 	}
 
 	router := httprouter.New()
 
-	return &server_http_jschmhr{
+	return &serverHTTPJschmhr{
 		httpServer: &http.Server{
 			Addr:           ":" + strconv.Itoa(port),
 			Handler:        router,
@@ -50,14 +50,14 @@ func New(port int, certFileTLS, keyFileTLS string, identOp identity.Operator, ht
 		certFileTLS: certFileTLS,
 		keyFileTLS:  keyFileTLS,
 
-		identOp: identOp,
+		identOpsMap: identOpsMap,
 
 		htmlTemplate: htmlTemplate,
 	}, nil
 }
 
 // start wraps and verbalizes http.Server.ListenAndServe method.
-func (s *server_http_jschmhr) Start() {
+func (s *serverHTTPJschmhr) Start() {
 	l.Info("Server is starting on address", s.httpServer.Addr)
 
 	var err error
@@ -74,7 +74,7 @@ func (s *server_http_jschmhr) Start() {
 	}
 }
 
-func (s *server_http_jschmhr) handleFunc(method, path string, handler httprouter.Handle) {
+func (s *serverHTTPJschmhr) handleFunc(method, path string, handler httprouter.Handle) {
 	if handler == nil {
 		l.Error(method, " --> ", path, "\t!!! NULL HANDLER ISN'T DISPATCHED !!!")
 		return

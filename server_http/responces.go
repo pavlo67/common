@@ -6,14 +6,7 @@ import (
 	"github.com/pavlo67/punctum/basis"
 )
 
-func Redirect(w http.ResponseWriter, req *http.Request) {
-	// remove/add not default ports from req.Host
-	target := "https://" + req.Host + req.URL.Path
-	if len(req.URL.RawQuery) > 0 {
-		target += "?" + req.URL.RawQuery
-	}
-	http.Redirect(w, req, target, http.StatusTemporaryRedirect)
-}
+// HTML -------------------------------------------------------------------------------------
 
 type HTMLResponse struct {
 	Status int
@@ -30,6 +23,8 @@ func HTMLError(status int, label string) HTMLResponse {
 		Data:   map[string]string{"corpus": label},
 	}
 }
+
+// REST -------------------------------------------------------------------------------------
 
 type RESTDataMessage struct {
 	Info     string `json:"info,omitempty"`
@@ -51,6 +46,8 @@ func RESTError(err error) RESTResponse {
 		Data:   RESTDataError{basis.Errors{err}},
 	}
 }
+
+// Binary -----------------------------------------------------------------------------------
 
 type BinaryResponse struct {
 	Status   int

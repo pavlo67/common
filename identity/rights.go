@@ -2,15 +2,14 @@ package identity
 
 import (
 	"errors"
+
+	"github.com/pavlo67/punctum/basis"
 )
 
 var ErrNoRights = errors.New("користувачу бракує прав :-(")
 
-// Right ...
 type Right string
-
-// Managers ...
-type Managers map[Right]ID
+type Managers map[Right]basis.ID
 
 const (
 	Owner           Right = "owner"
@@ -31,3 +30,54 @@ const (
 	RRemoveMember   Right = "remove_member"   //
 	RRestrictMember Right = "restrict_member" //
 )
+
+const AllowedForAll basis.ID = "*"
+const AllowedForAllAuthorized basis.ID = "!"
+
+func HasRights(user *User, identOpsMap map[CredsType]Operator, allowedIDs []basis.ID) (bool, error) {
+	if allowedIDs == nil {
+		return true, nil
+	} else if len(allowedIDs) < 1 {
+		return false, nil
+	}
+
+	if user == nil {
+		for _, allowedID := range allowedIDs {
+			if allowedID == AllowedForAll {
+				return true, nil
+			}
+		}
+		return false, nil
+	}
+
+	for _, allowedID := range allowedIDs {
+		if allowedID == AllowedForAll || allowedID == AllowedForAllAuthorized || allowedID == user.ID {
+			return true, nil
+		}
+	}
+
+	if len(user.Accesses) > 0 {
+		for _, access := range user.Accesses {
+			if access.ID == user.ID {
+				return true, nil
+			}
+		}
+	}
+
+	if identOp := identOpsMap[CredsAllowedID]; identOp != nil {
+		var errs basis.Errors
+		for _, allowedID := range allowedIDs {
+			user, _, err := identOp.Authorize(Creds{Type: CredsID, Value: string(user.ID)}, Creds{Type: CredsAllowedID, Value: string(allowedID)})
+			if err != nil {
+				errs = append(errs, err)
+			}
+			if user != nil {
+				return true, errs.Err()
+			}
+		}
+
+		return false, errs.Err()
+	}
+
+	return false, nil
+}

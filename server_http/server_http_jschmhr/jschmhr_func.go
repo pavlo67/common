@@ -14,37 +14,16 @@ import (
 	"github.com/pavlo67/punctum/server_http"
 )
 
-func (s *server_http_jschmhr) getUserData(r *http.Request) *identity.User {
-	if s.identOp == nil {
-		return nil
-	}
-
-	token := r.Header.Get("Authorization")
-	if token == "" {
-		c, err := r.Cookie("token")
-		if err != nil {
-			return nil
-		}
-		token = c.Value
-		if token == "" {
-			return nil
-		}
-	}
-	user, _, err := s.identOp.Identify([]identity.Creds{{Type: identity.CredsToken, Value: token}})
-	if err != nil {
-		l.Error(err)
-		return nil
-	}
-	return user
+func (s *serverHTTPJschmhr) HandleFuncRaw(method, serverPath string, rawHandler server_http.HandlerRaw, allowedIDs ...basis.ID) {
+	l.Fatal("func (s *serverHTTPJschmhr) HandleFuncRaw() isn't implemented!!!")
 }
 
-func (s *server_http_jschmhr) HandleFuncRaw(method, serverPath string, rawHandler server_http.HandlerRaw, allowedIDs ...basis.ID) {
-	l.Fatal("func (s *server_http_jschmhr) HandleFuncRaw() isn't implemented!!!")
-}
-
-func (s *server_http_jschmhr) HandleFuncHTML(method, serverPath string, htmlHandler server_http.HandlerHTML, allowedIDs ...basis.ID) {
+func (s *serverHTTPJschmhr) HandleFuncHTML(method, serverPath string, htmlHandler server_http.HandlerHTML, allowedIDs ...basis.ID) {
 	s.handleFunc(method, serverPath, func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
-		user := s.getUserData(r)
+		user, err := server_http.UserWithRequest(r, s.identOpsMap)
+		if err != nil {
+			l.Error(err)
+		}
 
 		var params map[string]string
 		if len(paramsHR) > 0 {
@@ -61,7 +40,11 @@ func (s *server_http_jschmhr) HandleFuncHTML(method, serverPath string, htmlHand
 			context = s.templator(user, r, params)
 		}
 
-		if allowedIDs != nil && !s.identOp.HasRights(user, allowedIDs...) {
+		ok, err := identity.HasRights(user, s.identOpsMap, allowedIDs)
+		if err != nil {
+			l.Error(err)
+		}
+		if !ok {
 			w.Header().Set("Content-Type", "text/html")
 
 			res, err := mustache.Render(s.htmlTemplate, context)
@@ -102,15 +85,22 @@ func (s *server_http_jschmhr) HandleFuncHTML(method, serverPath string, htmlHand
 	})
 }
 
-func (s *server_http_jschmhr) HandleTemplatorHTML(templatorHTML server_http.Templator) {
+func (s *serverHTTPJschmhr) HandleTemplatorHTML(templatorHTML server_http.Templator) {
 	s.templator = templatorHTML
 }
 
-func (s *server_http_jschmhr) HandleFuncREST(method, serverPath string, restHandler server_http.HandlerREST, allowedIDs ...basis.ID) {
+func (s *serverHTTPJschmhr) HandleFuncREST(method, serverPath string, restHandler server_http.HandlerREST, allowedIDs ...basis.ID) {
 	s.handleFunc(method, serverPath, func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
-		user := s.getUserData(r)
+		user, err := server_http.UserWithRequest(r, s.identOpsMap)
+		if err != nil {
+			l.Error(err)
+		}
 
-		if allowedIDs != nil && !s.identOp.HasRights(user, allowedIDs...) {
+		ok, err := identity.HasRights(user, s.identOpsMap, allowedIDs)
+		if err != nil {
+			l.Error(err)
+		}
+		if !ok {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
@@ -151,11 +141,18 @@ func (s *server_http_jschmhr) HandleFuncREST(method, serverPath string, restHand
 
 }
 
-func (s *server_http_jschmhr) HandleFuncBinary(method, serverPath string, binaryHandler server_http.HandlerBinary, allowedIDs ...basis.ID) {
+func (s *serverHTTPJschmhr) HandleFuncBinary(method, serverPath string, binaryHandler server_http.HandlerBinary, allowedIDs ...basis.ID) {
 	s.handleFunc(method, serverPath, func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
-		user := s.getUserData(r)
+		user, err := server_http.UserWithRequest(r, s.identOpsMap)
+		if err != nil {
+			l.Error(err)
+		}
 
-		if allowedIDs != nil && !s.identOp.HasRights(user, allowedIDs...) {
+		ok, err := identity.HasRights(user, s.identOpsMap, allowedIDs)
+		if err != nil {
+			l.Error(err)
+		}
+		if !ok {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
