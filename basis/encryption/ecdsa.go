@@ -1,12 +1,11 @@
 package encryption
 
 import (
-	"bytes"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/md5"
 	"crypto/rand"
-	"encoding/gob"
+	"encoding/json"
 	"io"
 	"math/big"
 )
@@ -49,23 +48,29 @@ func ECDSAVerify(publicKey, dataRaw, signature []byte) bool {
 }
 
 func ECDSASerialize(privKey ecdsa.PrivateKey) ([]byte, error) {
-	var encoded bytes.Buffer
 
-	// gob.Register(privKey.Curve)
 	privKey.Curve = nil
 
-	enc := gob.NewEncoder(&encoded)
-	err := enc.Encode(privKey)
+	return json.Marshal(privKey)
 
-	if err != nil {
-		return nil, err
-	}
-
-	return encoded.Bytes(), nil
+	//var encoded bytes.Buffer
+	// gob.Register(privKey.Curve)
+	//enc := gob.NewEncoder(&encoded)
+	//err := enc.Encode(privKey)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//return encoded.Bytes(), nil
 }
+
 func ECDSADeserialize(data []byte, privKey *ecdsa.PrivateKey) error {
-	decoder := gob.NewDecoder(bytes.NewReader(data))
-	err := decoder.Decode(privKey)
+	//decoder := gob.NewDecoder(bytes.NewReader(data))
+	//err := decoder.Decode(privKey)
+	//if err != nil {
+	//	return err
+	//}
+
+	err := json.Unmarshal(data, privKey)
 	if err != nil {
 		return err
 	}

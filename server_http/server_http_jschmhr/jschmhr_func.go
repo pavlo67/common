@@ -9,16 +9,15 @@ import (
 	"github.com/cbroglie/mustache"
 	"github.com/julienschmidt/httprouter"
 
-	"github.com/pavlo67/punctum/basis"
 	"github.com/pavlo67/punctum/identity"
 	"github.com/pavlo67/punctum/server_http"
 )
 
-func (s *serverHTTPJschmhr) HandleFuncRaw(method, serverPath string, rawHandler server_http.HandlerRaw, allowedIDs ...basis.ID) {
+func (s *serverHTTPJschmhr) HandleFuncRaw(method, serverPath string, rawHandler server_http.HandlerRaw, allowedIDs ...identity.ID) {
 	l.Fatal("func (s *serverHTTPJschmhr) HandleFuncRaw() isn't implemented!!!")
 }
 
-func (s *serverHTTPJschmhr) HandleFuncHTML(method, serverPath string, htmlHandler server_http.HandlerHTML, allowedIDs ...basis.ID) {
+func (s *serverHTTPJschmhr) HandleFuncHTML(method, serverPath string, htmlHandler server_http.HandlerHTML, allowedIDs ...identity.ID) {
 	s.handleFunc(method, serverPath, func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
 		user, err := server_http.UserWithRequest(r, s.identOpsMap)
 		if err != nil {
@@ -89,7 +88,7 @@ func (s *serverHTTPJschmhr) HandleTemplatorHTML(templatorHTML server_http.Templa
 	s.templator = templatorHTML
 }
 
-func (s *serverHTTPJschmhr) HandleFuncREST(method, serverPath string, restHandler server_http.HandlerREST, allowedIDs ...basis.ID) {
+func (s *serverHTTPJschmhr) HandleFuncREST(method, serverPath string, restHandler server_http.HandlerREST, allowedIDs ...identity.ID) {
 	s.handleFunc(method, serverPath, func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
 		user, err := server_http.UserWithRequest(r, s.identOpsMap)
 		if err != nil {
@@ -141,7 +140,7 @@ func (s *serverHTTPJschmhr) HandleFuncREST(method, serverPath string, restHandle
 
 }
 
-func (s *serverHTTPJschmhr) HandleFuncBinary(method, serverPath string, binaryHandler server_http.HandlerBinary, allowedIDs ...basis.ID) {
+func (s *serverHTTPJschmhr) HandleFuncBinary(method, serverPath string, binaryHandler server_http.HandlerBinary, allowedIDs ...identity.ID) {
 	s.handleFunc(method, serverPath, func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
 		user, err := server_http.UserWithRequest(r, s.identOpsMap)
 		if err != nil {

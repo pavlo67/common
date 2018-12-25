@@ -17,11 +17,11 @@ type Operator interface {
 
 	HandleFile(serverPath, localPath string, mimeType *string) error
 	HandleString(serverPath, str string, mimeType *string)
-	HandleFuncRaw(method, serverPath string, rawHandler HandlerRaw, allowedIDs ...basis.ID)
-	HandleFuncHTML(method, serverPath string, htmlHandler HandlerHTML, allowedIDs ...basis.ID)
+	HandleFuncRaw(method, serverPath string, rawHandler HandlerRaw, allowedIDs ...identity.ID)
+	HandleFuncHTML(method, serverPath string, htmlHandler HandlerHTML, allowedIDs ...identity.ID)
 	HandleTemplatorHTML(templatorHTML Templator)
-	HandleFuncREST(method, serverPath string, restHandler HandlerREST, allowedIDs ...basis.ID)
-	HandleFuncBinary(method, serverPath string, binaryHandler HandlerBinary, allowedIDs ...basis.ID)
+	HandleFuncREST(method, serverPath string, restHandler HandlerREST, allowedIDs ...identity.ID)
+	HandleFuncBinary(method, serverPath string, binaryHandler HandlerBinary, allowedIDs ...identity.ID)
 }
 
 type Templator func(*identity.User, *http.Request, map[string]string) map[string]string
@@ -30,7 +30,7 @@ type HandlerHTML func(*identity.User, *http.Request, map[string]string) (HTMLRes
 type HandlerREST func(*identity.User, *http.Request, map[string]string) (RESTResponse, error)
 type HandlerBinary func(*identity.User, *http.Request, map[string]string) (BinaryResponse, error)
 
-func InitEndpoints(op Operator, endpoints map[string]config.Endpoint, htmlHandlers map[string]HandlerHTML, restHandlers map[string]HandlerREST, binaryHandlers map[string]HandlerBinary, allowedIDs []basis.ID) basis.Errors {
+func InitEndpoints(op Operator, endpoints map[string]config.Endpoint, htmlHandlers map[string]HandlerHTML, restHandlers map[string]HandlerREST, binaryHandlers map[string]HandlerBinary, allowedIDs []identity.ID) basis.Errors {
 	var errs basis.Errors
 
 	for key, ep := range endpoints {

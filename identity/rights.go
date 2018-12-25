@@ -9,7 +9,7 @@ import (
 var ErrNoRights = errors.New("користувачу бракує прав :-(")
 
 type Right string
-type Managers map[Right]basis.ID
+type Managers map[Right]ID
 
 const (
 	Owner           Right = "owner"
@@ -31,10 +31,10 @@ const (
 	RRestrictMember Right = "restrict_member" //
 )
 
-const AllowedForAll basis.ID = "*"
-const AllowedForAllAuthorized basis.ID = "!"
+const AllowedForAll ID = "*"
+const AllowedForAllAuthorized ID = "!"
 
-func HasRights(user *User, identOpsMap map[CredsType]Operator, allowedIDs []basis.ID) (bool, error) {
+func HasRights(user *User, identOpsMap map[CredsType]Operator, allowedIDs []ID) (bool, error) {
 	if allowedIDs == nil {
 		return true, nil
 	} else if len(allowedIDs) < 1 {

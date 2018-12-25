@@ -1,27 +1,27 @@
 package identity
 
 import (
-	"github.com/pavlo67/punctum/basis"
 	"github.com/pavlo67/punctum/basis/program"
 )
 
 const InterfaceKey program.InterfaceKey = "identity"
 
 type Access struct {
-	ID    basis.ID `bson:"id"              json:"id"`
-	Right Right    `bson:"right,omitempty" json:"right,omitempty"`
-	Label string   `bson:"label,omitempty" json:"label,omitempty"`
+	ID    ID     `bson:"id"              json:"id"`
+	Right Right  `bson:"right,omitempty" json:"right,omitempty"`
+	Label string `bson:"label,omitempty" json:"label,omitempty"`
 }
 
 type User struct {
-	ID       basis.ID `bson:"id"                 json:"id"`
+	ID       ID       `bson:"id"                 json:"id"`
+	LocalID  string   `bson:"local_id"           json:"local_id"`
 	Nickname string   `bson:"nickname"           json:"nickname"`
 	Accesses []Access `bson:"accesses,omitempty" json:"accesses,omitempty"`
 }
 
 type Operator interface {
 	// SetCreds can require multi-steps (using returned []Creds)...
-	SetCreds(userID *basis.ID, toSet []Creds, toAuth ...Creds) (*User, []Creds, error)
+	SetCreds(userID *ID, toSet []Creds, toAuth ...Creds) (*User, []Creds, error)
 
 	// Authorize can require multi-steps (using returned []Creds)...
 	Authorize(toAuth ...Creds) (*User, []Creds, error)

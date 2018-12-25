@@ -3,23 +3,25 @@ package identity_btc
 import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
-	"crypto/md5"
 	"crypto/rand"
-	"io"
-	"math/big"
 	"strings"
 
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/punctum/basis"
+	"github.com/pavlo67/punctum/basis/encryption"
 	"github.com/pavlo67/punctum/identity"
 )
 
+const Proto basis.Proto = "btc://"
+
 var _ identity.Operator = &identityBTC{}
 
-var ErrWrongSignature = errors.New("wrong signature")
-var ErrEmptyPublicKeyAddress = errors.New("empty public Key address")
+var errWrongAddressProto = errors.New("wrong address proto")
+var errWrongSignature = errors.New("wrong signature")
+var errEmptyPublicKeyAddress = errors.New("empty public Key address")
+var errEmptyPrivateKeyGenerated = errors.New("empty private key generated")
 
 type identityBTC struct{}
 
@@ -28,81 +30,68 @@ func New() (identity.Operator, error) {
 }
 
 // 	SetCreds ignores all input parameters, creates new "BTC identity" and returns it
-func (*identityBTC) SetCreds(*basis.ID, []identity.Creds, ...identity.Creds) (*identity.User, []identity.Creds, error) {
+func (*identityBTC) SetCreds(*identity.ID, []identity.Creds, ...identity.Creds) (*identity.User, []identity.Creds, error) {
 	privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		return nil, nil, err
+	} else if privateKey == nil {
+		return nil, nil, errEmptyPrivateKeyGenerated
+	}
+
+	privateKeyBytes, err := encryption.ECDSASerialize(*privateKey)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	privateCreds := []identity.Creds{{
+	privateKeyCreds := []identity.Creds{{
 		Type:  identity.CredsPrivateKey,
-		Value: string(privateKey),
+		Value: string(privateKeyBytes),
 	}}
 
-	pubKey := append(privateKey.PublicKey.X.Bytes(), privateKey.PublicKey.Y.Bytes()...)
-
-	pk := ecdsa.PrivateKey{
-		PublicKey: ecdsa.PublicKey{
-			Curve: elliptic.Curve{},
-			X:     &big.Int{},
-			Y:     &big.Int{},
-		},
-		D: &big.Int{},
-	}
+	publicKeyAddress := string(Proto) + string(append(privateKey.PublicKey.X.Bytes(), privateKey.PublicKey.Y.Bytes()...))
 
 	return &identity.User{
-		ID:       "",
-		Nickname: "",
-		Accesses: nil,
-	}, nil, basis.ErrNotImplemented
+		ID:       identity.ID(publicKeyAddress),
+		Nickname: publicKeyAddress,
+	}, privateKeyCreds, nil
 }
 
+// var reProto = regexp.MustCompile(`^\w+://\s*`)
+
 func (*identityBTC) Authorize(toAuth ...identity.Creds) (*identity.User, []identity.Creds, error) {
-	var publicKeyAddress, contentToSignature, signature string
+	var publicKeyAddress, publicKeyEncoded string
+	var contentToSignature, signature []byte
 
 	for _, creds := range toAuth {
 		switch creds.Type {
 		case identity.CredsPublicKeyAddress:
+			// publicKeyAddress = reProto.ReplaceAllString(strings.TrimSpace(creds.Value), "")
 			publicKeyAddress = strings.TrimSpace(creds.Value)
+			if publicKeyAddress[:len(Proto)] != string(Proto) {
+				return nil, nil, errWrongAddressProto
+			}
+			publicKeyEncoded = publicKeyAddress[len(Proto):]
+
 		case identity.CredsContentToSignature:
-			contentToSignature = creds.Value
+			contentToSignature = []byte(creds.Value)
+
 		case identity.CredsSignature:
-			signature = creds.Value
+			signature = []byte(creds.Value)
 		}
 	}
 
-	if publicKeyAddress == "" {
-		return nil, nil, ErrEmptyPublicKeyAddress
+	if len(publicKeyEncoded) < 1 {
+		return nil, nil, errEmptyPublicKeyAddress
 	}
-	publicKey := base58.Decode(publicKeyAddress)
 
-	h := md5.New()
-	io.WriteString(h, contentToSignature)
-	data := h.Sum(nil)
+	publicKey := base58.Decode(publicKeyEncoded)
 
-	// build key and verify data
-	r := big.Int{}
-	s := big.Int{}
-	sigLen := len(signature)
-	r.SetBytes([]byte(signature)[:(sigLen / 2)])
-	s.SetBytes([]byte(signature)[(sigLen / 2):])
-
-	x := big.Int{}
-	y := big.Int{}
-	keyLen := len(publicKey)
-	x.SetBytes(publicKey[:(keyLen / 2)])
-	y.SetBytes(publicKey[(keyLen / 2):])
-
-	curve := elliptic.P256()
-
-	rawPubKey := ecdsa.PublicKey{Curve: curve, X: &x, Y: &y}
-
-	if !ecdsa.Verify(&rawPubKey, data, &r, &s) {
-		return nil, nil, ErrWrongSignature
+	if !encryption.ECDSAVerify(publicKey, contentToSignature, signature) {
+		return nil, nil, errWrongSignature
 	}
 
 	return &identity.User{
-		ID:       basis.ID("btc://" + publicKeyAddress),
+		ID:       identity.ID(publicKeyAddress),
 		Nickname: publicKeyAddress,
 	}, nil, nil
 }
