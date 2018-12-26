@@ -13,11 +13,11 @@ import (
 	"github.com/pavlo67/punctum/server_http"
 )
 
-func (s *serverHTTPJschmhr) HandleFuncRaw(method, serverPath string, rawHandler server_http.HandlerRaw, allowedIDs ...identity.ID) {
+func (s *serverHTTPJschmhr) HandleFuncRaw(method, serverPath string, rawHandler server_http.RawHandler, allowedIDs ...identity.ID) {
 	l.Fatal("func (s *serverHTTPJschmhr) HandleFuncRaw() isn't implemented!!!")
 }
 
-func (s *serverHTTPJschmhr) HandleFuncHTML(method, serverPath string, htmlHandler server_http.HandlerHTML, allowedIDs ...identity.ID) {
+func (s *serverHTTPJschmhr) HandleFuncHTML(method, serverPath string, htmlHandler server_http.HTMLHandler, allowedIDs ...identity.ID) {
 	s.handleFunc(method, serverPath, func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
 		user, err := server_http.UserWithRequest(r, s.identOpsMap)
 		if err != nil {
@@ -36,7 +36,7 @@ func (s *serverHTTPJschmhr) HandleFuncHTML(method, serverPath string, htmlHandle
 
 		var context map[string]string
 		if s.templator != nil {
-			context = s.templator(user, r, params)
+			context = s.templator.Context(user, r, params)
 		}
 
 		ok, err := identity.HasRights(user, s.identOpsMap, allowedIDs)
@@ -88,7 +88,7 @@ func (s *serverHTTPJschmhr) HandleTemplatorHTML(templatorHTML server_http.Templa
 	s.templator = templatorHTML
 }
 
-func (s *serverHTTPJschmhr) HandleFuncREST(method, serverPath string, restHandler server_http.HandlerREST, allowedIDs ...identity.ID) {
+func (s *serverHTTPJschmhr) HandleFuncREST(method, serverPath string, restHandler server_http.RESTHandler, allowedIDs ...identity.ID) {
 	s.handleFunc(method, serverPath, func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
 		user, err := server_http.UserWithRequest(r, s.identOpsMap)
 		if err != nil {
@@ -140,7 +140,7 @@ func (s *serverHTTPJschmhr) HandleFuncREST(method, serverPath string, restHandle
 
 }
 
-func (s *serverHTTPJschmhr) HandleFuncBinary(method, serverPath string, binaryHandler server_http.HandlerBinary, allowedIDs ...identity.ID) {
+func (s *serverHTTPJschmhr) HandleFuncBinary(method, serverPath string, binaryHandler server_http.BinaryHandler, allowedIDs ...identity.ID) {
 	s.handleFunc(method, serverPath, func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
 		user, err := server_http.UserWithRequest(r, s.identOpsMap)
 		if err != nil {

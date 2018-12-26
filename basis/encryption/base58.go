@@ -14,3 +14,6 @@ func Base58Decode(input []byte) []byte {
 
 	return decoded
 }
+
+// alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+// alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz0OlI;.,_-`:!@#$%^&*+=|/?<>()[]{}"

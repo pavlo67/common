@@ -1,4 +1,4 @@
-package identity_btc
+package identity_ecdsa
 
 import (
 	"github.com/pkg/errors"
@@ -48,12 +48,12 @@ func (ss *identity_btcStarter) Setup() error {
 func (ss *identity_btcStarter) Init(joiner program.Joiner) error {
 	identOp, err := New()
 	if err != nil {
-		return errors.Wrap(err, "can't init identity_btc.Operator")
+		return errors.Wrap(err, "can't init identity_ecdsa.Operator")
 	}
 
 	err = joiner.JoinInterface(identOp, ss.interfaceKey)
 	if err != nil {
-		return errors.Wrapf(err, "can't join identity_btc identOp as identity.Operator with key '%s'", ss.interfaceKey)
+		return errors.Wrapf(err, "can't join identity_ecdsa identOp as identity.Operator with key '%s'", ss.interfaceKey)
 	}
 
 	return nil

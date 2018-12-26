@@ -119,17 +119,20 @@ func (j *joiner) CloseAll() {
 		log.Print("on Joiner.Close(): null Joiner item")
 		return
 	}
-	closersInt := j.InterfacesAll((*basis.Closer)(nil), "")
-	for _, cl := range closersInt {
-		if cl.Interface != nil {
-			if closer, ok := cl.Interface.(basis.Closer); ok {
-				err := closer.Close()
-				if err != nil {
-					log.Print("on Joiner.Close(): ", err)
-				}
-			}
-		}
-	}
+
+	// TODO!!!
+
+	//closersInt := j.InterfacesAll((*basis.Closer)(nil), "")
+	//for _, cl := range closersInt {
+	//	if cl.Interface != nil {
+	//		if closer, ok := cl.Interface.(basis.Closer); ok {
+	//			err := closer.Close()
+	//			if err != nil {
+	//				log.Print("on Joiner.Close(): ", err)
+	//			}
+	//		}
+	//	}
+	//}
 }
 
 // DEPRECATED

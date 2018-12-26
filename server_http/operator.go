@@ -17,20 +17,24 @@ type Operator interface {
 
 	HandleFile(serverPath, localPath string, mimeType *string) error
 	HandleString(serverPath, str string, mimeType *string)
-	HandleFuncRaw(method, serverPath string, rawHandler HandlerRaw, allowedIDs ...identity.ID)
-	HandleFuncHTML(method, serverPath string, htmlHandler HandlerHTML, allowedIDs ...identity.ID)
+	HandleFuncRaw(method, serverPath string, rawHandler RawHandler, allowedIDs ...identity.ID)
+	HandleFuncHTML(method, serverPath string, htmlHandler HTMLHandler, allowedIDs ...identity.ID)
 	HandleTemplatorHTML(templatorHTML Templator)
-	HandleFuncREST(method, serverPath string, restHandler HandlerREST, allowedIDs ...identity.ID)
-	HandleFuncBinary(method, serverPath string, binaryHandler HandlerBinary, allowedIDs ...identity.ID)
+	HandleFuncREST(method, serverPath string, restHandler RESTHandler, allowedIDs ...identity.ID)
+	HandleFuncBinary(method, serverPath string, binaryHandler BinaryHandler, allowedIDs ...identity.ID)
 }
 
-type Templator func(*identity.User, *http.Request, map[string]string) map[string]string
-type HandlerRaw func(*identity.User, *http.Request, map[string]string, http.ResponseWriter) error
-type HandlerHTML func(*identity.User, *http.Request, map[string]string) (HTMLResponse, error)
-type HandlerREST func(*identity.User, *http.Request, map[string]string) (RESTResponse, error)
-type HandlerBinary func(*identity.User, *http.Request, map[string]string) (BinaryResponse, error)
+// !!! requires internal variables (so it can't be a simple function only)
+type Templator interface {
+	Context(*identity.User, *http.Request, map[string]string) map[string]string
+}
 
-func InitEndpoints(op Operator, endpoints map[string]config.Endpoint, htmlHandlers map[string]HandlerHTML, restHandlers map[string]HandlerREST, binaryHandlers map[string]HandlerBinary, allowedIDs []identity.ID) basis.Errors {
+type RawHandler func(*identity.User, *http.Request, map[string]string, http.ResponseWriter) error
+type HTMLHandler func(*identity.User, *http.Request, map[string]string) (HTMLResponse, error)
+type RESTHandler func(*identity.User, *http.Request, map[string]string) (RESTResponse, error)
+type BinaryHandler func(*identity.User, *http.Request, map[string]string) (BinaryResponse, error)
+
+func InitEndpoints(op Operator, endpoints map[string]config.Endpoint, htmlHandlers map[string]HTMLHandler, restHandlers map[string]RESTHandler, binaryHandlers map[string]BinaryHandler, allowedIDs []identity.ID) basis.Errors {
 	var errs basis.Errors
 
 	for key, ep := range endpoints {

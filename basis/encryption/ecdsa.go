@@ -22,7 +22,7 @@ func ECDSASign(privKey ecdsa.PrivateKey, data []byte) ([]byte, error) {
 	return append(r.Bytes(), s.Bytes()...), nil
 }
 
-func ECDSAVerify(publicKey, dataRaw, signature []byte) bool {
+func ECDSAVerify(publKey, dataRaw, signature []byte) bool {
 	h := md5.New()
 	io.WriteString(h, string(dataRaw))
 	data := h.Sum(nil)
@@ -38,9 +38,9 @@ func ECDSAVerify(publicKey, dataRaw, signature []byte) bool {
 
 	x := big.Int{}
 	y := big.Int{}
-	keyLen := len(publicKey)
-	x.SetBytes(publicKey[:(keyLen / 2)])
-	y.SetBytes(publicKey[(keyLen / 2):])
+	keyLen := len(publKey)
+	x.SetBytes(publKey[:(keyLen / 2)])
+	y.SetBytes(publKey[(keyLen / 2):])
 
 	rawPubKey := ecdsa.PublicKey{Curve: elliptic.P256(), X: &x, Y: &y}
 

@@ -34,7 +34,7 @@ const (
 const AllowedForAll ID = "*"
 const AllowedForAllAuthorized ID = "!"
 
-func HasRights(user *User, identOpsMap map[CredsType]Operator, allowedIDs []ID) (bool, error) {
+func HasRights(user *User, identOpsMap map[CredsType][]Operator, allowedIDs []ID) (bool, error) {
 	if allowedIDs == nil {
 		return true, nil
 	} else if len(allowedIDs) < 1 {
@@ -64,7 +64,10 @@ func HasRights(user *User, identOpsMap map[CredsType]Operator, allowedIDs []ID) 
 		}
 	}
 
-	if identOp := identOpsMap[CredsAllowedID]; identOp != nil {
+	for _, identOp := range identOpsMap[CredsAllowedID] {
+		if identOp == nil {
+			continue
+		}
 		var errs basis.Errors
 		for _, allowedID := range allowedIDs {
 			user, _, err := identOp.Authorize(Creds{Type: CredsID, Value: string(user.ID)}, Creds{Type: CredsAllowedID, Value: string(allowedID)})
