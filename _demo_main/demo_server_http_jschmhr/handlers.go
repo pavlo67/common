@@ -14,9 +14,9 @@ var htmlHandlers = map[string]server_http.HTMLHandler{
 func root(_ *identity.User, _ *http.Request, _ map[string]string) (server_http.HTMLResponse, error) {
 	responseData := server_http.HTMLResponse{
 		Data: map[string]string{
-			"caput":   "Про цей сервер",
-			"titulus": "Про цей сервер",
-			"corpus":  "!!!",
+			"caput":  "Про цей сервер",
+			"title":  "про себе",
+			"corpus": "!!!",
 		},
 	}
 

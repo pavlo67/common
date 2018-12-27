@@ -58,7 +58,7 @@ func New(port int, certFileTLS, keyFileTLS string, identOpsMap map[identity.Cred
 
 // start wraps and verbalizes http.Server.ListenAndServe method.
 func (s *serverHTTPJschmhr) Start() {
-	l.Info("Server is starting on address", s.httpServer.Addr)
+	l.Info("Server is starting on address ", s.httpServer.Addr)
 
 	var err error
 

@@ -6,42 +6,27 @@ import (
 	"strings"
 )
 
-const ForUser = "info for user"
-
-var ErrGlobalISNotFound = errors.New("record with this GlobalIS isn't found")
-
 var ErrNotImplemented = errors.New("поки не імплементовано")
+
 var ErrWrongDataType = errors.New("значення невідповідного типу")
-var ErrNullItem = errors.New("порожнє значення")
-var ErrDuplicateItem = errors.New("дублікат значення")
-var ErrNotFound = errors.New("пошук не дав результатів")
-var ErrCantCreate = errors.New("не вдається створити унікальний ключ")
+var ErrNull = errors.New("відсутнє значення")
+var ErrEmpty = errors.New("порожнє значення")
+var ErrDuplicate = errors.New("дублікат значення")
 
-var ErrAuthenticated = errors.New("необхідна авторизація")
-
-var ErrBadGenus = errors.New("помилковий тип даних")
-var ErrBadQuery = errors.New("помилка при запиті до даних")
-var ErrEmptyQuery = errors.New("порожній пошуктовий запит")
+var ErrEmptyQuery = errors.New("порожній запит")
+var ErrBadQuery = errors.New("помилковий запит")
+var ErrNotFound = errors.New("не знайдено")
+var ErrCantPerform = errors.New("не вдається виконати операцію")
+var ErrCantDecodeData = errors.New("не вдається декодувати дані")
+var ErrNoData = errors.New("відсутні дані")
 var ErrJSONFormat = errors.New("неприйнятний формат даних, мав би бути JSON")
 
-var ErrNoData = errors.New("відсутні дані")
-var ErrCantDecodeData = errors.New("не вдається декодувати дані")
-var ErrCantPerform = errors.New("не вдається виконати операцію")
+const CantPrepareQuery = "can't prepare (query='%s')"
+const CantExecQuery = "can't execute (query='%s', values='%#v')"
 
 var ErrTest = errors.New("помилка на тесті")
 
-const CantPrepareQuery = "can't prepare (query='%s')"
-const CantExecQuery = "can't exec (query='%s', values='%#v')"
-
-// var ErrUserNotFound = errors.New("нема такого користувача")
-// var ErrAuthorization = errors.New("помилковий логін/пароль")
-// var ErrBadIdentityString = errors.New("bad confidenter string")
-
-var ErrBadIdentity = errors.New("bad identity")
-
-type Closer interface {
-	Close() error
-}
+// Errors ---------------------------------------------------------------------------------------------------------------
 
 type Errors []error
 
@@ -124,13 +109,14 @@ func (errs Errors) MarshalJSON() ([]byte, error) {
 	return json.Marshal(messages)
 }
 
-func (errs Errors) SetForUser() Errors {
-	return append(Errors{errors.New(ForUser)}, errs...)
-}
-
-func (errs Errors) ForUser() Errors {
-	if len(errs) > 0 && errs[0].Error() == ForUser {
-		return errs[1:]
-	}
-	return nil
-}
+//const ForUser = "info for user"
+//func (errs Errors) SetForUser() Errors {
+//	return append(Errors{errors.New(ForUser)}, errs...)
+//}
+//
+//func (errs Errors) ForUser() Errors {
+//	if len(errs) > 0 && errs[0].Error() == ForUser {
+//		return errs[1:]
+//	}
+//	return nil
+//}

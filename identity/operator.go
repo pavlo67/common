@@ -1,10 +1,10 @@
 package identity
 
 import (
-	"github.com/pavlo67/punctum/basis/program"
+	"github.com/pavlo67/punctum/basis/joiner"
 )
 
-const InterfaceKey program.InterfaceKey = "identity"
+const InterfaceKey joiner.InterfaceKey = "identity"
 
 type Access struct {
 	ID    ID     `bson:"id"              json:"id"`

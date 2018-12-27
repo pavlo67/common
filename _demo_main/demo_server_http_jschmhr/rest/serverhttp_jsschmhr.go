@@ -33,7 +33,7 @@ func (rcOp *rest_datastore_serverhttp_jschmhr) newOp() error {
 	//	return
 	//}
 	//
-	//ops := rcOp.joiner.InterfacesAll(nil, "")
+	//ops := rcOp.joiner.ComponentsAll(nil, "")
 	//
 	//for _, crudInt := range ops {
 	//	// l.Info("???", crudInt)
@@ -74,12 +74,12 @@ const ongetOp = "on rest_datastore_serverhttp_jschmhr.getOp()"
 
 func (rcOp *rest_datastore_serverhttp_jschmhr) getOp(datastoreType string) (datastore.Operator, error) {
 	if rcOp == nil {
-		return nil, errors.Wrap(basis.ErrNullItem, ongetOp+": no rest_datastore_serverhttp_jschmhr.Operator")
+		return nil, errors.Wrap(basis.ErrNull, ongetOp+": no rest_datastore_serverhttp_jschmhr.Operator")
 	}
 
 	datastoreType = strings.TrimSpace(datastoreType)
 	if datastoreType == "" {
-		return nil, errors.Wrap(basis.ErrNullItem, ongetOp+": no datastoreType defined")
+		return nil, errors.Wrap(basis.ErrNull, ongetOp+": no datastoreType defined")
 	}
 
 	rcOp.mutex.Lock()
@@ -87,7 +87,7 @@ func (rcOp *rest_datastore_serverhttp_jschmhr) getOp(datastoreType string) (data
 
 	datastoreOp := rcOp.datastoreOps[datastoreType]
 	if datastoreOp == nil {
-		return nil, errors.Wrapf(basis.ErrNullItem, ongetOp+": no datastore.Operator for datastoreType %s defined yet", datastoreType)
+		return nil, errors.Wrapf(basis.ErrNull, ongetOp+": no datastore.Operator for datastoreType %s defined yet", datastoreType)
 	}
 
 	return datastoreOp, nil

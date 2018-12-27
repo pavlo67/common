@@ -4,19 +4,18 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"regexp"
+	"strings"
 
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/pkg/errors"
 
-	"regexp"
-	"strings"
-
-	"github.com/pavlo67/punctum/basis"
-	"github.com/pavlo67/punctum/basis/encryption"
+	"github.com/pavlo67/punctum/basis/libs/addrlib"
+	"github.com/pavlo67/punctum/basis/libs/encrlib"
 	"github.com/pavlo67/punctum/identity"
 )
 
-const Proto basis.Proto = "ecdsa://"
+const Proto addrlib.Proto = "ecdsa://"
 
 var _ identity.Operator = &identityECDSA{}
 
@@ -40,7 +39,7 @@ func (*identityECDSA) SetCreds(*identity.ID, []identity.Creds, ...identity.Creds
 		return nil, nil, errEmptyPrivateKeyGenerated
 	}
 
-	privKeyBytes, err := encryption.ECDSASerialize(*privKey)
+	privKeyBytes, err := encrlib.ECDSASerialize(*privKey)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -87,7 +86,7 @@ func (*identityECDSA) Authorize(toAuth ...identity.Creds) (*identity.User, []ide
 
 	publKey := base58.Decode(publKeyEncoded)
 
-	if !encryption.ECDSAVerify(publKey, contentToSignature, signature) {
+	if !encrlib.ECDSAVerify(publKey, contentToSignature, signature) {
 		return nil, nil, errWrongSignature
 	}
 

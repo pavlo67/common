@@ -17,20 +17,25 @@ func (s *serverHTTPJschmhr) HandleFile(serverPath, localPath string, mimeType *s
 
 	// TODO: check localPath
 
-	fileServer := http.FileServer(http.Dir(localPath))
+	if mimeType == nil {
+		s.httpServeMux.ServeFiles(serverPath, http.Dir(localPath))
+		return nil
+	}
+
+	//fileServer := http.FileServer(http.Dir(localPath))
 	s.httpServeMux.GET(serverPath, func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		if mimeType != nil {
-			w.Header().Set("Content-Type", *mimeType)
-			OpenFile, err := os.Open(localPath + "/" + p.ByName("filepath"))
-			defer OpenFile.Close()
-			if err != nil {
-				l.Error(err)
-			} else {
-				io.Copy(w, OpenFile)
-			}
-			return
+		w.Header().Set("Content-Type", *mimeType)
+		OpenFile, err := os.Open(localPath + "/" + p.ByName("filepath"))
+		defer OpenFile.Close()
+		if err != nil {
+			l.Error(err)
+		} else {
+			io.Copy(w, OpenFile)
 		}
-		fileServer.ServeHTTP(w, r)
+
+		//if mimeType != nil {
+		//}
+		//fileServer.ServeHTTP(w, r)
 	})
 
 	return nil

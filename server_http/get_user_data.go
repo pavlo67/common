@@ -26,12 +26,8 @@ func UserWithRequest(r *http.Request, identOpsMap map[identity.CredsType][]ident
 	// TOKEN_CHECK
 	token := r.Header.Get("Token")
 	if token == "" {
-		c, err := r.Cookie("Token")
-		if err != nil {
-			errs = append(errs, errors.Wrap(err, onGetUserData+`: on r.Cookie("Token")`))
-		}
+		c, _ := r.Cookie("Token") // ErrNoCookie only
 		if c == nil || c.Value == "" {
-			errs = append(errs, errors.Wrap(errEmptyToken, onGetUserData+`: in r.Cookie("Token")`))
 			goto SIGNATURE_CHECK
 		}
 	}

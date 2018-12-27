@@ -1,3 +1,3 @@
-package basis
+package addrlib
 
 type Proto string

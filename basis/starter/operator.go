@@ -3,7 +3,7 @@ package starter
 import (
 	"github.com/pavlo67/punctum/basis"
 	"github.com/pavlo67/punctum/basis/config"
-	"github.com/pavlo67/punctum/basis/program"
+	"github.com/pavlo67/punctum/basis/joiner"
 )
 
 type Info struct {
@@ -27,7 +27,7 @@ type Operator interface {
 	Setup() error
 
 	// Init inits the component to use in application
-	Init(program.Joiner) error
+	Init(joiner.Operator) error
 }
 
 type Starter struct {

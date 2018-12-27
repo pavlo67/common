@@ -9,11 +9,11 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/punctum/basis/config"
+	"github.com/pavlo67/punctum/basis/joiner"
 	"github.com/pavlo67/punctum/basis/logger"
-	"github.com/pavlo67/punctum/basis/program"
 )
 
-func StartComponent(conf *config.PunctumConfig, c Starter, joiner program.Joiner) error {
+func StartComponent(conf *config.PunctumConfig, c Starter, joinerOp joiner.Operator) error {
 	l := logger.Get()
 
 	l.Info("  -------------   check component: ", c.Name(), "   ---------------")
@@ -31,38 +31,37 @@ func StartComponent(conf *config.PunctumConfig, c Starter, joiner program.Joiner
 		return fmt.Errorf("error calling Check() for component (%s): %s", c.Name(), err)
 	}
 
-	err = c.Init(joiner)
+	err = c.Init(joinerOp)
 	if err != nil {
-		return fmt.Errorf("error calling Init() for component (%s): %s", c.Name(), err)
+		return fmt.Errorf("error calling zapInit() for component (%s): %s", c.Name(), err)
 	}
 
 	return nil
 }
 
-func Run(conf *config.PunctumConfig, starters []Starter, label string, runKeys []program.InterfaceKey) (program.Joiner, error) {
+func Run(conf *config.PunctumConfig, starters []Starter, label string, runKeys []joiner.InterfaceKey) (joiner.Operator, error) {
 	l := logger.Get()
 
 	if conf == nil {
 		return nil, errors.New("no config data for starter.Run()")
 	}
 
-	joiner := program.NewJoiner()
-
+	joinerOp := joiner.New()
 	for _, c := range starters {
-		err := StartComponent(conf, c, joiner)
+		err := StartComponent(conf, c, joinerOp)
 		if err != nil {
-			return joiner, err
+			return joinerOp, err
 		}
 	}
 
 	//for _, runKey := range runKeys {
-	//	if runner, ok := joiner.Interface(runKey).(Runner); ok {
+	//	if runner, ok := joinerOp.Component(runKey).(Runner); ok {
 	//		err := runner.Run()
 	//		if err != nil {
-	//			return joiner, errors.Wrapf(err, "can't start .Runner for key %s", runKey)
+	//			return joinerOp, errors.Wrapf(err, "can't start .Runner for key %s", runKey)
 	//		}
 	//	} else {
-	//		return joiner, errors.Errorf("no .Runner interface for key %s", runKey)
+	//		return joinerOp, errors.Errorf("no .Runner interface for key %s", runKey)
 	//	}
 	//}
 
@@ -80,5 +79,5 @@ func Run(conf *config.PunctumConfig, starters []Starter, label string, runKeys [
 	//	fmt.Println("\nGot signal:", signal)
 	//}
 
-	return joiner, nil
+	return joinerOp, nil
 }

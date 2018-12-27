@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/pavlo67/punctum/basis/config"
-	"github.com/pavlo67/punctum/basis/filelib"
+	"github.com/pavlo67/punctum/basis/libs/filelib"
 )
 
 func TestMain(m *testing.M) {

@@ -2,12 +2,11 @@ package identity_ecdsa
 
 import (
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"github.com/pavlo67/punctum/basis"
 	"github.com/pavlo67/punctum/basis/config"
+	"github.com/pavlo67/punctum/basis/joiner"
 	"github.com/pavlo67/punctum/basis/logger"
-	"github.com/pavlo67/punctum/basis/program"
 	"github.com/pavlo67/punctum/basis/starter"
 	"github.com/pavlo67/punctum/identity"
 )
@@ -16,11 +15,11 @@ func Starter() starter.Operator {
 	return &identity_btcStarter{}
 }
 
-var l *zap.SugaredLogger
+var l logger.Operator
 var _ starter.Operator = &identity_btcStarter{}
 
 type identity_btcStarter struct {
-	interfaceKey program.InterfaceKey
+	interfaceKey joiner.InterfaceKey
 }
 
 func (ss *identity_btcStarter) Name() string {
@@ -32,7 +31,7 @@ func (ss *identity_btcStarter) Prepare(conf *config.PunctumConfig, params basis.
 
 	// var errs basis.Errors
 
-	ss.interfaceKey = program.InterfaceKey(params.StringKeyDefault("interface_key", string(identity.InterfaceKey)))
+	ss.interfaceKey = joiner.InterfaceKey(params.StringKeyDefault("interface_key", string(identity.InterfaceKey)))
 
 	return nil
 }
@@ -45,7 +44,7 @@ func (ss *identity_btcStarter) Setup() error {
 	return nil
 }
 
-func (ss *identity_btcStarter) Init(joiner program.Joiner) error {
+func (ss *identity_btcStarter) Init(joiner joiner.Operator) error {
 	identOp, err := New()
 	if err != nil {
 		return errors.Wrap(err, "can't init identity_ecdsa.Operator")

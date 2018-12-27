@@ -6,11 +6,11 @@ import (
 
 	"github.com/pavlo67/punctum/basis"
 	"github.com/pavlo67/punctum/basis/config"
-	"github.com/pavlo67/punctum/basis/program"
+	"github.com/pavlo67/punctum/basis/joiner"
 	"github.com/pavlo67/punctum/identity"
 )
 
-const InterfaceKey program.InterfaceKey = "server_http"
+const InterfaceKey joiner.InterfaceKey = "server_http"
 
 type Operator interface {
 	Start()
@@ -57,7 +57,7 @@ func InitEndpoints(op Operator, endpoints map[string]config.Endpoint, htmlHandle
 //// !!! non-recursively
 //func HandleDir(srvOp Operator, path, localPath string) error {
 //	if srvOp == nil {
-//		return errors.Wrap(basis.ErrNullItem, "no serverhttp.Operator to HandleDir")
+//		return errors.Wrap(basis.ErrNull, "no serverhttp.Operator to HandleDir")
 //	}
 //
 //	path = strings.TrimSpace(path)

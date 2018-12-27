@@ -5,13 +5,12 @@ import (
 	"io/ioutil"
 
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"github.com/pavlo67/punctum/basis"
 	"github.com/pavlo67/punctum/basis/config"
-	"github.com/pavlo67/punctum/basis/filelib"
+	"github.com/pavlo67/punctum/basis/joiner"
+	"github.com/pavlo67/punctum/basis/libs/filelib"
 	"github.com/pavlo67/punctum/basis/logger"
-	"github.com/pavlo67/punctum/basis/program"
 	"github.com/pavlo67/punctum/basis/starter"
 	"github.com/pavlo67/punctum/identity"
 	"github.com/pavlo67/punctum/server_http"
@@ -21,14 +20,15 @@ func Starter() starter.Operator {
 	return &server_http_jschmhrStarter{}
 }
 
-var l *zap.SugaredLogger
+var l logger.Operator
 var _ starter.Operator = &server_http_jschmhrStarter{}
 
 type server_http_jschmhrStarter struct {
-	interfaceKey program.InterfaceKey
+	interfaceKey joiner.InterfaceKey
 	config       config.ServerTLS
 
 	htmlTemplate string
+	staticPath   string
 }
 
 func (ss *server_http_jschmhrStarter) Name() string {
@@ -40,7 +40,7 @@ func (ss *server_http_jschmhrStarter) Prepare(conf *config.PunctumConfig, params
 
 	var errs basis.Errors
 
-	ss.interfaceKey = program.InterfaceKey(params.StringKeyDefault("interface_key", string(server_http.InterfaceKey)))
+	ss.interfaceKey = joiner.InterfaceKey(params.StringKeyDefault("interface_key", string(server_http.InterfaceKey)))
 
 	ss.config, errs = conf.Server(params.StringKeyDefault("config_key", "data"), errs)
 	if ss.config.Port <= 0 {
@@ -65,6 +65,8 @@ func (ss *server_http_jschmhrStarter) Prepare(conf *config.PunctumConfig, params
 		ss.htmlTemplate = string(htmlTemplate)
 	}
 
+	ss.staticPath = params.StringKeyDefault("static_path", "")
+
 	return errs.Err()
 }
 
@@ -76,10 +78,10 @@ func (ss *server_http_jschmhrStarter) Setup() error {
 	return nil
 }
 
-func (ss *server_http_jschmhrStarter) Init(joiner program.Joiner) error {
+func (ss *server_http_jschmhrStarter) Init(joiner joiner.Operator) error {
 	identOpsMap := map[identity.CredsType][]identity.Operator{}
 
-	identOpsPtr := joiner.InterfacesAll(identity.InterfaceKey)
+	identOpsPtr := joiner.ComponentsAll(identity.InterfaceKey)
 	for _, identOpIntf := range identOpsPtr {
 		if identOp, ok := identOpIntf.Interface.(identity.Operator); ok {
 			credsTypes, err := identOp.Accepts()
@@ -101,6 +103,10 @@ func (ss *server_http_jschmhrStarter) Init(joiner program.Joiner) error {
 	)
 	if err != nil {
 		return errors.Wrap(err, "can't init serverHTTPJschmhr.Operator")
+	}
+
+	if ss.staticPath != "" {
+		srvOp.HandleFile("/static/*filepath", ss.staticPath, nil)
 	}
 
 	err = joiner.JoinInterface(srvOp, ss.interfaceKey)

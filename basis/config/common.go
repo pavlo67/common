@@ -4,21 +4,24 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"reflect"
 
 	"github.com/pkg/errors"
 	"github.com/yosuke-furukawa/json5/encoding/json5"
 
 	"github.com/pavlo67/punctum/basis"
+	"github.com/pavlo67/punctum/basis/logger"
 )
 
 var ErrNoConfig = errors.New("no config")
 var ErrNoValue = errors.New("no value")
 
+var l logger.Operator
+
 // -----------------------------------------------------------------------------
 
-// ReadList ...
-func Get(path string) (*PunctumConfig, error) {
+func Get(path string, loggerToSet logger.Operator) (*PunctumConfig, error) {
+	l = loggerToSet
+
 	var data []byte
 	var err error
 	if len(path) < 1 {
@@ -134,7 +137,7 @@ func readConfig(data []byte) (*PunctumConfig, error) {
 			case bool:
 				conf.flags[k] = v
 			default:
-				fmt.Printf("bad config value %v (typeof v, v): %v, %v\n", k, reflect.TypeOf(v), v)
+				l.Errorf("bad config value for key `%s`: %#v\n", k, v)
 			}
 			continue
 		}

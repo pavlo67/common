@@ -1,6 +1,6 @@
 package identity
 
-import "github.com/pavlo67/punctum/basis/encryption"
+import "github.com/pavlo67/punctum/basis/libs/encrlib"
 
 type CredsType string
 
@@ -25,7 +25,7 @@ const CredsPublicKey CredsType = "public_key"
 const CredsPrivateKey CredsType = "private_key"
 
 type Creds struct {
-	Type     CredsType           `json:"type"`
-	Cryptype encryption.Cryptype `json:"cryptype"`
-	Value    string              `json:"value,omitempty"`
+	Type     CredsType        `json:"type"`
+	Cryptype encrlib.Cryptype `json:"cryptype"`
+	Value    string           `json:"value,omitempty"`
 }

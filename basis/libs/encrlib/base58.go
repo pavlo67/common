@@ -1,4 +1,4 @@
-package encryption
+package encrlib
 
 import "github.com/btcsuite/btcutil/base58"
 

@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/pavlo67/partes/fronthttp/componenthtml"
-	"github.com/pavlo67/punctum/basis/program"
+	"github.com/pavlo67/punctum/basis/joiner"
 	"github.com/pavlo67/punctum/identity"
 	"github.com/pavlo67/punctum/server_http"
 )
@@ -20,7 +20,7 @@ type templator struct {
 	htmlStatic     map[string]string
 }
 
-func Templator(components map[string]componenthtml.Operator, joiner program.Joiner) *templator {
+func Templator(components map[string]componenthtml.Operator, joiner joiner.Operator) *templator {
 
 	htmlStatic := componenthtml.Static(joiner)
 

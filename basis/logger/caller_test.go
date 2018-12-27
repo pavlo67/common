@@ -9,8 +9,8 @@ import (
 func TestGetCallInfo(t *testing.T) {
 	callInfo := GetCallInfo()
 
-	require.Equal(t, "github.com/pavlo67/punctum/basis/logger", callInfo.PackageFullName)
-	require.Equal(t, "logger", callInfo.PackageName)
+	require.Equal(t, "github.com/pavlo67/punctum/basis/loggerZap", callInfo.PackageFullName)
+	require.Equal(t, "loggerZap", callInfo.PackageName)
 	require.Equal(t, "caller_test.go", callInfo.FileName)
 	require.Equal(t, "TestGetCallInfo", callInfo.FuncName)
 
