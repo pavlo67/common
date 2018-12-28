@@ -12,7 +12,7 @@ import (
 	"github.com/pavlo67/punctum/basis/starter"
 	"github.com/pavlo67/punctum/server_http"
 
-	"github.com/pavlo67/punctum/_demo_main/demo_config"
+	"github.com/pavlo67/punctum/_linker_main/linker_config"
 )
 
 func main() {
@@ -31,7 +31,7 @@ func main() {
 
 	// flag.Parse()
 
-	starters, label := demo_config.Starters()
+	starters, label := linker_config.Starters()
 	joiner, err := starter.Run(conf, starters, label, nil)
 	if err != nil {
 		l.Fatal(err)

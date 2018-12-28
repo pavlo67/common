@@ -16,7 +16,7 @@ import (
 func StartComponent(conf *config.PunctumConfig, c Starter, joinerOp joiner.Operator) error {
 	l := logger.Get()
 
-	l.Info("  -------------   check component: ", c.Name(), "   ---------------")
+	l.Info("checking component: ", c.Name())
 
 	err := c.Prepare(conf, c.Params)
 	if err != nil {

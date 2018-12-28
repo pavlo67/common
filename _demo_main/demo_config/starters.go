@@ -6,7 +6,7 @@ import (
 	"github.com/pavlo67/punctum/basis/starter"
 	"github.com/pavlo67/punctum/server_http/server_http_jschmhr"
 
-	"github.com/pavlo67/punctum/_demo_main/demo_server_http_jschmhr"
+	"github.com/pavlo67/punctum/_demo_main/demo_server_http"
 	"github.com/pavlo67/punctum/identity/identity_ecdsa"
 )
 
@@ -20,7 +20,7 @@ func Starters() ([]starter.Starter, string) {
 
 	starters = append(starters, starter.Starter{identity_ecdsa.Starter(), nil})
 	starters = append(starters, starter.Starter{server_http_jschmhr.Starter(), paramsServerStatic})
-	starters = append(starters, starter.Starter{demo_server_http_jsschmhr.Starter(), nil})
+	starters = append(starters, starter.Starter{demo_server_http.Starter(), nil})
 
 	return starters, "PUNCTUM DEMO BUILD"
 }

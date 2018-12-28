@@ -9,6 +9,10 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/pkg/errors"
 
+	"io"
+	"os"
+	"regexp"
+
 	"github.com/pavlo67/punctum/identity"
 	"github.com/pavlo67/punctum/server_http"
 )
@@ -76,10 +80,10 @@ func (s *serverHTTPJschmhr) Start() {
 
 func (s *serverHTTPJschmhr) handleFunc(method, path string, handler httprouter.Handle) {
 	if handler == nil {
-		l.Error(method, " --> ", path, "\t!!! NULL HANDLER ISN'T DISPATCHED !!!")
+		l.Error(method, ": ", path, "\t!!! NULL HANDLER ISN'T DISPATCHED !!!")
 		return
 	}
-	l.Info(method, " --> ", path)
+	l.Infof("%-6s: %s", method, path)
 	switch strings.ToLower(method) {
 	case "get":
 		s.httpServeMux.GET(path, handler)
@@ -88,4 +92,50 @@ func (s *serverHTTPJschmhr) handleFunc(method, path string, handler httprouter.H
 	default:
 		l.Error(method, " isn't supported!")
 	}
+}
+
+var reHTMLExt = regexp.MustCompile(`\.html?$`)
+
+func (s *serverHTTPJschmhr) HandleFile(serverPath, localPath string, mimeType *string) error {
+	l.Infof("FILES : %s <-- %s", serverPath, localPath)
+
+	// TODO: check localPath
+
+	if mimeType == nil {
+		s.httpServeMux.ServeFiles(serverPath, http.Dir(localPath))
+		return nil
+	}
+
+	//fileServer := http.FileServer(http.Dir(localPath))
+	s.httpServeMux.GET(serverPath, func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		w.Header().Set("Content-Type", *mimeType)
+		OpenFile, err := os.Open(localPath + "/" + p.ByName("filepath"))
+		defer OpenFile.Close()
+		if err != nil {
+			l.Error(err)
+		} else {
+			io.Copy(w, OpenFile)
+		}
+
+		//if mimeType != nil {
+		//}
+		//fileServer.ServeHTTP(w, r)
+	})
+
+	return nil
+}
+
+// mimeTypeToSet, err = inspector.MIME(localPath+"/"+r.URL.Path, nil)
+// if err != nil {
+//	l.Error("can't read MIMEType for file: ", localPath+"/"+r.URL.Path, err)
+// }
+
+func (s *serverHTTPJschmhr) HandleString(serverPath, str string, mimeType *string) {
+	s.handleFunc("GET", serverPath, func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+		if mimeType != nil {
+			// "application/javascript"
+			w.Header().Set("Content-Type", *mimeType)
+		}
+		w.Write([]byte(str))
+	})
 }

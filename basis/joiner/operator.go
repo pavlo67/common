@@ -21,7 +21,7 @@ type Operator interface {
 	JoinInterface(interface{}, InterfaceKey) error
 	Interface(InterfaceKey) interface{}
 	ComponentsAll(InterfaceKey) []Component
-	ComponentsAllWithSignature(ptrToInterface interface{}) []Component
+	ComponentsAllWithInterface(ptrToInterface interface{}) []Component
 	CloseAll()
 }
 
@@ -97,7 +97,7 @@ func (j *joiner) ComponentsAll(key InterfaceKey) []Component {
 	return components
 }
 
-func (j *joiner) ComponentsAllWithSignature(ptrToInterface interface{}) []Component {
+func (j *joiner) ComponentsAllWithInterface(ptrToInterface interface{}) []Component {
 	j.mutex.Lock()
 	defer j.mutex.Unlock()
 
@@ -135,7 +135,7 @@ func (j *joiner) CloseAll() {
 		return
 	}
 
-	closerComponents := j.ComponentsAllWithSignature((*Closer)(nil))
+	closerComponents := j.ComponentsAllWithInterface((*Closer)(nil))
 
 	for _, closerComponent := range closerComponents {
 		if closer, _ := closerComponent.Interface.(Closer); closer != nil {

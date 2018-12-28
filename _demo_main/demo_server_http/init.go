@@ -1,4 +1,4 @@
-package demo_server_http_jsschmhr
+package demo_server_http
 
 import (
 	"github.com/pkg/errors"
@@ -6,7 +6,6 @@ import (
 	"github.com/pavlo67/punctum/basis"
 	"github.com/pavlo67/punctum/basis/config"
 	"github.com/pavlo67/punctum/basis/joiner"
-	"github.com/pavlo67/punctum/basis/libs/filelib"
 	"github.com/pavlo67/punctum/basis/logger"
 	"github.com/pavlo67/punctum/basis/starter"
 	"github.com/pavlo67/punctum/server_http"
@@ -17,10 +16,8 @@ func Starter() starter.Operator {
 }
 
 var l logger.Operator
-var endpoints map[string]config.Endpoint
 
-type demo_server_http_jsschmhrStarter struct {
-}
+type demo_server_http_jsschmhrStarter struct{}
 
 func (dcs *demo_server_http_jsschmhrStarter) Name() string {
 	return logger.GetCallInfo().PackageName
@@ -29,11 +26,7 @@ func (dcs *demo_server_http_jsschmhrStarter) Name() string {
 func (dcs *demo_server_http_jsschmhrStarter) Prepare(conf *config.PunctumConfig, params basis.Params) error {
 	l = logger.Get()
 
-	index, errs := config.ComponentIndex(params.StringKeyDefault("index_path", filelib.CurrentPath()), nil)
-
-	endpoints = index.Endpoints
-
-	return errs.Err()
+	return nil
 }
 
 func (dcs *demo_server_http_jsschmhrStarter) Check() (info []starter.Info, err error) {
@@ -47,7 +40,7 @@ func (dcs *demo_server_http_jsschmhrStarter) Setup() error {
 func (dcs *demo_server_http_jsschmhrStarter) Init(joinerOp joiner.Operator) error {
 	srvOp, ok := joinerOp.Interface(server_http.InterfaceKey).(server_http.Operator)
 	if !ok {
-		return errors.New("no server_http_jschmhr.Operator interface found for demo_server_http_jschmhr component")
+		return errors.New("no server_http_jschmhr.Operator interface found for demo_server_http component")
 	}
 
 	errs := server_http.InitEndpoints(

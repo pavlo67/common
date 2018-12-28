@@ -1,4 +1,4 @@
-package demo_server_http_jsschmhr
+package demo_server_http
 
 import (
 	"net/http"
