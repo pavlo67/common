@@ -6,11 +6,11 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/pavlo67/punctum/basis/config"
-	"github.com/pavlo67/punctum/basis/libs/filelib"
-	"github.com/pavlo67/punctum/basis/logger"
-	"github.com/pavlo67/punctum/basis/starter"
+	"github.com/pavlo67/punctum/basis/filelib"
 	"github.com/pavlo67/punctum/server_http"
+	"github.com/pavlo67/punctum/starter"
+	"github.com/pavlo67/punctum/starter/config"
+	"github.com/pavlo67/punctum/starter/logger"
 
 	"github.com/pavlo67/punctum/_demo_main/demo_config"
 )

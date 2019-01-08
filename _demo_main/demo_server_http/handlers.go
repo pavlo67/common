@@ -3,8 +3,7 @@ package demo_server_http
 import (
 	"net/http"
 
-	"github.com/pavlo67/punctum/basis/config"
-	"github.com/pavlo67/punctum/identity"
+	"github.com/pavlo67/punctum/auth"
 	"github.com/pavlo67/punctum/server_http"
 )
 
@@ -13,12 +12,12 @@ var htmlHandlers = map[string]server_http.HTMLHandler{
 	"sect1": section1Handler,
 }
 
-var endpoints = map[string]config.Endpoint{
+var endpoints = map[string]server_http.Endpoint{
 	"root":  {Method: "GET", ServerPath: "/"},
 	"sect1": {Method: "GET", ServerPath: "/section1"},
 }
 
-func rootHandler(_ *identity.User, _ *http.Request, _ map[string]string) (server_http.HTMLResponse, error) {
+func rootHandler(_ *auth.User, _ *http.Request, _ map[string]string) (server_http.HTMLResponse, error) {
 	responseData := server_http.HTMLResponse{
 		Data: map[string]string{
 			"caput":  "Про цей сервер",
@@ -30,7 +29,7 @@ func rootHandler(_ *identity.User, _ *http.Request, _ map[string]string) (server
 	return responseData, nil
 }
 
-func section1Handler(_ *identity.User, _ *http.Request, _ map[string]string) (server_http.HTMLResponse, error) {
+func section1Handler(_ *auth.User, _ *http.Request, _ map[string]string) (server_http.HTMLResponse, error) {
 	responseData := server_http.HTMLResponse{
 		Data: map[string]string{
 			"caput":  "Розділ 1",

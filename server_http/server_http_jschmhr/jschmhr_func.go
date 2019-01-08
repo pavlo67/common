@@ -9,15 +9,15 @@ import (
 	"github.com/cbroglie/mustache"
 	"github.com/julienschmidt/httprouter"
 
-	"github.com/pavlo67/punctum/identity"
+	"github.com/pavlo67/punctum/auth"
 	"github.com/pavlo67/punctum/server_http"
 )
 
-func (s *serverHTTPJschmhr) HandleFuncRaw(method, serverPath string, rawHandler server_http.RawHandler, allowedIDs ...identity.ID) {
+func (s *serverHTTPJschmhr) HandleFuncRaw(method, serverPath string, rawHandler server_http.RawHandler, allowedIDs ...auth.ID) {
 	l.Fatal("func (s *serverHTTPJschmhr) HandleFuncRaw() isn't implemented!!!")
 }
 
-func (s *serverHTTPJschmhr) HandleFuncHTML(method, serverPath string, htmlHandler server_http.HTMLHandler, allowedIDs ...identity.ID) {
+func (s *serverHTTPJschmhr) HandleFuncHTML(method, serverPath string, htmlHandler server_http.HTMLHandler, allowedIDs ...auth.ID) {
 	s.handleFunc(method, serverPath, func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
 		user, err := server_http.UserWithRequest(r, s.identOpsMap)
 		if err != nil {
@@ -39,7 +39,7 @@ func (s *serverHTTPJschmhr) HandleFuncHTML(method, serverPath string, htmlHandle
 			context = s.templator.Context(user, r, params)
 		}
 
-		ok, err := identity.HasRights(user, s.identOpsMap, allowedIDs)
+		ok, err := auth.HasRights(user, s.identOpsMap, allowedIDs)
 		if err != nil {
 			l.Error(err)
 		}
@@ -88,14 +88,14 @@ func (s *serverHTTPJschmhr) HandleTemplatorHTML(templatorHTML server_http.Templa
 	s.templator = templatorHTML
 }
 
-func (s *serverHTTPJschmhr) HandleFuncREST(method, serverPath string, restHandler server_http.RESTHandler, allowedIDs ...identity.ID) {
+func (s *serverHTTPJschmhr) HandleFuncREST(method, serverPath string, restHandler server_http.RESTHandler, allowedIDs ...auth.ID) {
 	s.handleFunc(method, serverPath, func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
 		user, err := server_http.UserWithRequest(r, s.identOpsMap)
 		if err != nil {
 			l.Error(err)
 		}
 
-		ok, err := identity.HasRights(user, s.identOpsMap, allowedIDs)
+		ok, err := auth.HasRights(user, s.identOpsMap, allowedIDs)
 		if err != nil {
 			l.Error(err)
 		}
@@ -140,14 +140,14 @@ func (s *serverHTTPJschmhr) HandleFuncREST(method, serverPath string, restHandle
 
 }
 
-func (s *serverHTTPJschmhr) HandleFuncBinary(method, serverPath string, binaryHandler server_http.BinaryHandler, allowedIDs ...identity.ID) {
+func (s *serverHTTPJschmhr) HandleFuncBinary(method, serverPath string, binaryHandler server_http.BinaryHandler, allowedIDs ...auth.ID) {
 	s.handleFunc(method, serverPath, func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
 		user, err := server_http.UserWithRequest(r, s.identOpsMap)
 		if err != nil {
 			l.Error(err)
 		}
 
-		ok, err := identity.HasRights(user, s.identOpsMap, allowedIDs)
+		ok, err := auth.HasRights(user, s.identOpsMap, allowedIDs)
 		if err != nil {
 			l.Error(err)
 		}

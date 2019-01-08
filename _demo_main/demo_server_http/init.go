@@ -4,11 +4,11 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/punctum/basis"
-	"github.com/pavlo67/punctum/basis/config"
-	"github.com/pavlo67/punctum/basis/joiner"
-	"github.com/pavlo67/punctum/basis/logger"
-	"github.com/pavlo67/punctum/basis/starter"
 	"github.com/pavlo67/punctum/server_http"
+	"github.com/pavlo67/punctum/starter"
+	"github.com/pavlo67/punctum/starter/config"
+	"github.com/pavlo67/punctum/starter/joiner"
+	"github.com/pavlo67/punctum/starter/logger"
 )
 
 func Starter() starter.Operator {
@@ -43,6 +43,8 @@ func (dcs *demo_server_http_jsschmhrStarter) Init(joinerOp joiner.Operator) erro
 		return errors.New("no server_http_jschmhr.Operator interface found for demo_server_http component")
 	}
 
+	srvOp.HandleTemplatorHTML(newTemplator(joinerOp))
+
 	errs := server_http.InitEndpoints(
 		srvOp,
 		endpoints,
@@ -51,17 +53,6 @@ func (dcs *demo_server_http_jsschmhrStarter) Init(joinerOp joiner.Operator) erro
 		nil,
 		nil,
 	)
-
-	//opsMap := map[string]componenthtml.Operator{}
-	//
-	//confidenterOp, ok := joinerOp.Component(confidenter_serverhttp_jschmhr.InterfaceKey).(componenthtml.Operator)
-	//if ok {
-	//	opsMap["confidenter"] = confidenterOp
-	//} else {
-	//	errs = append(errs, errors.Errorf("no componenthtml.Operator with key %s found for datacompStarter.init()", confidenter_serverhttp_jschmhr.InterfaceKey))
-	//}
-
-	// srvOp.HandleTemplator(Templator(opsMap, joinerOp))
 
 	return errs.Err()
 }

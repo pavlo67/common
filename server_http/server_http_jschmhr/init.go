@@ -6,14 +6,14 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/pavlo67/punctum/auth"
 	"github.com/pavlo67/punctum/basis"
-	"github.com/pavlo67/punctum/basis/config"
-	"github.com/pavlo67/punctum/basis/joiner"
-	"github.com/pavlo67/punctum/basis/libs/filelib"
-	"github.com/pavlo67/punctum/basis/logger"
-	"github.com/pavlo67/punctum/basis/starter"
-	"github.com/pavlo67/punctum/identity"
+	"github.com/pavlo67/punctum/basis/filelib"
 	"github.com/pavlo67/punctum/server_http"
+	"github.com/pavlo67/punctum/starter"
+	"github.com/pavlo67/punctum/starter/config"
+	"github.com/pavlo67/punctum/starter/joiner"
+	"github.com/pavlo67/punctum/starter/logger"
 )
 
 func Starter() starter.Operator {
@@ -42,14 +42,14 @@ func (ss *server_http_jschmhrStarter) Prepare(conf *config.PunctumConfig, params
 
 	ss.interfaceKey = joiner.InterfaceKey(params.StringKeyDefault("interface_key", string(server_http.InterfaceKey)))
 
-	ss.config, errs = conf.Server(params.StringKeyDefault("config_key", "data"), errs)
+	ss.config, errs = conf.Server(params.StringKeyDefault("config_server_key", "default"), errs)
 	if ss.config.Port <= 0 {
 		errs = append(errs, fmt.Errorf("wrong port for serverOp: %d", ss.config.Port))
 	}
 
 	templatePath := params.StringKeyDefault("template_path", "")
 	if templatePath == "" {
-		l.Warn(`on serverHTTPJschmhr.Prepare(): empty params["template_path"]`)
+		l.Warn(`on server_http_jschmhr.Prepare(): empty params["template_path"]`)
 
 	} else {
 		if templatePath[0] != '/' {
@@ -79,11 +79,11 @@ func (ss *server_http_jschmhrStarter) Setup() error {
 }
 
 func (ss *server_http_jschmhrStarter) Init(joiner joiner.Operator) error {
-	identOpsMap := map[identity.CredsType][]identity.Operator{}
+	identOpsMap := map[auth.CredsType][]auth.Operator{}
 
-	identOpsPtr := joiner.ComponentsAll(identity.InterfaceKey)
+	identOpsPtr := joiner.ComponentsAll(auth.InterfaceKey)
 	for _, identOpIntf := range identOpsPtr {
-		if identOp, ok := identOpIntf.Interface.(identity.Operator); ok {
+		if identOp, ok := identOpIntf.Interface.(auth.Operator); ok {
 			credsTypes, err := identOp.Accepts()
 			if err != nil {
 				l.Error(err)

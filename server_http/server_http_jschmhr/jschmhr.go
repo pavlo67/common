@@ -13,7 +13,7 @@ import (
 	"os"
 	"regexp"
 
-	"github.com/pavlo67/punctum/identity"
+	"github.com/pavlo67/punctum/auth"
 	"github.com/pavlo67/punctum/server_http"
 )
 
@@ -24,13 +24,13 @@ type serverHTTPJschmhr struct {
 	httpServeMux *httprouter.Router
 	certFileTLS  string
 	keyFileTLS   string
-	identOpsMap  map[identity.CredsType][]identity.Operator
+	identOpsMap  map[auth.CredsType][]auth.Operator
 
 	htmlTemplate string
 	templator    server_http.Templator
 }
 
-func New(port int, certFileTLS, keyFileTLS string, identOpsMap map[identity.CredsType][]identity.Operator, htmlTemplate string) (server_http.Operator, error) {
+func New(port int, certFileTLS, keyFileTLS string, identOpsMap map[auth.CredsType][]auth.Operator, htmlTemplate string) (server_http.Operator, error) {
 	if port <= 0 {
 		return nil, errors.Errorf("serverOp hasn't started: no correct data for http port: %d", port)
 	}

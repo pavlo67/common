@@ -1,0 +1,19 @@
+{
+  endpoints: {
+    // HTML
+    read:      ["/read/:type/:id",   "GET"],
+    read_list: ["/read_list/:type/",  "GET"],
+
+    // REST
+    save_rest:        ["/save_rest/:type",         "POST"],
+    update_list_rest: ["/update_list_rest/:type/", "POST"],
+    delete_rest:      ["/delete_rest/:type/:id",   "GET"],
+    read_rest:        ["/read_rest/:type/:id",     "GET"],
+    read_list_rest:   ["/read_list_rest/:type/",   "GET"]
+  },
+
+  listeners: {
+    editInTable:       ["editInTable"],
+    saveEditedInTable: ["saveEditedInTable"],
+  },
+}

@@ -5,23 +5,19 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/pavlo67/punctum/auth"
 	"github.com/pavlo67/punctum/basis"
-	"github.com/pavlo67/punctum/identity"
 )
 
 var errNoIdentityOpsMap = errors.New("no map[CredsType]identity.Operator")
 
-var errEmptyToken = errors.New("empty token")
-
-const onGetUserData = "on UserWithRequest()"
-
-func UserWithRequest(r *http.Request, identOpsMap map[identity.CredsType][]identity.Operator) (*identity.User, error) {
+func UserWithRequest(r *http.Request, identOpsMap map[auth.CredsType][]auth.Operator) (*auth.User, error) {
 	if identOpsMap == nil {
 		return nil, errNoIdentityOpsMap
 	}
 
 	var errs basis.Errors
-	var user *identity.User
+	var user *auth.User
 
 	// TOKEN_CHECK
 	token := r.Header.Get("Token")
@@ -32,7 +28,7 @@ func UserWithRequest(r *http.Request, identOpsMap map[identity.CredsType][]ident
 		}
 	}
 
-	user, errs = identity.GetUserWithToken(token, identOpsMap, errs)
+	user, errs = auth.GetUser([]auth.Creds{{Type: auth.CredsToken, Value: token}}, identOpsMap, errs)
 	if user != nil {
 		return user, errs.Err()
 	}
@@ -46,6 +42,12 @@ SIGNATURE_CHECK:
 	contentToSignature := r.Header.Get("Content-To-Signature") + r.RemoteAddr
 	publicKeyAddress := r.Header.Get("Public-Key-Address")
 
-	user, errs = identity.GetUserWithSignature(contentToSignature, publicKeyAddress, signature, identOpsMap, errs)
+	credsSignature := []auth.Creds{
+		{Type: auth.CredsSignature, Value: signature},
+		{Type: auth.CredsContentToSignature, Value: contentToSignature},
+		{Type: auth.CredsPublicKeyAddress, Value: publicKeyAddress},
+	}
+
+	user, errs = auth.GetUser(credsSignature, identOpsMap, errs)
 	return user, errs.Err()
 }
