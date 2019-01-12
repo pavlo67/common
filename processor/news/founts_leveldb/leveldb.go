@@ -39,8 +39,7 @@ func (fountsOp *fountsLevelDB) Save(url string, logItems ...processor.LogItem) e
 
 	dataReaded, err := fountsOp.db.Get([]byte(url), nil)
 	if err == leveldb.ErrNotFound {
-		item.CreatedAt = time.Now()
-		// item.CreatedAt = time.Now().UTC()
+		item.CreatedAtStr = time.Now().Format(time.RFC3339)
 		// ok
 	} else if err != nil {
 		return errors.Wrapf(err, onSave+": can't fountsOp.db.Get('%s', nil)", url)
@@ -52,10 +51,6 @@ func (fountsOp *fountsLevelDB) Save(url string, logItems ...processor.LogItem) e
 		item.URL = ""
 	}
 
-	//for i, logItem := range logItems {
-	//	logItems[i].Started = logItem.Started.UTC()
-	//	logItems[i].Finished = logItem.Finished.UTC()
-	//}
 	item.Log = append(item.Log, logItems...)
 
 	dataToSave, err := json.Marshal(item)

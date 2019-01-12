@@ -1,4 +1,4 @@
-package auth_login_stub
+package auth_stub
 
 import (
 	"github.com/pkg/errors"
