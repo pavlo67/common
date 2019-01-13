@@ -29,7 +29,7 @@ func (opCRUD OperatorCRUD) Describe() (crud.Description, error) {
 		Fields: []crud.Field{
 			{Key: "url", Creatable: true, Unique: true},
 			{Key: "log", Creatable: true, Additable: true},
-			{Key: "created_at", NotEmpty: true},
+			{Key: "saved_at", NotEmpty: true},
 		},
 	}, nil
 }
@@ -47,19 +47,19 @@ func (opCRUD OperatorCRUD) StringMapToNative(data crud.StringMap) (interface{}, 
 		}
 	}
 
-	var createdAt time.Time
-	if data["created_at"] != "" {
+	var savedAt time.Time
+	if data["saved_at"] != "" {
 		var err error
-		createdAt, err = time.Parse(time.RFC3339, data["created_at"])
+		savedAt, err = time.Parse(time.RFC3339, data["saved_at"])
 		if err != nil {
-			return nil, errors.Wrapf(err, `can't parse time from data["created_at"]: %s`, data["created_at"])
+			return nil, errors.Wrapf(err, `can't parse time from data["saved_at"]: %s`, data["saved_at"])
 		}
 	}
 
 	return &Item{
-		URL:       data["url"],
-		Log:       logItems,
-		CreatedAt: createdAt,
+		URL:     data["url"],
+		Log:     logItems,
+		SavedAt: savedAt,
 	}, nil
 }
 
@@ -86,12 +86,12 @@ func (opCRUD OperatorCRUD) NativeToStringMap(native interface{}) (crud.StringMap
 		}
 	}
 
-	createdAtStr := fount.CreatedAt.Format(time.RFC3339)
+	savedAtStr := fount.SavedAt.Format(time.RFC3339)
 
 	return crud.StringMap{
-		"url":        fount.URL,
-		"log":        string(logJSON),
-		"created_at": createdAtStr,
+		"url":      fount.URL,
+		"log":      string(logJSON),
+		"saved_at": savedAtStr,
 	}, nil
 }
 

@@ -49,12 +49,12 @@ func (fl *founts_leveldbStarter) Setup() error {
 func (fl *founts_leveldbStarter) Init(joinerOp joiner.Operator) error {
 	fountsOp, err := New(fl.path)
 	if err != nil {
-		return errors.Wrap(err, "")
+		return errors.Wrap(err, "can't init fountsOp")
 	}
 
 	err = joinerOp.JoinInterface(fountsOp, founts.InterfaceKey)
 	if err != nil {
-		return errors.Wrap(err, "")
+		return errors.Wrapf(err, "can't join fountsOp as %s operator", founts.InterfaceKey)
 	}
 
 	return nil

@@ -113,7 +113,7 @@ const InterfaceKeyCRUD joiner.InterfaceKey = "flow.crud"
 //		},
 //		Status:   dataMap["status"],
 //		History:  dataMap["history"],
-//		StoredAt: storedAtPtr,
+//		SavedAt: storedAtPtr,
 //	}, nil
 //}
 //
@@ -150,8 +150,8 @@ const InterfaceKeyCRUD joiner.InterfaceKey = "flow.crud"
 //	}
 //
 //	var storedAtStr string
-//	if itemPtr.StoredAt != nil {
-//		storedAtStr = itemPtr.StoredAt.Format(time.RFC3339)
+//	if itemPtr.SavedAt != nil {
+//		storedAtStr = itemPtr.SavedAt.Format(time.RFC3339)
 //	}
 //
 //	var sourceTimeStr string

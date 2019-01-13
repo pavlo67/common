@@ -2,10 +2,11 @@ package founts_leveldb
 
 import (
 	"encoding/json"
-	"time"
 
 	"github.com/pkg/errors"
 	"github.com/syndtr/goleveldb/leveldb"
+
+	"time"
 
 	"github.com/pavlo67/punctum/basis"
 	"github.com/pavlo67/punctum/crud"
@@ -39,8 +40,6 @@ func (fountsOp *fountsLevelDB) Save(url string, logItems ...processor.LogItem) e
 
 	dataReaded, err := fountsOp.db.Get([]byte(url), nil)
 	if err == leveldb.ErrNotFound {
-		item.CreatedAt = time.Now()
-		// item.CreatedAt = time.Now().UTC()
 		// ok
 	} else if err != nil {
 		return errors.Wrapf(err, onSave+": can't fountsOp.db.Get('%s', nil)", url)
@@ -52,10 +51,7 @@ func (fountsOp *fountsLevelDB) Save(url string, logItems ...processor.LogItem) e
 		item.URL = ""
 	}
 
-	//for i, logItem := range logItems {
-	//	logItems[i].Started = logItem.Started.UTC()
-	//	logItems[i].Finished = logItem.Finished.UTC()
-	//}
+	item.SavedAt = time.Now()
 	item.Log = append(item.Log, logItems...)
 
 	dataToSave, err := json.Marshal(item)
@@ -104,12 +100,12 @@ func (fountsOp *fountsLevelDB) ReadList(*crud.ReadOptions) ([]founts.Item, *uint
 	iter := fountsOp.db.NewIterator(nil, nil)
 	for iter.Next() {
 		key := iter.Key()
-		dataReaded := iter.Value()
+		value := iter.Value()
 
 		var item founts.Item
-		err := json.Unmarshal(dataReaded, &item)
+		err := json.Unmarshal(value, &item)
 		if err != nil {
-			errs = append(errs, errors.Wrapf(err, onReadList+": can't json.Unmarshal('%s', &founts.Item)", dataReaded))
+			errs = append(errs, errors.Wrapf(err, onReadList+": can't json.Unmarshal('%s', &founts.Item)", value))
 			continue
 		}
 

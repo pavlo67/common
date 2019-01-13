@@ -11,10 +11,10 @@ import (
 const InterfaceKey joiner.InterfaceKey = "news"
 
 type Item struct {
-	ID          string `   bson:"_id,omitempty" json:"id,omitempty"`
-	flow.Source `          bson:",inline"       json:",inline"`
-	Content     `          bson:"content"       json:"content"`
-	StoredAt    time.Time `bson:"stored_at"     json:"stored_at"`
+	ID          string `bson:"_id,omitempty" json:"id,omitempty"`
+	flow.Source `bson:",inline"       json:",inline"`
+	Content     `bson:"content"       json:"content"`
+	SavedAt     *time.Time `bson:"saved_at"      json:"saved_at"`
 }
 
 type Content struct {
@@ -33,7 +33,7 @@ type Embedded struct {
 }
 
 type Operator interface {
-	Exists(*flow.Source) (bool, error)
+	Has(*flow.Source) (bool, error)
 	Save(item *Item) error
 	ReadList(*crud.ReadOptions) ([]Item, *uint64, error)
 	DeleteList(*crud.ReadOptions) error

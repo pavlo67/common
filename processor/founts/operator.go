@@ -11,12 +11,9 @@ import (
 const InterfaceKey joiner.InterfaceKey = "founts"
 
 type Item struct {
-	URL       string              `json:"url,omitempty"`
-	Log       []processor.LogItem `json:"log,omitempty"`
-	CreatedAt time.Time           `json:"created_at"`
-
-	//CreatedAt    time.Time           `json:"-"`
-	//CreatedAtStr string              `json:"created_at_str"`
+	URL     string              `json:"url,omitempty"`
+	Log     []processor.LogItem `json:"log,omitempty"`
+	SavedAt time.Time           `json:"saved_at"`
 }
 
 type Operator interface {

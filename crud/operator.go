@@ -38,9 +38,10 @@ func (descr Description) Field(key string) *Field {
 type ReadOptions struct {
 	Selector selectors.Selector `json:"selector,omitempty"`
 	SortBy   []string           `json:"sort_by,omitempty"`
-	Limits   []uint64           `json:"limits,omitempty"`
-	Exemplar interface{}        `json:"exemplar,omitempty"`
+	LimitMin string             `json:"limit_min,omitempty"`
+	LimitMax string             `json:"limit_max,omitempty"`
 
+	// Exemplar interface{}        `json:"exemplar,omitempty"`
 	//Values    []string           `json:"values,omitempty"`
 	//JoinTo    []JoinTo           `json:"join_to,omitempty"`
 	//GroupBy   []string           `json:"group_by,omitempty"`
