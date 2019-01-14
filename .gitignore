@@ -6,5 +6,5 @@ cfg.remote.json5
 *.test
 .idea
 .env
-_storage/*
-*/_storage/*
+_storage
+_test

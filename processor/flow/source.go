@@ -4,6 +4,8 @@ import (
 	"strings"
 )
 
+type SourceType string
+
 type Source struct {
 	URL      string `bson:"url"                 json:"url"`
 	SourceID string `bson:"source_id,omitempty" json:"source_id,omitempty"`

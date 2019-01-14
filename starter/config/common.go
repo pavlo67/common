@@ -41,7 +41,7 @@ func Get(path string, loggerToSet logger.Operator) (*PunctumConfig, error) {
 type PunctumConfig struct {
 	identity map[string]map[string]string
 
-	system     map[string]string
+	paths      map[string]string
 	server     map[string]ServerTLS
 	fileslocal map[string]map[string]string
 
@@ -90,7 +90,7 @@ func readConfig(data []byte) (*PunctumConfig, error) {
 		facebook:  map[string][]string{},
 
 		fileslocal: map[string]map[string]string{},
-		system:     map[string]string{},
+		paths:      map[string]string{},
 		strings:    map[string]string{},
 		flags:      map[string]bool{},
 	}
@@ -112,8 +112,8 @@ func readConfig(data []byte) (*PunctumConfig, error) {
 			err = json5.Unmarshal(configRaw[k], &conf.server)
 		} else if k == "fileslocal" {
 			err = json5.Unmarshal(configRaw[k], &conf.fileslocal)
-		} else if k == "system" {
-			err = json5.Unmarshal(configRaw[k], &conf.system)
+		} else if k == "paths" {
+			err = json5.Unmarshal(configRaw[k], &conf.paths)
 		} else if k == "credentials" {
 			err = json5.Unmarshal(configRaw[k], &conf.credentials)
 
@@ -232,14 +232,14 @@ func (c *PunctumConfig) POP3(server string, errs basis.Errors) (ServerAccess, ba
 	return ServerAccess{}, append(errs, errors.Wrapf(ErrNoValue, "no config.pop3 for key '%s'", server))
 }
 
-func (c *PunctumConfig) System(key string, errs basis.Errors) (string, basis.Errors) {
+func (c *PunctumConfig) Path(key string, errs basis.Errors) (string, basis.Errors) {
 	if c == nil {
 		return "", append(errs, ErrNoConfig)
 	}
-	if str, ok := c.system[key]; ok {
-		return str, errs
+	if path, ok := c.paths[key]; ok {
+		return path, errs
 	}
-	return "", append(errs, errors.Wrapf(ErrNoValue, "no data for key '%s' in config.system in %#v", key, c))
+	return "", append(errs, errors.Wrapf(ErrNoValue, "no data for key '%s' in config.paths in %#v", key, c))
 }
 
 func (c *PunctumConfig) Credentials(key string, errs basis.Errors) (map[string]string, basis.Errors) {

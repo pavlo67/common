@@ -15,7 +15,7 @@ func TestCRUD(t *testing.T) {
 		t.Fatal("No test environment set!!!")
 	}
 
-	fountsOp, err := New("test")
+	fountsOp, err := New("_test")
 
 	operatorCRUD := founts.OperatorCRUD{fountsOp}
 	testCases, err := operatorCRUD.TestCases(func() error { return fountsOp.clean() })

@@ -15,7 +15,7 @@ func TestCRUD(t *testing.T) {
 		t.Fatal("No test environment set!!!")
 	}
 
-	newsOp, err := New("test")
+	newsOp, err := New("_test")
 
 	src := flow.Source{
 		URL:      "abc",

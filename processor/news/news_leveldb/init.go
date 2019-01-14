@@ -1,8 +1,6 @@
 package news_leveldb
 
 import (
-	"strings"
-
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/punctum/basis"
@@ -27,15 +25,16 @@ func (fl *news_leveldbStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (fl *news_leveldbStarter) Prepare(conf *config.PunctumConfig, params basis.Params) error {
+func (fl *news_leveldbStarter) Prepare(cfg *config.PunctumConfig, params basis.Params) error {
 	l = logger.Get()
 
-	fl.path = strings.TrimSpace(params.StringKeyDefault("path", ""))
+	var errs basis.Errors
+	fl.path, errs = cfg.Path("news.leveldb", nil)
 	if fl.path == "" {
 		return errors.New("no path to leveldb files described")
 	}
 
-	return nil
+	return errs.Err()
 }
 
 func (fl *news_leveldbStarter) Check() (info []starter.Info, err error) {

@@ -24,6 +24,7 @@ type Content struct {
 	Tags     []string   `bson:"tags,omitempty"     json:"tags,omitempty"`
 	Embedded []Embedded `bson:"embedded,omitempty" json:"embedded,omitempty"`
 	Href     string     `bson:"href,omitempty"     json:"href,omitempty"`
+	Time     *time.Time `bson:"time,omitempty"     json:"time,omitempty"`
 }
 
 type Embedded struct {
