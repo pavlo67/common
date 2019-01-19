@@ -7,7 +7,7 @@ import (
 	"os/signal"
 
 	"github.com/pavlo67/punctum/basis/filelib"
-	"github.com/pavlo67/punctum/server_http"
+	"github.com/pavlo67/punctum/server/server_http"
 	"github.com/pavlo67/punctum/starter"
 	"github.com/pavlo67/punctum/starter/config"
 	"github.com/pavlo67/punctum/starter/logger"

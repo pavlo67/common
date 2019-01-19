@@ -4,7 +4,7 @@ import (
 	"github.com/pavlo67/punctum/auth/auth_ecdsa"
 	"github.com/pavlo67/punctum/basis"
 	"github.com/pavlo67/punctum/basis/filelib"
-	"github.com/pavlo67/punctum/server_http/server_http_jschmhr"
+	"github.com/pavlo67/punctum/server/server_http/server_http_jschmhr"
 	"github.com/pavlo67/punctum/starter"
 
 	"github.com/pavlo67/punctum/_demo_main/demo_server_http"

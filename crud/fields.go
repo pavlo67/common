@@ -8,7 +8,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-type FieldKey string
 type FieldType string
 
 const TypeString FieldType = "str"

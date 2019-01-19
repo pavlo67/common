@@ -94,15 +94,18 @@ func main() {
 			if err != nil {
 				numErr++
 				l.Info(err)
-			} else if !ok {
-				item.SavedAt = &savedAt
-				err = newsOp.Save(item)
-				if err != nil {
-					numErr++
-					l.Info(err)
-				} else {
-					numNew++
-				}
+			} else if ok {
+				// already exists!
+				continue
+			}
+
+			item.SavedAt = &savedAt
+			err = newsOp.Save(item)
+			if err != nil {
+				numErr++
+				l.Info(err)
+			} else {
+				numNew++
 			}
 		}
 

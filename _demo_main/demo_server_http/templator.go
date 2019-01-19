@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/pavlo67/punctum/auth"
-	"github.com/pavlo67/punctum/server_http"
+	"github.com/pavlo67/punctum/server/server_http"
 	"github.com/pavlo67/punctum/starter/joiner"
 )
 

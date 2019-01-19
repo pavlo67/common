@@ -10,27 +10,25 @@ import (
 	"github.com/julienschmidt/httprouter"
 
 	"github.com/pavlo67/punctum/auth"
-	"github.com/pavlo67/punctum/server_http"
+	"github.com/pavlo67/punctum/server"
+	"github.com/pavlo67/punctum/server/server_http"
 )
 
-func (s *serverHTTPJschmhr) HandleFuncRaw(method, serverPath string, rawHandler server_http.RawHandler, allowedIDs ...auth.ID) {
+func (s *serverHTTPJschmhr) HandleFuncRaw(method, serverRoute string, rawHandler server_http.RawHandler, allowedIDs ...auth.ID) {
 	l.Fatal("func (s *serverHTTPJschmhr) HandleFuncRaw() isn't implemented!!!")
 }
 
-func (s *serverHTTPJschmhr) HandleFuncHTML(method, serverPath string, htmlHandler server_http.HTMLHandler, allowedIDs ...auth.ID) {
-	s.handleFunc(method, serverPath, func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
+func (s *serverHTTPJschmhr) HandleFuncHTML(method, serverRoute string, htmlHandler server_http.HTMLHandler, allowedIDs ...auth.ID) {
+	s.handleFunc(method, serverRoute, func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
 		user, err := server_http.UserWithRequest(r, s.identOpsMap)
 		if err != nil {
 			l.Error(err)
 		}
 
-		var params map[string]string
+		var params server.RouteParams
 		if len(paramsHR) > 0 {
-			params = map[string]string{}
 			for _, p := range paramsHR {
-				if _, ok := params[p.Key]; !ok {
-					params[p.Key] = p.Value
-				}
+				params = append(params, server.RouteParam{Name: p.Key, Value: p.Value})
 			}
 		}
 
@@ -88,8 +86,8 @@ func (s *serverHTTPJschmhr) HandleTemplatorHTML(templatorHTML server_http.Templa
 	s.templator = templatorHTML
 }
 
-func (s *serverHTTPJschmhr) HandleFuncREST(method, serverPath string, restHandler server_http.RESTHandler, allowedIDs ...auth.ID) {
-	s.handleFunc(method, serverPath, func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
+func (s *serverHTTPJschmhr) HandleFuncREST(method, serverRoute string, restHandler server_http.RESTHandler, allowedIDs ...auth.ID) {
+	s.handleFunc(method, serverRoute, func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
 		user, err := server_http.UserWithRequest(r, s.identOpsMap)
 		if err != nil {
 			l.Error(err)
@@ -104,13 +102,10 @@ func (s *serverHTTPJschmhr) HandleFuncREST(method, serverPath string, restHandle
 			return
 		}
 
-		var params map[string]string
+		var params server.RouteParams
 		if len(paramsHR) > 0 {
-			params = map[string]string{}
 			for _, p := range paramsHR {
-				if _, ok := params[p.Key]; !ok {
-					params[p.Key] = p.Value
-				}
+				params = append(params, server.RouteParam{Name: p.Key, Value: p.Value})
 			}
 		}
 
@@ -140,8 +135,8 @@ func (s *serverHTTPJschmhr) HandleFuncREST(method, serverPath string, restHandle
 
 }
 
-func (s *serverHTTPJschmhr) HandleFuncBinary(method, serverPath string, binaryHandler server_http.BinaryHandler, allowedIDs ...auth.ID) {
-	s.handleFunc(method, serverPath, func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
+func (s *serverHTTPJschmhr) HandleFuncBinary(method, serverRoute string, binaryHandler server_http.BinaryHandler, allowedIDs ...auth.ID) {
+	s.handleFunc(method, serverRoute, func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
 		user, err := server_http.UserWithRequest(r, s.identOpsMap)
 		if err != nil {
 			l.Error(err)
@@ -156,13 +151,10 @@ func (s *serverHTTPJschmhr) HandleFuncBinary(method, serverPath string, binaryHa
 			return
 		}
 
-		var params map[string]string
+		var params server.RouteParams
 		if len(paramsHR) > 0 {
-			params = map[string]string{}
 			for _, p := range paramsHR {
-				if _, ok := params[p.Key]; !ok {
-					params[p.Key] = p.Value
-				}
+				params = append(params, server.RouteParam{Name: p.Key, Value: p.Value})
 			}
 		}
 

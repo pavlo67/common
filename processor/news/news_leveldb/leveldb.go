@@ -91,6 +91,53 @@ func (newsOp *newsLevelDB) Has(src *flow.Source) (bool, error) {
 	return false, errors.Wrap(iter.Error(), onHas)
 }
 
+type CheckKey func([]byte) bool
+
+func ranges(opt *crud.ReadOptions) (*util.Range, CheckKey) {
+
+	if opt == nil || (opt.RangeMin == "" && opt.RangeMax == "") {
+		return nil, nil
+	}
+
+	if opt.RangedBy == crud.TimeField {
+		var rangeMin, rangeMax uint64
+		var checkMax bool
+
+		if opt.RangeMin != "" {
+			rangeMin, _ = strconv.ParseUint(opt.RangeMin, 10, 64)
+		}
+		if opt.RangeMax != "" {
+			checkMax = true
+			rangeMax, _ = strconv.ParseUint(opt.RangeMax, 10, 64)
+		}
+
+		return nil, func(key []byte) bool {
+			keyParts := strings.Split(string(key), "#")
+			var keyTime uint64
+			if len(keyParts) >= 2 {
+				keyTime, _ = strconv.ParseUint(keyParts[1], 10, 64)
+			}
+
+			return keyTime >= rangeMin && (!checkMax || keyTime < rangeMax)
+		}
+	}
+
+	var ranges *util.Range
+	var checkKey CheckKey
+	if opt.RangeMin != "" {
+		if opt.RangeMax != "" {
+			ranges = &util.Range{Start: []byte(opt.RangeMin), Limit: []byte(opt.RangeMax)}
+		} else {
+			ranges = &util.Range{Start: []byte(opt.RangeMin)}
+		}
+	} else {
+		// opt.RangeMax != "" due to: if opt == nil || (opt.RangeMin == "" && opt.RangeMax == "")
+		ranges = &util.Range{Limit: []byte(opt.RangeMax)}
+	}
+
+	return ranges, checkKey
+}
+
 const onReadList = "on newsLevelDB.ReadList()"
 
 func (newsOp *newsLevelDB) ReadList(opt *crud.ReadOptions) ([]news.Item, *uint64, error) {
@@ -98,21 +145,14 @@ func (newsOp *newsLevelDB) ReadList(opt *crud.ReadOptions) ([]news.Item, *uint64
 	var items []news.Item
 	var errs basis.Errors
 
-	var ranges *util.Range
-	if opt != nil {
-		if opt.LimitMin != "" {
-			if opt.LimitMax != "" {
-				ranges = &util.Range{Start: []byte(opt.LimitMin), Limit: []byte(opt.LimitMax)}
-			} else {
-				ranges = &util.Range{Start: []byte(opt.LimitMin)}
-			}
-		} else if opt.LimitMax != "" {
-			ranges = &util.Range{Limit: []byte(opt.LimitMax)}
-		}
-	}
+	ranges, checkKey := ranges(opt)
 
 	iter := newsOp.db.NewIterator(ranges, nil)
 	for iter.Next() {
+		if checkKey != nil && !checkKey(iter.Key()) {
+			continue
+		}
+
 		value := iter.Value()
 
 		var item news.Item
@@ -131,23 +171,18 @@ func (newsOp *newsLevelDB) ReadList(opt *crud.ReadOptions) ([]news.Item, *uint64
 const onDeleteList = "on newsLevelDB.DeleteList()"
 
 func (newsOp *newsLevelDB) DeleteList(opt *crud.ReadOptions) error {
-	var ranges *util.Range
-	if opt != nil {
-		if opt.LimitMin != "" {
-			if opt.LimitMax != "" {
-				ranges = &util.Range{Start: []byte(opt.LimitMin), Limit: []byte(opt.LimitMax)}
-			} else {
-				ranges = &util.Range{Start: []byte(opt.LimitMin)}
-			}
-		} else if opt.LimitMax != "" {
-			ranges = &util.Range{Limit: []byte(opt.LimitMax)}
-		}
-	}
-
 	var errs basis.Errors
+
+	ranges, checkKey := ranges(opt)
+
 	iter := newsOp.db.NewIterator(ranges, nil)
 	for iter.Next() {
 		key := iter.Key()
+
+		if checkKey != nil && !checkKey(key) {
+			continue
+		}
+
 		err := newsOp.db.Delete(key, nil)
 		if err != nil {
 			errs = append(errs, err)

@@ -35,11 +35,16 @@ func (descr Description) Field(key string) *Field {
 //	Selector selectors.Selector `json:"selector,omitempty"`
 //}
 
+type FieldKey string
+
+const TimeField FieldKey = ".time"
+
 type ReadOptions struct {
+	RangedBy FieldKey           `json:"ranged_by,omitempty"`
+	RangeMin string             `json:"range_min,omitempty"`
+	RangeMax string             `json:"range_max,omitempty"`
 	Selector selectors.Selector `json:"selector,omitempty"`
 	SortBy   []string           `json:"sort_by,omitempty"`
-	LimitMin string             `json:"limit_min,omitempty"`
-	LimitMax string             `json:"limit_max,omitempty"`
 
 	// Exemplar interface{}        `json:"exemplar,omitempty"`
 	//Values    []string           `json:"values,omitempty"`

@@ -14,7 +14,7 @@ import (
 	"regexp"
 
 	"github.com/pavlo67/punctum/auth"
-	"github.com/pavlo67/punctum/server_http"
+	"github.com/pavlo67/punctum/server/server_http"
 )
 
 var _ server_http.Operator = &serverHTTPJschmhr{}
@@ -96,18 +96,18 @@ func (s *serverHTTPJschmhr) handleFunc(method, path string, handler httprouter.H
 
 var reHTMLExt = regexp.MustCompile(`\.html?$`)
 
-func (s *serverHTTPJschmhr) HandleFile(serverPath, localPath string, mimeType *string) error {
-	l.Infof("FILES : %s <-- %s", serverPath, localPath)
+func (s *serverHTTPJschmhr) HandleFile(serverRoute, localPath string, mimeType *string) error {
+	l.Infof("FILES : %s <-- %s", serverRoute, localPath)
 
 	// TODO: check localPath
 
 	if mimeType == nil {
-		s.httpServeMux.ServeFiles(serverPath, http.Dir(localPath))
+		s.httpServeMux.ServeFiles(serverRoute, http.Dir(localPath))
 		return nil
 	}
 
 	//fileServer := http.FileServer(http.Dir(localPath))
-	s.httpServeMux.GET(serverPath, func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	s.httpServeMux.GET(serverRoute, func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		w.Header().Set("Content-Type", *mimeType)
 		OpenFile, err := os.Open(localPath + "/" + p.ByName("filepath"))
 		defer OpenFile.Close()
@@ -130,8 +130,8 @@ func (s *serverHTTPJschmhr) HandleFile(serverPath, localPath string, mimeType *s
 //	l.Error("can't read MIMEType for file: ", localPath+"/"+r.URL.Path, err)
 // }
 
-func (s *serverHTTPJschmhr) HandleString(serverPath, str string, mimeType *string) {
-	s.handleFunc("GET", serverPath, func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+func (s *serverHTTPJschmhr) HandleString(serverRoute, str string, mimeType *string) {
+	s.handleFunc("GET", serverRoute, func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 		if mimeType != nil {
 			// "application/javascript"
 			w.Header().Set("Content-Type", *mimeType)

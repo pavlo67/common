@@ -46,12 +46,3 @@ func RESTError(err error) RESTResponse {
 		Data:   RESTDataError{basis.Errors{err}},
 	}
 }
-
-// Binary -----------------------------------------------------------------------------------
-
-type BinaryResponse struct {
-	Status   int
-	MIMEType string
-	Data     []byte
-	FileName string
-}
