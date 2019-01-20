@@ -16,7 +16,7 @@ import (
 
 	"time"
 
-	"github.com/pavlo67/punctum/_rss_main/rss_config"
+	"github.com/pavlo67/punctum/_rss_main/rss_starters"
 )
 
 //var setup = flag.Bool("setup", false, "recreate structures for the selected (or all if no) component")
@@ -37,7 +37,7 @@ func main() {
 
 	// flag.Parse()
 
-	starters, label := rss_config.Starters()
+	starters, label := rss_starters.Starters()
 	joiner, err := starter.Run(conf, starters, label, nil)
 	if err != nil {
 		l.Fatal(err)

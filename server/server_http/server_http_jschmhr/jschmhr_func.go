@@ -9,26 +9,38 @@ import (
 	"github.com/cbroglie/mustache"
 	"github.com/julienschmidt/httprouter"
 
+	"strings"
+
 	"github.com/pavlo67/punctum/auth"
 	"github.com/pavlo67/punctum/server"
+	"github.com/pavlo67/punctum/server/router"
 	"github.com/pavlo67/punctum/server/server_http"
 )
 
-func (s *serverHTTPJschmhr) HandleFuncRaw(method, serverRoute string, rawHandler server_http.RawHandler, allowedIDs ...auth.ID) {
+func ServerPath(ep router.Endpoint) string {
+	if len(ep.ParamNames) < 1 {
+		return ep.ServerPath
+	}
+	return ep.ServerPath + "/:" + strings.Join(ep.ParamNames, "/:")
+}
+
+func (s *serverHTTPJschmhr) HandleRaw(endpoint router.Endpoint, rawHandler server_http.RawHandler, allowedIDs []auth.ID) {
 	l.Fatal("func (s *serverHTTPJschmhr) HandleFuncRaw() isn't implemented!!!")
 }
 
-func (s *serverHTTPJschmhr) HandleFuncHTML(method, serverRoute string, htmlHandler server_http.HTMLHandler, allowedIDs ...auth.ID) {
-	s.handleFunc(method, serverRoute, func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
+func (s *serverHTTPJschmhr) HandleHTML(endpoint router.Endpoint, htmlHandler server_http.HTMLHandler, allowedIDs []auth.ID) {
+	method := endpoint.Method
+	serverPath := ServerPath(endpoint)
+	s.handleFunc(method, serverPath, func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
 		user, err := server_http.UserWithRequest(r, s.identOpsMap)
 		if err != nil {
 			l.Error(err)
 		}
 
-		var params server.RouteParams
+		var params router.Params
 		if len(paramsHR) > 0 {
 			for _, p := range paramsHR {
-				params = append(params, server.RouteParam{Name: p.Key, Value: p.Value})
+				params = append(params, router.Param{Name: p.Key, Value: p.Value})
 			}
 		}
 
@@ -86,8 +98,10 @@ func (s *serverHTTPJschmhr) HandleTemplatorHTML(templatorHTML server_http.Templa
 	s.templator = templatorHTML
 }
 
-func (s *serverHTTPJschmhr) HandleFuncREST(method, serverRoute string, restHandler server_http.RESTHandler, allowedIDs ...auth.ID) {
-	s.handleFunc(method, serverRoute, func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
+func (s *serverHTTPJschmhr) HandleREST(endpoint router.Endpoint, restHandler server_http.RESTHandler, allowedIDs []auth.ID) {
+	method := endpoint.Method
+	serverPath := ServerPath(endpoint)
+	s.handleFunc(method, serverPath, func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
 		user, err := server_http.UserWithRequest(r, s.identOpsMap)
 		if err != nil {
 			l.Error(err)
@@ -102,10 +116,10 @@ func (s *serverHTTPJschmhr) HandleFuncREST(method, serverRoute string, restHandl
 			return
 		}
 
-		var params server.RouteParams
+		var params router.Params
 		if len(paramsHR) > 0 {
 			for _, p := range paramsHR {
-				params = append(params, server.RouteParam{Name: p.Key, Value: p.Value})
+				params = append(params, router.Param{Name: p.Key, Value: p.Value})
 			}
 		}
 
@@ -135,8 +149,29 @@ func (s *serverHTTPJschmhr) HandleFuncREST(method, serverRoute string, restHandl
 
 }
 
-func (s *serverHTTPJschmhr) HandleFuncBinary(method, serverRoute string, binaryHandler server_http.BinaryHandler, allowedIDs ...auth.ID) {
-	s.handleFunc(method, serverRoute, func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
+func (s *serverHTTPJschmhr) HandleWorker(endpoint router.Endpoint, workerFunc router.WorkerFunc, allowedIDs []auth.ID) {
+	if workerFunc == nil {
+		l.Errorf("nil worker for endpoint %#v", endpoint)
+		return
+	}
+
+	var restHandler = func(user *auth.User, r *http.Request, params router.Params) (server.DataResponse, error) {
+		var body []byte
+		_, err := r.Body.Read(body)
+		if err != nil {
+			return server.DataResponse{}, err
+		}
+
+		return workerFunc(params, body)
+	}
+
+	s.HandleREST(endpoint, restHandler, allowedIDs)
+}
+
+func (s *serverHTTPJschmhr) HandleBinary(endpoint router.Endpoint, binaryHandler server_http.BinaryHandler, allowedIDs []auth.ID) {
+	method := endpoint.Method
+	serverPath := ServerPath(endpoint)
+	s.handleFunc(method, serverPath, func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
 		user, err := server_http.UserWithRequest(r, s.identOpsMap)
 		if err != nil {
 			l.Error(err)
@@ -151,10 +186,10 @@ func (s *serverHTTPJschmhr) HandleFuncBinary(method, serverRoute string, binaryH
 			return
 		}
 
-		var params server.RouteParams
+		var params router.Params
 		if len(paramsHR) > 0 {
 			for _, p := range paramsHR {
-				params = append(params, server.RouteParam{Name: p.Key, Value: p.Value})
+				params = append(params, router.Param{Name: p.Key, Value: p.Value})
 			}
 		}
 
@@ -171,7 +206,7 @@ func (s *serverHTTPJschmhr) HandleFuncBinary(method, serverRoute string, binaryH
 			w.Header().Set("Contentus-Disposition", "attachment; filename="+responseData.FileName)
 		}
 
-		if responseData.Status > 0 {
+		if responseData.Status <= 0 {
 			w.WriteHeader(responseData.Status)
 		} else {
 			w.WriteHeader(http.StatusOK)
@@ -181,5 +216,4 @@ func (s *serverHTTPJschmhr) HandleFuncBinary(method, serverRoute string, binaryH
 			l.Error("binaryMiddleware can't write response data", err)
 		}
 	})
-
 }

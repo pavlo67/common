@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/pavlo67/punctum/basis"
+	"github.com/pavlo67/punctum/server"
 )
 
 // HTML -------------------------------------------------------------------------------------
@@ -35,13 +36,8 @@ type RESTDataError struct {
 	Error basis.Errors `json:"error,omitempty"`
 }
 
-type RESTResponse struct {
-	Status int         `json:"status,omitempty"`
-	Data   interface{} `json:"data,omitempty"`
-}
-
-func RESTError(err error) RESTResponse {
-	return RESTResponse{
+func RESTError(err error) server.DataResponse {
+	return server.DataResponse{
 		Status: http.StatusOK,
 		Data:   RESTDataError{basis.Errors{err}},
 	}

@@ -96,7 +96,7 @@ func (s *serverHTTPJschmhr) handleFunc(method, path string, handler httprouter.H
 
 var reHTMLExt = regexp.MustCompile(`\.html?$`)
 
-func (s *serverHTTPJschmhr) HandleFile(serverRoute, localPath string, mimeType *string) error {
+func (s *serverHTTPJschmhr) HandleGetFile(serverRoute, localPath string, mimeType *string) error {
 	l.Infof("FILES : %s <-- %s", serverRoute, localPath)
 
 	// TODO: check localPath
@@ -130,7 +130,7 @@ func (s *serverHTTPJschmhr) HandleFile(serverRoute, localPath string, mimeType *
 //	l.Error("can't read MIMEType for file: ", localPath+"/"+r.URL.Path, err)
 // }
 
-func (s *serverHTTPJschmhr) HandleString(serverRoute, str string, mimeType *string) {
+func (s *serverHTTPJschmhr) HandleGetString(serverRoute, str string, mimeType *string) {
 	s.handleFunc("GET", serverRoute, func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 		if mimeType != nil {
 			// "application/javascript"

@@ -1,4 +1,4 @@
-package demo_config
+package demo_starters
 
 import (
 	"github.com/pavlo67/punctum/auth/auth_ecdsa"
