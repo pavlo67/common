@@ -9,12 +9,12 @@ import (
 type Attributes map[string]string
 
 type Field struct {
-	Key            string       `bson:"key"                       json:"key"`
-	Label          string       `bson:"label,omitempty"           json:"label,omitempty"`
-	Type           string       `bson:"type,omitempty"            json:"type,omitempty"`
-	Format         string       `bson:"format,omitempty"          json:"format,omitempty"`
-	AttributesHTML string       `bson:"attributes_html,omitempty" json:"attributes_html,omitempty"`
-	Params         basis.Params `bson:"params,omitempty"          json:"params,omitempty"`
+	Key            string        `bson:"key"                       json:"key"`
+	Label          string        `bson:"label,omitempty"           json:"label,omitempty"`
+	Type           string        `bson:"type,omitempty"            json:"type,omitempty"`
+	Format         string        `bson:"format,omitempty"          json:"format,omitempty"`
+	AttributesHTML string        `bson:"attributes_html,omitempty" json:"attributes_html,omitempty"`
+	Params         basis.Options `bson:"params,omitempty"          json:"params,omitempty"`
 }
 
 const NotEmptyKey = "not_empty"
@@ -26,8 +26,8 @@ const CreateNewKey = "create_new"
 const CreateNewTitleKey = "create_new_title"
 const GenusKey = "genus"
 
-var NotEmpty = basis.Params{NotEmptyKey: true}
-var NoEscape = basis.Params{NoEscapeKey: true}
+var NotEmpty = basis.Options{NotEmptyKey: true}
+var NoEscape = basis.Options{NoEscapeKey: true}
 
 func AttributesHTML(attributes Attributes) string {
 	var attributesHTML string
@@ -96,11 +96,11 @@ func FieldEdit(formID string, field Field, data map[string]string, options map[s
 			}
 			resHTML = `<textarea style="width:100%" ` + attributes + ` rows=` + rows + `>` + value + `</textarea>`
 		} else if field.Format == "number" {
-			parameters := ` step="` + field.Params.StringKeyDefault("step", "1") + `"`
-			if min, ok := field.Params.StringKey("min"); ok {
+			parameters := ` step="` + field.Params.StringDefault("step", "1") + `"`
+			if min, ok := field.Params.String("min"); ok {
 				parameters += ` min="` + min + `"`
 			}
-			if max, ok := field.Params.StringKey("max"); ok {
+			if max, ok := field.Params.String("max"); ok {
 				parameters += ` max="` + max + `"`
 			}
 			resHTML = `<input type="number"` + parameters + attributes + ` value="` + value + `" />`
@@ -127,7 +127,7 @@ func FieldView(field Field, data map[string]string, options map[string]SelectStr
 
 	//if frontOp, ok := frontOps[field.Type]; ok {
 	//	params := map[string]string{
-	//		// "format": field.Params,
+	//		// "format": field.Options,
 	//		"class": class,
 	//		"style": "width:100%",
 	//	}

@@ -35,12 +35,12 @@ func (sc *identity_login_stubStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (sc *identity_login_stubStarter) Prepare(conf *config.PunctumConfig, params basis.Params) error {
+func (sc *identity_login_stubStarter) Prepare(conf *config.PunctumConfig, params basis.Options) error {
 	l = logger.Get()
 
-	sc.interfaceKey = joiner.InterfaceKey(params.StringKeyDefault("interface_key", string(auth.InterfaceKey)))
+	sc.interfaceKey = joiner.InterfaceKey(params.StringDefault("interface_key", string(auth.InterfaceKey)))
 
-	credentialsConf, errs := conf.Credentials(params.StringKeyDefault("config_credentials_key", "default"), nil)
+	credentialsConf, errs := conf.Credentials(params.StringDefault("config_credentials_key", "default"), nil)
 
 	var ok bool
 

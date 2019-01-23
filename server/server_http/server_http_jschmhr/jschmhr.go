@@ -125,9 +125,9 @@ func (s *serverHTTPJschmhr) HandleGetFile(serverRoute, localPath string, mimeTyp
 	return nil
 }
 
-// mimeTypeToSet, err = inspector.MIME(localPath+"/"+r.URL.Path, nil)
+// mimeTypeToSet, err = inspector.MIME(localPath+"/"+r.URL.WithParams, nil)
 // if err != nil {
-//	l.Error("can't read MIMEType for file: ", localPath+"/"+r.URL.Path, err)
+//	l.Error("can't read MIMEType for file: ", localPath+"/"+r.URL.WithParams, err)
 // }
 
 func (s *serverHTTPJschmhr) HandleGetString(serverRoute, str string, mimeType *string) {

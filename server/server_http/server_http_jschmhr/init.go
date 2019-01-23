@@ -37,20 +37,20 @@ func (ss *server_http_jschmhrStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *server_http_jschmhrStarter) Prepare(conf *config.PunctumConfig, params basis.Params) error {
+func (ss *server_http_jschmhrStarter) Prepare(conf *config.PunctumConfig, params basis.Options) error {
 	l = logger.Get()
 
 	var errs basis.Errors
 
-	ss.interfaceKey = joiner.InterfaceKey(params.StringKeyDefault("interface_key", string(server_http.InterfaceKey)))
-	ss.interfaceKeyRouter = joiner.InterfaceKey(params.StringKeyDefault("interface_key_router", string(router.InterfaceKey)))
+	ss.interfaceKey = joiner.InterfaceKey(params.StringDefault("interface_key", string(server_http.InterfaceKey)))
+	ss.interfaceKeyRouter = joiner.InterfaceKey(params.StringDefault("interface_key_router", string(router.InterfaceKey)))
 
-	ss.config, errs = conf.Server(params.StringKeyDefault("config_server_key", "default"), errs)
+	ss.config, errs = conf.Server(params.StringDefault("config_server_key", "default"), errs)
 	if ss.config.Port <= 0 {
 		errs = append(errs, fmt.Errorf("wrong port for serverOp: %d", ss.config.Port))
 	}
 
-	templatePath := params.StringKeyDefault("template_path", "")
+	templatePath := params.StringDefault("template_path", "")
 	if templatePath == "" {
 		l.Warn(`on server_http_jschmhr.Prepare(): empty params["template_path"]`)
 
@@ -68,7 +68,7 @@ func (ss *server_http_jschmhrStarter) Prepare(conf *config.PunctumConfig, params
 		ss.htmlTemplate = string(htmlTemplate)
 	}
 
-	ss.staticPath = params.StringKeyDefault("static_path", "")
+	ss.staticPath = params.StringDefault("static_path", "")
 
 	return errs.Err()
 }

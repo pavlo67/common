@@ -23,18 +23,18 @@ type Operator interface {
 	HandleTemplatorHTML(templatorHTML Templator)
 	HandleREST(endpoint router.Endpoint, restHandler RESTHandler, allowedIDs []auth.ID)
 	HandleBinary(endpoint router.Endpoint, binaryHandler BinaryHandler, allowedIDs []auth.ID)
-	HandleWorker(endpoint router.Endpoint, worker router.WorkerFunc, allowedIDs []auth.ID)
+	HandleWorker(endpoint router.Endpoint, worker router.Worker, allowedIDs []auth.ID)
 }
 
 // !!! requires internal variables (so it can't be a simple function only)
 type Templator interface {
-	Context(*auth.User, *http.Request, router.Params) map[string]string
+	Context(*auth.User, *http.Request, basis.Params) map[string]string
 }
 
-type RawHandler func(*auth.User, *http.Request, router.Params, http.ResponseWriter) error
-type BinaryHandler func(*auth.User, *http.Request, router.Params) (server.BinaryResponse, error)
-type RESTHandler func(*auth.User, *http.Request, router.Params) (server.DataResponse, error)
-type HTMLHandler func(*auth.User, *http.Request, router.Params) (HTMLResponse, error)
+type RawHandler func(*auth.User, *http.Request, basis.Params, http.ResponseWriter) error
+type BinaryHandler func(*auth.User, *http.Request, basis.Params) (server.BinaryResponse, error)
+type RESTHandler func(*auth.User, *http.Request, basis.Params) (server.DataResponse, error)
+type HTMLHandler func(*auth.User, *http.Request, basis.Params) (HTMLResponse, error)
 
 func InitEndpoints(op Operator, endpoints map[string]router.Endpoint, htmlHandlers map[string]HTMLHandler, restHandlers map[string]RESTHandler,
 	binaryHandlers map[string]BinaryHandler, allowedIDs []auth.ID) basis.Errors {

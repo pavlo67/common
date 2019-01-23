@@ -48,7 +48,7 @@ package viewshtml
 //				}
 //			}
 //			if i != pageNum {
-//				href := opt.Path + opt.CGIParams +
+//				href := opt.WithParams + opt.CGIParams +
 //					"sort=" + strings.Join(sortBy, "+") +
 //					"&page=" + strconv.FormatUint(i, 10)
 //				paginationHTML += `

@@ -1,4 +1,4 @@
-package rss_router
+package news_router
 
 import (
 	"github.com/pkg/errors"
@@ -14,33 +14,33 @@ import (
 )
 
 func Starter() starter.Operator {
-	return &rss_routerStarter{}
+	return &news_routerStarter{}
 }
 
 var l logger.Operator
 var newsOp news.Operator
 
-type rss_routerStarter struct{}
+type news_routerStarter struct{}
 
-func (dcs *rss_routerStarter) Name() string {
+func (dcs *news_routerStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (dcs *rss_routerStarter) Prepare(conf *config.PunctumConfig, params basis.Params) error {
+func (dcs *news_routerStarter) Prepare(conf *config.PunctumConfig, params basis.Options) error {
 	l = logger.Get()
 
 	return nil
 }
 
-func (dcs *rss_routerStarter) Check() (info []starter.Info, err error) {
+func (dcs *news_routerStarter) Check() (info []starter.Info, err error) {
 	return nil, nil
 }
 
-func (dcs *rss_routerStarter) Setup() error {
+func (dcs *news_routerStarter) Setup() error {
 	return nil
 }
 
-func (dcs *rss_routerStarter) Init(joinerOp joiner.Operator) error {
+func (dcs *news_routerStarter) Init(joinerOp joiner.Operator) error {
 	routerInterfaceKey := router.InterfaceKey
 	routerOp, ok := joinerOp.Interface(routerInterfaceKey).(router.Operator)
 	if !ok {
@@ -56,7 +56,6 @@ func (dcs *rss_routerStarter) Init(joinerOp joiner.Operator) error {
 	errs := router.InitEndpoints(
 		routerOp,
 		endpoints,
-		workers,
 		nil,
 	)
 

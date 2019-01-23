@@ -13,19 +13,19 @@ const InterfaceKey joiner.InterfaceKey = "router"
 
 type Key string
 
-type WorkerFunc func(params Params, data []byte) (server.DataResponse, error)
+type Worker func(endpoint Endpoint, params basis.Params, options basis.Options, data interface{}) (*server.DataResponse, error)
 
 type Operator interface {
-	HandleWorker(endpoint Endpoint, worker WorkerFunc, allowedIDs []auth.ID)
+	HandleWorker(endpoint Endpoint, worker Worker, allowedIDs []auth.ID)
 	// RouteString(key Key, params []string) (string, error)
 }
 
-func InitEndpoints(op Operator, endpoints map[string]Endpoint, workers map[string]WorkerFunc, allowedIDs []auth.ID) basis.Errors {
+func InitEndpoints(op Operator, endpoints map[string]Endpoint, allowedIDs []auth.ID) basis.Errors {
 	var errs basis.Errors
 
 	for key, ep := range endpoints {
-		if worker, ok := workers[key]; ok {
-			op.HandleWorker(ep, worker, allowedIDs)
+		if ep.Worker != nil {
+			op.HandleWorker(ep, ep.Worker, allowedIDs)
 		} else {
 			errs = append(errs, errors.Errorf("no handler for endpoint: %s", key))
 		}

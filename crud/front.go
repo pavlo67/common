@@ -29,14 +29,14 @@ type ResultData struct {
 //		readOptions.SortBy = sortByDefault
 //	}
 //
-//	pageStr := paramsTree.StringKeyDefault("page", "1")
+//	pageStr := paramsTree.StringDefault("page", "1")
 //	page, err := strconv.ParseUint(pageStr, 10, 64)
 //	if err != nil {
 //		return nil, 0, errors.Errorf("bad query page value: '%s'", pageStr)
 //	}
 //
 //	var pageLength uint64
-//	pageLengthStr, ok := paramsTree.StringKey("page_length")
+//	pageLengthStr, ok := paramsTree.String("page_length")
 //	if ok {
 //		pageLength, err = strconv.ParseUint(pageLengthStr, 10, 64)
 //		if err != nil {
@@ -88,7 +88,7 @@ type ResultData struct {
 //	}
 //
 //	readOptionsHTTP := &httplib.ReadOptionsHTTP{
-//		Path:    r.URL.Path,
+//		WithParams:    r.URL.WithParams,
 //		PageNum: page,
 //	}
 //
@@ -107,7 +107,7 @@ type ResultData struct {
 //
 //	query := r.URL.Query()
 //
-//	opt.Path = r.URL.Path
+//	opt.WithParams = r.URL.WithParams
 //	opt.SortBy = query["sort"]
 //	if len(opt.SortBy) < 1 {
 //		opt.SortBy = defaultSortBy

@@ -14,9 +14,8 @@ import (
 
 	"log"
 
-	"time"
-
-	"github.com/pavlo67/punctum/_rss_main/rss_starters"
+	"github.com/pavlo67/punctum/_news_main/news_router"
+	"github.com/pavlo67/punctum/_news_main/news_starters"
 )
 
 //var setup = flag.Bool("setup", false, "recreate structures for the selected (or all if no) component")
@@ -37,7 +36,7 @@ func main() {
 
 	// flag.Parse()
 
-	starters, label := rss_starters.Starters()
+	starters, label := news_starters.Starters()
 	joiner, err := starter.Run(conf, starters, label, nil)
 	if err != nil {
 		l.Fatal(err)
@@ -51,7 +50,7 @@ func main() {
 
 	}
 
-	rssSources := []string{
+	rssURLs := []string{
 		"https://rss.unian.net/site/news_ukr.rss",
 		"https://ua.censor.net.ua/includes/news_uk.xml",
 		"https://ua.censor.net.ua/includes/resonance_uk.xml",
@@ -67,49 +66,16 @@ func main() {
 
 	rssOp := &importer_rss.RSS{}
 
-	for _, rssSource := range rssSources {
-		l.Info(rssSource)
+	for _, rssURL := range rssURLs {
+		l.Info(rssURL)
 
-		var num, numNew, numErr uint
+		num, numNew, errs := news_router.Load(rssOp, rssURL, newsOp)
 
-		err = rssOp.Init(rssSource)
-		if err != nil {
-			l.Infof("can't rssOp.Init('%s')", rssSource, err)
+		l.Infof("total: %d, with errors: %d, added new: %d", num, len(errs), numNew)
+
+		if len(errs) > 0 {
+			l.Errorf("%#v", errs)
 		}
-
-		savedAt := time.Now()
-
-		for {
-			item, err := rssOp.Next()
-			if err != nil {
-				l.Infof("can't get next item: %v", err)
-				continue
-			}
-			if item == nil {
-				break
-			}
-
-			num++
-			ok, err := newsOp.Has(&item.Source)
-			if err != nil {
-				numErr++
-				l.Info(err)
-			} else if ok {
-				// already exists!
-				continue
-			}
-
-			item.SavedAt = &savedAt
-			err = newsOp.Save(item)
-			if err != nil {
-				numErr++
-				l.Info(err)
-			} else {
-				numNew++
-			}
-		}
-
-		l.Infof("total: %d, with errors: %d, added new: %d", num, numErr, numNew)
 	}
 
 }

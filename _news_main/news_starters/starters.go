@@ -1,4 +1,4 @@
-package rss_starters
+package news_starters
 
 import (
 	"github.com/pavlo67/punctum/starter"

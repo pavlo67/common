@@ -11,6 +11,8 @@ import (
 
 	"strings"
 
+	"regexp"
+
 	"github.com/pavlo67/punctum/basis"
 	"github.com/pavlo67/punctum/crud"
 	"github.com/pavlo67/punctum/processor/flow"
@@ -93,6 +95,8 @@ func (newsOp *newsLevelDB) Has(src *flow.Source) (bool, error) {
 
 type CheckKey func([]byte) bool
 
+var reDigits = regexp.MustCompile(`^\d+$`)
+
 func ranges(opt *crud.ReadOptions) (*util.Range, CheckKey) {
 
 	if opt == nil || (opt.RangeMin == "" && opt.RangeMax == "") {
@@ -104,11 +108,21 @@ func ranges(opt *crud.ReadOptions) (*util.Range, CheckKey) {
 		var checkMax bool
 
 		if opt.RangeMin != "" {
-			rangeMin, _ = strconv.ParseUint(opt.RangeMin, 10, 64)
+			if reDigits.MatchString(opt.RangeMin) {
+				rangeMin, _ = strconv.ParseUint(opt.RangeMin, 10, 64)
+			} else {
+				timeMin, _ := time.Parse(time.RFC3339, opt.RangeMin)
+				rangeMin = uint64(timeMin.Unix())
+			}
 		}
 		if opt.RangeMax != "" {
 			checkMax = true
-			rangeMax, _ = strconv.ParseUint(opt.RangeMax, 10, 64)
+			if reDigits.MatchString(opt.RangeMax) {
+				rangeMax, _ = strconv.ParseUint(opt.RangeMax, 10, 64)
+			} else {
+				timeMax, _ := time.Parse(time.RFC3339, opt.RangeMax)
+				rangeMax = uint64(timeMax.Unix())
+			}
 		}
 
 		return nil, func(key []byte) bool {

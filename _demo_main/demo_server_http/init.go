@@ -23,7 +23,7 @@ func (dcs *demo_server_http_jsschmhrStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (dcs *demo_server_http_jsschmhrStarter) Prepare(conf *config.PunctumConfig, params basis.Params) error {
+func (dcs *demo_server_http_jsschmhrStarter) Prepare(conf *config.PunctumConfig, params basis.Options) error {
 	l = logger.Get()
 
 	return nil

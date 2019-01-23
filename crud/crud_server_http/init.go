@@ -33,13 +33,13 @@ func (fcs *crud_serverhttp_jschmhrStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (fcs *crud_serverhttp_jschmhrStarter) Prepare(conf *config.PunctumConfig, params basis.Params) error {
+func (fcs *crud_serverhttp_jschmhrStarter) Prepare(conf *config.PunctumConfig, params basis.Options) error {
 	l = logger.zapGet()
 
-	fcs.interfaceKey = joiner.InterfaceKey(params.StringKeyDefault("interface_key", string(InterfaceKey)))
+	fcs.interfaceKey = joiner.InterfaceKey(params.StringDefault("interface_key", string(InterfaceKey)))
 
 	var errs basis.Errors
-	indexPath := params.StringKeyDefault("index_path", filelib.CurrentPath())
+	indexPath := params.StringDefault("index_path", filelib.CurrentPath())
 	fcs.index, errs = config.ComponentIndex(indexPath, errs)
 
 	return errs.Err()

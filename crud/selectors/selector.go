@@ -8,7 +8,7 @@ import (
 
 type Selector interface{}
 
-func FromParams(params basis.Params) (Selector, error) {
+func FromParams(params basis.Options) (Selector, error) {
 	if params == nil {
 		return nil, nil
 	}
