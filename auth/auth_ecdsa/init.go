@@ -26,12 +26,12 @@ func (ss *identity_btcStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *identity_btcStarter) Prepare(conf *config.PunctumConfig, params basis.Options) error {
+func (ss *identity_btcStarter) Prepare(conf *config.PunctumConfig, options, runtimeOptions basis.Options) error {
 	l = logger.Get()
 
 	// var errs basis.Errors
 
-	ss.interfaceKey = joiner.InterfaceKey(params.StringDefault("interface_key", string(auth.InterfaceKey)))
+	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(auth.InterfaceKey)))
 
 	return nil
 }

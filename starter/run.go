@@ -8,17 +8,18 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/pavlo67/punctum/basis"
 	"github.com/pavlo67/punctum/starter/config"
 	"github.com/pavlo67/punctum/starter/joiner"
 	"github.com/pavlo67/punctum/starter/logger"
 )
 
-func StartComponent(conf *config.PunctumConfig, c Starter, joinerOp joiner.Operator) error {
+func StartComponent(conf *config.PunctumConfig, runtimeOptions basis.Options, c Starter, joinerOp joiner.Operator) error {
 	l := logger.Get()
 
 	l.Info("checking component: ", c.Name())
 
-	err := c.Prepare(conf, c.Params)
+	err := c.Prepare(conf, c.Options, runtimeOptions)
 	if err != nil {
 		return fmt.Errorf("error calling .Prepare() for component (%s): %s", c.Name(), err)
 	}
@@ -39,16 +40,22 @@ func StartComponent(conf *config.PunctumConfig, c Starter, joinerOp joiner.Opera
 	return nil
 }
 
-func Run(conf *config.PunctumConfig, starters []Starter, label string, runKeys []joiner.InterfaceKey) (joiner.Operator, error) {
+func ReadOptions(args []string) basis.Options {
+	return nil
+}
+
+func Run(conf *config.PunctumConfig, args []string, starters []Starter, label string, runKeys []joiner.InterfaceKey) (joiner.Operator, error) {
 	l := logger.Get()
 
 	if conf == nil {
 		return nil, errors.New("no config data for starter.Run()")
 	}
 
+	runtimeOptions := ReadOptions(args)
+
 	joinerOp := joiner.New()
 	for _, c := range starters {
-		err := StartComponent(conf, c, joinerOp)
+		err := StartComponent(conf, runtimeOptions, c, joinerOp)
 		if err != nil {
 			return joinerOp, err
 		}

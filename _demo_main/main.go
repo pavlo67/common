@@ -32,7 +32,7 @@ func main() {
 	// flag.Parse()
 
 	starters, label := demo_starters.Starters()
-	joiner, err := starter.Run(conf, starters, label, nil)
+	joiner, err := starter.Run(conf, os.Args[1:], starters, label, nil)
 	if err != nil {
 		l.Fatal(err)
 

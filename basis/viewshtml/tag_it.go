@@ -43,7 +43,7 @@ package viewshtml
 //	resHTML += "\n</ul>" + tagIt(idDOMEscaped)
 
 //if field.Type == "file" {
-//format := field.Params
+//format := field.Options
 //if format == "" {
 //format = "*.*"
 //}

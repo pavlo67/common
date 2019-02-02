@@ -1,4 +1,4 @@
-package news_router
+package router_news
 
 import (
 	"strconv"
@@ -91,7 +91,7 @@ func list(endpoint router.Endpoint, params basis.Params, options basis.Options, 
 	return &server.DataResponse{Data: news}, err
 }
 
-//func stat(endpoint router.Endpoint, params basis.Params, options basis.Options, data interface{}) (*server.DataResponse, error) {
+//func stat(endpoint router.Endpoint, params basis.Options, options basis.Options, data interface{}) (*server.DataResponse, error) {
 //	var urls URLs
 //	if endpoint.Method == "POST" {
 //		var ok bool

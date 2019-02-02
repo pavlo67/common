@@ -18,7 +18,7 @@ type Operator interface {
 	// Name returns started component name
 	Name() string
 
-	Prepare(conf *config.PunctumConfig, params basis.Options) error
+	Prepare(conf *config.PunctumConfig, params, runtimeOptions basis.Options) error
 
 	// Check checks status of the component that implements this interface
 	Check() (info []Info, err error)
@@ -32,7 +32,7 @@ type Operator interface {
 
 type Starter struct {
 	Operator
-	Params basis.Options
+	Options basis.Options
 }
 
 //type Runner interface {

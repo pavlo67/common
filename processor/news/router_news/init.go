@@ -1,4 +1,4 @@
-package news_router
+package router_news
 
 import (
 	"github.com/pkg/errors"
@@ -26,7 +26,7 @@ func (dcs *news_routerStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (dcs *news_routerStarter) Prepare(conf *config.PunctumConfig, params basis.Options) error {
+func (dcs *news_routerStarter) Prepare(conf *config.PunctumConfig, options, runtimeOptions basis.Options) error {
 	l = logger.Get()
 
 	return nil

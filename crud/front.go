@@ -16,7 +16,7 @@ type ResultData struct {
 	Info string
 }
 
-//func ReadOptionsFromParams(paramsTree basis.Params, pageLengthDefault uint64, sortByDefault []string) (*ReadOptions, uint64, error) {
+//func ReadOptionsFromParams(paramsTree basis.Options, pageLengthDefault uint64, sortByDefault []string) (*ReadOptions, uint64, error) {
 //	var readOptions ReadOptions
 //	if sortByParams, ok := paramsTree["sort_by"]; ok {
 //		sortBy, ok := sortByParams.([]string)
@@ -57,7 +57,7 @@ type ResultData struct {
 //	}
 //
 //	if selectorParams, ok := paramsTree["selector"]; ok {
-//		params, ok := selectorParams.(basis.Params)
+//		params, ok := selectorParams.(basis.Options)
 //		if !ok {
 //			return nil, page, errors.Errorf("wrong value type for selector parameter: %#v", selectorParams)
 //		}
@@ -76,7 +76,7 @@ type ResultData struct {
 //		return nil, nil, errors.New("null request")
 //	}
 //
-//	paramsTree := basis.Params{}
+//	paramsTree := basis.Options{}
 //	query := r.URL.Query()
 //	for k, v := range query {
 //		paramsTree[k] = v

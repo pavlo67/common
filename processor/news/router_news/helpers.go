@@ -1,4 +1,4 @@
-package news_router
+package router_news
 
 import (
 	"time"
