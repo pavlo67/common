@@ -20,8 +20,6 @@ var endpoints = map[string]router.Endpoint{
 	"loadPost": {Method: "POST", Path: "load", Worker: load, DataItem: URLs{}},
 	"list":     {Method: "GET", Path: "list", Worker: list},
 	"listPost": {Method: "POST", Path: "list", Worker: list, DataItem: URLs{}},
-	"stat":     {Method: "GET", Path: "stat", Worker: stat},
-	"statPost": {Method: "POST", Path: "stat", Worker: stat, DataItem: URLs{}},
 }
 
 const daysForCleanDefault = 7
@@ -41,8 +39,7 @@ func clean(endpoint router.Endpoint, params basis.Params, _ basis.Options, _ int
 	}
 
 	err = newsOp.DeleteList(&crud.ReadOptions{
-		RangedBy: crud.TimeField,
-		RangeMax: strconv.FormatInt(time.Now().Add(-time.Hour*24*time.Duration(days)).Unix(), 10),
+		Selector: basis.Lt(crud.TimeField, time.Now().Add(-time.Hour*24*time.Duration(days)).Format(time.RFC3339)),
 	})
 
 	return nil, err
@@ -80,30 +77,36 @@ func list(endpoint router.Endpoint, params basis.Params, options basis.Options, 
 		urls = options.Strings("url")
 	}
 
-	responseData := server.DataResponse{
-		Status: 0,
-		Data:   nil,
-	}
+	days, _ := strconv.Atoi(options.StringDefault("days", "0"))
+	now := time.Now().UTC()
 
-	return &responseData, nil
+	selector := basis.And(
+		basis.InStr(string(crud.URLField), urls),
+		basis.Unary(basis.Ge(crud.TimeField, time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC).Add(-time.Hour*time.Duration(days)).Format(time.RFC3339))),
+	)
+	news, _, err := newsOp.ReadList(&crud.ReadOptions{
+		Selector: selector,
+	})
+
+	return &server.DataResponse{Data: news}, err
 }
 
-func stat(endpoint router.Endpoint, params basis.Params, options basis.Options, data interface{}) (*server.DataResponse, error) {
-	var urls URLs
-	if endpoint.Method == "POST" {
-		var ok bool
-		urls, ok = data.(URLs)
-		if !ok {
-			return nil, errors.New("wrong data type")
-		}
-	} else {
-		urls = options.Strings("url")
-	}
-
-	responseData := server.DataResponse{
-		Status: 0,
-		Data:   nil,
-	}
-
-	return &responseData, nil
-}
+//func stat(endpoint router.Endpoint, params basis.Params, options basis.Options, data interface{}) (*server.DataResponse, error) {
+//	var urls URLs
+//	if endpoint.Method == "POST" {
+//		var ok bool
+//		urls, ok = data.(URLs)
+//		if !ok {
+//			return nil, errors.New("wrong data type")
+//		}
+//	} else {
+//		urls = options.Strings("url")
+//	}
+//
+//	responseData := server.DataResponse{
+//		Status: 0,
+//		Data:   nil,
+//	}
+//
+//	return &responseData, nil
+//}

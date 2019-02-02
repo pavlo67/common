@@ -2,8 +2,8 @@ package crud
 
 import (
 	"github.com/pavlo67/punctum/auth"
+	"github.com/pavlo67/punctum/basis"
 	"github.com/pavlo67/punctum/basis/viewshtml"
-	"github.com/pavlo67/punctum/crud/selectors"
 )
 
 //type Result struct {
@@ -38,20 +38,21 @@ func (descr Description) Field(key string) *Field {
 type FieldKey string
 
 const TimeField FieldKey = ".time"
+const URLField FieldKey = ".url"
 
 type ReadOptions struct {
-	RangedBy FieldKey           `json:"ranged_by,omitempty"`
-	RangeMin string             `json:"range_min,omitempty"`
-	RangeMax string             `json:"range_max,omitempty"`
-	Selector selectors.Selector `json:"selector,omitempty"`
-	SortBy   []string           `json:"sort_by,omitempty"`
+	Selector *basis.Term `json:"selector,omitempty"`
+	SortBy   []string    `json:"sort_by,omitempty"`
 
+	// RangedBy FieldKey   `json:"ranged_by,omitempty"`
+	// RangeMin string     `json:"range_min,omitempty"`
+	// RangeMax string     `json:"range_max,omitempty"`
 	// Exemplar interface{}        `json:"exemplar,omitempty"`
-	//Values    []string           `json:"values,omitempty"`
-	//JoinTo    []JoinTo           `json:"join_to,omitempty"`
-	//GroupBy   []string           `json:"group_by,omitempty"`
-	//ForAdmin  bool               `json:"for_admin,omitempty"`
-	//ForExport bool               `json:"for_export,omitempty"`
+	// Values    []string           `json:"values,omitempty"`
+	// JoinTo    []JoinTo           `json:"join_to,omitempty"`
+	// GroupBy   []string           `json:"group_by,omitempty"`
+	// ForAdmin  bool               `json:"for_admin,omitempty"`
+	// ForExport bool               `json:"for_export,omitempty"`
 }
 
 // Operator is a common interface to manage create/read/update/delete operations

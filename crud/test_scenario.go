@@ -8,8 +8,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
+	"github.com/pavlo67/partes/selectors"
 	"github.com/pavlo67/punctum/auth"
-	"github.com/pavlo67/punctum/crud/selectors"
 )
 
 type OperatorTestCase struct {

@@ -10,57 +10,54 @@ import (
 	"github.com/pavlo67/punctum/processor/news"
 )
 
-func Load(urls []string, newsOp news.Operator) (int, int, basis.Errors) {
-	err := impOp.Init(sourceURL)
-	if err != nil {
-		return 0, 0, basis.Errors{errors.Errorf("can't impOp.Init('%s')", sourceURL, err)}
-	}
+func Load(urls []string, newsOp news.Operator) (numAll, numNewAll int, errs basis.Errors) {
+	impOp := &importer_rss.RSS{}
 
-	rssOp := &importer_rss.RSS{}
+	for _, url := range urls {
+		l.Info(url)
 
-	savedAt := time.Now()
+		err := impOp.Init(url)
+		if err != nil {
+			errs = append(errs, errors.Errorf("can't impOp.Init('%s')", url, err))
+			continue
+		}
 
-	for _, rssURL := range urls {
-		l.Info(rssURL)
+		savedAt := time.Now()
 
-		num, numNew, errs := Load(rssOp, urls, newsOp)
+		var num, numNew int
+
+		for {
+			item, err := impOp.Next()
+			if err != nil {
+				errs = append(errs, errors.Errorf("can't get next item: %v", err))
+				continue
+			}
+			if item == nil {
+				break
+			}
+
+			num++
+			ok, err := newsOp.Has(&item.Source)
+			if err != nil {
+				errs = append(errs, errors.Errorf("can't newsOp.Has(%s): %s", item.Source, err))
+			} else if ok {
+				// already exists!
+				continue
+			}
+
+			item.SavedAt = &savedAt
+			err = newsOp.Save(item)
+			if err != nil {
+				errs = append(errs, errors.Errorf("can't newsOp.Save(%#v): %s", item, err))
+			} else {
+				numNew++
+			}
+		}
 
 		numAll += num
 		numNewAll += numNew
-		errsAll = append(errsAll, errs...)
+
 	}
 
-	var num, numNew int
-	var errs basis.Errors
-
-	for {
-		item, err := impOp.Next()
-		if err != nil {
-			l.Infof("can't get next item: %v", err)
-			continue
-		}
-		if item == nil {
-			break
-		}
-
-		num++
-		ok, err := newsOp.Has(&item.Source)
-		if err != nil {
-			errs = append(errs, err)
-		} else if ok {
-			// already exists!
-			continue
-		}
-
-		item.SavedAt = &savedAt
-		err = newsOp.Save(item)
-		if err != nil {
-			errs = append(errs, err)
-		} else {
-			numNew++
-		}
-	}
-
-	return num, numNew, errs
-
+	return numAll, numNewAll, errs
 }

@@ -12,7 +12,7 @@ type Source struct {
 	Original string `bson:"original,omitempty"  json:"original,omitempty"`
 }
 
-func (src *Source) Key(addKey string) string {
+func (src *Source) Key(keyAdd string) string {
 	if src == nil {
 		return ""
 	}
@@ -28,8 +28,8 @@ func (src *Source) Key(addKey string) string {
 		return ""
 	}
 
-	if len(addKey) > 0 {
-		url += "#" + addKey
+	if len(keyAdd) > 0 {
+		url += "#" + keyAdd
 	}
 
 	sourceID := strings.TrimSpace(src.SourceID)

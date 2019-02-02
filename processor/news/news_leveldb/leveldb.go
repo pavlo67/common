@@ -11,8 +11,6 @@ import (
 
 	"strings"
 
-	"regexp"
-
 	"github.com/pavlo67/punctum/basis"
 	"github.com/pavlo67/punctum/crud"
 	"github.com/pavlo67/punctum/processor/flow"
@@ -93,77 +91,24 @@ func (newsOp *newsLevelDB) Has(src *flow.Source) (bool, error) {
 	return false, errors.Wrap(iter.Error(), onHas)
 }
 
-type CheckKey func([]byte) bool
-
-var reDigits = regexp.MustCompile(`^\d+$`)
-
-func ranges(opt *crud.ReadOptions) (*util.Range, CheckKey) {
-
-	if opt == nil || (opt.RangeMin == "" && opt.RangeMax == "") {
-		return nil, nil
-	}
-
-	if opt.RangedBy == crud.TimeField {
-		var rangeMin, rangeMax uint64
-		var checkMax bool
-
-		if opt.RangeMin != "" {
-			if reDigits.MatchString(opt.RangeMin) {
-				rangeMin, _ = strconv.ParseUint(opt.RangeMin, 10, 64)
-			} else {
-				timeMin, _ := time.Parse(time.RFC3339, opt.RangeMin)
-				rangeMin = uint64(timeMin.Unix())
-			}
-		}
-		if opt.RangeMax != "" {
-			checkMax = true
-			if reDigits.MatchString(opt.RangeMax) {
-				rangeMax, _ = strconv.ParseUint(opt.RangeMax, 10, 64)
-			} else {
-				timeMax, _ := time.Parse(time.RFC3339, opt.RangeMax)
-				rangeMax = uint64(timeMax.Unix())
-			}
-		}
-
-		return nil, func(key []byte) bool {
-			keyParts := strings.Split(string(key), "#")
-			var keyTime uint64
-			if len(keyParts) >= 2 {
-				keyTime, _ = strconv.ParseUint(keyParts[1], 10, 64)
-			}
-
-			return keyTime >= rangeMin && (!checkMax || keyTime < rangeMax)
-		}
-	}
-
-	var ranges *util.Range
-	var checkKey CheckKey
-	if opt.RangeMin != "" {
-		if opt.RangeMax != "" {
-			ranges = &util.Range{Start: []byte(opt.RangeMin), Limit: []byte(opt.RangeMax)}
-		} else {
-			ranges = &util.Range{Start: []byte(opt.RangeMin)}
-		}
-	} else {
-		// opt.RangeMax != "" due to: if opt == nil || (opt.RangeMin == "" && opt.RangeMax == "")
-		ranges = &util.Range{Limit: []byte(opt.RangeMax)}
-	}
-
-	return ranges, checkKey
-}
-
 const onReadList = "on newsLevelDB.ReadList()"
+
+// !!! opt.Selector should use iter.Key() only
 
 func (newsOp *newsLevelDB) ReadList(opt *crud.ReadOptions) ([]news.Item, *uint64, error) {
 
 	var items []news.Item
 	var errs basis.Errors
 
-	ranges, checkKey := ranges(opt)
+	ranges, check, err := RangesAndCheck(opt)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, onReadList)
+	}
 
 	iter := newsOp.db.NewIterator(ranges, nil)
 	for iter.Next() {
-		if checkKey != nil && !checkKey(iter.Key()) {
+
+		if check != nil && !check(iter.Key(), nil, nil) {
 			continue
 		}
 
@@ -184,16 +129,21 @@ func (newsOp *newsLevelDB) ReadList(opt *crud.ReadOptions) ([]news.Item, *uint64
 
 const onDeleteList = "on newsLevelDB.DeleteList()"
 
+// !!! opt.Selector should use iter.Key() only
+
 func (newsOp *newsLevelDB) DeleteList(opt *crud.ReadOptions) error {
 	var errs basis.Errors
 
-	ranges, checkKey := ranges(opt)
+	ranges, check, err := RangesAndCheck(opt)
+	if err != nil {
+		return errors.Wrap(err, onDeleteList)
+	}
 
 	iter := newsOp.db.NewIterator(ranges, nil)
 	for iter.Next() {
 		key := iter.Key()
 
-		if checkKey != nil && !checkKey(key) {
+		if check != nil && !check(key, nil, nil) {
 			continue
 		}
 
