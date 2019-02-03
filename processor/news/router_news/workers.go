@@ -9,12 +9,12 @@ import (
 	"github.com/pavlo67/punctum/basis"
 	"github.com/pavlo67/punctum/crud"
 	"github.com/pavlo67/punctum/server"
-	"github.com/pavlo67/punctum/server/router"
+	"github.com/pavlo67/punctum/server/controller"
 )
 
 type URLs []string
 
-var endpoints = map[string]router.Endpoint{
+var endpoints = map[string]controller.Endpoint{
 	"clean":    {Method: "GET", Path: "clean", Worker: clean},
 	"load":     {Method: "GET", Path: "load", Worker: load},
 	"loadPost": {Method: "POST", Path: "load", Worker: load, DataItem: URLs{}},
@@ -26,7 +26,7 @@ const daysForCleanDefault = 7
 
 const onClean = "on news_router.clean()"
 
-func clean(endpoint router.Endpoint, params basis.Params, _ basis.Options, _ interface{}) (*server.DataResponse, error) {
+func clean(endpoint controller.Endpoint, params basis.Params, _ basis.Options, _ interface{}) (*server.DataResponse, error) {
 	var err error
 
 	daysStr := params.ByNum(0)
@@ -45,7 +45,7 @@ func clean(endpoint router.Endpoint, params basis.Params, _ basis.Options, _ int
 	return nil, err
 }
 
-func load(endpoint router.Endpoint, params basis.Params, options basis.Options, data interface{}) (*server.DataResponse, error) {
+func load(endpoint controller.Endpoint, params basis.Params, options basis.Options, data interface{}) (*server.DataResponse, error) {
 	var urls URLs
 	if endpoint.Method == "POST" {
 		var ok bool
@@ -65,7 +65,7 @@ func load(endpoint router.Endpoint, params basis.Params, options basis.Options, 
 	return &responseData, errs.Err()
 }
 
-func list(endpoint router.Endpoint, params basis.Params, options basis.Options, data interface{}) (*server.DataResponse, error) {
+func list(endpoint controller.Endpoint, params basis.Params, options basis.Options, data interface{}) (*server.DataResponse, error) {
 	var urls URLs
 	if endpoint.Method == "POST" {
 		var ok bool

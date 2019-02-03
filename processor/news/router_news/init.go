@@ -10,7 +10,7 @@ import (
 	"github.com/pavlo67/punctum/starter/logger"
 
 	"github.com/pavlo67/punctum/processor/news"
-	"github.com/pavlo67/punctum/server/router"
+	"github.com/pavlo67/punctum/server/controller"
 )
 
 func Starter() starter.Operator {
@@ -41,8 +41,8 @@ func (dcs *news_routerStarter) Setup() error {
 }
 
 func (dcs *news_routerStarter) Init(joinerOp joiner.Operator) error {
-	routerInterfaceKey := router.InterfaceKey
-	routerOp, ok := joinerOp.Interface(routerInterfaceKey).(router.Operator)
+	routerInterfaceKey := controller.InterfaceKey
+	routerOp, ok := joinerOp.Interface(routerInterfaceKey).(controller.Operator)
 	if !ok {
 		return errors.Errorf("no router.Operator interface with key %s found for rss_router component", routerInterfaceKey)
 	}
@@ -53,7 +53,7 @@ func (dcs *news_routerStarter) Init(joinerOp joiner.Operator) error {
 		return errors.Errorf("no news.Operator interface with key %s found for rss_router component", newsInterfaceKey)
 	}
 
-	errs := router.InitEndpoints(
+	errs := controller.InitEndpoints(
 		routerOp,
 		endpoints,
 		nil,

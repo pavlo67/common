@@ -15,11 +15,11 @@ import (
 	"github.com/pavlo67/punctum/auth"
 	"github.com/pavlo67/punctum/basis"
 	"github.com/pavlo67/punctum/server"
-	"github.com/pavlo67/punctum/server/router"
+	"github.com/pavlo67/punctum/server/controller"
 	"github.com/pavlo67/punctum/server/server_http"
 )
 
-func ServerPath(ep router.Endpoint) string {
+func ServerPath(ep controller.Endpoint) string {
 	path := ep.Path
 	if len(path) == 0 || path[0] != '/' {
 		path = "/" + path
@@ -32,11 +32,11 @@ func ServerPath(ep router.Endpoint) string {
 	return path + "/:" + strings.Join(ep.ParamNames, "/:")
 }
 
-func (s *serverHTTPJschmhr) HandleRaw(endpoint router.Endpoint, rawHandler server_http.RawHandler, allowedIDs []auth.ID) {
+func (s *serverHTTPJschmhr) HandleRaw(endpoint controller.Endpoint, rawHandler server_http.RawHandler, allowedIDs []auth.ID) {
 	l.Fatal("func (s *serverHTTPJschmhr) HandleFuncRaw() isn't implemented!!!")
 }
 
-func (s *serverHTTPJschmhr) HandleHTML(endpoint router.Endpoint, htmlHandler server_http.HTMLHandler, allowedIDs []auth.ID) {
+func (s *serverHTTPJschmhr) HandleHTML(endpoint controller.Endpoint, htmlHandler server_http.HTMLHandler, allowedIDs []auth.ID) {
 	method := endpoint.Method
 	serverPath := ServerPath(endpoint)
 	s.handleFunc(method, serverPath, func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
@@ -106,7 +106,7 @@ func (s *serverHTTPJschmhr) HandleTemplatorHTML(templatorHTML server_http.Templa
 	s.templator = templatorHTML
 }
 
-func (s *serverHTTPJschmhr) HandleREST(endpoint router.Endpoint, restHandler server_http.RESTHandler, allowedIDs []auth.ID) {
+func (s *serverHTTPJschmhr) HandleREST(endpoint controller.Endpoint, restHandler server_http.RESTHandler, allowedIDs []auth.ID) {
 	method := endpoint.Method
 	serverPath := ServerPath(endpoint)
 	s.handleFunc(method, serverPath, func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
@@ -163,7 +163,7 @@ func (s *serverHTTPJschmhr) HandleREST(endpoint router.Endpoint, restHandler ser
 
 }
 
-func (s *serverHTTPJschmhr) HandleWorker(endpoint router.Endpoint, worker router.Worker, allowedIDs []auth.ID) {
+func (s *serverHTTPJschmhr) HandleWorker(endpoint controller.Endpoint, worker controller.Worker, allowedIDs []auth.ID) {
 	if worker == nil {
 		l.Errorf("nil worker for endpoint %#v", endpoint)
 		return
@@ -202,7 +202,7 @@ func (s *serverHTTPJschmhr) HandleWorker(endpoint router.Endpoint, worker router
 	s.HandleREST(endpoint, restHandler, allowedIDs)
 }
 
-func (s *serverHTTPJschmhr) HandleBinary(endpoint router.Endpoint, binaryHandler server_http.BinaryHandler, allowedIDs []auth.ID) {
+func (s *serverHTTPJschmhr) HandleBinary(endpoint controller.Endpoint, binaryHandler server_http.BinaryHandler, allowedIDs []auth.ID) {
 	method := endpoint.Method
 	serverPath := ServerPath(endpoint)
 	s.handleFunc(method, serverPath, func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {

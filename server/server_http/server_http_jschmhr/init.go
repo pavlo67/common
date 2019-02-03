@@ -9,7 +9,7 @@ import (
 	"github.com/pavlo67/punctum/auth"
 	"github.com/pavlo67/punctum/basis"
 	"github.com/pavlo67/punctum/basis/filelib"
-	"github.com/pavlo67/punctum/server/router"
+	"github.com/pavlo67/punctum/server/controller"
 	"github.com/pavlo67/punctum/server/server_http"
 	"github.com/pavlo67/punctum/starter"
 	"github.com/pavlo67/punctum/starter/config"
@@ -43,7 +43,7 @@ func (ss *server_http_jschmhrStarter) Prepare(conf *config.PunctumConfig, option
 	var errs basis.Errors
 
 	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(server_http.InterfaceKey)))
-	ss.interfaceKeyRouter = joiner.InterfaceKey(options.StringDefault("interface_key_router", string(router.InterfaceKey)))
+	ss.interfaceKeyRouter = joiner.InterfaceKey(options.StringDefault("interface_key_router", string(controller.InterfaceKey)))
 
 	ss.config, errs = conf.Server(options.StringDefault("config_server_key", "default"), errs)
 	if ss.config.Port <= 0 {

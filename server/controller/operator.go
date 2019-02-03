@@ -1,4 +1,4 @@
-package router
+package controller
 
 import (
 	"github.com/pkg/errors"
@@ -9,7 +9,7 @@ import (
 	"github.com/pavlo67/punctum/starter/joiner"
 )
 
-const InterfaceKey joiner.InterfaceKey = "router"
+const InterfaceKey joiner.InterfaceKey = "controller"
 
 type Key string
 

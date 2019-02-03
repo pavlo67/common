@@ -19,6 +19,7 @@ const CredsQuestionAnswer CredsType = "question_answer"
 const CredsAllowedID CredsType = "allowed_id"
 
 const CredsContentToSignature CredsType = "content_to_signature"
+const CredsNumberToSignature CredsType = "number_to_signature"
 const CredsSignature CredsType = "signature"
 const CredsPublicKeyAddress CredsType = "public_key_address"
 const CredsPublicKey CredsType = "public_key"

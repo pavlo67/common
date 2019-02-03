@@ -19,35 +19,42 @@ func UserWithRequest(r *http.Request, identOpsMap map[auth.CredsType][]auth.Oper
 	var errs basis.Errors
 	var user *auth.User
 
-	// TOKEN_CHECK
+	// TOKEN CHECK
 	token := r.Header.Get("Token")
-	if token == "" {
-		c, _ := r.Cookie("Token") // ErrNoCookie only
-		if c == nil || c.Value == "" {
-			goto SIGNATURE_CHECK
+	if token != "" {
+		user, errs = auth.GetUser([]auth.Creds{{Type: auth.CredsToken, Value: token}}, identOpsMap, errs)
+		if user != nil {
+			return user, errs.Err()
 		}
+		// previous errs is added by auth.GetUser()
 	}
 
-	user, errs = auth.GetUser([]auth.Creds{{Type: auth.CredsToken, Value: token}}, identOpsMap, errs)
-	if user != nil {
-		return user, errs.Err()
+	// COOKIE CHECK
+	c, _ := r.Cookie("Token") // ErrNoCookie only
+	if c != nil && c.Value != "" {
+		user, errs = auth.GetUser([]auth.Creds{{Type: auth.CredsToken, Value: c.Value}}, identOpsMap, errs)
+		if user != nil {
+			return user, errs.Err()
+		}
+		// previous errs is added by auth.GetUser()
 	}
 
-SIGNATURE_CHECK:
+	// SIGNATURE CHECK
 	signature := r.Header.Get("Signature")
-	if signature == "" {
-		return nil, errs.Err()
+	if signature != "" && r.URL != nil {
+		publicKeyAddress := r.Header.Get("Public-Key-Address")
+		numberToSignature := r.Header.Get("Number-To-Signature")
+
+		credsSignature := []auth.Creds{
+			{Type: auth.CredsPublicKeyAddress, Value: publicKeyAddress},
+			{Type: auth.CredsContentToSignature, Value: r.URL.Path + "?" + r.URL.RawQuery},
+			{Type: auth.CredsNumberToSignature, Value: numberToSignature},
+			{Type: auth.CredsSignature, Value: signature},
+		}
+
+		user, errs = auth.GetUser(credsSignature, identOpsMap, errs)
+		// previous errs is added by auth.GetUser()
 	}
 
-	contentToSignature := r.Header.Get("Content-To-Signature") + r.RemoteAddr
-	publicKeyAddress := r.Header.Get("Public-Key-Address")
-
-	credsSignature := []auth.Creds{
-		{Type: auth.CredsSignature, Value: signature},
-		{Type: auth.CredsContentToSignature, Value: contentToSignature},
-		{Type: auth.CredsPublicKeyAddress, Value: publicKeyAddress},
-	}
-
-	user, errs = auth.GetUser(credsSignature, identOpsMap, errs)
 	return user, errs.Err()
 }

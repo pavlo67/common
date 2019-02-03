@@ -6,7 +6,7 @@ import (
 	"github.com/pavlo67/punctum/auth"
 	"github.com/pavlo67/punctum/basis"
 	"github.com/pavlo67/punctum/server"
-	"github.com/pavlo67/punctum/server/router"
+	"github.com/pavlo67/punctum/server/controller"
 	"github.com/pavlo67/punctum/starter/joiner"
 	"github.com/pkg/errors"
 )
@@ -18,12 +18,12 @@ type Operator interface {
 
 	HandleGetFile(serverPath, localPath string, mimeType *string) error
 	HandleGetString(serverPath, str string, mimeType *string)
-	HandleRaw(endpoint router.Endpoint, rawHandler RawHandler, allowedIDs []auth.ID)
-	HandleHTML(endpoint router.Endpoint, htmlHandler HTMLHandler, allowedIDs []auth.ID)
+	HandleRaw(endpoint controller.Endpoint, rawHandler RawHandler, allowedIDs []auth.ID)
+	HandleHTML(endpoint controller.Endpoint, htmlHandler HTMLHandler, allowedIDs []auth.ID)
 	HandleTemplatorHTML(templatorHTML Templator)
-	HandleREST(endpoint router.Endpoint, restHandler RESTHandler, allowedIDs []auth.ID)
-	HandleBinary(endpoint router.Endpoint, binaryHandler BinaryHandler, allowedIDs []auth.ID)
-	HandleWorker(endpoint router.Endpoint, worker router.Worker, allowedIDs []auth.ID)
+	HandleREST(endpoint controller.Endpoint, restHandler RESTHandler, allowedIDs []auth.ID)
+	HandleBinary(endpoint controller.Endpoint, binaryHandler BinaryHandler, allowedIDs []auth.ID)
+	HandleWorker(endpoint controller.Endpoint, worker controller.Worker, allowedIDs []auth.ID)
 }
 
 // !!! requires internal variables (so it can't be a simple function only)
@@ -36,7 +36,7 @@ type BinaryHandler func(*auth.User, *http.Request, basis.Params) (server.BinaryR
 type RESTHandler func(*auth.User, *http.Request, basis.Params) (server.DataResponse, error)
 type HTMLHandler func(*auth.User, *http.Request, basis.Params) (HTMLResponse, error)
 
-func InitEndpoints(op Operator, endpoints map[string]router.Endpoint, htmlHandlers map[string]HTMLHandler, restHandlers map[string]RESTHandler,
+func InitEndpoints(op Operator, endpoints map[string]controller.Endpoint, htmlHandlers map[string]HTMLHandler, restHandlers map[string]RESTHandler,
 	binaryHandlers map[string]BinaryHandler, allowedIDs []auth.ID) basis.Errors {
 	var errs basis.Errors
 
