@@ -19,7 +19,7 @@ type Item struct {
 type Operator interface {
 	Save(url string, logItems ...processor.LogItem) error
 	Read(url string) (*Item, error)
-	ReadList(*crud.ReadOptions) ([]Item, *uint64, error)
+	ReadList(crud.ReadOptions) ([]Item, *uint64, error)
 	Delete(url string) error
 	Close() error
 }

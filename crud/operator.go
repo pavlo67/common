@@ -71,7 +71,7 @@ type Operator interface {
 	Read(userIS auth.ID, id string) (interface{}, error)
 
 	// ReadList returns crud items list (accordingly to requester's rights).
-	ReadList(userIS auth.ID, options *ReadOptions) ([]interface{}, *uint64, error)
+	ReadList(userIS auth.ID, options ReadOptions) ([]interface{}, *uint64, error)
 
 	// Update changes crud item (accordingly to requester's rights).
 	Update(userIS auth.ID, native interface{}) error

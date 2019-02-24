@@ -11,6 +11,8 @@ const InterfaceKey joiner.InterfaceKey = "auth"
 
 type ID string
 
+const Anyone ID = "_"
+
 //type Access struct {
 //	TargetID   ID     `bson:"target_id"             json:"target_id"`
 //	TargetNick string `bson:"target_nick,omitempty" json:"target_nick,omitempty"`

@@ -93,7 +93,7 @@ func (fountsOp *fountsLevelDB) Read(url string) (*founts.Item, error) {
 
 const onReadList = "on fountsLevelDB.ReadList()"
 
-func (fountsOp *fountsLevelDB) ReadList(*crud.ReadOptions) ([]founts.Item, *uint64, error) {
+func (fountsOp *fountsLevelDB) ReadList(crud.ReadOptions) ([]founts.Item, *uint64, error) {
 	var items []founts.Item
 	var errs basis.Errors
 
