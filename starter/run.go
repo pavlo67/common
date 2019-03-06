@@ -14,7 +14,7 @@ import (
 	"github.com/pavlo67/punctum/starter/logger"
 )
 
-func StartComponent(conf *config.PunctumConfig, runtimeOptions basis.Options, c Starter, joinerOp joiner.Operator) error {
+func StartComponent(c Starter, conf *config.PunctumConfig, runtimeOptions basis.Options, joinerOp joiner.Operator) error {
 	l := logger.Get()
 
 	l.Info("checking component: ", c.Name())
@@ -44,7 +44,7 @@ func ReadOptions(args []string) basis.Options {
 	return nil
 }
 
-func Run(conf *config.PunctumConfig, args []string, starters []Starter, label string, runKeys []joiner.InterfaceKey) (joiner.Operator, error) {
+func Run(starters []Starter, conf *config.PunctumConfig, args []string, label string) (joiner.Operator, error) {
 	l := logger.Get()
 
 	if conf == nil {
@@ -55,22 +55,11 @@ func Run(conf *config.PunctumConfig, args []string, starters []Starter, label st
 
 	joinerOp := joiner.New()
 	for _, c := range starters {
-		err := StartComponent(conf, runtimeOptions, c, joinerOp)
+		err := StartComponent(c, conf, runtimeOptions, joinerOp)
 		if err != nil {
 			return joinerOp, err
 		}
 	}
-
-	//for _, runKey := range runKeys {
-	//	if runner, ok := joinerOp.Component(runKey).(Runner); ok {
-	//		err := runner.Run()
-	//		if err != nil {
-	//			return joinerOp, errors.Wrapf(err, "can't start .Runner for key %s", runKey)
-	//		}
-	//	} else {
-	//		return joinerOp, errors.Errorf("no .Runner interface for key %s", runKey)
-	//	}
-	//}
 
 	env, ok := os.LookupEnv("ENV")
 	if !ok || strings.TrimSpace(env) == "" {

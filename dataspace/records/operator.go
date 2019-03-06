@@ -1,4 +1,4 @@
-package elements
+package records
 
 import (
 	"time"
@@ -13,9 +13,9 @@ import (
 	"github.com/pavlo67/punctum/dataspace/vcs"
 )
 
-const InterfaceKey joiner.InterfaceKey = "elements"
+const InterfaceKey joiner.InterfaceKey = "records"
+const CleanerInterfaceKey joiner.InterfaceKey = "records.cleaner"
 
-// const CleanerInterfaceKey joiner.InterfaceKey = "notes.cleaner"
 // const GenusDefault = "note"
 // const GenusFieldName = "genus"
 

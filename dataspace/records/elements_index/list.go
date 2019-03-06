@@ -6,17 +6,17 @@ import (
 	"github.com/pavlo67/punctum/basis"
 	"github.com/pavlo67/punctum/starter/joiner"
 
-	"github.com/pavlo67/punctum/dataspace/elements"
+	"github.com/pavlo67/punctum/dataspace/records"
 )
 
 func All(joinerOp joiner.Operator) ([]Item, basis.Errors) {
-	elementsOp := elements.Operator(nil)
+	elementsOp := records.Operator(nil)
 
 	var items []Item
 	var errs basis.Errors
 
 	for _, component := range joinerOp.ComponentsAllWithInterface(&elementsOp) {
-		elementsOp, ok := component.Interface.(elements.Operator)
+		elementsOp, ok := component.Interface.(records.Operator)
 		if ok {
 			items = append(items, Item{component.Key, elementsOp})
 		} else {

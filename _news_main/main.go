@@ -34,7 +34,7 @@ func main() {
 	// flag.Parse()
 
 	starters, label := news_starters.Starters(news_starters.RouterHTTPStarters()...)
-	joiner, err := starter.Run(conf, os.Args[1:], starters, label, nil)
+	joiner, err := starter.Run(starters, conf, os.Args[1:], label)
 	if err != nil {
 		l.Fatal(err)
 

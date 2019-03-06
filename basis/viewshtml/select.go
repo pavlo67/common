@@ -4,7 +4,7 @@ import (
 	"html"
 	"strings"
 
-	"github.com/pavlo67/partes/libs/validator"
+	"github.com/pavlo67/partes/validator"
 	"github.com/pavlo67/punctum/basis"
 )
 

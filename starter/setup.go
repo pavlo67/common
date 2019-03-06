@@ -44,7 +44,7 @@ func Setup(conf *config.PunctumConfig, starters []Starter, components []string, 
 
 		log.Println("  ---------- setup component: ", c.Name(), "   -----------")
 
-		err := c.Prepare(conf, c.Options)
+		err := c.Prepare(conf, c.Options, nil)
 		if err != nil {
 			return fmt.Errorf("error calling .Prepare() for component (%s): %s", c.Name(), err)
 		}
