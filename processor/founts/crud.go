@@ -22,16 +22,15 @@ type OperatorCRUD struct {
 	Operator
 }
 
-func (opCRUD OperatorCRUD) Describe() (crud.Description, error) {
+func (opCRUD OperatorCRUD) Description() crud.Description {
 	return crud.Description{
-		Title:     "founts",
-		FieldsKey: []string{"url"},
+		ExemplarNative: &Item{},
 		Fields: []crud.Field{
-			{Key: "url", Creatable: true, Unique: true},
-			{Key: "log", Creatable: true, Additable: true},
+			{Key: "url", Creatable: true, Unique: true, Primary: true},
+			{Key: "log", Creatable: true, Updatable: true},
 			{Key: "saved_at", NotEmpty: true},
 		},
-	}, nil
+	}
 }
 
 func (opCRUD OperatorCRUD) StringMapToNative(data crud.StringMap) (interface{}, error) {
@@ -143,7 +142,7 @@ func (opCRUD OperatorCRUD) ReadList(userIS auth.ID, options crud.ReadOptions) ([
 	return intfsList, allCnt, nil
 }
 
-func (opCRUD OperatorCRUD) Update(_ auth.ID, native interface{}) error {
+func (opCRUD OperatorCRUD) Update(_ auth.ID, url string, native interface{}) error {
 	fount, ok := native.(*Item)
 	if !ok {
 		return basis.ErrWrongDataType
@@ -152,12 +151,12 @@ func (opCRUD OperatorCRUD) Update(_ auth.ID, native interface{}) error {
 		return basis.ErrNull
 	}
 
-	_, err := opCRUD.Operator.Read(fount.URL)
+	_, err := opCRUD.Operator.Read(url)
 	if err != nil {
 		return err
 	}
 
-	return opCRUD.Operator.Save(fount.URL, fount.Log...)
+	return opCRUD.Operator.Save(url, fount.Log...)
 
 }
 

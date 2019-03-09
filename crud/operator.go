@@ -2,68 +2,20 @@ package crud
 
 import (
 	"github.com/pavlo67/punctum/auth"
-	"github.com/pavlo67/punctum/basis"
-	"github.com/pavlo67/punctum/basis/viewshtml"
+	"github.com/pavlo67/punctum/basis/selectors"
+	"github.com/pavlo67/punctum/starter/joiner"
 )
 
-//type Result struct {
-//	NumOk int64
-//}
-
-type Description struct {
-	Title         string            `json:"title,omitempty"`
-	Fields        []Field           `json:"fields,omitempty"`
-	FieldsKey     []string          `json:"fields_key,omitempty"`
-	SortByDefault []string          `json:"sort_by_default,omitempty"`
-	Exemplar      interface{}       `json:"exemplar,omitempty"`
-	View          []viewshtml.Field `json:"view,omitempty"`
-	ViewList      []viewshtml.Field `json:"table_view,omitempty"`
-}
-
-func (descr Description) Field(key string) *Field {
-	for _, field := range descr.Fields {
-		if field.Key == key {
-			return &field
-		}
-	}
-
-	return nil
-}
-
-//type JoinTo struct {
-//	Table    string             `json:"table,omitempty"`
-//	Selector selectors.Selector `json:"selector,omitempty"`
-//}
-
-type FieldKey string
-
-const TimeField FieldKey = ".time"
-const URLField FieldKey = ".url"
+const InterfaceKey joiner.InterfaceKey = "crud"
 
 type ReadOptions struct {
-	Selector *basis.Term `json:"selector,omitempty"`
-	SortBy   []string    `json:"sort_by,omitempty"`
-
-	// RangedBy FieldKey   `json:"ranged_by,omitempty"`
-	// RangeMin string     `json:"range_min,omitempty"`
-	// RangeMax string     `json:"range_max,omitempty"`
-	// Exemplar interface{}        `json:"exemplar,omitempty"`
-	// Values    []string           `json:"values,omitempty"`
-	// JoinTo    []JoinTo           `json:"join_to,omitempty"`
-	// GroupBy   []string           `json:"group_by,omitempty"`
-	// ForAdmin  bool               `json:"for_admin,omitempty"`
-	// ForExport bool               `json:"for_export,omitempty"`
+	Selector *selectors.Term `json:"selector,omitempty"`
+	SortBy   []string        `json:"sort_by,omitempty"`
 }
 
 // Operator is a common interface to manage create/read/update/delete operations
 type Operator interface {
-	Describe() (Description, error)
-
-	StringMapToNative(data StringMap) (interface{}, error)
-
-	NativeToStringMap(interface{}) (StringMap, error)
-
-	IDFromNative(interface{}) (string, error)
+	Mapper
 
 	Create(userIS auth.ID, native interface{}) (id string, err error)
 
@@ -74,7 +26,7 @@ type Operator interface {
 	ReadList(userIS auth.ID, options ReadOptions) ([]interface{}, *uint64, error)
 
 	// Update changes crud item (accordingly to requester's rights).
-	Update(userIS auth.ID, native interface{}) error
+	Update(userIS auth.ID, id string, native interface{}) error
 
 	// Update deletes crud item (accordingly to requester's rights).
 	Delete(userIS auth.ID, id string) error

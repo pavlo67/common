@@ -1,4 +1,13 @@
-package basis
+package selectors
+
+import "errors"
+
+//var ErrBadObjectDetails = errors.New("bad object details")
+//var ErrBadObjectManagers = errors.New("bad object managers")
+//var ErrBadDataBuffer = errors.New("bad data buffer")
+//var ErrEmptySelector = errors.New("empty selector")
+
+var ErrBadSelector = errors.New("bad selector")
 
 type Term struct {
 	First TermUnary
@@ -53,8 +62,12 @@ func Unary(term *Term) *TermUnary {
 	return &TermUnary{term, nil}
 }
 
-func InStr(key string, values []string) *TermUnary {
+func InStrUnary(key string, values ...string) *TermUnary {
 	return &TermUnary{TermOneOfStr{key, values}, nil}
+}
+
+func InStr(key string, values ...string) *Term {
+	return &Term{First: TermUnary{TermOneOfStr{key, values}, nil}}
 }
 
 func Le(key, value interface{}) *Term {

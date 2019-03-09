@@ -8,11 +8,11 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/pavlo67/punctum/starter"
 	"github.com/pavlo67/punctum/starter/config"
-	"github.com/pavlo67/punctum/starter/joiner"
 )
 
-func CheckMySQLTables(mysqlConfig config.ServerAccess, tablesConfig map[string]config.MySQLTableComponent, tables []config.Table) ([]joiner.Info, error) {
+func CheckMySQLTables(mysqlConfig config.ServerAccess, tablesConfig map[string]config.MySQLTableComponent, tables []config.Table) ([]starter.Info, error) {
 	dbh, userTablesJSON, userIndexesJSON, err := prepareTableComponents(mysqlConfig, tablesConfig)
 	if err != nil {
 		return nil, err
@@ -22,15 +22,15 @@ func CheckMySQLTables(mysqlConfig config.ServerAccess, tablesConfig map[string]c
 	var userTables = map[string][]config.MySQLField{}
 	var userIndexes = map[string][]config.MySQLIndex{}
 	var ok bool
-	var info []joiner.Info
+	var info []starter.Info
 	isErr := false
 	for _, t := range tables {
 		if userTables[t.Name], ok = userTablesJSON[t.Key]; !ok {
-			info = append(info, joiner.Info{Path: t.Key, Status: "can't find table structure in mysql.json5"})
+			info = append(info, starter.Info{Path: t.Key, Status: "can't find table structure in mysql.json5"})
 			isErr = true
 		}
 		if userIndexes[t.Name], ok = userIndexesJSON[t.Key]; !ok {
-			info = append(info, joiner.Info{Path: t.Key, Status: "can't find table indexes in mysql.json5"})
+			info = append(info, starter.Info{Path: t.Key, Status: "can't find table indexes in mysql.json5"})
 		}
 	}
 
@@ -51,38 +51,38 @@ func CheckMySQLTables(mysqlConfig config.ServerAccess, tablesConfig map[string]c
 	return info, nil
 }
 
-func CheckTables(dbh *sql.DB, tablesFields map[string][]config.MySQLField, tablesIndexes map[string][]config.MySQLIndex) ([]joiner.Info, bool) {
+func CheckTables(dbh *sql.DB, tablesFields map[string][]config.MySQLField, tablesIndexes map[string][]config.MySQLIndex) ([]starter.Info, bool) {
 	isErr := false
-	info := []joiner.Info{}
+	info := []starter.Info{}
 	for table := range tablesFields {
 		err := TableExists(dbh, table)
 		if err != nil {
-			info = append(info, joiner.Info{Path: table, Status: err.Error()})
+			info = append(info, starter.Info{Path: table, Status: err.Error()})
 			isErr = true
 			continue
 		}
 		fields, err := TableFields(dbh, table)
 		if err != nil {
-			info = append(info, joiner.Info{Path: table, Status: err.Error()})
+			info = append(info, starter.Info{Path: table, Status: err.Error()})
 			isErr = true
 			continue
 		}
 
 		indexes, err := TableIndexes(dbh, table)
 		if err != nil {
-			info = append(info, joiner.Info{Path: table, Status: err.Error()})
+			info = append(info, starter.Info{Path: table, Status: err.Error()})
 			isErr = true
 			continue
 		}
 
 		resF, err := CheckTableFields(dbh, fields, tablesFields[table])
 		if err != nil {
-			info = append(info, joiner.Info{Path: table, Status: err.Error()})
+			info = append(info, starter.Info{Path: table, Status: err.Error()})
 			isErr = true
 		}
 		if len(resF) > 0 {
 			for e, v := range resF {
-				i := joiner.Info{Path: table, Status: e, Details: v}
+				i := starter.Info{Path: table, Status: e, Details: v}
 				info = append(info, i)
 			}
 			isErr = true
@@ -92,7 +92,7 @@ func CheckTables(dbh *sql.DB, tablesFields map[string][]config.MySQLField, table
 			resI := CheckTableIndexes(dbh, table, indexes, tablesIndexes[table])
 			if len(resI) > 0 {
 				for e, v := range resI {
-					i := joiner.Info{Path: table, Status: e, Details: v}
+					i := starter.Info{Path: table, Status: e, Details: v}
 					info = append(info, i)
 				}
 				isErr = true

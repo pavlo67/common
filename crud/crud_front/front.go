@@ -1,4 +1,4 @@
-package crud
+package crud_front
 
 type ReadData struct {
 	Description Description
