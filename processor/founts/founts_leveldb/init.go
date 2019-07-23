@@ -25,7 +25,7 @@ func (fl *founts_leveldbStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (fl *founts_leveldbStarter) Prepare(cfg *config.PunctumConfig, options, runtimeOptions basis.Options) error {
+func (fl *founts_leveldbStarter) Prepare(cfg *config.Config, options, runtimeOptions basis.Options) error {
 	l = logger.Get()
 
 	var errs basis.Errors

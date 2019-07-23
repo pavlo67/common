@@ -12,7 +12,7 @@ import (
 	"github.com/pavlo67/punctum/starter/config"
 )
 
-func Setup(conf *config.PunctumConfig, starters []Starter, components []string, label string) error {
+func Setup(conf *config.Config, starters []Starter, components []string, label string) error {
 	if conf == nil {
 		return errors.New("no config data for starter.Setup()")
 	}

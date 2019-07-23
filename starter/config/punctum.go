@@ -19,7 +19,7 @@ var l logger.Operator
 
 // -----------------------------------------------------------------------------
 
-func Get(path string, loggerToSet logger.Operator) (*PunctumConfig, error) {
+func Get(path string, loggerToSet logger.Operator) (*Config, error) {
 	l = loggerToSet
 
 	var data []byte
@@ -38,7 +38,7 @@ func Get(path string, loggerToSet logger.Operator) (*PunctumConfig, error) {
 	return readConfig(data)
 }
 
-type PunctumConfig struct {
+type Config struct {
 	identity map[string]map[string]string
 
 	paths      map[string]string
@@ -61,7 +61,7 @@ type PunctumConfig struct {
 	flags   map[string]bool
 }
 
-func readConfig(data []byte) (*PunctumConfig, error) {
+func readConfig(data []byte) (*Config, error) {
 	var configRaw map[string]json5.RawMessage
 	err := json5.Unmarshal(data, &configRaw)
 	if err != nil {
@@ -75,7 +75,7 @@ func readConfig(data []byte) (*PunctumConfig, error) {
 		return nil, errors.Wrapf(err, "error reading json to config: %v", string(data))
 	}
 
-	conf := PunctumConfig{
+	conf := Config{
 		identity:    map[string]map[string]string{},
 		server:      map[string]ServerTLS{},
 		mysql:       map[string]ServerAccess{},
@@ -151,7 +151,7 @@ func readConfig(data []byte) (*PunctumConfig, error) {
 	return &conf, nil
 }
 
-func (c *PunctumConfig) Identity(key string, errs basis.Errors) (map[string]string, basis.Errors) {
+func (c *Config) Identity(key string, errs basis.Errors) (map[string]string, basis.Errors) {
 	if c == nil {
 		return nil, append(errs, ErrNoConfig)
 	}
@@ -161,7 +161,7 @@ func (c *PunctumConfig) Identity(key string, errs basis.Errors) (map[string]stri
 	return nil, append(errs, errors.Wrapf(ErrNoValue, "no data for key '%s' in config.identity in %#v", key, c))
 }
 
-func (c *PunctumConfig) Sender(key string, errs basis.Errors) (map[string]string, basis.Errors) {
+func (c *Config) Sender(key string, errs basis.Errors) (map[string]string, basis.Errors) {
 	if c == nil {
 		return nil, append(errs, ErrNoConfig)
 	}
@@ -171,7 +171,7 @@ func (c *PunctumConfig) Sender(key string, errs basis.Errors) (map[string]string
 	return nil, append(errs, errors.Wrapf(ErrNoValue, "no data for key '%s' in config.sender in %#v", key, c))
 }
 
-func (c *PunctumConfig) Server(key string, errs basis.Errors) (ServerTLS, basis.Errors) {
+func (c *Config) Server(key string, errs basis.Errors) (ServerTLS, basis.Errors) {
 	if c == nil {
 		return ServerTLS{}, append(errs, ErrNoConfig)
 	}
@@ -181,7 +181,7 @@ func (c *PunctumConfig) Server(key string, errs basis.Errors) (ServerTLS, basis.
 	return ServerTLS{}, append(errs, errors.Wrapf(ErrNoValue, "no data for key '%s' in config.serverhttp_jschmhr in %#v", key, c))
 }
 
-func (c *PunctumConfig) MySQL(database string, errs basis.Errors) (ServerAccess, basis.Errors) {
+func (c *Config) MySQL(database string, errs basis.Errors) (ServerAccess, basis.Errors) {
 	if c == nil {
 		return ServerAccess{}, append(errs, ErrNoConfig)
 	}
@@ -195,7 +195,7 @@ func (c *PunctumConfig) MySQL(database string, errs basis.Errors) (ServerAccess,
 	return ServerAccess{}, append(errs, errors.Wrapf(ErrNoValue, "no config.mysql for key '%s'", database))
 }
 
-func (c *PunctumConfig) Bolt(database string, errs basis.Errors) (ServerAccess, basis.Errors) {
+func (c *Config) Bolt(database string, errs basis.Errors) (ServerAccess, basis.Errors) {
 	if c == nil {
 		return ServerAccess{}, append(errs, ErrNoConfig)
 	}
@@ -208,7 +208,7 @@ func (c *PunctumConfig) Bolt(database string, errs basis.Errors) (ServerAccess, 
 	return ServerAccess{}, append(errs, errors.Wrapf(ErrNoValue, "no config.bolt for key '%s'", database))
 }
 
-func (c *PunctumConfig) SMTP(server string, errs basis.Errors) (ServerAccess, basis.Errors) {
+func (c *Config) SMTP(server string, errs basis.Errors) (ServerAccess, basis.Errors) {
 	if c == nil {
 		return ServerAccess{}, append(errs, ErrNoConfig)
 	}
@@ -220,7 +220,7 @@ func (c *PunctumConfig) SMTP(server string, errs basis.Errors) (ServerAccess, ba
 	return ServerAccess{}, append(errs, errors.Wrapf(ErrNoValue, "no config.smtp for key '%s'", server))
 }
 
-func (c *PunctumConfig) POP3(server string, errs basis.Errors) (ServerAccess, basis.Errors) {
+func (c *Config) POP3(server string, errs basis.Errors) (ServerAccess, basis.Errors) {
 	if c == nil {
 		return ServerAccess{}, append(errs, ErrNoConfig)
 	}
@@ -232,7 +232,7 @@ func (c *PunctumConfig) POP3(server string, errs basis.Errors) (ServerAccess, ba
 	return ServerAccess{}, append(errs, errors.Wrapf(ErrNoValue, "no config.pop3 for key '%s'", server))
 }
 
-func (c *PunctumConfig) Path(key string, errs basis.Errors) (string, basis.Errors) {
+func (c *Config) Path(key string, errs basis.Errors) (string, basis.Errors) {
 	if c == nil {
 		return "", append(errs, ErrNoConfig)
 	}
@@ -242,7 +242,7 @@ func (c *PunctumConfig) Path(key string, errs basis.Errors) (string, basis.Error
 	return "", append(errs, errors.Wrapf(ErrNoValue, "no data for key '%s' in config.paths in %#v", key, c))
 }
 
-func (c *PunctumConfig) Credentials(key string, errs basis.Errors) (map[string]string, basis.Errors) {
+func (c *Config) Credentials(key string, errs basis.Errors) (map[string]string, basis.Errors) {
 	if c == nil {
 		return nil, append(errs, ErrNoConfig)
 	}
@@ -252,7 +252,7 @@ func (c *PunctumConfig) Credentials(key string, errs basis.Errors) (map[string]s
 	return nil, append(errs, errors.Wrapf(ErrNoValue, "no data for key '%s' in config.credentials in %#v", key, c))
 }
 
-func (c *PunctumConfig) Fileslocal(key string, errs basis.Errors) (map[string]string, basis.Errors) {
+func (c *Config) Fileslocal(key string, errs basis.Errors) (map[string]string, basis.Errors) {
 	if c == nil {
 		return nil, append(errs, ErrNoConfig)
 	}
@@ -262,7 +262,7 @@ func (c *PunctumConfig) Fileslocal(key string, errs basis.Errors) (map[string]st
 	return nil, append(errs, errors.Wrapf(ErrNoValue, "no data for key '%s' in config.fileslocal in %#v", key, c))
 }
 
-func (c *PunctumConfig) Instagram(key string, errs basis.Errors) (map[string]string, basis.Errors) {
+func (c *Config) Instagram(key string, errs basis.Errors) (map[string]string, basis.Errors) {
 	if c == nil {
 		return nil, append(errs, ErrNoConfig)
 	}
@@ -273,7 +273,7 @@ func (c *PunctumConfig) Instagram(key string, errs basis.Errors) (map[string]str
 }
 
 // Twitter ...
-func (c *PunctumConfig) Twitter(key string, errs basis.Errors) (map[string]string, basis.Errors) {
+func (c *Config) Twitter(key string, errs basis.Errors) (map[string]string, basis.Errors) {
 	if c == nil {
 		return nil, append(errs, ErrNoConfig)
 	}
@@ -284,7 +284,7 @@ func (c *PunctumConfig) Twitter(key string, errs basis.Errors) (map[string]strin
 }
 
 // Facebook ...
-func (c *PunctumConfig) Facebook(errs basis.Errors) (map[string][]string, basis.Errors) {
+func (c *Config) Facebook(errs basis.Errors) (map[string][]string, basis.Errors) {
 	if c == nil {
 		return nil, append(errs, ErrNoConfig)
 	}
@@ -298,7 +298,7 @@ func (c *PunctumConfig) Facebook(errs basis.Errors) (map[string][]string, basis.
 }
 
 // Google ...
-func (c *PunctumConfig) Google(key string, errs basis.Errors) (map[string]string, basis.Errors) {
+func (c *Config) Google(key string, errs basis.Errors) (map[string]string, basis.Errors) {
 	if c == nil {
 		return nil, append(errs, ErrNoConfig)
 	}
@@ -309,7 +309,7 @@ func (c *PunctumConfig) Google(key string, errs basis.Errors) (map[string]string
 }
 
 // String ...
-func (c *PunctumConfig) String(key string, errs basis.Errors) (string, basis.Errors) {
+func (c *Config) String(key string, errs basis.Errors) (string, basis.Errors) {
 	if c == nil {
 		return "", append(errs, ErrNoConfig)
 	}
@@ -320,7 +320,7 @@ func (c *PunctumConfig) String(key string, errs basis.Errors) (string, basis.Err
 }
 
 // Bool ...
-func (c *PunctumConfig) Bool(key string, errs basis.Errors) (bool, basis.Errors) {
+func (c *Config) Bool(key string, errs basis.Errors) (bool, basis.Errors) {
 	if c == nil {
 		return false, append(errs, ErrNoConfig)
 	}

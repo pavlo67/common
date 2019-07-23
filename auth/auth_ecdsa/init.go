@@ -26,7 +26,7 @@ func (ss *identity_btcStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *identity_btcStarter) Prepare(conf *config.PunctumConfig, options, runtimeOptions basis.Options) error {
+func (ss *identity_btcStarter) Prepare(conf *config.Config, options, runtimeOptions basis.Options) error {
 	l = logger.Get()
 
 	// var errs basis.Errors
@@ -45,7 +45,7 @@ func (ss *identity_btcStarter) Setup() error {
 }
 
 func (ss *identity_btcStarter) Init(joiner joiner.Operator) error {
-	identOp, err := New()
+	identOp, err := New(nil)
 	if err != nil {
 		return errors.Wrap(err, "can't init identity_ecdsa.Operator")
 	}

@@ -26,11 +26,11 @@ type serverHTTPJschmhr struct {
 	keyFileTLS   string
 	identOpsMap  map[auth.CredsType][]auth.Operator
 
-	htmlTemplate string
-	templator    server_http.Templator
+	//htmlTemplate string
+	//templator    server_http.Templator
 }
 
-func New(port int, certFileTLS, keyFileTLS string, identOpsMap map[auth.CredsType][]auth.Operator, htmlTemplate string) (server_http.Operator, error) {
+func New(port int, certFileTLS, keyFileTLS string, identOpsMap map[auth.CredsType][]auth.Operator) (server_http.Operator, error) {
 	if port <= 0 {
 		return nil, errors.Errorf("serverOp hasn't started: no correct data for http port: %d", port)
 	}
@@ -55,8 +55,6 @@ func New(port int, certFileTLS, keyFileTLS string, identOpsMap map[auth.CredsTyp
 		keyFileTLS:  keyFileTLS,
 
 		identOpsMap: identOpsMap,
-
-		htmlTemplate: htmlTemplate,
 	}, nil
 }
 
@@ -96,14 +94,14 @@ func (s *serverHTTPJschmhr) handleFunc(method, path string, handler httprouter.H
 
 var reHTMLExt = regexp.MustCompile(`\.html?$`)
 
-func (s *serverHTTPJschmhr) HandleGetFile(serverRoute, localPath string, mimeType *string) error {
+func (s *serverHTTPJschmhr) HandleFiles(serverRoute, localPath string, mimeType *string) {
 	l.Infof("FILES : %s <-- %s", serverRoute, localPath)
 
 	// TODO: check localPath
 
 	if mimeType == nil {
 		s.httpServeMux.ServeFiles(serverRoute, http.Dir(localPath))
-		return nil
+		return
 	}
 
 	//fileServer := http.FileServer(http.Dir(localPath))
@@ -122,7 +120,7 @@ func (s *serverHTTPJschmhr) HandleGetFile(serverRoute, localPath string, mimeTyp
 		//fileServer.ServeHTTP(w, r)
 	})
 
-	return nil
+	return
 }
 
 // mimeTypeToSet, err = inspector.MIME(localPath+"/"+r.URL.WithParams, nil)
@@ -130,12 +128,12 @@ func (s *serverHTTPJschmhr) HandleGetFile(serverRoute, localPath string, mimeTyp
 //	l.Error("can't read MIMEType for file: ", localPath+"/"+r.URL.WithParams, err)
 // }
 
-func (s *serverHTTPJschmhr) HandleGetString(serverRoute, str string, mimeType *string) {
-	s.handleFunc("GET", serverRoute, func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-		if mimeType != nil {
-			// "application/javascript"
-			w.Header().Set("Content-Type", *mimeType)
-		}
-		w.Write([]byte(str))
-	})
-}
+//func (s *serverHTTPJschmhr) HandleGetString(serverRoute, str string, mimeType *string) {
+//	s.handleFunc("GET", serverRoute, func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+//		if mimeType != nil {
+//			// "application/javascript"
+//			w.Header().Set("Content-Type", *mimeType)
+//		}
+//		w.Write([]byte(str))
+//	})
+//}

@@ -14,7 +14,7 @@ import (
 	"github.com/pavlo67/punctum/starter/logger"
 )
 
-func StartComponent(c Starter, conf *config.PunctumConfig, runtimeOptions basis.Options, joinerOp joiner.Operator) error {
+func StartComponent(c Starter, conf *config.Config, runtimeOptions basis.Options, joinerOp joiner.Operator) error {
 	l := logger.Get()
 
 	l.Info("checking component: ", c.Name())
@@ -44,7 +44,7 @@ func ReadOptions(args []string) basis.Options {
 	return nil
 }
 
-func Run(starters []Starter, conf *config.PunctumConfig, args []string, label string) (joiner.Operator, error) {
+func Run(starters []Starter, conf *config.Config, args []string, label string) (joiner.Operator, error) {
 	l := logger.Get()
 
 	if conf == nil {

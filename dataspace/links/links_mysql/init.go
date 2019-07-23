@@ -27,7 +27,7 @@ type links_mysqlStarter struct {
 	interfaceKey        joiner.InterfaceKey
 	cleanerInterfaceKey joiner.InterfaceKey
 	mysqlConfig         config.ServerAccess
-	conf                config.PunctumConfig
+	conf                config.Config
 	index               config.ServerComponentsIndex
 	tables              []config.Table
 }
@@ -38,7 +38,7 @@ func (lms *links_mysqlStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (lms *links_mysqlStarter) Prepare(conf *config.PunctumConfig, params basis.Options) error {
+func (lms *links_mysqlStarter) Prepare(conf *config.Config, params basis.Options) error {
 
 	l = logger.zapGet()
 

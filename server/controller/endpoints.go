@@ -4,6 +4,8 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
+
+	"github.com/pavlo67/punctum/auth"
 )
 
 type Endpoint struct {
@@ -14,6 +16,8 @@ type Endpoint struct {
 
 	Method   string `json:"method,omitempty"`
 	Shortcut string `json:"shortcut,omitempty"`
+
+	AllowedIDs []auth.ID `json:"allowed_ids,omitempty"`
 }
 
 var rePathParam = regexp.MustCompile(":[^/]+")

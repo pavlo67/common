@@ -26,7 +26,7 @@ const daysForCleanDefault = 7
 
 const onClean = "on news_router.clean()"
 
-func clean(endpoint controller.Endpoint, params basis.Params, _ basis.Options, _ interface{}) (*server.DataResponse, error) {
+func clean(endpoint controller.Endpoint, params basis.Params, _ basis.Options, _ interface{}) (*server.Response, error) {
 	var err error
 
 	daysStr := params.ByNum(0)
@@ -45,7 +45,7 @@ func clean(endpoint controller.Endpoint, params basis.Params, _ basis.Options, _
 	return nil, err
 }
 
-func load(endpoint controller.Endpoint, params basis.Params, options basis.Options, data interface{}) (*server.DataResponse, error) {
+func load(endpoint controller.Endpoint, params basis.Params, options basis.Options, data interface{}) (*server.Response, error) {
 	var urls URLs
 	if endpoint.Method == "POST" {
 		var ok bool
@@ -58,14 +58,14 @@ func load(endpoint controller.Endpoint, params basis.Params, options basis.Optio
 	}
 
 	num, numNew, errs := Load(urls, newsOp)
-	responseData := server.DataResponse{
+	responseData := server.Response{
 		Data: map[string]int{"num": num, "num_new": numNew},
 	}
 
 	return &responseData, errs.Err()
 }
 
-func list(endpoint controller.Endpoint, params basis.Params, options basis.Options, data interface{}) (*server.DataResponse, error) {
+func list(endpoint controller.Endpoint, params basis.Params, options basis.Options, data interface{}) (*server.Response, error) {
 	var urls URLs
 	if endpoint.Method == "POST" {
 		var ok bool
@@ -88,10 +88,10 @@ func list(endpoint controller.Endpoint, params basis.Params, options basis.Optio
 		Selector: selector,
 	})
 
-	return &server.DataResponse{Data: news}, err
+	return &server.Response{Data: news}, err
 }
 
-//func stat(endpoint router.Endpoint, params basis.Options, options basis.Options, data interface{}) (*server.DataResponse, error) {
+//func stat(endpoint router.Endpoint, params basis.Options, options basis.Options, data interface{}) (*server.Response, error) {
 //	var urls URLs
 //	if endpoint.Method == "POST" {
 //		var ok bool
@@ -103,7 +103,7 @@ func list(endpoint controller.Endpoint, params basis.Params, options basis.Optio
 //		urls = options.Strings("url")
 //	}
 //
-//	responseData := server.DataResponse{
+//	responseData := server.Response{
 //		Status: 0,
 //		Data:   nil,
 //	}

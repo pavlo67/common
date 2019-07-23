@@ -31,7 +31,7 @@ func (nms *crud_fileStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (nms *crud_fileStarter) Prepare(conf *config.PunctumConfig, options, runtimeOptions basis.Options) error {
+func (nms *crud_fileStarter) Prepare(conf *config.Config, options, runtimeOptions basis.Options) error {
 	l = logger.Get()
 
 	var ok bool

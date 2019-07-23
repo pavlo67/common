@@ -16,37 +16,19 @@ const InterfaceKey joiner.InterfaceKey = "server_http"
 type Operator interface {
 	Start()
 
-	HandleGetFile(serverPath, localPath string, mimeType *string) error
-	HandleGetString(serverPath, str string, mimeType *string)
-	HandleRaw(endpoint controller.Endpoint, rawHandler RawHandler, allowedIDs []auth.ID)
-	HandleHTML(endpoint controller.Endpoint, htmlHandler HTMLHandler, allowedIDs []auth.ID)
-	HandleTemplatorHTML(templatorHTML Templator)
-	HandleREST(endpoint controller.Endpoint, restHandler RESTHandler, allowedIDs []auth.ID)
-	HandleBinary(endpoint controller.Endpoint, binaryHandler BinaryHandler, allowedIDs []auth.ID)
-	HandleWorker(endpoint controller.Endpoint, worker controller.Worker, allowedIDs []auth.ID)
+	Handle(endpoint controller.Endpoint, worker controller.Worker)
+	HandleHTTP(endpoint controller.Endpoint, workerHTTP WorkerHTTP)
+	HandleFiles(serverPath, localPath string, mimeType *string)
 }
 
-// !!! requires internal variables (so it can't be a simple function only)
-type Templator interface {
-	Context(*auth.User, *http.Request, basis.Params) map[string]string
-}
+type WorkerHTTP func(*auth.User, basis.Params, *http.Request) (server.Response, error)
 
-type RawHandler func(*auth.User, *http.Request, basis.Params, http.ResponseWriter) error
-type BinaryHandler func(*auth.User, *http.Request, basis.Params) (server.BinaryResponse, error)
-type RESTHandler func(*auth.User, *http.Request, basis.Params) (server.DataResponse, error)
-type HTMLHandler func(*auth.User, *http.Request, basis.Params) (HTMLResponse, error)
-
-func InitEndpoints(op Operator, endpoints map[string]controller.Endpoint, htmlHandlers map[string]HTMLHandler, restHandlers map[string]RESTHandler,
-	binaryHandlers map[string]BinaryHandler, allowedIDs []auth.ID) basis.Errors {
+func InitEndpoints(op Operator, endpoints map[string]controller.Endpoint, handlers map[string]WorkerHTTP) basis.Errors {
 	var errs basis.Errors
 
 	for key, ep := range endpoints {
-		if htmlHandler, ok := htmlHandlers[key]; ok {
-			op.HandleHTML(ep, htmlHandler, allowedIDs)
-		} else if restHandler, ok := restHandlers[key]; ok {
-			op.HandleREST(ep, restHandler, allowedIDs)
-		} else if binaryHandler, ok := binaryHandlers[key]; ok {
-			op.HandleBinary(ep, binaryHandler, allowedIDs)
+		if binaryHandler, ok := handlers[key]; ok {
+			op.HandleHTTP(ep, binaryHandler)
 		} else {
 			errs = append(errs, errors.New("no handler for endpoint: "+key))
 		}

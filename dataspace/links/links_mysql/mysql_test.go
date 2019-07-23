@@ -11,7 +11,7 @@ import (
 	"github.com/pavlo67/punctum/starter/joiner"
 )
 
-var conf *config.PunctumConfig
+var conf *config.Config
 var mysqlConfig config.ServerAccess
 
 func TestMain(m *testing.M) {

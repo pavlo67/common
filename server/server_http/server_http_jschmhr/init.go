@@ -37,7 +37,7 @@ func (ss *server_http_jschmhrStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *server_http_jschmhrStarter) Prepare(conf *config.PunctumConfig, options, runtimeOptions basis.Options) error {
+func (ss *server_http_jschmhrStarter) Prepare(conf *config.Config, options, runtimeOptions basis.Options) error {
 	l = logger.Get()
 
 	var errs basis.Errors
@@ -102,14 +102,13 @@ func (ss *server_http_jschmhrStarter) Init(joiner joiner.Operator) error {
 		ss.config.TLSCertFile,
 		ss.config.TLSKeyFile,
 		identOpsMap,
-		ss.htmlTemplate,
 	)
 	if err != nil {
 		return errors.Wrap(err, "can't init serverHTTPJschmhr.Operator")
 	}
 
 	if ss.staticPath != "" {
-		srvOp.HandleGetFile("/static/*filepath", ss.staticPath, nil)
+		srvOp.HandleFiles("/static/*filepath", ss.staticPath, nil)
 	}
 
 	err = joiner.JoinInterface(srvOp, ss.interfaceKey)

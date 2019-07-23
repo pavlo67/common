@@ -26,7 +26,7 @@ type records_mysqlStarter struct {
 	interfaceKey        joiner.InterfaceKey
 	cleanerInterfaceKey joiner.InterfaceKey
 	mysqlConfig         config.ServerAccess
-	conf                config.PunctumConfig
+	conf                config.Config
 	index               config.ServerComponentsIndex
 	tables              []config.Table
 	jointLinks          bool
@@ -36,7 +36,7 @@ func (nms *records_mysqlStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (nms *records_mysqlStarter) Prepare(conf *config.PunctumConfig, options, runtimeOptions basis.Options) error {
+func (nms *records_mysqlStarter) Prepare(conf *config.Config, options, runtimeOptions basis.Options) error {
 
 	l = logger.Get()
 

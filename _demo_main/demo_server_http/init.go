@@ -17,13 +17,15 @@ func Starter() starter.Operator {
 
 var l logger.Operator
 
+var _ starter.Operator = &demo_server_http_jsschmhrStarter{}
+
 type demo_server_http_jsschmhrStarter struct{}
 
 func (dcs *demo_server_http_jsschmhrStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (dcs *demo_server_http_jsschmhrStarter) Prepare(conf *config.PunctumConfig, params basis.Options) error {
+func (dcs *demo_server_http_jsschmhrStarter) Prepare(conf *config.Config, params, options basis.Options) error {
 	l = logger.Get()
 
 	return nil
@@ -43,13 +45,8 @@ func (dcs *demo_server_http_jsschmhrStarter) Init(joinerOp joiner.Operator) erro
 		return errors.New("no server_http_jschmhr.Operator interface found for demo_server_http component")
 	}
 
-	srvOp.HandleTemplatorHTML(newTemplator(joinerOp))
-
 	errs := server_http.InitEndpoints(
 		srvOp,
-		endpoints,
-		htmlHandlers,
-		nil,
 		nil,
 		nil,
 	)
