@@ -29,7 +29,7 @@ func ServerPath(ep controller.Endpoint) string {
 	return path + "/:" + strings.Join(ep.ParamNames, "/:")
 }
 
-func (s *serverHTTPJschmhr) HandleHTTP(endpoint controller.Endpoint, binaryHandler server_http.WorkerHTTP) {
+func (s *serverHTTPJschmhr) HandleHTTP(endpoint controller.Endpoint, workerHTTP server_http.WorkerHTTP) {
 	method := endpoint.Method
 	serverPath := ServerPath(endpoint)
 	s.handleFunc(method, serverPath, func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
@@ -54,7 +54,7 @@ func (s *serverHTTPJschmhr) HandleHTTP(endpoint controller.Endpoint, binaryHandl
 			}
 		}
 
-		responseData, err := binaryHandler(user, params, r)
+		responseData, err := workerHTTP(user, params, r)
 		if err != nil {
 			l.Error(err)
 			http.Error(w, err.Error(), responseData.Status)
@@ -79,7 +79,7 @@ func (s *serverHTTPJschmhr) HandleHTTP(endpoint controller.Endpoint, binaryHandl
 	})
 }
 
-func (s *serverHTTPJschmhr) Handle(endpoint controller.Endpoint, worker controller.Worker) {
+func (s *serverHTTPJschmhr) HandleWorker(endpoint controller.Endpoint, worker controller.Worker) {
 	if worker == nil {
 		l.Errorf("nil worker for endpoint %#v", endpoint)
 		return

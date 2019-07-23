@@ -9,15 +9,15 @@ import (
 )
 
 type Endpoint struct {
-	Path       string      `json:"path"`
-	ParamNames []string    `json:"param_names,omitempty"`
-	DataItem   interface{} `json:"data_item,omitempty"`
-	Worker     Worker      `json:"worker"`
-
-	Method   string `json:"method,omitempty"`
-	Shortcut string `json:"shortcut,omitempty"`
-
+	Method     string    `json:"method,omitempty"`
+	Path       string    `json:"path"`
+	ParamNames []string  `json:"param_names,omitempty"`
 	AllowedIDs []auth.ID `json:"allowed_ids,omitempty"`
+
+	DataItem interface{} `json:"data_item,omitempty"` // for Worker
+
+	// Shortcut string `json:"shortcut,omitempty"`
+
 }
 
 var rePathParam = regexp.MustCompile(":[^/]+")

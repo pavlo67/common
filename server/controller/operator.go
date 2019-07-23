@@ -17,15 +17,16 @@ type Worker func(user *auth.User, params basis.Params, data interface{}) (server
 
 type Operator interface {
 	HandleWorker(endpoint Endpoint, worker Worker)
-	// RouteString(key Key, params []string) (string, error)
+
+	Start()
 }
 
-func InitEndpoints(op Operator, endpoints map[string]Endpoint) basis.Errors {
+func InitEndpoints(op Operator, endpoints map[string]Endpoint, workers map[string]Worker) basis.Errors {
 	var errs basis.Errors
 
 	for key, ep := range endpoints {
-		if ep.Worker != nil {
-			op.HandleWorker(ep, ep.Worker)
+		if worker, ok := workers[key]; ok {
+			op.HandleWorker(ep, worker)
 		} else {
 			errs = append(errs, errors.Errorf("no handler for endpoint: %s", key))
 		}
