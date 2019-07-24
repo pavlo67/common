@@ -26,7 +26,7 @@ const daysForCleanDefault = 7
 
 const onClean = "on news_router.clean()"
 
-func clean(endpoint controller.Endpoint, params basis.Params, _ basis.Options, _ interface{}) (*server.Response, error) {
+func clean(endpoint controller.Endpoint, params basis.Params, _ basis.Info, _ interface{}) (*server.Response, error) {
 	var err error
 
 	daysStr := params.ByNum(0)
@@ -38,14 +38,14 @@ func clean(endpoint controller.Endpoint, params basis.Params, _ basis.Options, _
 		}
 	}
 
-	err = newsOp.DeleteList(&crud.ReadOptions{
+	err = newsOp.DeleteList(&content.ListOptions{
 		Selector: basis.Lt(crud.TimeField, time.Now().Add(-time.Hour*24*time.Duration(days)).Format(time.RFC3339)),
 	})
 
 	return nil, err
 }
 
-func load(endpoint controller.Endpoint, params basis.Params, options basis.Options, data interface{}) (*server.Response, error) {
+func load(endpoint controller.Endpoint, params basis.Params, options basis.Info, data interface{}) (*server.Response, error) {
 	var urls URLs
 	if endpoint.Method == "POST" {
 		var ok bool
@@ -65,7 +65,7 @@ func load(endpoint controller.Endpoint, params basis.Params, options basis.Optio
 	return &responseData, errs.Err()
 }
 
-func list(endpoint controller.Endpoint, params basis.Params, options basis.Options, data interface{}) (*server.Response, error) {
+func list(endpoint controller.Endpoint, params basis.Params, options basis.Info, data interface{}) (*server.Response, error) {
 	var urls URLs
 	if endpoint.Method == "POST" {
 		var ok bool
@@ -84,14 +84,14 @@ func list(endpoint controller.Endpoint, params basis.Params, options basis.Optio
 		basis.InStr(string(crud.URLField), urls),
 		basis.Unary(basis.Ge(crud.TimeField, time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC).Add(-time.Hour*time.Duration(days)).Format(time.RFC3339))),
 	)
-	news, _, err := newsOp.ReadList(&crud.ReadOptions{
+	news, _, err := newsOp.ReadList(&content.ListOptions{
 		Selector: selector,
 	})
 
 	return &server.Response{Data: news}, err
 }
 
-//func stat(endpoint router.Endpoint, params basis.Options, options basis.Options, data interface{}) (*server.Response, error) {
+//func stat(endpoint router.Endpoint, params basis.Info, options basis.Info, data interface{}) (*server.Response, error) {
 //	var urls URLs
 //	if endpoint.Method == "POST" {
 //		var ok bool

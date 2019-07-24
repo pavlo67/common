@@ -2,7 +2,7 @@ package old
 
 //type Transform func(object *items.Object) (*items.Object, error)
 //
-//func TransformAll(userIS basis.UserIS, obj Operator, options *crud.ReadOptions, method Transform, verbose bool) (numOk, numErr uint64, err error) {
+//func TransformAll(userIS basis.UserIS, obj Operator, options *content.ListOptions, method Transform, verbose bool) (numOk, numErr uint64, err error) {
 //	// !!! to use for admin purposes only
 //
 //	options.ForAdmin = true

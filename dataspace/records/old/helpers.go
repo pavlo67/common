@@ -7,7 +7,6 @@ import (
 
 	"strconv"
 
-	"github.com/pavlo67/partes/crud"
 	"github.com/pavlo67/partes/crud/selectors"
 	"github.com/pavlo67/punctum/auth"
 	"github.com/pavlo67/punctum/basis"
@@ -46,7 +45,7 @@ func FillFilesIDs(linksList []links.Item) ([]links.Item, bool) {
 }
 
 func GetUnique(userIS auth.ID, objectsOp Operator, selector selectors.Selector) (*Item, error) {
-	options := &crud.ReadOptions{Selector: selector}
+	options := &content.ListOptions{Selector: selector}
 	objs, _, err := objectsOp.ReadList(userIS, options)
 	if err != nil {
 		return nil, fmt.Errorf("error on objectsOp.ReadList(%#v, %#v): %s", userIS, options, err)

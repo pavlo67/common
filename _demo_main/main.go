@@ -18,7 +18,7 @@ import (
 func main() {
 	err := logger.Init(logger.Config{LogLevel: logger.DebugLevel})
 	if err != nil {
-		os.Stderr.WriteString(fmt.Sprintf("can't logger.Init(logger.Config{LogLevel: logger.DebugLevel}): %s", err))
+		os.Stderr.WriteString(fmt.Sprintf("can't logger.Run(logger.Config{LogLevel: logger.DebugLevel}): %s", err))
 		os.Exit(1)
 	}
 	l := logger.Get()

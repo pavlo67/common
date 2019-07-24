@@ -26,7 +26,7 @@ func (ss *identity_btcStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *identity_btcStarter) Prepare(conf *config.Config, options, runtimeOptions basis.Options) error {
+func (ss *identity_btcStarter) Prepare(conf *config.Config, options, runtimeOptions basis.Info) error {
 	l = logger.Get()
 
 	// var errs basis.Errors

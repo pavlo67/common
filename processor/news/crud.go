@@ -206,7 +206,7 @@ const InterfaceKeyCRUD joiner.InterfaceKey = "flow.crud"
 //
 //func (opCRUD OperatorCRUD) Read(userIS auth.ID, id string) (interface{}, error) {
 //	items, _, err := opCRUD.Operator.ReadList(
-//		&crud.ReadOptions{
+//		&content.ListOptions{
 //			Selector: selectors.FieldStr("id", id),
 //		},
 //	)
@@ -221,7 +221,7 @@ const InterfaceKeyCRUD joiner.InterfaceKey = "flow.crud"
 //	return items[0], nil
 //}
 //
-//func (opCRUD OperatorCRUD) ReadList(userIS auth.ID, options *crud.ReadOptions) ([]interface{}, uint64, error) {
+//func (opCRUD OperatorCRUD) ReadList(userIS auth.ID, options *content.ListOptions) ([]interface{}, uint64, error) {
 //	srcList, allCnt, err := opCRUD.Operator.ReadList(options)
 //	if err != nil {
 //		return nil, 0, err
@@ -241,7 +241,7 @@ const InterfaceKeyCRUD joiner.InterfaceKey = "flow.crud"
 //
 //func (opCRUD OperatorCRUD) Delete(userIS auth.ID, id string) (crud.Result, error) {
 //	return opCRUD.Operator.Delete(
-//		&crud.ReadOptions{
+//		&content.ListOptions{
 //			Selector: selectors.FieldStr("id", id),
 //		},
 //	)
@@ -300,8 +300,8 @@ const InterfaceKeyCRUD joiner.InterfaceKey = "flow.crud"
 ////
 ////			ISToCreate:        userIS,
 ////			ISToCreateBad:     &userISNil,
-////			ToCreate:          toCreatePrivate,
-////			ExpectedCreateErr: nil,
+////			ToSave:          toCreatePrivate,
+////			ExpectedSaveErr: nil,
 ////
 ////			ISToRead:        userIS,
 ////			ISToReadBad:     &userISAnother,
@@ -314,7 +314,7 @@ const InterfaceKeyCRUD joiner.InterfaceKey = "flow.crud"
 ////
 ////			ISToDelete:        userIS,
 ////			ISToDeleteBad:     &userISAnother,
-////			ExpectedDeleteErr: nil,
+////			ExpectedRemoveErr: nil,
 ////		},
 ////
 ////		// 1. all ok for private record,
@@ -326,8 +326,8 @@ const InterfaceKeyCRUD joiner.InterfaceKey = "flow.crud"
 ////
 ////			ISToCreate:        userIS,
 ////			ISToCreateBad:     &userISNil,
-////			ToCreate:          toCreatePrivate,
-////			ExpectedCreateErr: nil,
+////			ToSave:          toCreatePrivate,
+////			ExpectedSaveErr: nil,
 ////
 ////			ISToRead:        userIS,
 ////			ISToReadBad:     &userISNil,
@@ -340,7 +340,7 @@ const InterfaceKeyCRUD joiner.InterfaceKey = "flow.crud"
 ////
 ////			ISToDelete:        userIS,
 ////			ISToDeleteBad:     &userISNil,
-////			ExpectedDeleteErr: nil,
+////			ExpectedRemoveErr: nil,
 ////		},
 ////
 ////		// 2. all ok for public record,
@@ -353,8 +353,8 @@ const InterfaceKeyCRUD joiner.InterfaceKey = "flow.crud"
 ////
 ////			ISToCreate:        userIS,
 ////			ISToCreateBad:     &userISNil,
-////			ToCreate:          toCreatePublic,
-////			ExpectedCreateErr: nil,
+////			ToSave:          toCreatePublic,
+////			ExpectedSaveErr: nil,
 ////
 ////			ISToRead:        userIS,
 ////			ExpectedReadErr: nil,
@@ -366,7 +366,7 @@ const InterfaceKeyCRUD joiner.InterfaceKey = "flow.crud"
 ////
 ////			ISToDelete:        userIS,
 ////			ISToDeleteBad:     &userISAnother,
-////			ExpectedDeleteErr: nil,
+////			ExpectedRemoveErr: nil,
 ////		},
 ////
 ////		// 3. all ok for public record,
@@ -380,8 +380,8 @@ const InterfaceKeyCRUD joiner.InterfaceKey = "flow.crud"
 ////
 ////			ISToCreate:        userIS,
 ////			ISToCreateBad:     &userISNil,
-////			ToCreate:          toCreatePublic,
-////			ExpectedCreateErr: nil,
+////			ToSave:          toCreatePublic,
+////			ExpectedSaveErr: nil,
 ////
 ////			ISToRead:        userISNil,
 ////			ExpectedReadErr: nil,
@@ -393,7 +393,7 @@ const InterfaceKeyCRUD joiner.InterfaceKey = "flow.crud"
 ////
 ////			ISToDelete:        userIS,
 ////			ISToDeleteBad:     &userISNil,
-////			ExpectedDeleteErr: nil,
+////			ExpectedRemoveErr: nil,
 ////		},
 ////	}
 ////

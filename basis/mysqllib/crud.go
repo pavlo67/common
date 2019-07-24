@@ -235,7 +235,7 @@ func (crudOp *crudMySQL) Read(userIS auth.ID, idStr string) (interface{}, error)
 
 const onReadList = "on crudMySQL.ReadList()"
 
-func (crudOp *crudMySQL) ReadList(userIS auth.ID, options *crud.ReadOptions) ([]interface{}, uint64, error) {
+func (crudOp *crudMySQL) ReadList(userIS auth.ID, options *content.ListOptions) ([]interface{}, uint64, error) {
 	var err error
 	var values []interface{}
 	var orderAndLimit, condition, conditionCompleted string

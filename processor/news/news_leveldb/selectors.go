@@ -20,7 +20,7 @@ type CheckIter func(key, value []byte, exemplar interface{}) bool
 
 const onConditions = "on seveldblib.RangesAndCheck()"
 
-func RangesAndCheck(opt *crud.ReadOptions) (*util.Range, CheckIter, error) {
+func RangesAndCheck(opt *content.ListOptions) (*util.Range, CheckIter, error) {
 	if opt == nil || opt.Selector == nil {
 		return nil, nil, nil
 	}

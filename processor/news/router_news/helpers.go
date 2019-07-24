@@ -18,7 +18,7 @@ func Load(urls []string, newsOp news.Operator) (numAll, numNewAll int, errs basi
 
 		err := impOp.Init(url)
 		if err != nil {
-			errs = append(errs, errors.Errorf("can't impOp.Init('%s')", url, err))
+			errs = append(errs, errors.Errorf("can't impOp.Run('%s')", url, err))
 			continue
 		}
 

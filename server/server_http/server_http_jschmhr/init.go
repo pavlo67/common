@@ -37,7 +37,7 @@ func (ss *server_http_jschmhrStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *server_http_jschmhrStarter) Prepare(conf *config.Config, options, runtimeOptions basis.Options) error {
+func (ss *server_http_jschmhrStarter) Prepare(conf *config.Config, options, runtimeOptions basis.Info) error {
 	l = logger.Get()
 
 	var errs basis.Errors
@@ -52,7 +52,7 @@ func (ss *server_http_jschmhrStarter) Prepare(conf *config.Config, options, runt
 
 	templatePath := options.StringDefault("template_path", "")
 	if templatePath == "" {
-		l.Warn(`on server_http_jschmhr.Prepare(): empty options["template_path"]`)
+		l.Warn(`on server_http_jschmhr.Init(): empty options["template_path"]`)
 
 	} else {
 		if templatePath[0] != '/' {

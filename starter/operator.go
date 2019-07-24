@@ -6,33 +6,30 @@ import (
 	"github.com/pavlo67/punctum/starter/joiner"
 )
 
-type Info struct {
-	Service string
-	Path    string
-	Status  string
-	Details interface{}
-}
+//type Info struct {
+//	Service string
+//	Path    string
+//	Status  string
+//	Details interface{}
+//}
 
 type Operator interface {
 
 	// Name returns started component name
 	Name() string
 
-	Prepare(conf *config.Config, params, runtimeOptions basis.Options) error
-
-	// Check checks status of the component that implements this interface
-	Check() (info []Info, err error)
+	Init(conf *config.Config, options basis.Info) (info []basis.Info, err error)
 
 	// Setup sets up the component
 	Setup() error
 
-	// Init inits the component to use in application
-	Init(joiner.Operator) error
+	// Run inits the component to use in application
+	Run(joiner.Operator) error
 }
 
 type Starter struct {
 	Operator
-	Options basis.Options
+	Options basis.Info
 }
 
 //type Runner interface {

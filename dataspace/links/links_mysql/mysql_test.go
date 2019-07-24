@@ -25,7 +25,7 @@ func TestMain(m *testing.M) {
 		log.Fatal(err)
 	}
 	if conf == nil {
-		log.Fatal("no config data after setup.Init()")
+		log.Fatal("no config data after setup.Run()")
 	}
 
 	var errs basis.Errors
@@ -47,9 +47,9 @@ func TestMain(m *testing.M) {
 	//		}
 	//		log.Fatalf("error calling Check() for component (%s): %s", c.Nick, err)
 	//	}
-	//	err = c.Init()
+	//	err = c.Run()
 	//	if err != nil {
-	//		log.Fatalf("error calling Init() for component (%s): %s", c.Nick, err)
+	//		log.Fatalf("error calling Run() for component (%s): %s", c.Nick, err)
 	//	}
 	//}
 	//

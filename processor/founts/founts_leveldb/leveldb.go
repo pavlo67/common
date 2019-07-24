@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/pavlo67/punctum/basis"
-	"github.com/pavlo67/punctum/crud"
 	"github.com/pavlo67/punctum/processor"
 	"github.com/pavlo67/punctum/processor/founts"
 )
@@ -93,7 +92,7 @@ func (fountsOp *fountsLevelDB) Read(url string) (*founts.Item, error) {
 
 const onReadList = "on fountsLevelDB.ReadList()"
 
-func (fountsOp *fountsLevelDB) ReadList(crud.ReadOptions) ([]founts.Item, *uint64, error) {
+func (fountsOp *fountsLevelDB) ReadList(content.ListOptions) ([]founts.Item, *uint64, error) {
 	var items []founts.Item
 	var errs basis.Errors
 

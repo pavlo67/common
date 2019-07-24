@@ -14,25 +14,20 @@ import (
 	"github.com/pavlo67/punctum/starter/logger"
 )
 
-func StartComponent(c Starter, conf *config.Config, runtimeOptions basis.Options, joinerOp joiner.Operator) error {
+func StartComponent(c Starter, conf *config.Config, runtimeOptions basis.Info, joinerOp joiner.Operator) error {
 	l := logger.Get()
 
 	l.Info("checking component: ", c.Name())
 
-	err := c.Prepare(conf, c.Options, runtimeOptions)
+	info, err := c.Init(conf, c.Options, runtimeOptions)
+	for _, i := range info {
+		log.Println(i)
+	}
 	if err != nil {
-		return fmt.Errorf("error calling .Prepare() for component (%s): %s", c.Name(), err)
+		return fmt.Errorf("error calling .Init() for component (%s): %s", c.Name(), err)
 	}
 
-	info, err := c.Check()
-	if err != nil {
-		for _, i := range info {
-			log.Println(i)
-		}
-		return fmt.Errorf("error calling Check() for component (%s): %s", c.Name(), err)
-	}
-
-	err = c.Init(joinerOp)
+	err = c.Run(joinerOp)
 	if err != nil {
 		return fmt.Errorf("error calling zapInit() for component (%s): %s", c.Name(), err)
 	}
@@ -40,7 +35,7 @@ func StartComponent(c Starter, conf *config.Config, runtimeOptions basis.Options
 	return nil
 }
 
-func ReadOptions(args []string) basis.Options {
+func ReadOptions(args []string) basis.Info {
 	return nil
 }
 

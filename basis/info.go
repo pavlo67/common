@@ -4,9 +4,9 @@ import (
 	"strconv"
 )
 
-type Options map[string]interface{}
+type Info map[string]interface{}
 
-func (p Options) StringDefault(key, defaultStr string) string {
+func (p Info) StringDefault(key, defaultStr string) string {
 	switch value := p[key].(type) {
 	case string:
 		return value
@@ -21,7 +21,7 @@ func (p Options) StringDefault(key, defaultStr string) string {
 	return defaultStr
 }
 
-func (p Options) String(key string) (string, bool) {
+func (p Info) String(key string) (string, bool) {
 	switch value := p[key].(type) {
 	case string:
 		return value, true
@@ -36,7 +36,7 @@ func (p Options) String(key string) (string, bool) {
 	return "", false
 }
 
-func (p Options) Strings(key string) []string {
+func (p Info) Strings(key string) []string {
 	switch value := p[key].(type) {
 	case string:
 		return []string{value}
@@ -49,7 +49,7 @@ func (p Options) Strings(key string) []string {
 	return nil
 }
 
-//func (p Options) StringMapKeyDefault(key string, defaultMap map[string]string) map[string]string {
+//func (p Info) StringMapKeyDefault(key string, defaultMap map[string]string) map[string]string {
 //	if valueMap, ok := p[key].(map[string]string); ok {
 //		return valueMap
 //	}
@@ -57,7 +57,7 @@ func (p Options) Strings(key string) []string {
 //	return defaultMap
 //}
 //
-func (p Options) StringsMap() map[string]string {
+func (p Info) StringsMap() map[string]string {
 	data := map[string]string{}
 
 	for k, v := range p {

@@ -87,7 +87,7 @@ func (s *serverHTTPJschmhr) HandleWorker(endpoint controller.Endpoint, worker co
 
 	var handler = func(user *auth.User, params basis.Params, r *http.Request) (server.Response, error) {
 		var data interface{}
-		options := basis.Options{}
+		options := basis.Info{}
 		for k, v := range r.URL.Query() {
 			options[k] = v
 		}

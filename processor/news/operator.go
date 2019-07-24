@@ -3,7 +3,6 @@ package news
 import (
 	"time"
 
-	"github.com/pavlo67/punctum/crud"
 	"github.com/pavlo67/punctum/processor/flow"
 	"github.com/pavlo67/punctum/starter/joiner"
 )
@@ -36,8 +35,8 @@ type Embedded struct {
 type Operator interface {
 	Has(*flow.Source) (bool, error)
 	Save(item *Item) error
-	ReadList(*crud.ReadOptions) ([]Item, *uint64, error)
-	DeleteList(*crud.ReadOptions) error
+	ReadList(*content.ListOptions) ([]Item, *uint64, error)
+	DeleteList(*content.ListOptions) error
 	Close() error
 }
 

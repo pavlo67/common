@@ -44,7 +44,7 @@ func ImportTo(userIS auth.ID, objectsOp Operator, id, status string) error {
 func Export(user *auth.User, objectsOp Operator, credentialsOp users.Operator, ctrl groups.Operator, filesOp files.Operator, selector selectors.Selector) (string, error) {
 	return "", basis.ErrNotImplemented
 
-	//options := crud.ReadOptions{Selector: selector, ForExport: true}
+	//options := content.ListOptions{Selector: selector, ForExport: true}
 	//res, _, err := objectsOp.ReadList(user.Identity().String(), &options)
 	//if err != nil {
 	//	return "", err
@@ -377,7 +377,7 @@ func ObjectsToJSON(user *auth.User, filesOp files.Operator, credentialsOpOp user
 	//filesForZip = append(filesForZip, filelib.FileForZip{Label: identitiesPath, Temporary: true})
 	//
 	//// zipping
-	//t := time.Now().Options("2006_01_02_15_04_05")
+	//t := time.Now().Info("2006_01_02_15_04_05")
 	//zipName := filepath.Join123(exportDir, user.UserIS.SystemDomain+"_"+t+".zip")
 	//// delete, if old zip exist
 	//os.Remove(zipName)

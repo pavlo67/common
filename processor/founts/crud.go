@@ -128,7 +128,7 @@ func (opCRUD OperatorCRUD) Read(_ auth.ID, url string) (interface{}, error) {
 	return opCRUD.Operator.Read(url)
 }
 
-func (opCRUD OperatorCRUD) ReadList(userIS auth.ID, options crud.ReadOptions) ([]interface{}, *uint64, error) {
+func (opCRUD OperatorCRUD) ReadList(userIS auth.ID, options content.ListOptions) ([]interface{}, *uint64, error) {
 	srcList, allCnt, err := opCRUD.Operator.ReadList(options)
 	if err != nil {
 		return nil, nil, err

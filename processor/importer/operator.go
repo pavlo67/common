@@ -15,7 +15,7 @@ const InterfaceKey joiner.InterfaceKey = "importer"
 //var ErrNilItem = errors.New("item is nil")
 
 type Operator interface {
-	// Init opens import session with selected data source
+	// Run opens import session with selected data source
 	Init(source string) error
 
 	// Next gets the next data entity from the source
@@ -29,9 +29,9 @@ type Operator interface {
 //	var cnt int
 //
 //	for _, src := range sources {
-//		err := impOp.Init(src)
+//		err := impOp.Run(src)
 //		if err != nil {
-//			errs = append(errs, errors.Wrapf(err, "on impOp.Init(%s)", src))
+//			errs = append(errs, errors.Wrapf(err, "on impOp.Run(%s)", src))
 //			continue
 //		}
 //

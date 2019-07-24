@@ -25,7 +25,7 @@ func (dcs *demo_server_http_jsschmhrStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (dcs *demo_server_http_jsschmhrStarter) Prepare(conf *config.Config, params, options basis.Options) error {
+func (dcs *demo_server_http_jsschmhrStarter) Prepare(conf *config.Config, params, options basis.Info) error {
 	l = logger.Get()
 
 	return nil

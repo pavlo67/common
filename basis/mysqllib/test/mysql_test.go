@@ -16,7 +16,7 @@ func TestDesc(t *testing.T) {
 	//		log.Fatal(err)
 	//	}
 	//	if conf == nil {
-	//		log.Fatal(nil.New("no config data after setup.Init()"))
+	//		log.Fatal(nil.New("no config data after setup.Run()"))
 	//	}
 	//	partKeys := config.PartKeys{
 	//		"mysql": "items",
@@ -40,9 +40,9 @@ func TestDesc(t *testing.T) {
 	//		log.Fatal(err)
 	//	}
 	//
-	//	stmt, err := dbh.Prepare("desc user")
+	//	stmt, err := dbh.Init("desc user")
 	//	if err != nil {
-	//		log.Println("err .Prepare:", err)
+	//		log.Println("err .Init:", err)
 	//	}
 	//	defer stmt.Close()
 	//
@@ -68,7 +68,7 @@ func TestDesc(t *testing.T) {
 	//		log.Fatal(err)
 	//	}
 	//	if conf == nil {
-	//		log.Fatal(nil.New("no config data after setup.Init()"))
+	//		log.Fatal(nil.New("no config data after setup.Run()"))
 	//	}
 	//	partKeys := config.PartKeys{
 	//		"mysql": "items",

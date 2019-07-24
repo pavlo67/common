@@ -1,4 +1,4 @@
-package crud_file
+package content_files
 
 import (
 	"os"
@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/punctum/basis"
-	"github.com/pavlo67/punctum/crud"
+	"github.com/pavlo67/punctum/content"
 	"github.com/pavlo67/punctum/starter"
 	"github.com/pavlo67/punctum/starter/config"
 	"github.com/pavlo67/punctum/starter/joiner"
@@ -14,50 +14,31 @@ import (
 )
 
 var l logger.Operator
-var _ starter.Operator = &crud_fileStarter{}
+var _ starter.Operator = &contentFilesStarter{}
 
 func Starter() starter.Operator {
-	return &crud_fileStarter{}
+	return &contentFilesStarter{}
 }
 
-type crud_fileStarter struct {
+type contentFilesStarter struct {
 	interfaceKey joiner.InterfaceKey
 	path         string
 	marshaler    basis.Marshaler
-	mapper       crud.Mapper
 }
 
-func (nms *crud_fileStarter) Name() string {
+func (nms *contentFilesStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (nms *crud_fileStarter) Prepare(conf *config.Config, options, runtimeOptions basis.Options) error {
+func (nms *contentFilesStarter) Init(conf *config.Config, options basis.Info) (info []basis.Info, err error) {
 	l = logger.Get()
 
 	var ok bool
 	nms.path, ok = options.String("path")
 	if !ok {
-		return errors.New("no path for crud_fileStarter.Prepare()")
+		return nil, errors.New("no path for contentFilesStarter.Init()")
 	}
-
-	nms.marshaler, ok = options["marshaler"].(basis.Marshaler)
-	if !ok || nms.marshaler == nil {
-		return errors.New("no marshaler for crud_fileStarter.Prepare()")
-	}
-
-	nms.mapper, ok = options["mapper"].(crud.Mapper)
-	if !ok || nms.mapper == nil {
-		return errors.New("no mapper for crud_fileStarter.Prepare()")
-	}
-
-	nms.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(crud.InterfaceKey)))
-
-	return nil
-}
-
-func (nms *crud_fileStarter) Check() (info []starter.Info, err error) {
 	fileinfo, err := os.Stat(nms.path)
-
 	if err != nil {
 		return nil, errors.Wrapf(err, "on check directory '%s'", nms.path)
 	}
@@ -66,10 +47,17 @@ func (nms *crud_fileStarter) Check() (info []starter.Info, err error) {
 		return nil, errors.Errorf("'%s' isn't a directory", nms.path)
 	}
 
+	nms.marshaler, ok = options["marshaler"].(basis.Marshaler)
+	if !ok || nms.marshaler == nil {
+		return nil, errors.New("no marshaler for contentFilesStarter.Init()")
+	}
+
+	nms.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(content.InterfaceKey)))
+
 	return nil, nil
 }
 
-func (nms *crud_fileStarter) Setup() error {
+func (nms *contentFilesStarter) Setup() error {
 	err := os.MkdirAll(nms.path, 0755)
 	if err != nil {
 		return errors.Wrapf(err, "on create directory '%s'", nms.path)
@@ -78,7 +66,7 @@ func (nms *crud_fileStarter) Setup() error {
 	return nil
 }
 
-func (nms *crud_fileStarter) Init(joiner joiner.Operator) error {
+func (nms *contentFilesStarter) Run(joiner joiner.Operator) error {
 
 	//var err error
 	//notesOp, err := New(

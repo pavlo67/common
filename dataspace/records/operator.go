@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/pavlo67/punctum/auth"
-	"github.com/pavlo67/punctum/crud"
 	"github.com/pavlo67/punctum/starter/joiner"
 
 	"github.com/pavlo67/punctum/dataspace"
@@ -46,7 +45,7 @@ type Operator interface {
 
 	Read(auth.ID, dataspace.ID) (*Item, error)
 
-	ReadList(auth.ID, crud.ReadOptions) ([]Item, *uint64, error)
+	ReadList(auth.ID, content.ListOptions) ([]Item, *uint64, error)
 
 	Update(auth.ID, Item) error
 

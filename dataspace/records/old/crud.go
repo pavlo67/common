@@ -167,7 +167,7 @@ package old
 //	return ObjectToData(obj)
 //}
 //
-//func (opCRUD OperatorCRUD) ReadList(userIS basis.UserIS, options *crud.ReadOptions) ([]crud.Contentus, uint64, error) {
+//func (opCRUD OperatorCRUD) ReadList(userIS basis.UserIS, options *content.ListOptions) ([]crud.Contentus, uint64, error) {
 //	objList, allCnt, err := opCRUD.Operator.ReadList(userIS, options)
 //	if err != nil {
 //		return nil, 0, err
@@ -294,8 +294,8 @@ package old
 //
 //			ISToCreate:        userIS,
 //			ISToCreateBad:     &userISNil,
-//			ToCreate:          toCreatePrivate,
-//			ExpectedCreateErr: nil,
+//			ToSave:          toCreatePrivate,
+//			ExpectedSaveErr: nil,
 //
 //			ISToRead:        userIS,
 //			ISToReadBad:     &userISAnother,
@@ -308,7 +308,7 @@ package old
 //
 //			ISToDelete:        userIS,
 //			ISToDeleteBad:     &userISAnother,
-//			ExpectedDeleteErr: nil,
+//			ExpectedRemoveErr: nil,
 //		},
 //
 //		// 1. all ok for private record,
@@ -320,8 +320,8 @@ package old
 //
 //			ISToCreate:        userIS,
 //			ISToCreateBad:     &userISNil,
-//			ToCreate:          toCreatePrivate,
-//			ExpectedCreateErr: nil,
+//			ToSave:          toCreatePrivate,
+//			ExpectedSaveErr: nil,
 //
 //			ISToRead:        userIS,
 //			ISToReadBad:     &userISNil,
@@ -334,7 +334,7 @@ package old
 //
 //			ISToDelete:        userIS,
 //			ISToDeleteBad:     &userISNil,
-//			ExpectedDeleteErr: nil,
+//			ExpectedRemoveErr: nil,
 //		},
 //
 //		// 2. all ok for public record,
@@ -347,8 +347,8 @@ package old
 //
 //			ISToCreate:        userIS,
 //			ISToCreateBad:     &userISNil,
-//			ToCreate:          toCreatePublic,
-//			ExpectedCreateErr: nil,
+//			ToSave:          toCreatePublic,
+//			ExpectedSaveErr: nil,
 //
 //			ISToRead:        userIS,
 //			ExpectedReadErr: nil,
@@ -360,7 +360,7 @@ package old
 //
 //			ISToDelete:        userIS,
 //			ISToDeleteBad:     &userISAnother,
-//			ExpectedDeleteErr: nil,
+//			ExpectedRemoveErr: nil,
 //		},
 //
 //		// 3. all ok for public record,
@@ -374,8 +374,8 @@ package old
 //
 //			ISToCreate:        userIS,
 //			ISToCreateBad:     &userISNil,
-//			ToCreate:          toCreatePublic,
-//			ExpectedCreateErr: nil,
+//			ToSave:          toCreatePublic,
+//			ExpectedSaveErr: nil,
 //
 //			ISToRead:        userISNil,
 //			ExpectedReadErr: nil,
@@ -387,7 +387,7 @@ package old
 //
 //			ISToDelete:        userIS,
 //			ISToDeleteBad:     &userISNil,
-//			ExpectedDeleteErr: nil,
+//			ExpectedRemoveErr: nil,
 //		},
 //	}
 //

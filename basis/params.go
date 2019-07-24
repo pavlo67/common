@@ -24,7 +24,7 @@ func (p Params) ByNum(num uint) string {
 	return p[num].Value
 }
 
-//func (p Options) AllExcept(names ...string) []string {
+//func (p Info) AllExcept(names ...string) []string {
 //	var values []string
 //
 //PARAM:

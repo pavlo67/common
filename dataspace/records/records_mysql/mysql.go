@@ -270,7 +270,7 @@ package records_mysql
 //
 //const onReadList = "on notesMySQL.ReadList"
 //
-//func (objOp *notesMySQL) ReadList(userIS auth.ID, options *crud.ReadOptions) ([]notes.Item, uint64, error) {
+//func (objOp *notesMySQL) ReadList(userIS auth.ID, options *content.ListOptions) ([]notes.Item, uint64, error) {
 //	var err error
 //	var values []interface{}
 //	var orderAndLimit, condition, conditionCompleted string
@@ -523,7 +523,7 @@ package records_mysql
 //var rePhrase = regexp.MustCompile(`^\s*".*"\s*$`)
 //var reDelimiter = regexp.MustCompile(`[\.,\s\t;:\-\+\!\?\(\)\{\}\[\]\/'"\*]+`)
 //
-//func (objOp *notesMySQL) ReadListByWords(userIS auth.ID, options *crud.ReadOptions, searched string) (objects []notes.Item, allCnt uint64, err error) {
+//func (objOp *notesMySQL) ReadListByWords(userIS auth.ID, options *content.ListOptions, searched string) (objects []notes.Item, allCnt uint64, err error) {
 //	if !rePhrase.MatchString(searched) {
 //		words := reDelimiter.Split(searched, -1)
 //		searched = ""
@@ -536,7 +536,7 @@ package records_mysql
 //
 //	selectorSearched := selectors.Match("name,content,tags", searched, "IN BOOLEAN MODE")
 //	if options == nil {
-//		options = &crud.ReadOptions{Selector: selectorSearched}
+//		options = &content.ListOptions{Selector: selectorSearched}
 //	} else if options.Selector == nil {
 //		options.Selector = selectorSearched
 //	} else {
@@ -547,7 +547,7 @@ package records_mysql
 //
 //const onReadListByTag = "on notesMySQL.ReadListByTag"
 //
-//func (objOp *notesMySQL) ReadListByTag(userIS auth.ID, options *crud.ReadOptions, tag string) (linkedObjs []notes.Item, allCnt uint64, parentIDs []string, err error) {
+//func (objOp *notesMySQL) ReadListByTag(userIS auth.ID, options *content.ListOptions, tag string) (linkedObjs []notes.Item, allCnt uint64, parentIDs []string, err error) {
 //	var linked []links.Linked
 //	if objOp.linksOp != nil {
 //		linked, err = objOp.linksOp.QueryByTag(userIS, tag)
@@ -578,7 +578,7 @@ package records_mysql
 //
 //	selectorTagged := selectors.FieldStr("id", linkedIDs...)
 //	if options == nil {
-//		options = &crud.ReadOptions{Selector: selectorTagged}
+//		options = &content.ListOptions{Selector: selectorTagged}
 //	} else if options.Selector == nil {
 //		options.Selector = selectorTagged
 //	} else {
@@ -713,7 +713,7 @@ package records_mysql
 ////func (objOp *notesMySQL) loadFixture(userIS auth.ID, selector selectors.Selector, fixture fixturer.Fixture) error {
 ////	var numDeleted, numLoaded int
 ////
-////	options := &crud.ReadOptions{Selector: selector}
+////	options := &content.ListOptions{Selector: selector}
 ////	objs, _, err := objOp.ReadList(userIS, options)
 ////	if err != nil {
 ////		log.Println(onloadFixture+"on read all data rows with fixture.Selector: ", err)

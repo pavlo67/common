@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	"github.com/pavlo67/punctum/basis"
-	"github.com/pavlo67/punctum/crud"
 	"github.com/pavlo67/punctum/processor/flow"
 	"github.com/pavlo67/punctum/processor/news"
 	"github.com/syndtr/goleveldb/leveldb/util"
@@ -95,7 +94,7 @@ const onReadList = "on newsLevelDB.ReadList()"
 
 // !!! opt.Selector should use iter.Key() only
 
-func (newsOp *newsLevelDB) ReadList(opt *crud.ReadOptions) ([]news.Item, *uint64, error) {
+func (newsOp *newsLevelDB) ReadList(opt *content.ListOptions) ([]news.Item, *uint64, error) {
 
 	var items []news.Item
 	var errs basis.Errors
@@ -131,7 +130,7 @@ const onDeleteList = "on newsLevelDB.DeleteList()"
 
 // !!! opt.Selector should use iter.Key() only
 
-func (newsOp *newsLevelDB) DeleteList(opt *crud.ReadOptions) error {
+func (newsOp *newsLevelDB) DeleteList(opt *content.ListOptions) error {
 	var errs basis.Errors
 
 	ranges, check, err := RangesAndCheck(opt)

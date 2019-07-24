@@ -25,7 +25,7 @@ func (fl *news_leveldbStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (fl *news_leveldbStarter) Prepare(cfg *config.Config, options, runtimeOptions basis.Options) error {
+func (fl *news_leveldbStarter) Prepare(cfg *config.Config, options, runtimeOptions basis.Info) error {
 	l = logger.Get()
 
 	var errs basis.Errors

@@ -4,7 +4,6 @@ import (
 	"log"
 	"strings"
 
-	"github.com/pavlo67/partes/crud"
 	"github.com/pavlo67/partes/crud/selectors"
 	"github.com/pavlo67/punctum/auth"
 	"github.com/pavlo67/punctum/basis"
@@ -105,7 +104,7 @@ func Linked(userIS auth.ID, objectsOp Operator, linksOp links.Operator, o *Item)
 		ids = append(ids, l.LinkedID)
 	}
 	selector := selectors.FieldEqual("id", ids...)
-	options := &crud.ReadOptions{Selector: selector, SortBy: []string{"name"}}
+	options := &content.ListOptions{Selector: selector, SortBy: []string{"name"}}
 	linkedObjects, _, err := objectsOp.ReadList(userIS, options)
 	if err != nil {
 		log.Print(err)

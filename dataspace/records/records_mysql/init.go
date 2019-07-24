@@ -36,7 +36,7 @@ func (nms *records_mysqlStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (nms *records_mysqlStarter) Prepare(conf *config.Config, options, runtimeOptions basis.Options) error {
+func (nms *records_mysqlStarter) Prepare(conf *config.Config, options, runtimeOptions basis.Info) error {
 
 	l = logger.Get()
 
