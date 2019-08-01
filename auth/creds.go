@@ -1,6 +1,6 @@
 package auth
 
-import "github.com/pavlo67/punctum/basis/encrlib"
+import "github.com/pavlo67/associatio/basis/encrlib"
 
 type CredsType string
 

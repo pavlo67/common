@@ -13,8 +13,8 @@ import (
 	"os"
 	"regexp"
 
-	"github.com/pavlo67/punctum/auth"
-	"github.com/pavlo67/punctum/server/server_http"
+	"github.com/pavlo67/associatio/auth"
+	"github.com/pavlo67/associatio/server/server_http"
 )
 
 var _ server_http.Operator = &serverHTTPJschmhr{}

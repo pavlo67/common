@@ -9,15 +9,15 @@ import (
 
 	"github.com/pavlo67/partes/crud/selectors"
 	"github.com/pavlo67/partes/libs/mysqllib"
-	"github.com/pavlo67/punctum/auth"
-	"github.com/pavlo67/punctum/basis"
-	"github.com/pavlo67/punctum/confidenter/groups"
-	"github.com/pavlo67/punctum/confidenter/rights"
-	"github.com/pavlo67/punctum/starter/config"
+	"github.com/pavlo67/associatio/auth"
+	"github.com/pavlo67/associatio/basis"
+	"github.com/pavlo67/associatio/confidenter/groups"
+	"github.com/pavlo67/associatio/confidenter/rights"
+	"github.com/pavlo67/associatio/starter/config"
 
 	"os"
 
-	"github.com/pavlo67/punctum/notebook/links"
+	"github.com/pavlo67/associatio/notebook/links"
 )
 
 // linksMySQL is a struct to implement Object interface using MySQL.

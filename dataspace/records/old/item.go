@@ -3,9 +3,9 @@ package old
 import (
 	"time"
 
-	"github.com/pavlo67/punctum/auth"
-	"github.com/pavlo67/punctum/confidenter/rights"
-	"github.com/pavlo67/punctum/notebook/links"
+	"github.com/pavlo67/associatio/auth"
+	"github.com/pavlo67/associatio/confidenter/rights"
+	"github.com/pavlo67/associatio/notebook/links"
 )
 
 const Private = "приватний запис"

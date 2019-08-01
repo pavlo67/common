@@ -3,8 +3,8 @@ package founts
 import (
 	"time"
 
-	"github.com/pavlo67/punctum/processor"
-	"github.com/pavlo67/punctum/starter/joiner"
+	"github.com/pavlo67/associatio/processor"
+	"github.com/pavlo67/associatio/starter/joiner"
 )
 
 const InterfaceKey joiner.InterfaceKey = "founts"

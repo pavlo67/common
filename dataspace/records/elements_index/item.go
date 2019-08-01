@@ -1,10 +1,10 @@
 package elements_index
 
 import (
-	"github.com/pavlo67/punctum/basis"
+	"github.com/pavlo67/associatio/basis"
 
-	"github.com/pavlo67/punctum/dataspace/records"
-	"github.com/pavlo67/punctum/starter/joiner"
+	"github.com/pavlo67/associatio/dataspace/records"
+	"github.com/pavlo67/associatio/starter/joiner"
 )
 
 type Item struct {

@@ -9,9 +9,9 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/punctum/basis"
-	"github.com/pavlo67/punctum/basis/selectors"
-	"github.com/pavlo67/punctum/content"
+	"github.com/pavlo67/associatio/basis"
+	"github.com/pavlo67/associatio/basis/selectors"
+	"github.com/pavlo67/associatio/content"
 )
 
 var _ content.Operator = &contentFiles{}
@@ -21,7 +21,7 @@ type contentFiles struct {
 	marshaler basis.Marshaler
 }
 
-const onNew = "on content_file.New()"
+const onNew = "on contentFiles.New()"
 
 func New(path string, marshaler basis.Marshaler) (*contentFiles, error) {
 	path = strings.TrimSpace(path)
@@ -42,7 +42,13 @@ func New(path string, marshaler basis.Marshaler) (*contentFiles, error) {
 	}, nil
 }
 
-const onSave = "on content_files.Save()"
+const onDescript = "on contentFiles.Descript()"
+
+func (cfOp contentFiles) Descript() (*content.Description, error) {
+	return nil, nil
+}
+
+const onSave = "on contentFiles.Save()"
 
 func (cfOp contentFiles) Save(item content.Item, options *content.SaveOptions) (id basis.ID, err error) {
 	data, err := cfOp.marshaler.Marshal(item)
@@ -59,7 +65,7 @@ func (cfOp contentFiles) Save(item content.Item, options *content.SaveOptions) (
 	return id, nil
 }
 
-const onRead = "on content_files.Read()"
+const onRead = "on contentFiles.Read()"
 
 func (cfOp contentFiles) Read(id basis.ID, options *content.ReadOptions) (*content.Item, error) {
 	data, err := ioutil.ReadFile(cfOp.path + string(id))
@@ -77,12 +83,12 @@ func (cfOp contentFiles) Read(id basis.ID, options *content.ReadOptions) (*conte
 	return &item, nil
 }
 
-const onList = "on content_files.List()"
+const onList = "on contentFiles.List()"
 
-func (cfOp contentFiles) List(selector *selectors.Term, options *content.ListOptions) ([]content.Brief, *content.Description, error) {
+func (cfOp contentFiles) List(selector *selectors.Term, options *content.ListOptions) ([]content.Brief, error) {
 	files, err := ioutil.ReadDir(cfOp.path)
 	if err != nil {
-		return nil, nil, errors.Wrapf(err, onList+" with path (%s)", cfOp.path)
+		return nil, errors.Wrapf(err, onList+" with path (%s)", cfOp.path)
 	}
 
 	var briefs []content.Brief
@@ -93,16 +99,16 @@ func (cfOp contentFiles) List(selector *selectors.Term, options *content.ListOpt
 
 		item, err := cfOp.Read(basis.ID(file.Name()), nil)
 		if err != nil {
-			return nil, nil, errors.Wrapf(err, onList)
+			return nil, errors.Wrapf(err, onList)
 		}
 
 		briefs = append(briefs, item.Brief)
 	}
 
-	return briefs, nil, nil
+	return briefs, nil
 }
 
-const onRemove = "on content_files.Remove()"
+const onRemove = "on contentFiles.Remove()"
 
 func (cfOp contentFiles) Remove(id basis.ID, options *content.RemoveOptions) error {
 	err := os.Remove(cfOp.path + string(id))

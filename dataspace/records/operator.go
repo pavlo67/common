@@ -3,13 +3,13 @@ package records
 import (
 	"time"
 
-	"github.com/pavlo67/punctum/auth"
-	"github.com/pavlo67/punctum/starter/joiner"
+	"github.com/pavlo67/associatio/auth"
+	"github.com/pavlo67/associatio/starter/joiner"
 
-	"github.com/pavlo67/punctum/dataspace"
-	"github.com/pavlo67/punctum/dataspace/content"
-	"github.com/pavlo67/punctum/dataspace/links"
-	"github.com/pavlo67/punctum/dataspace/vcs"
+	"github.com/pavlo67/associatio/dataspace"
+	"github.com/pavlo67/associatio/dataspace/content"
+	"github.com/pavlo67/associatio/dataspace/links"
+	"github.com/pavlo67/associatio/dataspace/vcs"
 )
 
 const InterfaceKey joiner.InterfaceKey = "records"

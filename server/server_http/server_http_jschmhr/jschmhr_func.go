@@ -9,11 +9,11 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 
-	"github.com/pavlo67/punctum/auth"
-	"github.com/pavlo67/punctum/basis"
-	"github.com/pavlo67/punctum/server"
-	"github.com/pavlo67/punctum/server/controller"
-	"github.com/pavlo67/punctum/server/server_http"
+	"github.com/pavlo67/associatio/auth"
+	"github.com/pavlo67/associatio/basis"
+	"github.com/pavlo67/associatio/server"
+	"github.com/pavlo67/associatio/server/controller"
+	"github.com/pavlo67/associatio/server/server_http"
 )
 
 func ServerPath(ep controller.Endpoint) string {

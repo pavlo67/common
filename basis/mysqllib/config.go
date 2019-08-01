@@ -9,7 +9,7 @@ import (
 
 	"database/sql"
 
-	"github.com/pavlo67/punctum/starter/config"
+	"github.com/pavlo67/associatio/starter/config"
 )
 
 func prepareTableComponents(mysqlConfig config.ServerAccess, tablesConfig map[string]config.MySQLTableComponent) (*sql.DB, map[string][]config.MySQLField, map[string][]config.MySQLIndex, error) {

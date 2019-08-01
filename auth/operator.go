@@ -3,8 +3,8 @@ package auth
 import (
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/punctum/basis"
-	"github.com/pavlo67/punctum/starter/joiner"
+	"github.com/pavlo67/associatio/basis"
+	"github.com/pavlo67/associatio/starter/joiner"
 )
 
 const InterfaceKey joiner.InterfaceKey = "auth"

@@ -5,10 +5,10 @@ import (
 
 	"github.com/mmcdole/gofeed"
 
-	"github.com/pavlo67/punctum/basis"
-	"github.com/pavlo67/punctum/processor/flow"
-	"github.com/pavlo67/punctum/processor/importer"
-	"github.com/pavlo67/punctum/processor/news"
+	"github.com/pavlo67/associatio/basis"
+	"github.com/pavlo67/associatio/processor/flow"
+	"github.com/pavlo67/associatio/processor/importer"
+	"github.com/pavlo67/associatio/processor/news"
 )
 
 const SourceTypeRSS flow.SourceType = "rss"

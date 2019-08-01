@@ -12,9 +12,9 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/pavlo67/punctum/auth"
-	"github.com/pavlo67/punctum/basis/addrlib"
-	"github.com/pavlo67/punctum/basis/encrlib"
+	"github.com/pavlo67/associatio/auth"
+	"github.com/pavlo67/associatio/basis/addrlib"
+	"github.com/pavlo67/associatio/basis/encrlib"
 )
 
 const Proto addrlib.Proto = "ecdsa://"

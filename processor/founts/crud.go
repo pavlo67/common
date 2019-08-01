@@ -7,11 +7,11 @@ import (
 	"github.com/pkg/errors"
 	"github.com/syndtr/goleveldb/leveldb"
 
-	"github.com/pavlo67/punctum/auth"
-	"github.com/pavlo67/punctum/basis"
-	"github.com/pavlo67/punctum/crud"
-	"github.com/pavlo67/punctum/processor"
-	"github.com/pavlo67/punctum/starter/joiner"
+	"github.com/pavlo67/associatio/auth"
+	"github.com/pavlo67/associatio/basis"
+	"github.com/pavlo67/associatio/crud"
+	"github.com/pavlo67/associatio/processor"
+	"github.com/pavlo67/associatio/starter/joiner"
 )
 
 const InterfaceKeyCRUD joiner.InterfaceKey = "founts.crud"

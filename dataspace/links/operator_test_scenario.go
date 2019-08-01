@@ -10,8 +10,8 @@ import (
 
 	"sort"
 
-	"github.com/pavlo67/punctum/auth"
-	"github.com/pavlo67/punctum/basis"
+	"github.com/pavlo67/associatio/auth"
+	"github.com/pavlo67/associatio/basis"
 )
 
 // TODO: test .Selector

@@ -3,9 +3,9 @@ package vcs
 import (
 	"time"
 
-	"github.com/pavlo67/punctum/auth"
-	"github.com/pavlo67/punctum/crud"
-	"github.com/pavlo67/punctum/dataspace"
+	"github.com/pavlo67/associatio/auth"
+	"github.com/pavlo67/associatio/crud"
+	"github.com/pavlo67/associatio/dataspace"
 )
 
 const TemporaryDomain = "..." // to create "temporary commit" that can be used in GetDiffVCS

@@ -4,14 +4,14 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/partes/libs/mysqllib"
-	"github.com/pavlo67/punctum/basis"
-	"github.com/pavlo67/punctum/basis/filelib"
-	"github.com/pavlo67/punctum/confidenter/groups"
-	"github.com/pavlo67/punctum/notebook/links"
-	"github.com/pavlo67/punctum/starter"
-	"github.com/pavlo67/punctum/starter/config"
-	"github.com/pavlo67/punctum/starter/joiner"
-	"github.com/pavlo67/punctum/starter/logger"
+	"github.com/pavlo67/associatio/basis"
+	"github.com/pavlo67/associatio/basis/filelib"
+	"github.com/pavlo67/associatio/confidenter/groups"
+	"github.com/pavlo67/associatio/notebook/links"
+	"github.com/pavlo67/associatio/starter"
+	"github.com/pavlo67/associatio/starter/config"
+	"github.com/pavlo67/associatio/starter/joiner"
+	"github.com/pavlo67/associatio/starter/logger"
 	"go.uber.org/zap"
 )
 

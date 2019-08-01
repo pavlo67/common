@@ -5,9 +5,9 @@ import (
 
 	"github.com/GehirnInc/crypt"
 	"github.com/pavlo67/partes/confidenter/auth"
-	"github.com/pavlo67/punctum/auth"
-	"github.com/pavlo67/punctum/basis"
-	"github.com/pavlo67/punctum/basis/encrlib"
+	"github.com/pavlo67/associatio/auth"
+	"github.com/pavlo67/associatio/basis"
+	"github.com/pavlo67/associatio/basis/encrlib"
 )
 
 var _ auth.Operator = &isentityLoginStub{}

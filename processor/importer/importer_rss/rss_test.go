@@ -3,7 +3,7 @@ package importer_rss
 import (
 	"testing"
 
-	"github.com/pavlo67/punctum/processor/importer"
+	"github.com/pavlo67/associatio/processor/importer"
 )
 
 var testCases = []importer.ImporterTestCase{

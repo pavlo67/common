@@ -10,12 +10,12 @@ import (
 
 	"github.com/pavlo67/partes/crud"
 	"github.com/pavlo67/partes/crud/selectors"
-	"github.com/pavlo67/punctum/auth"
-	"github.com/pavlo67/punctum/basis"
-	"github.com/pavlo67/punctum/starter/config"
+	"github.com/pavlo67/associatio/auth"
+	"github.com/pavlo67/associatio/basis"
+	"github.com/pavlo67/associatio/starter/config"
 
-	"github.com/pavlo67/punctum/confidenter/groups"
-	"github.com/pavlo67/punctum/confidenter/rights"
+	"github.com/pavlo67/associatio/confidenter/groups"
+	"github.com/pavlo67/associatio/confidenter/rights"
 )
 
 var _ crud.Operator = &crudMySQL{}

@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/pavlo67/punctum/auth"
+	"github.com/pavlo67/associatio/auth"
 )
 
 type Endpoint struct {

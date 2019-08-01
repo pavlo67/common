@@ -1,10 +1,10 @@
 package content
 
 import (
-	"github.com/pavlo67/punctum/auth"
-	"github.com/pavlo67/punctum/basis"
-	"github.com/pavlo67/punctum/basis/selectors"
-	"github.com/pavlo67/punctum/starter/joiner"
+	"github.com/pavlo67/associatio/auth"
+	"github.com/pavlo67/associatio/basis"
+	"github.com/pavlo67/associatio/basis/selectors"
+	"github.com/pavlo67/associatio/starter/joiner"
 )
 
 const InterfaceKey joiner.InterfaceKey = "content"
@@ -24,13 +24,16 @@ type Item struct {
 }
 
 type Description struct {
-	Length *int64 `json:"length, omitempty"`
+	Exemplar interface{} `json:"exemplar,omitempty"`
+	Length   *int64      `json:"length,omitempty"`
 }
 
 type Operator interface {
+	Descript() (*Description, error)
+
 	Save(content Item, options *SaveOptions) (id basis.ID, err error)
 
-	List(selector *selectors.Term, options *ListOptions) ([]Brief, *Description, error)
+	List(selector *selectors.Term, options *ListOptions) ([]Brief, error)
 
 	Read(id basis.ID, options *ReadOptions) (*Item, error)
 
@@ -40,7 +43,8 @@ type Operator interface {
 type Cleaner func() error
 
 type SaveOptions struct {
-	AuthID auth.ID
+	AuthID      auth.ID
+	DontReplace bool
 }
 
 type ListOptions struct {
@@ -54,6 +58,7 @@ type ReadOptions struct {
 
 type RemoveOptions struct {
 	AuthID auth.ID
+	Delete bool
 }
 
 //	ID        dataspace.ID `bson:"id"                   json:"id"`

@@ -5,9 +5,9 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/punctum/basis"
-	"github.com/pavlo67/punctum/processor/importer/importer_rss"
-	"github.com/pavlo67/punctum/processor/news"
+	"github.com/pavlo67/associatio/basis"
+	"github.com/pavlo67/associatio/processor/importer/importer_rss"
+	"github.com/pavlo67/associatio/processor/news"
 )
 
 func Load(urls []string, newsOp news.Operator) (numAll, numNewAll int, errs basis.Errors) {

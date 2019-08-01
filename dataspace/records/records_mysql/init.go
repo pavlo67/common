@@ -1,14 +1,14 @@
 package records_mysql
 
 import (
-	"github.com/pavlo67/punctum/basis"
-	"github.com/pavlo67/punctum/basis/filelib"
-	"github.com/pavlo67/punctum/basis/mysqllib"
-	"github.com/pavlo67/punctum/dataspace/records"
-	"github.com/pavlo67/punctum/starter"
-	"github.com/pavlo67/punctum/starter/config"
-	"github.com/pavlo67/punctum/starter/joiner"
-	"github.com/pavlo67/punctum/starter/logger"
+	"github.com/pavlo67/associatio/basis"
+	"github.com/pavlo67/associatio/basis/filelib"
+	"github.com/pavlo67/associatio/basis/mysqllib"
+	"github.com/pavlo67/associatio/dataspace/records"
+	"github.com/pavlo67/associatio/starter"
+	"github.com/pavlo67/associatio/starter/config"
+	"github.com/pavlo67/associatio/starter/joiner"
+	"github.com/pavlo67/associatio/starter/logger"
 )
 
 var l logger.Operator

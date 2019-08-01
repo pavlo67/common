@@ -3,12 +3,12 @@ package auth_stub
 import (
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/punctum/auth"
-	"github.com/pavlo67/punctum/basis"
-	"github.com/pavlo67/punctum/starter"
-	"github.com/pavlo67/punctum/starter/config"
-	"github.com/pavlo67/punctum/starter/joiner"
-	"github.com/pavlo67/punctum/starter/logger"
+	"github.com/pavlo67/associatio/auth"
+	"github.com/pavlo67/associatio/basis"
+	"github.com/pavlo67/associatio/starter"
+	"github.com/pavlo67/associatio/starter/config"
+	"github.com/pavlo67/associatio/starter/joiner"
+	"github.com/pavlo67/associatio/starter/logger"
 )
 
 func Starter() starter.Operator {

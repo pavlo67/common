@@ -10,7 +10,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/yosuke-furukawa/json5/encoding/json5"
 
-	"github.com/pavlo67/punctum/basis"
+	"github.com/pavlo67/associatio/basis"
 )
 
 type ServerComponentsIndex struct {
