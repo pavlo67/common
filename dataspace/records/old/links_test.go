@@ -5,10 +5,10 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/pavlo67/associatio/auth"
-	"github.com/pavlo67/associatio/confidenter"
-	"github.com/pavlo67/associatio/confidenter/groups/groupsstub"
-	"github.com/pavlo67/associatio/notebook/notes"
+	"github.com/pavlo67/constructor/auth"
+	"github.com/pavlo67/constructor/confidenter"
+	"github.com/pavlo67/constructor/confidenter/groups/groupsstub"
+	"github.com/pavlo67/constructor/notebook/notes"
 )
 
 func TestFilterLinks(t *testing.T) {

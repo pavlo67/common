@@ -1,7 +1,7 @@
 package server_http
 
 import (
-	"github.com/pavlo67/associatio/basis"
+	"github.com/pavlo67/constructor/basis"
 )
 
 // REST -------------------------------------------------------------------------------------

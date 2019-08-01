@@ -10,17 +10,17 @@ import (
 	"strings"
 
 	"github.com/pavlo67/partes/crud/selectors"
-	"github.com/pavlo67/associatio/auth"
-	"github.com/pavlo67/associatio/basis"
-	"github.com/pavlo67/associatio/basis/filelib"
-	"github.com/pavlo67/associatio/basis/strlib"
-	"github.com/pavlo67/associatio/confidenter/auth"
-	"github.com/pavlo67/associatio/confidenter/groups"
-	"github.com/pavlo67/associatio/confidenter/rights"
-	"github.com/pavlo67/associatio/confidenter/users"
-	"github.com/pavlo67/associatio/notebook/notes"
+	"github.com/pavlo67/constructor/auth"
+	"github.com/pavlo67/constructor/basis"
+	"github.com/pavlo67/constructor/basis/filelib"
+	"github.com/pavlo67/constructor/basis/strlib"
+	"github.com/pavlo67/constructor/confidenter/auth"
+	"github.com/pavlo67/constructor/confidenter/groups"
+	"github.com/pavlo67/constructor/confidenter/rights"
+	"github.com/pavlo67/constructor/confidenter/users"
+	"github.com/pavlo67/constructor/notebook/notes"
 
-	"github.com/pavlo67/associatio/things_old/files"
+	"github.com/pavlo67/constructor/things_old/files"
 	"github.com/pkg/errors"
 )
 

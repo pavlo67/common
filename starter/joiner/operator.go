@@ -7,7 +7,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/associatio/basis"
+	"github.com/pavlo67/constructor/basis"
 )
 
 type InterfaceKey string

@@ -1,11 +1,11 @@
-package controller
+package server_http
 
 import (
 	"net/url"
 	"regexp"
 	"strings"
 
-	"github.com/pavlo67/associatio/auth"
+	"github.com/pavlo67/constructor/auth"
 )
 
 type Endpoint struct {

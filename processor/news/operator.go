@@ -3,8 +3,8 @@ package news
 import (
 	"time"
 
-	"github.com/pavlo67/associatio/processor/flow"
-	"github.com/pavlo67/associatio/starter/joiner"
+	"github.com/pavlo67/constructor/processor/flow"
+	"github.com/pavlo67/constructor/starter/joiner"
 )
 
 const InterfaceKey joiner.InterfaceKey = "news"

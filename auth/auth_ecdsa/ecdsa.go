@@ -12,9 +12,9 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/pavlo67/associatio/auth"
-	"github.com/pavlo67/associatio/basis/addrlib"
-	"github.com/pavlo67/associatio/basis/encrlib"
+	"github.com/pavlo67/constructor/auth"
+	"github.com/pavlo67/constructor/basis/addrlib"
+	"github.com/pavlo67/constructor/basis/encrlib"
 )
 
 const Proto addrlib.Proto = "ecdsa://"
@@ -45,7 +45,7 @@ func New(numberedIDs []string) (auth.Operator, error) {
 }
 
 // 	SetCreds ignores all input parameters, creates new "BTC identity" and returns it
-func (*identityECDSA) SetCreds(*auth.ID, []auth.Creds, ...auth.Creds) (*auth.User, []auth.Creds, error) {
+func (*identityECDSA) SetCreds(*auth.ID, []auth.Creds) (*auth.User, []auth.Creds, error) {
 	privKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
 		return nil, nil, err
@@ -73,7 +73,7 @@ func (*identityECDSA) SetCreds(*auth.ID, []auth.Creds, ...auth.Creds) (*auth.Use
 
 const proto = `ecdsa://`
 
-func (is *identityECDSA) Authorize(toAuth ...auth.Creds) (*auth.User, []auth.Creds, error) {
+func (is *identityECDSA) Authorize(toAuth []auth.Creds) (*auth.User, []auth.Creds, error) {
 	var publKeyAddress, publKeyEncoded string
 	var contentToSignature, numberToSignature, signature []byte
 

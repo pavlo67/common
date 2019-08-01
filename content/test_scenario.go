@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/pavlo67/associatio/basis"
+	"github.com/pavlo67/constructor/basis"
 )
 
 type OperatorTestCase struct {

@@ -8,7 +8,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/associatio/starter/config"
+	"github.com/pavlo67/constructor/starter/config"
 )
 
 const FieldNotFound = "field not found"

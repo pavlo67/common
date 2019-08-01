@@ -7,11 +7,11 @@ package content_files
 //	"github.com/pavlo67/partes/confidenter/groups"
 //	"github.com/pavlo67/partes/confidenter/groups/groupsmysql"
 //	"github.com/pavlo67/partes/things_old/generastub"
-//	"github.com/pavlo67/associatio/crud"
-//	"github.com/pavlo67/associatio/dataspace/links"
-//	"github.com/pavlo67/associatio/dataspace/links/links_mysql"
-//	"github.com/pavlo67/associatio/starter"
-//	"github.com/pavlo67/associatio/starter/joiner"
+//	"github.com/pavlo67/constructor/crud"
+//	"github.com/pavlo67/constructor/dataspace/links"
+//	"github.com/pavlo67/constructor/dataspace/links/links_mysql"
+//	"github.com/pavlo67/constructor/starter"
+//	"github.com/pavlo67/constructor/starter/joiner"
 //)
 //
 //func TestCRUD(t *testing.T) {

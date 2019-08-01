@@ -1,9 +1,9 @@
 package links
 
 import (
-	"github.com/pavlo67/associatio/auth"
-	"github.com/pavlo67/associatio/basis"
-	"github.com/pavlo67/associatio/starter/joiner"
+	"github.com/pavlo67/constructor/auth"
+	"github.com/pavlo67/constructor/basis"
+	"github.com/pavlo67/constructor/starter/joiner"
 )
 
 const InterfaceKey joiner.InterfaceKey = "links"

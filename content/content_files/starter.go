@@ -5,12 +5,12 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/associatio/basis"
-	"github.com/pavlo67/associatio/content"
-	"github.com/pavlo67/associatio/starter"
-	"github.com/pavlo67/associatio/starter/config"
-	"github.com/pavlo67/associatio/starter/joiner"
-	"github.com/pavlo67/associatio/starter/logger"
+	"github.com/pavlo67/constructor/basis"
+	"github.com/pavlo67/constructor/content"
+	"github.com/pavlo67/constructor/starter"
+	"github.com/pavlo67/constructor/starter/config"
+	"github.com/pavlo67/constructor/starter/joiner"
+	"github.com/pavlo67/constructor/starter/logger"
 )
 
 var l logger.Operator

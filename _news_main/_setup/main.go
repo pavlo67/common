@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/pavlo67/associatio/basis/filelib"
-	"github.com/pavlo67/associatio/starter"
-	"github.com/pavlo67/associatio/starter/joiner"
+	"github.com/pavlo67/constructor/basis/filelib"
+	"github.com/pavlo67/constructor/starter"
+	"github.com/pavlo67/constructor/starter/joiner"
 
-	"github.com/pavlo67/associatio/processor/_starter_process_rsss_rss/process_rss_config"
+	"github.com/pavlo67/constructor/processor/_starter_process_rsss_rss/process_rss_config"
 )
 
 var setup = flag.Bool("setup", false, "recreate structures for the selected (or all if no) component")

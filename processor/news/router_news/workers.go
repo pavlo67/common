@@ -6,10 +6,10 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/associatio/basis"
-	"github.com/pavlo67/associatio/crud"
-	"github.com/pavlo67/associatio/server"
-	"github.com/pavlo67/associatio/server/controller"
+	"github.com/pavlo67/constructor/basis"
+	"github.com/pavlo67/constructor/crud"
+	"github.com/pavlo67/constructor/server"
+	"github.com/pavlo67/constructor/server/controller"
 )
 
 type URLs []string

@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/pavlo67/associatio/basis"
-	"github.com/pavlo67/associatio/starter/config"
+	"github.com/pavlo67/constructor/basis"
+	"github.com/pavlo67/constructor/starter/config"
 	"github.com/pkg/errors"
 )
 

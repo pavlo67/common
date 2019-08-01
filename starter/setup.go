@@ -9,7 +9,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/associatio/starter/config"
+	"github.com/pavlo67/constructor/starter/config"
 )
 
 func Setup(conf *config.Config, starters []Starter, components []string, label string) error {

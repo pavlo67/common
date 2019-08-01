@@ -6,15 +6,14 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/associatio/auth"
-	"github.com/pavlo67/associatio/basis"
-	"github.com/pavlo67/associatio/basis/filelib"
-	"github.com/pavlo67/associatio/server/controller"
-	"github.com/pavlo67/associatio/server/server_http"
-	"github.com/pavlo67/associatio/starter"
-	"github.com/pavlo67/associatio/starter/config"
-	"github.com/pavlo67/associatio/starter/joiner"
-	"github.com/pavlo67/associatio/starter/logger"
+	"github.com/pavlo67/constructor/auth"
+	"github.com/pavlo67/constructor/basis"
+	"github.com/pavlo67/constructor/basis/filelib"
+	"github.com/pavlo67/constructor/server/server_http"
+	"github.com/pavlo67/constructor/starter"
+	"github.com/pavlo67/constructor/starter/config"
+	"github.com/pavlo67/constructor/starter/joiner"
+	"github.com/pavlo67/constructor/starter/logger"
 )
 
 func Starter() starter.Operator {
@@ -26,24 +25,24 @@ var _ starter.Operator = &server_http_jschmhrStarter{}
 
 type server_http_jschmhrStarter struct {
 	interfaceKey       joiner.InterfaceKey
-	interfaceKeyRouter joiner.InterfaceKey
+	// interfaceKeyRouter joiner.InterfaceKey
 	config             config.ServerTLS
 
-	htmlTemplate string
-	staticPath   string
+	staticPaths        map[string]string
 }
 
 func (ss *server_http_jschmhrStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *server_http_jschmhrStarter) Prepare(conf *config.Config, options, runtimeOptions basis.Info) error {
+
+func (ss *server_http_jschmhrStarter) Init(conf *config.Config, options basis.Info) (info []basis.Info, err error) {
 	l = logger.Get()
 
 	var errs basis.Errors
 
 	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(server_http.InterfaceKey)))
-	ss.interfaceKeyRouter = joiner.InterfaceKey(options.StringDefault("interface_key_router", string(controller.InterfaceKey)))
+	// ss.interfaceKeyRouter = joiner.InterfaceKey(options.StringDefault("interface_key_router", string(controller.InterfaceKey)))
 
 	ss.config, errs = conf.Server(options.StringDefault("config_server_key", "default"), errs)
 	if ss.config.Port <= 0 {
@@ -65,23 +64,24 @@ func (ss *server_http_jschmhrStarter) Prepare(conf *config.Config, options, runt
 		} else if len(htmlTemplate) < 1 {
 			errs = append(errs, errors.Errorf("empty template data file: '%s'", templatePath))
 		}
-		ss.htmlTemplate = string(htmlTemplate)
 	}
 
-	ss.staticPath = options.StringDefault("static_path", "")
+	// TODO: use more then one static path
+	if staticPath, ok := options.String("static_path"); ok {
+		ss.staticPaths = map[string]string{"static": staticPath}
+	}
 
-	return errs.Err()
+	return nil, errs.Err()
 }
 
-func (ss *server_http_jschmhrStarter) Check() (info []starter.Info, err error) {
-	return nil, nil
-}
 
 func (ss *server_http_jschmhrStarter) Setup() error {
 	return nil
 }
 
-func (ss *server_http_jschmhrStarter) Init(joiner joiner.Operator) error {
+
+
+func (ss *server_http_jschmhrStarter) Run(joiner joiner.Operator) error {
 	identOpsMap := map[auth.CredsType][]auth.Operator{}
 
 	identOpsPtr := joiner.ComponentsAll(auth.InterfaceKey)
@@ -107,8 +107,8 @@ func (ss *server_http_jschmhrStarter) Init(joiner joiner.Operator) error {
 		return errors.Wrap(err, "can't init serverHTTPJschmhr.Operator")
 	}
 
-	if ss.staticPath != "" {
-		srvOp.HandleFiles("/static/*filepath", ss.staticPath, nil)
+	for path, staticPath := range ss.staticPaths {
+		srvOp.HandleFiles("/" + path + "/*filepath", staticPath, nil)
 	}
 
 	err = joiner.JoinInterface(srvOp, ss.interfaceKey)
@@ -116,10 +116,10 @@ func (ss *server_http_jschmhrStarter) Init(joiner joiner.Operator) error {
 		return errors.Wrapf(err, "can't join serverHTTPJschmhr srvOp as server.Operator with key '%s'", ss.interfaceKey)
 	}
 
-	err = joiner.JoinInterface(srvOp, ss.interfaceKeyRouter)
-	if err != nil {
-		return errors.Wrapf(err, "can't join serverHTTPJschmhr srvOp as router.Operator with key '%s'", ss.interfaceKeyRouter)
-	}
+	//err = joiner.JoinInterface(srvOp, ss.interfaceKeyRouter)
+	//if err != nil {
+	//	return errors.Wrapf(err, "can't join serverHTTPJschmhr srvOp as router.Operator with key '%s'", ss.interfaceKeyRouter)
+	//}
 
 	return nil
 }

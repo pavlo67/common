@@ -1,9 +1,9 @@
 package starter
 
 import (
-	"github.com/pavlo67/associatio/basis"
-	"github.com/pavlo67/associatio/starter/config"
-	"github.com/pavlo67/associatio/starter/joiner"
+	"github.com/pavlo67/constructor/basis"
+	"github.com/pavlo67/constructor/starter/config"
+	"github.com/pavlo67/constructor/starter/joiner"
 )
 
 //type Info struct {
@@ -30,6 +30,20 @@ type Operator interface {
 type Starter struct {
 	Operator
 	Options basis.Info
+}
+
+func (starter Starter) CorrectedOptions(options basis.Info) basis.Info {
+	newOptions := basis.Info{}
+
+	for k, v := range starter.Options {
+		newOptions[k] = v
+	}
+
+	for k, v := range options {
+		newOptions[k] = v
+	}
+
+	return newOptions
 }
 
 //type Runner interface {

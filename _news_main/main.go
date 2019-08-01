@@ -6,13 +6,13 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/pavlo67/associatio/basis/filelib"
-	"github.com/pavlo67/associatio/server/server_http"
-	"github.com/pavlo67/associatio/starter"
-	"github.com/pavlo67/associatio/starter/config"
-	"github.com/pavlo67/associatio/starter/logger"
+	"github.com/pavlo67/constructor/basis/filelib"
+	"github.com/pavlo67/constructor/server/server_http"
+	"github.com/pavlo67/constructor/starter"
+	"github.com/pavlo67/constructor/starter/config"
+	"github.com/pavlo67/constructor/starter/logger"
 
-	"github.com/pavlo67/associatio/_news_main/news_starters"
+	"github.com/pavlo67/constructor/_news_main/news_starters"
 )
 
 //var setup = flag.Bool("setup", false, "recreate structures for the selected (or all if no) component")

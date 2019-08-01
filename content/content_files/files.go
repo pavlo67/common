@@ -9,9 +9,9 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/associatio/basis"
-	"github.com/pavlo67/associatio/basis/selectors"
-	"github.com/pavlo67/associatio/content"
+	"github.com/pavlo67/constructor/basis"
+	"github.com/pavlo67/constructor/basis/selectors"
+	"github.com/pavlo67/constructor/content"
 )
 
 var _ content.Operator = &contentFiles{}

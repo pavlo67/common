@@ -5,10 +5,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/pavlo67/associatio/basis"
-	"github.com/pavlo67/associatio/basis/filelib"
-	"github.com/pavlo67/associatio/starter/config"
-	"github.com/pavlo67/associatio/starter/joiner"
+	"github.com/pavlo67/constructor/basis"
+	"github.com/pavlo67/constructor/basis/filelib"
+	"github.com/pavlo67/constructor/starter/config"
+	"github.com/pavlo67/constructor/starter/joiner"
 )
 
 var conf *config.Config

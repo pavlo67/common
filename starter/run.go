@@ -8,18 +8,20 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/associatio/basis"
-	"github.com/pavlo67/associatio/starter/config"
-	"github.com/pavlo67/associatio/starter/joiner"
-	"github.com/pavlo67/associatio/starter/logger"
+	"github.com/pavlo67/constructor/basis"
+	"github.com/pavlo67/constructor/starter/config"
+	"github.com/pavlo67/constructor/starter/joiner"
+	"github.com/pavlo67/constructor/starter/logger"
 )
 
-func StartComponent(c Starter, conf *config.Config, runtimeOptions basis.Info, joinerOp joiner.Operator) error {
+func StartComponent(c Starter, conf *config.Config, args []string,  joinerOp joiner.Operator) error {
 	l := logger.Get()
 
 	l.Info("checking component: ", c.Name())
 
-	info, err := c.Init(conf, c.Options, runtimeOptions)
+	startOptions := c.CorrectedOptions(ReadOptions(args))
+
+	info, err := c.Init(conf, startOptions)
 	for _, i := range info {
 		log.Println(i)
 	}
@@ -36,6 +38,8 @@ func StartComponent(c Starter, conf *config.Config, runtimeOptions basis.Info, j
 }
 
 func ReadOptions(args []string) basis.Info {
+	// TODO!!!
+
 	return nil
 }
 
@@ -46,11 +50,10 @@ func Run(starters []Starter, conf *config.Config, args []string, label string) (
 		return nil, errors.New("no config data for starter.Run()")
 	}
 
-	runtimeOptions := ReadOptions(args)
 
 	joinerOp := joiner.New()
 	for _, c := range starters {
-		err := StartComponent(c, conf, runtimeOptions, joinerOp)
+		err := StartComponent(c, conf, args, joinerOp)
 		if err != nil {
 			return joinerOp, err
 		}

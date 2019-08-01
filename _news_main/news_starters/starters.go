@@ -1,13 +1,13 @@
 package news_starters
 
 import (
-	"github.com/pavlo67/associatio/starter"
+	"github.com/pavlo67/constructor/starter"
 
-	"github.com/pavlo67/associatio/auth/auth_ecdsa"
-	"github.com/pavlo67/associatio/processor/founts/founts_leveldb"
-	"github.com/pavlo67/associatio/processor/news/news_leveldb"
-	"github.com/pavlo67/associatio/processor/news/router_news"
-	"github.com/pavlo67/associatio/server/server_http/server_http_jschmhr"
+	"github.com/pavlo67/constructor/auth/auth_ecdsa"
+	"github.com/pavlo67/constructor/processor/founts/founts_leveldb"
+	"github.com/pavlo67/constructor/processor/news/news_leveldb"
+	"github.com/pavlo67/constructor/processor/news/router_news"
+	"github.com/pavlo67/constructor/server/server_http/server_http_jschmhr"
 )
 
 func Starters(routerStarters ...starter.Starter) ([]starter.Starter, string) {

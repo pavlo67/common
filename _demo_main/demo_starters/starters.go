@@ -1,13 +1,13 @@
 package demo_starters
 
 import (
-	"github.com/pavlo67/associatio/auth/auth_ecdsa"
-	"github.com/pavlo67/associatio/basis"
-	"github.com/pavlo67/associatio/basis/filelib"
-	"github.com/pavlo67/associatio/server/server_http/server_http_jschmhr"
-	"github.com/pavlo67/associatio/starter"
+	"github.com/pavlo67/constructor/auth/auth_ecdsa"
+	"github.com/pavlo67/constructor/basis"
+	"github.com/pavlo67/constructor/basis/filelib"
+	"github.com/pavlo67/constructor/server/server_http/server_http_jschmhr"
+	"github.com/pavlo67/constructor/starter"
 
-	"github.com/pavlo67/associatio/_demo_main/demo_server_http"
+	"github.com/pavlo67/constructor/_demo_main/demo_server_http"
 )
 
 func Starters() ([]starter.Starter, string) {

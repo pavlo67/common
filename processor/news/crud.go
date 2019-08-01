@@ -1,7 +1,7 @@
 package news
 
 import (
-	"github.com/pavlo67/associatio/starter/joiner"
+	"github.com/pavlo67/constructor/starter/joiner"
 )
 
 const InterfaceKeyCRUD joiner.InterfaceKey = "flow.crud"

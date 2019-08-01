@@ -1,9 +1,9 @@
 package importer
 
 import (
-	"github.com/pavlo67/associatio/starter/joiner"
+	"github.com/pavlo67/constructor/starter/joiner"
 
-	"github.com/pavlo67/associatio/processor/news"
+	"github.com/pavlo67/constructor/processor/news"
 )
 
 const InterfaceKey joiner.InterfaceKey = "importer"

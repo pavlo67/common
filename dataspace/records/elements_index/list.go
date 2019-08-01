@@ -3,10 +3,10 @@ package elements_index
 import (
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/associatio/basis"
-	"github.com/pavlo67/associatio/starter/joiner"
+	"github.com/pavlo67/constructor/basis"
+	"github.com/pavlo67/constructor/starter/joiner"
 
-	"github.com/pavlo67/associatio/dataspace/records"
+	"github.com/pavlo67/constructor/dataspace/records"
 )
 
 func All(joinerOp joiner.Operator) ([]Item, basis.Errors) {

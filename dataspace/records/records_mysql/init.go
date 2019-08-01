@@ -1,14 +1,14 @@
 package records_mysql
 
 import (
-	"github.com/pavlo67/associatio/basis"
-	"github.com/pavlo67/associatio/basis/filelib"
-	"github.com/pavlo67/associatio/basis/mysqllib"
-	"github.com/pavlo67/associatio/dataspace/records"
-	"github.com/pavlo67/associatio/starter"
-	"github.com/pavlo67/associatio/starter/config"
-	"github.com/pavlo67/associatio/starter/joiner"
-	"github.com/pavlo67/associatio/starter/logger"
+	"github.com/pavlo67/constructor/basis"
+	"github.com/pavlo67/constructor/basis/filelib"
+	"github.com/pavlo67/constructor/basis/mysqllib"
+	"github.com/pavlo67/constructor/dataspace/records"
+	"github.com/pavlo67/constructor/starter"
+	"github.com/pavlo67/constructor/starter/config"
+	"github.com/pavlo67/constructor/starter/joiner"
+	"github.com/pavlo67/constructor/starter/logger"
 )
 
 var l logger.Operator

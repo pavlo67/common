@@ -3,12 +3,12 @@ package auth_ecdsa
 import (
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/associatio/auth"
-	"github.com/pavlo67/associatio/basis"
-	"github.com/pavlo67/associatio/starter"
-	"github.com/pavlo67/associatio/starter/config"
-	"github.com/pavlo67/associatio/starter/joiner"
-	"github.com/pavlo67/associatio/starter/logger"
+	"github.com/pavlo67/constructor/auth"
+	"github.com/pavlo67/constructor/basis"
+	"github.com/pavlo67/constructor/starter"
+	"github.com/pavlo67/constructor/starter/config"
+	"github.com/pavlo67/constructor/starter/joiner"
+	"github.com/pavlo67/constructor/starter/logger"
 )
 
 func Starter() starter.Operator {

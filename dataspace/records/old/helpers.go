@@ -8,10 +8,10 @@ import (
 	"strconv"
 
 	"github.com/pavlo67/partes/crud/selectors"
-	"github.com/pavlo67/associatio/auth"
-	"github.com/pavlo67/associatio/basis"
-	"github.com/pavlo67/associatio/notebook/links"
-	"github.com/pavlo67/associatio/things_old/files"
+	"github.com/pavlo67/constructor/auth"
+	"github.com/pavlo67/constructor/basis"
+	"github.com/pavlo67/constructor/notebook/links"
+	"github.com/pavlo67/constructor/things_old/files"
 )
 
 //func RViewDefault(dataManagers rights.Managers) auth.ID {

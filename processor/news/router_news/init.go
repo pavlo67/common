@@ -3,14 +3,14 @@ package router_news
 import (
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/associatio/basis"
-	"github.com/pavlo67/associatio/starter"
-	"github.com/pavlo67/associatio/starter/config"
-	"github.com/pavlo67/associatio/starter/joiner"
-	"github.com/pavlo67/associatio/starter/logger"
+	"github.com/pavlo67/constructor/basis"
+	"github.com/pavlo67/constructor/starter"
+	"github.com/pavlo67/constructor/starter/config"
+	"github.com/pavlo67/constructor/starter/joiner"
+	"github.com/pavlo67/constructor/starter/logger"
 
-	"github.com/pavlo67/associatio/processor/news"
-	"github.com/pavlo67/associatio/server/controller"
+	"github.com/pavlo67/constructor/processor/news"
+	"github.com/pavlo67/constructor/server/controller"
 )
 
 func Starter() starter.Operator {

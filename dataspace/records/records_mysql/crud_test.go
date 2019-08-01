@@ -5,18 +5,18 @@ package records_mysql
 //	"testing"
 //
 //	"github.com/pavlo67/partes/crud"
-//	"github.com/pavlo67/associatio/basis/filelib"
-//	"github.com/pavlo67/associatio/starter"
-//	"github.com/pavlo67/associatio/starter/joiner"
+//	"github.com/pavlo67/constructor/basis/filelib"
+//	"github.com/pavlo67/constructor/starter"
+//	"github.com/pavlo67/constructor/starter/joiner"
 //
-//	"github.com/pavlo67/associatio/confidenter/groups"
-//	"github.com/pavlo67/associatio/confidenter/groups/groupsmysql"
+//	"github.com/pavlo67/constructor/confidenter/groups"
+//	"github.com/pavlo67/constructor/confidenter/groups/groupsmysql"
 //
-//	"github.com/pavlo67/associatio/notebook/links"
-//	"github.com/pavlo67/associatio/notebook/links/links_mysql"
-//	"github.com/pavlo67/associatio/notebook/notes"
-//	"github.com/pavlo67/associatio/things_old/genera"
-//	"github.com/pavlo67/associatio/things_old/genera/generastub"
+//	"github.com/pavlo67/constructor/notebook/links"
+//	"github.com/pavlo67/constructor/notebook/links/links_mysql"
+//	"github.com/pavlo67/constructor/notebook/notes"
+//	"github.com/pavlo67/constructor/things_old/genera"
+//	"github.com/pavlo67/constructor/things_old/genera/generastub"
 //)
 //
 //func TestCRUD(t *testing.T) {

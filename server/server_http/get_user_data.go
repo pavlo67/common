@@ -5,8 +5,8 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/associatio/auth"
-	"github.com/pavlo67/associatio/basis"
+	"github.com/pavlo67/constructor/auth"
+	"github.com/pavlo67/constructor/basis"
 )
 
 var errNoIdentityOpsMap = errors.New("no map[CredsType]identity.Operator")

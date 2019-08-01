@@ -3,7 +3,6 @@ package server_http_jschmhr
 import (
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/julienschmidt/httprouter"
@@ -13,8 +12,8 @@ import (
 	"os"
 	"regexp"
 
-	"github.com/pavlo67/associatio/auth"
-	"github.com/pavlo67/associatio/server/server_http"
+	"github.com/pavlo67/constructor/auth"
+	"github.com/pavlo67/constructor/server/server_http"
 )
 
 var _ server_http.Operator = &serverHTTPJschmhr{}
@@ -76,21 +75,6 @@ func (s *serverHTTPJschmhr) Start() {
 	}
 }
 
-func (s *serverHTTPJschmhr) handleFunc(method, path string, handler httprouter.Handle) {
-	if handler == nil {
-		l.Error(method, ": ", path, "\t!!! NULL HANDLER ISN'T DISPATCHED !!!")
-		return
-	}
-	l.Infof("%-6s: %s", method, path)
-	switch strings.ToLower(method) {
-	case "get":
-		s.httpServeMux.GET(path, handler)
-	case "post":
-		s.httpServeMux.POST(path, handler)
-	default:
-		l.Error(method, " isn't supported!")
-	}
-}
 
 var reHTMLExt = regexp.MustCompile(`\.html?$`)
 

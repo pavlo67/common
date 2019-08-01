@@ -4,10 +4,9 @@ import (
 	"strings"
 
 	"github.com/GehirnInc/crypt"
-	"github.com/pavlo67/partes/confidenter/auth"
-	"github.com/pavlo67/associatio/auth"
-	"github.com/pavlo67/associatio/basis"
-	"github.com/pavlo67/associatio/basis/encrlib"
+	"github.com/pavlo67/constructor/auth"
+	"github.com/pavlo67/constructor/basis"
+	"github.com/pavlo67/constructor/basis/encrlib"
 )
 
 var _ auth.Operator = &isentityLoginStub{}
@@ -31,11 +30,11 @@ func (u *isentityLoginStub) Accepts() ([]auth.CredsType, error) {
 	return []auth.CredsType{auth.CredsPassword}, nil
 }
 
-func (u *isentityLoginStub) SetCreds(userID *auth.ID, toSet []auth.Creds, toAuth ...auth.Creds) (*auth.User, []auth.Creds, error) {
+func (u *isentityLoginStub) SetCreds(userID *auth.ID, toSet []auth.Creds) (*auth.User, []auth.Creds, error) {
 	return nil, nil, basis.ErrNotImplemented
 }
 
-func (u *isentityLoginStub) Authorize(toAuth ...auth.Creds) (*auth.User, []auth.Creds, error) {
+func (u *isentityLoginStub) Authorize(toAuth []auth.Creds) (*auth.User, []auth.Creds, error) {
 	var login, password string
 	var cryptype encrlib.Cryptype
 

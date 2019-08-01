@@ -5,13 +5,13 @@ import (
 	"strings"
 
 	"github.com/pavlo67/partes/crud/selectors"
-	"github.com/pavlo67/associatio/auth"
-	"github.com/pavlo67/associatio/basis"
-	"github.com/pavlo67/associatio/basis/strlib"
+	"github.com/pavlo67/constructor/auth"
+	"github.com/pavlo67/constructor/basis"
+	"github.com/pavlo67/constructor/basis/strlib"
 
-	"github.com/pavlo67/associatio/confidenter/groups"
+	"github.com/pavlo67/constructor/confidenter/groups"
 
-	"github.com/pavlo67/associatio/notebook/links"
+	"github.com/pavlo67/constructor/notebook/links"
 )
 
 func PrepareLinks(userIS auth.ID, grpsOp groups.Operator, objectROwner auth.ID, linksListOld, linksListNew []links.Item, jointLinks bool, linkTypesOnly ...string) (linkslistFinal []links.Item) {

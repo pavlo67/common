@@ -3,8 +3,8 @@ package auth
 import (
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/associatio/basis"
-	"github.com/pavlo67/associatio/starter/joiner"
+	"github.com/pavlo67/constructor/basis"
+	"github.com/pavlo67/constructor/starter/joiner"
 )
 
 const InterfaceKey joiner.InterfaceKey = "auth"
@@ -26,11 +26,11 @@ type User struct {
 }
 
 type Operator interface {
-	// SetCreds can require multi-steps (using returned []Creds)...
-	SetCreds(userID *ID, toSet []Creds, toAuth ...Creds) (*User, []Creds, error)
-
 	// Authorize can require multi-steps (using returned []Creds)...
-	Authorize(toAuth ...Creds) (*User, []Creds, error)
+	Authorize(toAuth []Creds) (*User, []Creds, error)
+
+	// SetCreds can require multi-steps (using returned []Creds)...
+	SetCreds(userID *ID, toSet []Creds) (*User, []Creds, error)
 
 	Accepts() ([]CredsType, error)
 }

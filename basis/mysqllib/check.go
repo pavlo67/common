@@ -8,8 +8,8 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/associatio/starter"
-	"github.com/pavlo67/associatio/starter/config"
+	"github.com/pavlo67/constructor/starter"
+	"github.com/pavlo67/constructor/starter/config"
 )
 
 func CheckMySQLTables(mysqlConfig config.ServerAccess, tablesConfig map[string]config.MySQLTableComponent, tables []config.Table) ([]starter.Info, error) {
