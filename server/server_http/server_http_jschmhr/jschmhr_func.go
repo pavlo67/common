@@ -9,11 +9,10 @@ import (
 
 	"github.com/pavlo67/constructor/auth"
 	"github.com/pavlo67/constructor/basis"
-	"github.com/pavlo67/constructor/server/controller"
 	"github.com/pavlo67/constructor/server/server_http"
 )
 
-func ServerPath(ep controller.Endpoint) string {
+func ServerPath(ep server_http.Endpoint) string {
 	path := ep.Path
 	if len(path) == 0 || path[0] != '/' {
 		path = "/" + path
@@ -26,7 +25,7 @@ func ServerPath(ep controller.Endpoint) string {
 	return path + "/:" + strings.Join(ep.ParamNames, "/:")
 }
 
-func (s *serverHTTPJschmhr) HandleHTTP(endpoint controller.Endpoint, workerHTTP server_http.WorkerHTTP) {
+func (s *serverHTTPJschmhr) HandleHTTP(endpoint server_http.Endpoint, workerHTTP server_http.WorkerHTTP) {
 
 	method := strings.ToUpper(endpoint.Method)
 	path := ServerPath(endpoint)
@@ -116,7 +115,7 @@ func (s *serverHTTPJschmhr) HandleHTTP(endpoint controller.Endpoint, workerHTTP 
 //			}
 //
 //			if endpoint.DataItem != nil {
-//				data = reflect.New(reflect.ValueOf(endpoint.DataItem).Elem().Type()).Interface()
+//				data = reflect.New(reflect.ValueOf(endpoint.DataItem).Elem().Type()).Worker()
 //				if err = json.Unmarshal(body, data); err != nil {
 //					return server.Response{}, err
 //				}

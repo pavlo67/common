@@ -7,7 +7,7 @@ import (
 	"github.com/pavlo67/constructor/starter/joiner"
 )
 
-const InterfaceKey joiner.InterfaceKey = "founts"
+const InterfaceKey joiner.ComponentKey = "founts"
 
 type Item struct {
 	URL     string              `json:"url,omitempty"`

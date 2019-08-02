@@ -24,8 +24,8 @@ func Starter() starter.Operator {
 }
 
 type links_mysqlStarter struct {
-	interfaceKey        joiner.InterfaceKey
-	cleanerInterfaceKey joiner.InterfaceKey
+	interfaceKey        joiner.ComponentKey
+	cleanerInterfaceKey joiner.ComponentKey
 	mysqlConfig         config.ServerAccess
 	conf                config.Config
 	index               config.ServerComponentsIndex
@@ -52,8 +52,8 @@ func (lms *links_mysqlStarter) Prepare(conf *config.Config, params basis.Info) e
 		return errs.Err()
 	}
 
-	lms.interfaceKey = joiner.InterfaceKey(params.StringDefault("interface_key", string(links.InterfaceKey)))
-	lms.cleanerInterfaceKey = joiner.InterfaceKey(params.StringDefault("cleaner_interface_key", string(links.CleanerInterfaceKey)))
+	lms.interfaceKey = joiner.ComponentKey(params.StringDefault("interface_key", string(links.InterfaceKey)))
+	lms.cleanerInterfaceKey = joiner.ComponentKey(params.StringDefault("cleaner_interface_key", string(links.CleanerInterfaceKey)))
 
 	table := params.StringDefault("table", TableDefault)
 
@@ -88,12 +88,12 @@ func (lms *links_mysqlStarter) Init(joiner joiner.Operator) error {
 		return errors.Wrap(err, "can't init links_mysql ")
 	}
 
-	err = joiner.JoinInterface(linksOp, lms.interfaceKey)
+	err = joiner.JoinComponent(linksOp, lms.interfaceKey)
 	if err != nil {
 		return errors.Wrap(err, "can't join links_mysql ")
 	}
 
-	//err = joiner.JoinInterface(dataOp.Clean, ds.cleanerInterfaceKey)
+	//err = joiner.JoinComponent(dataOp.Clean, ds.cleanerInterfaceKey)
 	//if err != nil {
 	//	return errors.Wrapf(err, "can't join datastoremysql.Operator.Clean as %s", ds.cleanerInterfaceKey)
 	//}

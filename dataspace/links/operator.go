@@ -6,8 +6,8 @@ import (
 	"github.com/pavlo67/constructor/starter/joiner"
 )
 
-const InterfaceKey joiner.InterfaceKey = "links"
-const CleanerInterfaceKey joiner.InterfaceKey = "links.cleaner"
+const InterfaceKey joiner.ComponentKey = "links"
+const CleanerInterfaceKey joiner.ComponentKey = "links.cleaner"
 
 type LinkedInfo struct {
 	ObjectID    string

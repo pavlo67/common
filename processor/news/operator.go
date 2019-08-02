@@ -7,7 +7,7 @@ import (
 	"github.com/pavlo67/constructor/starter/joiner"
 )
 
-const InterfaceKey joiner.InterfaceKey = "news"
+const InterfaceKey joiner.ComponentKey = "news"
 
 type Item struct {
 	ID          string `bson:"_id,omitempty" json:"id,omitempty"`

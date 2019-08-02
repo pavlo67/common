@@ -7,7 +7,7 @@ import (
 	"github.com/pavlo67/constructor/starter/joiner"
 )
 
-const InterfaceKey joiner.InterfaceKey = "content"
+const InterfaceKey joiner.ComponentKey = "content"
 
 type Brief struct {
 	ID    basis.ID   `json:"id,omitempty"`

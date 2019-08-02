@@ -19,7 +19,7 @@ var l logger.Operator
 var _ starter.Operator = &identity_btcStarter{}
 
 type identity_btcStarter struct {
-	interfaceKey joiner.InterfaceKey
+	interfaceKey joiner.ComponentKey
 }
 
 func (ss *identity_btcStarter) Name() string {
@@ -31,7 +31,7 @@ func (ss *identity_btcStarter) Prepare(conf *config.Config, options, runtimeOpti
 
 	// var errs basis.Errors
 
-	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(auth.InterfaceKey)))
+	ss.interfaceKey = joiner.ComponentKey(options.StringDefault("interface_key", string(auth.InterfaceKey)))
 
 	return nil
 }
@@ -50,7 +50,7 @@ func (ss *identity_btcStarter) Init(joiner joiner.Operator) error {
 		return errors.Wrap(err, "can't init identity_ecdsa.Operator")
 	}
 
-	err = joiner.JoinInterface(identOp, ss.interfaceKey)
+	err = joiner.JoinComponent(identOp, ss.interfaceKey)
 	if err != nil {
 		return errors.Wrapf(err, "can't join identity_ecdsa identOp as identity.Operator with key '%s'", ss.interfaceKey)
 	}

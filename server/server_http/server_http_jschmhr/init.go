@@ -24,8 +24,8 @@ var l logger.Operator
 var _ starter.Operator = &server_http_jschmhrStarter{}
 
 type server_http_jschmhrStarter struct {
-	interfaceKey       joiner.InterfaceKey
-	// interfaceKeyRouter joiner.InterfaceKey
+	interfaceKey       joiner.ComponentKey
+	// interfaceKeyRouter joiner.ComponentKey
 	config             config.ServerTLS
 
 	staticPaths        map[string]string
@@ -41,8 +41,8 @@ func (ss *server_http_jschmhrStarter) Init(conf *config.Config, options basis.In
 
 	var errs basis.Errors
 
-	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(server_http.InterfaceKey)))
-	// ss.interfaceKeyRouter = joiner.InterfaceKey(options.StringDefault("interface_key_router", string(controller.InterfaceKey)))
+	ss.interfaceKey = joiner.ComponentKey(options.StringDefault("interface_key", string(server_http.InterfaceKey)))
+	// ss.interfaceKeyRouter = joiner.ComponentKey(options.StringDefault("interface_key_router", string(controller.ComponentKey)))
 
 	ss.config, errs = conf.Server(options.StringDefault("config_server_key", "default"), errs)
 	if ss.config.Port <= 0 {
@@ -111,12 +111,12 @@ func (ss *server_http_jschmhrStarter) Run(joiner joiner.Operator) error {
 		srvOp.HandleFiles("/" + path + "/*filepath", staticPath, nil)
 	}
 
-	err = joiner.JoinInterface(srvOp, ss.interfaceKey)
+	err = joiner.JoinComponent(srvOp, ss.interfaceKey)
 	if err != nil {
 		return errors.Wrapf(err, "can't join serverHTTPJschmhr srvOp as server.Operator with key '%s'", ss.interfaceKey)
 	}
 
-	//err = joiner.JoinInterface(srvOp, ss.interfaceKeyRouter)
+	//err = joiner.JoinComponent(srvOp, ss.interfaceKeyRouter)
 	//if err != nil {
 	//	return errors.Wrapf(err, "can't join serverHTTPJschmhr srvOp as router.Operator with key '%s'", ss.interfaceKeyRouter)
 	//}

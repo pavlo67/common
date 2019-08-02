@@ -9,12 +9,13 @@ import (
 	"github.com/pavlo67/constructor/basis"
 	"github.com/pavlo67/constructor/server"
 	"github.com/pavlo67/constructor/starter/joiner"
+	"github.com/pavlo67/constructor/associatio"
 )
 
-const InterfaceKey joiner.InterfaceKey = "server_http"
+const InterfaceKey joiner.ComponentKey = "server_http"
 
 type Operator interface {
-	HandleHTTP(endpoint Endpoint, workerHTTP WorkerHTTP)
+	HandleHTTP(endpoint associatio.Endpoint, workerHTTP WorkerHTTP)
 	HandleFiles(serverPath, localPath string, mimeType *string)
 
 	Start()
@@ -22,7 +23,7 @@ type Operator interface {
 
 type WorkerHTTP func(*auth.User, basis.Params, *http.Request) (server.Response, error)
 
-func InitEndpoints(op Operator, endpoints map[string]Endpoint, workersHTTP map[string]WorkerHTTP) basis.Errors {
+func InitEndpoints(op Operator, endpoints map[string]associatio.Endpoint, workersHTTP map[string]WorkerHTTP) basis.Errors {
 	var errs basis.Errors
 
 	for key, ep := range endpoints {

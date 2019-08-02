@@ -53,7 +53,7 @@ func main() {
 	signal := <-c
 	l.Info("\nGot signal:", signal)
 
-	//newsOp, ok := joiner.Interface(news.InterfaceKey).(news.Operator)
+	//newsOp, ok := joiner.Worker(news.InterfaceKey).(news.Operator)
 	//if !ok {
 	//	log.Fatalf("no news.Operator with key %s", news.InterfaceKey)
 	//
