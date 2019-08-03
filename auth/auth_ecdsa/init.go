@@ -26,17 +26,13 @@ func (ss *identity_btcStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *identity_btcStarter) Prepare(conf *config.Config, options, runtimeOptions basis.Info) error {
+func (ss *identity_btcStarter) Init(conf *config.Config, options basis.Info) (info []basis.Info, err error) {
 	l = logger.Get()
 
 	// var errs basis.Errors
 
 	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(auth.InterfaceKey)))
 
-	return nil
-}
-
-func (ss *identity_btcStarter) Check() (info []starter.Info, err error) {
 	return nil, nil
 }
 
@@ -44,7 +40,7 @@ func (ss *identity_btcStarter) Setup() error {
 	return nil
 }
 
-func (ss *identity_btcStarter) Init(joiner joiner.Operator) error {
+func (ss *identity_btcStarter) Run(joiner joiner.Operator) error {
 	identOp, err := New(nil)
 	if err != nil {
 		return errors.Wrap(err, "can't init identity_ecdsa.Operator")

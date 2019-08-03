@@ -12,8 +12,7 @@ import (
 
 func Starters() ([]starter.Starter, string) {
 	paramsServerStatic := basis.Info{
-		"static_path":   filelib.CurrentPath() + "../demo_server_http/static/",
-		"template_path": filelib.CurrentPath() + "../demo_server_http/static/demo_server.html",
+		"static_path": filelib.CurrentPath() + "../demo_server_http/static/",
 	}
 
 	var starters []starter.Starter

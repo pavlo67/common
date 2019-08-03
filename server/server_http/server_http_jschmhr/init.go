@@ -2,13 +2,11 @@ package server_http_jschmhr
 
 import (
 	"fmt"
-	"io/ioutil"
 
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/constructor/auth"
 	"github.com/pavlo67/constructor/basis"
-	"github.com/pavlo67/constructor/basis/filelib"
 	"github.com/pavlo67/constructor/server/server_http"
 	"github.com/pavlo67/constructor/starter"
 	"github.com/pavlo67/constructor/starter/config"
@@ -46,23 +44,6 @@ func (ss *server_http_jschmhrStarter) Init(conf *config.Config, options basis.In
 	ss.config, errs = conf.Server(options.StringDefault("config_server_key", "default"), errs)
 	if ss.config.Port <= 0 {
 		errs = append(errs, fmt.Errorf("wrong port for serverOp: %d", ss.config.Port))
-	}
-
-	templatePath := options.StringDefault("template_path", "")
-	if templatePath == "" {
-		l.Warn(`on server_http_jschmhr.Init(): empty options["template_path"]`)
-
-	} else {
-		if templatePath[0] != '/' {
-			templatePath = filelib.CurrentPath() + templatePath
-		}
-
-		htmlTemplate, err := ioutil.ReadFile(templatePath)
-		if err != nil {
-			errs = append(errs, errors.Wrapf(err, "error reading template data from '%s'", templatePath))
-		} else if len(htmlTemplate) < 1 {
-			errs = append(errs, errors.Errorf("empty template data file: '%s'", templatePath))
-		}
 	}
 
 	// TODO: use more then one static path

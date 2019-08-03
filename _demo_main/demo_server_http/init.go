@@ -12,34 +12,30 @@ import (
 )
 
 func Starter() starter.Operator {
-	return &demo_server_http_jsschmhrStarter{}
+	return &demoServerHTTPStarter{}
 }
 
 var l logger.Operator
 
-var _ starter.Operator = &demo_server_http_jsschmhrStarter{}
+var _ starter.Operator = &demoServerHTTPStarter{}
 
-type demo_server_http_jsschmhrStarter struct{}
+type demoServerHTTPStarter struct{}
 
-func (dcs *demo_server_http_jsschmhrStarter) Name() string {
+func (dcs *demoServerHTTPStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (dcs *demo_server_http_jsschmhrStarter) Prepare(conf *config.Config, params, options basis.Info) error {
+func (dcs *demoServerHTTPStarter) Init(conf *config.Config, options basis.Info) ([]basis.Info, error) {
 	l = logger.Get()
 
-	return nil
-}
-
-func (dcs *demo_server_http_jsschmhrStarter) Check() (info []starter.Info, err error) {
 	return nil, nil
 }
 
-func (dcs *demo_server_http_jsschmhrStarter) Setup() error {
+func (dcs *demoServerHTTPStarter) Setup() error {
 	return nil
 }
 
-func (dcs *demo_server_http_jsschmhrStarter) Init(joinerOp joiner.Operator) error {
+func (dcs *demoServerHTTPStarter) Run(joinerOp joiner.Operator) error {
 	srvOp, ok := joinerOp.Interface(server_http.InterfaceKey).(server_http.Operator)
 	if !ok {
 		return errors.New("no server_http_jschmhr.Operator interface found for demo_server_http component")
@@ -47,7 +43,6 @@ func (dcs *demo_server_http_jsschmhrStarter) Init(joinerOp joiner.Operator) erro
 
 	errs := server_http.InitEndpoints(
 		srvOp,
-		nil,
 		nil,
 	)
 

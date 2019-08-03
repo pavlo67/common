@@ -58,7 +58,7 @@ func GetUser(creds []Creds, identOpsMap map[CredsType][]Operator, errs basis.Err
 			continue
 		}
 
-		user, _, err := identOp.Authorize(creds...)
+		user, _, err := identOp.Authorize(creds)
 		if err != nil {
 			errs = append(errs, errors.Wrapf(err, onGetUser+`: on identOp.Authorize(%#v)`, creds))
 		}
