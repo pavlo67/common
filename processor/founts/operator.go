@@ -3,11 +3,12 @@ package founts
 import (
 	"time"
 
+	"github.com/pavlo67/constructor/content"
 	"github.com/pavlo67/constructor/processor"
 	"github.com/pavlo67/constructor/starter/joiner"
 )
 
-const InterfaceKey joiner.ComponentKey = "founts"
+const InterfaceKey joiner.InterfaceKey = "founts"
 
 type Item struct {
 	URL     string              `json:"url,omitempty"`

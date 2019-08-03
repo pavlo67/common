@@ -12,8 +12,8 @@ import (
 	"github.com/pavlo67/constructor/dataspace/vcs"
 )
 
-const InterfaceKey joiner.ComponentKey = "records"
-const CleanerInterfaceKey joiner.ComponentKey = "records.cleaner"
+const InterfaceKey joiner.InterfaceKey = "records"
+const CleanerInterfaceKey joiner.InterfaceKey = "records.cleaner"
 
 // const GenusDefault = "note"
 // const GenusFieldName = "genus"

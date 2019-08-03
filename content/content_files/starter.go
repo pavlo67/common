@@ -21,7 +21,7 @@ func Starter() starter.Operator {
 }
 
 type contentFilesStarter struct {
-	interfaceKey joiner.ComponentKey
+	interfaceKey joiner.InterfaceKey
 	path         string
 	marshaler    basis.Marshaler
 }
@@ -52,7 +52,7 @@ func (nms *contentFilesStarter) Init(conf *config.Config, options basis.Info) (i
 		return nil, errors.New("no marshaler for contentFilesStarter.Init()")
 	}
 
-	nms.interfaceKey = joiner.ComponentKey(options.StringDefault("interface_key", string(content.InterfaceKey)))
+	nms.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(content.InterfaceKey)))
 
 	return nil, nil
 }
@@ -81,12 +81,12 @@ func (nms *contentFilesStarter) Run(joiner joiner.Operator) error {
 	//	return errors.Wrap(err, "can't init notes_mysql")
 	//}
 	//
-	//err = joiner.JoinComponent(notesOp, nms.interfaceKey)
+	//err = joiner.Join(notesOp, nms.interfaceKey)
 	//if err != nil {
 	//	return errors.Wrap(err, "can't join notes_mysql as notes.Operator interface")
 	//}
 
-	//err = joiner.JoinComponent(dataOp.Clean, ds.cleanerInterfaceKey)
+	//err = joiner.Join(dataOp.Clean, ds.cleanerInterfaceKey)
 	//if err != nil {
 	//	return errors.Wrapf(err, "can't join datastoremysql.Operator.Clean as %s", ds.cleanerInterfaceKey)
 	//}

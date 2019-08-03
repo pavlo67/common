@@ -3,7 +3,6 @@ package links_mysql
 import (
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/partes/libs/mysqllib"
 	"github.com/pavlo67/constructor/basis"
 	"github.com/pavlo67/constructor/basis/filelib"
 	"github.com/pavlo67/constructor/confidenter/groups"
@@ -12,6 +11,7 @@ import (
 	"github.com/pavlo67/constructor/starter/config"
 	"github.com/pavlo67/constructor/starter/joiner"
 	"github.com/pavlo67/constructor/starter/logger"
+	"github.com/pavlo67/partes/libs/mysqllib"
 	"go.uber.org/zap"
 )
 
@@ -24,8 +24,8 @@ func Starter() starter.Operator {
 }
 
 type links_mysqlStarter struct {
-	interfaceKey        joiner.ComponentKey
-	cleanerInterfaceKey joiner.ComponentKey
+	interfaceKey        joiner.InterfaceKey
+	cleanerInterfaceKey joiner.InterfaceKey
 	mysqlConfig         config.ServerAccess
 	conf                config.Config
 	index               config.ServerComponentsIndex
@@ -52,8 +52,8 @@ func (lms *links_mysqlStarter) Prepare(conf *config.Config, params basis.Info) e
 		return errs.Err()
 	}
 
-	lms.interfaceKey = joiner.ComponentKey(params.StringDefault("interface_key", string(links.InterfaceKey)))
-	lms.cleanerInterfaceKey = joiner.ComponentKey(params.StringDefault("cleaner_interface_key", string(links.CleanerInterfaceKey)))
+	lms.interfaceKey = joiner.InterfaceKey(params.StringDefault("interface_key", string(links.InterfaceKey)))
+	lms.cleanerInterfaceKey = joiner.InterfaceKey(params.StringDefault("cleaner_interface_key", string(links.CleanerInterfaceKey)))
 
 	table := params.StringDefault("table", TableDefault)
 
@@ -88,12 +88,12 @@ func (lms *links_mysqlStarter) Init(joiner joiner.Operator) error {
 		return errors.Wrap(err, "can't init links_mysql ")
 	}
 
-	err = joiner.JoinComponent(linksOp, lms.interfaceKey)
+	err = joiner.Join(linksOp, lms.interfaceKey)
 	if err != nil {
 		return errors.Wrap(err, "can't join links_mysql ")
 	}
 
-	//err = joiner.JoinComponent(dataOp.Clean, ds.cleanerInterfaceKey)
+	//err = joiner.Join(dataOp.Clean, ds.cleanerInterfaceKey)
 	//if err != nil {
 	//	return errors.Wrapf(err, "can't join datastoremysql.Operator.Clean as %s", ds.cleanerInterfaceKey)
 	//}

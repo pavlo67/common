@@ -1,4 +1,4 @@
-package server_http_jschmhr
+package _html
 
 //type templator struct {
 //	htmlNoUser string

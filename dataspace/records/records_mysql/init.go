@@ -23,8 +23,8 @@ func Starter(jointLinks bool) starter.Operator {
 const TableDefault = "records"
 
 type records_mysqlStarter struct {
-	interfaceKey        joiner.ComponentKey
-	cleanerInterfaceKey joiner.ComponentKey
+	interfaceKey        joiner.InterfaceKey
+	cleanerInterfaceKey joiner.InterfaceKey
 	mysqlConfig         config.ServerAccess
 	conf                config.Config
 	index               config.ServerComponentsIndex
@@ -50,8 +50,8 @@ func (nms *records_mysqlStarter) Prepare(conf *config.Config, options, runtimeOp
 		return errs.Err()
 	}
 
-	nms.interfaceKey = joiner.ComponentKey(options.StringDefault("interface_key", string(records.InterfaceKey)))
-	nms.cleanerInterfaceKey = joiner.ComponentKey(options.StringDefault("cleaner_interface_key", string(records.CleanerInterfaceKey)))
+	nms.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(records.InterfaceKey)))
+	nms.cleanerInterfaceKey = joiner.InterfaceKey(options.StringDefault("cleaner_interface_key", string(records.CleanerInterfaceKey)))
 
 	table := options.StringDefault("table", TableDefault)
 
@@ -71,17 +71,17 @@ func (nms *records_mysqlStarter) Setup() error {
 }
 
 func (nms *records_mysqlStarter) Init(joiner joiner.Operator) error {
-	//grpsOp, _ := joiner.Worker(groups.ComponentKey).(groups.Operator)
+	//grpsOp, _ := joiner.Interface(groups.InterfaceKey).(groups.Operator)
 	////if !ok {
 	////	return errors.New("no groups.Operator found for notes_mysql")
 	////}
 	//
-	//linksOp, _ := joiner.Worker(links.ComponentKey).(links.Operator)
+	//linksOp, _ := joiner.Interface(links.InterfaceKey).(links.Operator)
 	//if !ok {
 	//	return errors.New("no links.Operator found for notes_mysql")
 	//}
 
-	//generaOp, ok := joiner.Component(genera.ComponentKey).(genera.Operator)
+	//generaOp, ok := joiner.Component(genera.InterfaceKey).(genera.Operator)
 	//if !ok {
 	//	return errors.New("no genera.Operator found for notes_mysql")
 	//}
@@ -99,12 +99,12 @@ func (nms *records_mysqlStarter) Init(joiner joiner.Operator) error {
 	//	return errors.Wrap(err, "can't init notes_mysql")
 	//}
 	//
-	//err = joiner.JoinComponent(notesOp, nms.interfaceKey)
+	//err = joiner.Join(notesOp, nms.interfaceKey)
 	//if err != nil {
 	//	return errors.Wrap(err, "can't join notes_mysql as notes.Operator interface")
 	//}
 
-	//err = joiner.JoinComponent(dataOp.Clean, ds.cleanerInterfaceKey)
+	//err = joiner.Join(dataOp.Clean, ds.cleanerInterfaceKey)
 	//if err != nil {
 	//	return errors.Wrapf(err, "can't join datastoremysql.Operator.Clean as %s", ds.cleanerInterfaceKey)
 	//}
@@ -117,7 +117,7 @@ func (nms *records_mysqlStarter) Init(joiner joiner.Operator) error {
 //var _ fixturer.Operator = &records_mysqlStarter{}
 //
 //func (nms *records_mysqlStarter) NameGeneric() string {
-//	return string(notes.ComponentKey)
+//	return string(notes.InterfaceKey)
 //}
 //
 //func (nms *records_mysqlStarter) Load(userIS auth.ID, selector selectors.Selector, fixture fixturer.Fixture) error {

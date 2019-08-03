@@ -4,7 +4,7 @@ import (
 	"github.com/pavlo67/constructor/starter/joiner"
 )
 
-const InterfaceKeyCRUD joiner.ComponentKey = "flow.crud"
+const InterfaceKeyCRUD joiner.InterfaceKey = "flow.crud"
 
 //var _ crud.Operator = &OperatorCRUD{}
 //

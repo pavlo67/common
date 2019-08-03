@@ -6,7 +6,7 @@ import (
 	"github.com/pavlo67/constructor/processor/news"
 )
 
-const InterfaceKey joiner.ComponentKey = "importer"
+const InterfaceKey joiner.InterfaceKey = "importer"
 
 //var ErrNoFount = errors.New("no source is reachable")
 //var ErrNoMoreItems = errors.New("no more items.comp")

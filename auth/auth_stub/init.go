@@ -22,7 +22,7 @@ type UserStub struct {
 }
 
 type identity_login_stubStarter struct {
-	interfaceKey joiner.ComponentKey
+	interfaceKey joiner.InterfaceKey
 
 	users []UserStub
 	salt  string
@@ -38,7 +38,7 @@ func (sc *identity_login_stubStarter) Name() string {
 func (sc *identity_login_stubStarter) Prepare(conf *config.Config, params basis.Info) error {
 	l = logger.Get()
 
-	sc.interfaceKey = joiner.ComponentKey(params.StringDefault("interface_key", string(auth.InterfaceKey)))
+	sc.interfaceKey = joiner.InterfaceKey(params.StringDefault("interface_key", string(auth.InterfaceKey)))
 
 	credentialsConf, errs := conf.Credentials(params.StringDefault("config_credentials_key", "default"), nil)
 
@@ -69,7 +69,7 @@ func (sc *identity_login_stubStarter) Init(joiner joiner.Operator) error {
 		return errors.Wrapf(err, "can't init identity_login_stubStarter")
 	}
 
-	err = joiner.JoinComponent(u, sc.interfaceKey)
+	err = joiner.Join(u, sc.interfaceKey)
 	if err != nil {
 		return errors.Wrap(err, "can't join identity_login_stubStarter as identity.Operator interface")
 	}

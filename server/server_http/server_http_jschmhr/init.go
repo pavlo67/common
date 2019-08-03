@@ -24,25 +24,24 @@ var l logger.Operator
 var _ starter.Operator = &server_http_jschmhrStarter{}
 
 type server_http_jschmhrStarter struct {
-	interfaceKey       joiner.ComponentKey
-	// interfaceKeyRouter joiner.ComponentKey
-	config             config.ServerTLS
+	interfaceKey joiner.InterfaceKey
+	// interfaceKeyRouter joiner.InterfaceKey
+	config config.ServerTLS
 
-	staticPaths        map[string]string
+	staticPaths map[string]string
 }
 
 func (ss *server_http_jschmhrStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-
 func (ss *server_http_jschmhrStarter) Init(conf *config.Config, options basis.Info) (info []basis.Info, err error) {
 	l = logger.Get()
 
 	var errs basis.Errors
 
-	ss.interfaceKey = joiner.ComponentKey(options.StringDefault("interface_key", string(server_http.InterfaceKey)))
-	// ss.interfaceKeyRouter = joiner.ComponentKey(options.StringDefault("interface_key_router", string(controller.ComponentKey)))
+	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(server_http.InterfaceKey)))
+	// ss.interfaceKeyRouter = joiner.InterfaceKey(options.StringDefault("interface_key_router", string(controller.InterfaceKey)))
 
 	ss.config, errs = conf.Server(options.StringDefault("config_server_key", "default"), errs)
 	if ss.config.Port <= 0 {
@@ -74,17 +73,18 @@ func (ss *server_http_jschmhrStarter) Init(conf *config.Config, options basis.In
 	return nil, errs.Err()
 }
 
-
 func (ss *server_http_jschmhrStarter) Setup() error {
 	return nil
 }
 
-
-
-func (ss *server_http_jschmhrStarter) Run(joiner joiner.Operator) error {
+func (ss *server_http_jschmhrStarter) Run(joinerOp joiner.Operator) error {
 	identOpsMap := map[auth.CredsType][]auth.Operator{}
 
-	identOpsPtr := joiner.ComponentsAll(auth.InterfaceKey)
+	// ???
+	// authOpNil := auth.Operator(nil)
+	// identOpsPtr := joinerOp.ComponentsAllWithInterface(&authOpNil)
+
+	identOpsPtr := joinerOp.ComponentsAllWithInterface((*auth.Operator)(nil))
 	for _, identOpIntf := range identOpsPtr {
 		if identOp, ok := identOpIntf.Interface.(auth.Operator); ok {
 			credsTypes, err := identOp.Accepts()
@@ -97,29 +97,19 @@ func (ss *server_http_jschmhrStarter) Run(joiner joiner.Operator) error {
 		}
 	}
 
-	srvOp, err := New(
-		ss.config.Port,
-		ss.config.TLSCertFile,
-		ss.config.TLSKeyFile,
-		identOpsMap,
-	)
+	srvOp, err := New(ss.config.Port, ss.config.TLSCertFile, ss.config.TLSKeyFile, identOpsMap)
 	if err != nil {
 		return errors.Wrap(err, "can't init serverHTTPJschmhr.Operator")
 	}
 
 	for path, staticPath := range ss.staticPaths {
-		srvOp.HandleFiles("/" + path + "/*filepath", staticPath, nil)
+		srvOp.HandleFiles("/"+path+"/*filepath", staticPath, nil)
 	}
 
-	err = joiner.JoinComponent(srvOp, ss.interfaceKey)
+	err = joinerOp.Join(srvOp, ss.interfaceKey)
 	if err != nil {
 		return errors.Wrapf(err, "can't join serverHTTPJschmhr srvOp as server.Operator with key '%s'", ss.interfaceKey)
 	}
-
-	//err = joiner.JoinComponent(srvOp, ss.interfaceKeyRouter)
-	//if err != nil {
-	//	return errors.Wrapf(err, "can't join serverHTTPJschmhr srvOp as router.Operator with key '%s'", ss.interfaceKeyRouter)
-	//}
 
 	return nil
 }

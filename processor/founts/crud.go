@@ -9,12 +9,13 @@ import (
 
 	"github.com/pavlo67/constructor/auth"
 	"github.com/pavlo67/constructor/basis"
+	"github.com/pavlo67/constructor/content"
 	"github.com/pavlo67/constructor/crud"
 	"github.com/pavlo67/constructor/processor"
 	"github.com/pavlo67/constructor/starter/joiner"
 )
 
-const InterfaceKeyCRUD joiner.ComponentKey = "founts.crud"
+const InterfaceKeyCRUD joiner.InterfaceKey = "founts.crud"
 
 var _ crud.Operator = &OperatorCRUD{}
 

@@ -7,7 +7,7 @@ import (
 	"github.com/pavlo67/constructor/starter/joiner"
 )
 
-const InterfaceKey joiner.ComponentKey = "auth"
+const InterfaceKey joiner.InterfaceKey = "auth"
 
 type ID string
 

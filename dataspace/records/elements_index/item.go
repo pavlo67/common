@@ -8,7 +8,7 @@ import (
 )
 
 type Item struct {
-	Key      joiner.ComponentKey
+	Key      joiner.InterfaceKey
 	Operator records.Operator
 }
 

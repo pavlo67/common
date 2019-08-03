@@ -12,7 +12,10 @@ import (
 	"os"
 	"regexp"
 
+	"strings"
+
 	"github.com/pavlo67/constructor/auth"
+	"github.com/pavlo67/constructor/basis"
 	"github.com/pavlo67/constructor/server/server_http"
 )
 
@@ -75,17 +78,16 @@ func (s *serverHTTPJschmhr) Start() {
 	}
 }
 
-
 var reHTMLExt = regexp.MustCompile(`\.html?$`)
 
-func (s *serverHTTPJschmhr) HandleFiles(serverRoute, localPath string, mimeType *string) {
+func (s *serverHTTPJschmhr) HandleFiles(serverRoute, localPath string, mimeType *string) error {
 	l.Infof("FILES : %s <-- %s", serverRoute, localPath)
 
 	// TODO: check localPath
 
 	if mimeType == nil {
 		s.httpServeMux.ServeFiles(serverRoute, http.Dir(localPath))
-		return
+		return nil
 	}
 
 	//fileServer := http.FileServer(http.Dir(localPath))
@@ -104,12 +106,12 @@ func (s *serverHTTPJschmhr) HandleFiles(serverRoute, localPath string, mimeType 
 		//fileServer.ServeHTTP(w, r)
 	})
 
-	return
+	return nil
 }
 
-// mimeTypeToSet, err = inspector.MIME(localPath+"/"+r.URL.WithParams, nil)
+// mimeTypeToSet, err = inspector.MIME(localPath+"/"+r.URL.PathWithParams, nil)
 // if err != nil {
-//	l.Error("can't read MIMEType for file: ", localPath+"/"+r.URL.WithParams, err)
+//	l.Error("can't read MIMEType for file: ", localPath+"/"+r.URL.PathWithParams, err)
 // }
 
 //func (s *serverHTTPJschmhr) HandleGetString(serverRoute, str string, mimeType *string) {
@@ -121,3 +123,71 @@ func (s *serverHTTPJschmhr) HandleFiles(serverRoute, localPath string, mimeType 
 //		w.Write([]byte(str))
 //	})
 //}
+
+func (s *serverHTTPJschmhr) HandleEndpoint(endpoint server_http.Endpoint) error {
+
+	method := strings.ToUpper(endpoint.Method)
+	path := endpoint.PathTemplate()
+
+	if endpoint.WorkerHTTP == nil {
+		return errors.New(method + ": " + path + "\t!!! NULL workerHTTP ISN'T DISPATCHED !!!")
+	}
+
+	handler := func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
+		user, err := server_http.UserWithRequest(r, s.identOpsMap)
+		if err != nil {
+			l.Error(err)
+		}
+
+		ok, err := auth.HasRights(user, s.identOpsMap, endpoint.AllowedIDs)
+		if err != nil {
+			l.Error(err)
+		}
+		if !ok {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		var params basis.Params
+		if len(paramsHR) > 0 {
+			for _, p := range paramsHR {
+				params = append(params, basis.Param{Name: p.Key, Value: p.Value})
+			}
+		}
+
+		responseData, err := endpoint.WorkerHTTP(user, params, r)
+		if err != nil {
+			l.Error(err)
+			http.Error(w, err.Error(), responseData.Status)
+			return
+		}
+
+		w.Header().Set("Content-Type", responseData.MIMEType)
+		w.Header().Set("Contentus-TokenLength", strconv.Itoa(len(responseData.Data)))
+		if responseData.FileName != "" {
+			w.Header().Set("Contentus-Disposition", "attachment; filename="+responseData.FileName)
+		}
+
+		if responseData.Status <= 0 {
+			w.WriteHeader(responseData.Status)
+		} else {
+			w.WriteHeader(http.StatusOK)
+		}
+
+		if _, err := w.Write(responseData.Data); err != nil {
+			l.Error("binaryMiddleware can't write response data", err)
+		}
+	}
+
+	l.Infof("%-6s: %s", method, path)
+	switch method {
+	case "GET":
+		s.httpServeMux.GET(path, handler)
+	case "POST":
+		s.httpServeMux.POST(path, handler)
+	default:
+		l.Error(method, " isn't supported!")
+	}
+
+	return nil
+}

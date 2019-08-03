@@ -3,35 +3,28 @@ package server_http
 import (
 	"net/http"
 
-	"github.com/pkg/errors"
-
 	"github.com/pavlo67/constructor/auth"
 	"github.com/pavlo67/constructor/basis"
 	"github.com/pavlo67/constructor/server"
 	"github.com/pavlo67/constructor/starter/joiner"
-	"github.com/pavlo67/constructor/associatio"
 )
 
-const InterfaceKey joiner.ComponentKey = "server_http"
+const InterfaceKey joiner.InterfaceKey = "server_http"
+
+type WorkerHTTP func(*auth.User, basis.Params, *http.Request) (server.Response, error)
 
 type Operator interface {
-	HandleHTTP(endpoint associatio.Endpoint, workerHTTP WorkerHTTP)
-	HandleFiles(serverPath, localPath string, mimeType *string)
+	HandleEndpoint(endpoint Endpoint) error
+	HandleFiles(serverPath, localPath string, mimeType *string) error
 
 	Start()
 }
 
-type WorkerHTTP func(*auth.User, basis.Params, *http.Request) (server.Response, error)
-
-func InitEndpoints(op Operator, endpoints map[string]associatio.Endpoint, workersHTTP map[string]WorkerHTTP) basis.Errors {
+func InitEndpoints(op Operator, endpoints []Endpoint) basis.Errors {
 	var errs basis.Errors
 
-	for key, ep := range endpoints {
-		if workerHTTP, ok := workersHTTP[key]; ok {
-			op.HandleHTTP(ep, workerHTTP)
-		} else {
-			errs = append(errs, errors.New("no handler for endpoint: "+key))
-		}
+	for _, ep := range endpoints {
+		errs = errs.Append(op.HandleEndpoint(ep))
 	}
 
 	return errs

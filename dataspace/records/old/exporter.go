@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/pavlo67/partes/crud/selectors"
 	"github.com/pavlo67/constructor/auth"
 	"github.com/pavlo67/constructor/basis"
 	"github.com/pavlo67/constructor/basis/filelib"
@@ -19,6 +18,7 @@ import (
 	"github.com/pavlo67/constructor/confidenter/rights"
 	"github.com/pavlo67/constructor/confidenter/users"
 	"github.com/pavlo67/constructor/notebook/notes"
+	"github.com/pavlo67/partes/crud/selectors"
 
 	"github.com/pavlo67/constructor/things_old/files"
 	"github.com/pkg/errors"
@@ -186,7 +186,7 @@ func setLocalRight(rg, r auth.ID) auth.ID {
 //		if i.GlobalIS == string(basis.Anyone) {
 //			continue
 //		}
-//		if i.WithParams == "user" {
+//		if i.PathWithParams == "user" {
 //			userID, err := usersOp.IDByGlobalIS(userIS, i.GlobalIS)
 //			if err != nil {
 //				return identityStrings, errors.Wrapf(err, "can't find user.id for GlobalIS: %v", i.GlobalIS)
@@ -197,7 +197,7 @@ func setLocalRight(rg, r auth.ID) auth.ID {
 //			//} else if unknownAsMine {
 //			//	identityStrings[i.GlobalIS] = userIS.String()
 //			//}
-//		} else if i.WithParams == "group" {
+//		} else if i.PathWithParams == "group" {
 //			groupID, err := groupOp.IDByGlobalIS(userIS, i.GlobalIS)
 //			if err != nil {
 //				return identityStrings, errors.Wrapf(err, "can't find group.id for GlobalIS: %v", i.GlobalIS)
@@ -221,7 +221,7 @@ func setLocalRight(rg, r auth.ID) auth.ID {
 //			//	// groupOp.Create already added current user to members of new group
 //			//}
 //		} else {
-//			log.Println("error issForGlobalISs(); bad confidenter.LocalPath:", i.WithParams)
+//			log.Println("error issForGlobalISs(); bad confidenter.LocalPath:", i.PathWithParams)
 //		}
 //	}
 //	return identityStrings, nil
@@ -455,7 +455,7 @@ func setGlobalIS(user *auth.User, is auth.ID, credentialsOp users.Operator, ctrl
 	//	return string(is), ""
 	//}
 	//var err error
-	//if is.UserIS().WithParams == "user" {
+	//if is.UserIS().PathWithParams == "user" {
 	//	if is == user.UserIS.String() {
 	//		if user.GlobalIS == "" {
 	//			user.GlobalIS, err = credentialsOp.SetGlobalIS(user.UserIS())
@@ -469,7 +469,7 @@ func setGlobalIS(user *auth.User, is auth.ID, credentialsOp users.Operator, ctrl
 	//
 	//	}
 	//
-	//} else if is.UserIS().WithParams == "group" {
+	//} else if is.UserIS().PathWithParams == "group" {
 	//	globalIS, name, err := ctrl.SetGlobalIS(user.UserIS(), is)
 	//	if err == nil {
 	//		return globalIS, name
@@ -477,7 +477,7 @@ func setGlobalIS(user *auth.User, is auth.ID, credentialsOp users.Operator, ctrl
 	//		log.Println("can't set GlobalIS for group:", is, err)
 	//	}
 	//} else {
-	//	log.Println("can't setGlobalIS for UserIS.LocalPath:", is.UserIS().WithParams)
+	//	log.Println("can't setGlobalIS for UserIS.LocalPath:", is.UserIS().PathWithParams)
 	//}
 
 	return "", ""

@@ -1,4 +1,4 @@
-package associatio
+package server_http
 
 import (
 	"net/url"
@@ -14,15 +14,15 @@ type Endpoint struct {
 	ParamNames []string  `json:"param_names,omitempty"`
 	AllowedIDs []auth.ID `json:"allowed_ids,omitempty"`
 
-	DataItem interface{} `json:"data_item,omitempty"` // for Worker
+	WorkerHTTP
 
-	// Shortcut string `json:"shortcut,omitempty"`
+	// DataItem   interface{} `json:"data_item,omitempty"` // for Interface
 
 }
 
 var rePathParam = regexp.MustCompile(":[^/]+")
 
-func (ep Endpoint) WithParams(params ...string) string {
+func (ep Endpoint) PathWithParams(params ...string) string {
 	matches := rePathParam.FindAllStringSubmatchIndex(ep.Path, -1)
 
 	numMatches := len(matches)
@@ -36,4 +36,17 @@ func (ep Endpoint) WithParams(params ...string) string {
 	}
 
 	return path
+}
+
+func (ep Endpoint) PathTemplate() string {
+	path := ep.Path
+	if len(path) == 0 || path[0] != '/' {
+		path = "/" + path
+	}
+
+	if len(ep.ParamNames) < 1 {
+		return path
+	}
+
+	return path + "/:" + strings.Join(ep.ParamNames, "/:")
 }

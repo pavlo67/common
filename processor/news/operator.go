@@ -3,11 +3,12 @@ package news
 import (
 	"time"
 
+	"github.com/pavlo67/constructor/content"
 	"github.com/pavlo67/constructor/processor/flow"
 	"github.com/pavlo67/constructor/starter/joiner"
 )
 
-const InterfaceKey joiner.ComponentKey = "news"
+const InterfaceKey joiner.InterfaceKey = "news"
 
 type Item struct {
 	ID          string `bson:"_id,omitempty" json:"id,omitempty"`

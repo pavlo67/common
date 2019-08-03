@@ -10,82 +10,84 @@ import (
 func TestInterface(t *testing.T) {
 	joiner := New()
 
-	const keyA1 ComponentKey = "KeyA1"
+	const keyA1 InterfaceKey = "KeyA1"
 	structA1 := &StructA{}
 
-	const keyA2 ComponentKey = "KeyA2"
+	const keyA2 InterfaceKey = "KeyA2"
 	structA2 := &StructA{}
 
-	joiner.JoinComponent(structA1, keyA1)
-	joiner.JoinComponent(structA2, keyA2)
+	joiner.Join(structA1, keyA1)
+	joiner.Join(structA2, keyA2)
 
 	structA1Joined, ok := joiner.Interface(keyA1).(InterfaceA)
 	require.True(t, ok)
 	require.Equal(t, structA1, structA1Joined)
 }
 
-func TestComponentsAll(t *testing.T) {
-	joiner := New()
-
-	const textA1 = "StructA.Action()"
-	const keyA1 ComponentKey = "KeyA1"
-	structA1 := &StructA{text: textA1}
-	structA3 := &StructA{text: textA1}
-
-	const keyA2 ComponentKey = "KeyA2"
-	structA2 := &StructA{}
-
-	const keyB1 ComponentKey = "KeyB1"
-	structB1 := &StructB{}
-
-	joiner.JoinComponent(structA1, keyA1)
-	joiner.JoinComponent(structA3, keyA1)
-	joiner.JoinComponent(structB1, keyB1)
-	joiner.JoinComponent(structA2, keyA2)
-
-	components := joiner.ComponentsAll(keyA1)
-	require.Equal(t, 2, len(components))
-
-	for _, component := range components {
-		require.Equal(t, keyA1, component.Key)
-
-		interfaceA, ok := component.Interface.(InterfaceA)
-		require.True(t, ok)
-		require.NotNil(t, interfaceA)
-
-		text := interfaceA.ActionA()
-		require.Equal(t, textA1, text)
-	}
-
-	require.Equal(t, 1, structA1.NumActionA)
-	require.Equal(t, 1, structA3.NumActionA)
-	require.Equal(t, 0, structA2.NumActionA)
-}
+//func TestComponentsAll(t *testing.T) {
+//	joiner := New()
+//
+//	const textA1 = "StructA.Action()"
+//	const keyA1 InterfaceKey = "KeyA1"
+//	structA1 := &StructA{text: textA1}
+//	structA3 := &StructA{text: textA1}
+//
+//	const keyA2 InterfaceKey = "KeyA2"
+//	structA2 := &StructA{}
+//
+//	const keyB1 InterfaceKey = "KeyB1"
+//	structB1 := &StructB{}
+//
+//	joiner.Join(structA1, keyA1)
+//	joiner.Join(structA3, keyA1)
+//	joiner.Join(structB1, keyB1)
+//	joiner.Join(structA2, keyA2)
+//
+//	components := joiner.ComponentsAll(keyA1)
+//	require.Equal(t, 2, len(components))
+//
+//	for _, component := range components {
+//		require.Equal(t, keyA1, component.Key)
+//
+//		interfaceA, ok := component.Interface.(InterfaceA)
+//		require.True(t, ok)
+//		require.NotNil(t, interfaceA)
+//
+//		text := interfaceA.ActionA()
+//		require.Equal(t, textA1, text)
+//	}
+//
+//	require.Equal(t, 1, structA1.NumActionA)
+//	require.Equal(t, 1, structA3.NumActionA)
+//	require.Equal(t, 0, structA2.NumActionA)
+//}
 
 func TestComponentsAllWithSignature(t *testing.T) {
 	joiner := New()
 
 	const textA1 = "StructA.Action()"
-	const keyA1 ComponentKey = "KeyA1"
+	const keyA1 InterfaceKey = "KeyA1"
 	structA1 := &StructA{text: textA1}
-	structA3 := &StructA{text: textA1}
 
-	const keyA2 ComponentKey = "KeyA2"
+	const keyA2 InterfaceKey = "KeyA2"
 	structA2 := &StructA{text: textA1}
 
-	const keyB1 ComponentKey = "KeyB1"
+	const keyA3 InterfaceKey = "KeyA3"
+	structA3 := &StructA{text: textA1}
+
+	const keyB1 InterfaceKey = "KeyB1"
 	structB1 := &StructB{}
 
-	joiner.JoinComponent(structA1, keyA1)
-	joiner.JoinComponent(structA3, keyA1)
-	joiner.JoinComponent(structB1, keyB1)
-	joiner.JoinComponent(structA2, keyA2)
+	joiner.Join(structA1, keyA1)
+	joiner.Join(structA3, keyA3)
+	joiner.Join(structB1, keyB1)
+	joiner.Join(structA2, keyA2)
 
 	components := joiner.ComponentsAllWithInterface((*InterfaceA)(nil))
 	require.Equal(t, 3, len(components))
 
 	for _, component := range components {
-		interfaceA, ok := component.Worker.(InterfaceA)
+		interfaceA, ok := component.Interface.(InterfaceA)
 		require.True(t, ok)
 		require.NotNil(t, interfaceA)
 
@@ -102,20 +104,22 @@ func TestCloseAll(t *testing.T) {
 	joiner := New()
 
 	const textA1 = "StructA.Action()"
-	const keyA1 ComponentKey = "KeyA1"
+	const keyA1 InterfaceKey = "KeyA1"
 	structA1 := &StructA{text: textA1}
-	structA3 := &StructA{text: textA1}
 
-	const keyA2 ComponentKey = "KeyA2"
+	const keyA2 InterfaceKey = "KeyA2"
 	structA2 := &StructA{text: textA1}
 
-	const keyB1 ComponentKey = "KeyB1"
+	const keyA3 InterfaceKey = "KeyA3"
+	structA3 := &StructA{text: textA1}
+
+	const keyB1 InterfaceKey = "KeyB1"
 	structB1 := &StructB{}
 
-	joiner.JoinComponent(structA1, keyA1)
-	joiner.JoinComponent(structA3, keyA1)
-	joiner.JoinComponent(structB1, keyB1)
-	joiner.JoinComponent(structA2, keyA2)
+	joiner.Join(structA1, keyA1)
+	joiner.Join(structA3, keyA3)
+	joiner.Join(structB1, keyB1)
+	joiner.Join(structA2, keyA2)
 
 	joiner.CloseAll()
 
