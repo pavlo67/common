@@ -55,7 +55,7 @@ func (sc *identity_login_stubStarter) Prepare(conf *config.Config, params basis.
 	return errs.Err()
 }
 
-func (sc *identity_login_stubStarter) Check() (info []starter.Info, err error) {
+func (sc *identity_login_stubStarter) Check() (info []basis.Info, err error) {
 	return nil, nil
 }
 

@@ -5,13 +5,13 @@ import (
 
 	"github.com/mmcdole/gofeed"
 
+	"github.com/pavlo67/constructor/apps/f"
+	"github.com/pavlo67/constructor/apps/flow"
 	"github.com/pavlo67/constructor/basis"
-	"github.com/pavlo67/constructor/processor/flow"
 	"github.com/pavlo67/constructor/processor/importer"
-	"github.com/pavlo67/constructor/processor/news"
 )
 
-const SourceTypeRSS flow.SourceType = "rss"
+const SourceTypeRSS f.SourceType = "rss"
 
 var _ importer.Operator = &RSS{}
 
@@ -43,7 +43,7 @@ func (r *RSS) Init(feedURL string) error {
 
 //var reHTTP = regexp.MustCompile("(?i)^https?://")
 
-func (r *RSS) Next() (*news.Item, error) {
+func (r *RSS) Next() (*flow.Item, error) {
 	r.itemIndex++
 
 	if r.itemIndex >= len(r.items) {
@@ -70,10 +70,10 @@ func (r *RSS) Next() (*news.Item, error) {
 
 	// Original:   interface{}(item),
 
-	var embedded []news.Embedded
+	var embedded []flow.Embedded
 
 	if item.Image != nil {
-		embedded = append(embedded, news.Embedded{
+		embedded = append(embedded, flow.Embedded{
 			SourceURL: item.Image.URL,
 			Title:     item.Image.Title,
 		})
@@ -81,19 +81,19 @@ func (r *RSS) Next() (*news.Item, error) {
 
 	if len(item.Enclosures) > 0 {
 		for _, p := range item.Enclosures {
-			embedded = append(embedded, news.Embedded{
+			embedded = append(embedded, flow.Embedded{
 				SourceURL: p.URL,
 				Title:     p.Type + ": " + p.Length,
 			})
 		}
 	}
 
-	return &news.Item{
-		Source: flow.Source{
+	return &flow.Item{
+		Source: f.Source{
 			URL:      r.feedURL,
 			SourceID: originalID,
 		},
-		Content: news.Content{
+		Content: flow.Content{
 			Time:     &sourceTime,
 			Title:    item.Title,
 			Summary:  item.Description,

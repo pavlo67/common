@@ -3,7 +3,7 @@ package importer
 import (
 	"github.com/pavlo67/constructor/starter/joiner"
 
-	"github.com/pavlo67/constructor/processor/news"
+	"github.com/pavlo67/constructor/apps/flow"
 )
 
 const InterfaceKey joiner.InterfaceKey = "importer"
@@ -19,7 +19,7 @@ type Operator interface {
 	Init(source string) error
 
 	// Next gets the next data entity from the source
-	Next() (*news.Item, error)
+	Next() (*flow.Item, error)
 
 	Close() error
 }

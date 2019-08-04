@@ -15,14 +15,16 @@ import (
 
 type ServerComponentsIndex struct {
 	Endpoints map[string]Endpoint
-	MySQL     map[string]MySQLTableComponent
+	MySQL     map[string]SQLTable
+	SQLite    map[string]SQLTable
 	Params    map[string]string
 	ParamsArr map[string][]string
 }
 
 type serverComponentsIndexRaw struct {
 	Endpoints map[string]interface{}
-	MySQL     map[string]MySQLTableComponent
+	MySQL     map[string]SQLTable
+	SQLite    map[string]SQLTable
 	Params    map[string]interface{}
 }
 

@@ -1,0 +1,69 @@
+{
+    endpoints: {
+        viewFounts:       ["/founts/", "GET"],
+        viewFount:        ["/fount/view/:id", "GET"],
+        blankFount:       ["/fount/blank/", "GET"],
+        editFount:        ["/fount/edit/:id", "GET"],
+        createFount:      ["/fount/create/", "POST"],
+        updateFount:      ["/fount/update/", "POST"],
+        deleteFount:      ["/fount/delete/:id", "POST"],
+        fountSettings:    ["/fount/settings/", "POST"],
+        fountTestSetting: ["/fount/settings/test/", "POST"],
+
+        freeFlows:        ["/flows/free/:tag", "GET"],
+        viewFlows:        ["/flows/", "GET"],
+        viewFlowsFount:   ["/flows/fount/:id", "GET"],
+        viewFlowsByTag:   ["/flows/tag/:tag", "GET"],
+        importFlow:       ["/flows/import/:id", "GET"],
+
+        downloadFile:     ["/download/import/", "POST"],
+        importTest:       ["/test/import/", "POST"],
+
+    },
+    fields: {
+        id:                "id",
+        title:             "title",
+        url:               "url",
+        direct:            "direct",
+        tags:              "tags",
+        type:              "type",
+        updated_at:        "updated_at",
+        selectAuthor:      "select_author",
+        author:            "author",
+
+        importDetailsType:   "import_details_type",
+        importDetailsParams: "import_details_params",
+        importStartRegexp :  "import_start_regexp",
+        importFinishRegexp:  "import_finish_regexp",
+        importSplitRegexp:   "import_split_regexp",
+        importTagsList :     "import_tags_list",
+        titleRegexp:         "title_regexp",
+
+        acceptImport:     "/notes/accept/import/",
+        fromImportID:     "from_import_id_",
+    },
+    listeners: {
+        createFount:      ["fount_create", "click"],
+        updateFount:      ["fount_update", "click"],
+        deleteFount:      ["fount_delete_*", "click"],
+        importTest:       ["test_import_fount_*", "click"],
+        showContent:      ["news_title_id_*", "mouseover"],
+        hideContent:      ["news_title_id_*", "mouseout"],
+        hideOwnContent:   ["news_content_id_*", "mouseout"],
+        importFlow:       ["flow_import_id_*", "click"],
+
+        authorsFromImport: ["select_author", "change", "authorsFromImport"],
+        acceptImport:      ["import_accept", "click", "acceptImport"],
+        selectAllImport:   ["select_all_as_*", "click", "selectAllImport"],
+        oneObjectImport:   ["one_object_import_id_*", "click", "oneObjectImport"],
+        oneObjectAccept:   ["one_object_accept_id_*", "click", "oneObjectAccept"],
+
+        testRegexp:   ["test_regexp", "click", "testRegexp"],
+        exportRegexp: ["export_regexp", "click", "exportRegexp"],
+
+    },
+    params: {
+        pagination: "200",
+        idFountScannerGroup: "5",
+    },
+}

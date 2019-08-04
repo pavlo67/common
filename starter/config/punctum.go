@@ -337,7 +337,7 @@ func (c *Config) Bool(key string, errs basis.Errors) (bool, basis.Errors) {
 //// 	values := make(map[string]string)
 //
 //// 	s := structs.New(data)
-//// 	for _, f := range s.Fields() {
+//// 	for _, f := range s.FieldsArr() {
 //// 		if f.IsExported() {
 //// 			if reflect.TypeOf(f.Value()).Kind() == reflect.Struct {
 //// 				v1 := DataStructParse(f.Value())
