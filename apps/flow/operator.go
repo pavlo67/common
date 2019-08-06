@@ -7,7 +7,6 @@ import (
 	"github.com/pavlo67/constructor/apps/links"
 	"github.com/pavlo67/constructor/auth"
 	"github.com/pavlo67/constructor/basis"
-	"github.com/pavlo67/constructor/basis/selectors"
 	"github.com/pavlo67/constructor/starter/joiner"
 	"github.com/pavlo67/constructor/structura"
 )
@@ -34,26 +33,26 @@ type Source struct {
 }
 
 type Content struct {
-	SourceURL string      `bson:"source_url,omitempty" json:"source_url,omitempty"`
-	Title     string      `bson:"title"                json:"title"`
-	Summary   string      `bson:"summary,omitempty"    json:"summary,omitempty"`
-	Text      string      `bson:"text,omitempty"       json:"text,omitempty"`
-	Tags      []links.Tag `bson:"tags,omitempty"       json:"tags,omitempty"`
-	Href      string      `bson:"href,omitempty"       json:"href,omitempty"`
+	SourceURL string `bson:"source_url,omitempty" json:"source_url,omitempty"`
+	Title     string `bson:"title"                json:"title"`
+	Summary   string `bson:"summary,omitempty"    json:"summary,omitempty"`
+	Details   string `bson:"details,omitempty"    json:"details,omitempty"`
+	Href      string `bson:"href,omitempty"       json:"href,omitempty"`
 }
 
 type Operator interface {
-	Read(basis.ID, *structura.GetOptions) (Item, error)
-	List(*selectors.Term, *structura.GetOptions) ([]content.Brief, error)
-	Tags(*selectors.Term, *structura.GetOptions) ([]links.Tag, error)
-	Sources(*selectors.Term, *structura.GetOptions) ([]basis.ID, error)
-	Close() error
+	Sources(*structura.GetOptions) ([]basis.ID, error)
+	Tags(*structura.GetOptions) ([]links.Tag, error)
+	ListAll(before *time.Time, options *structura.GetOptions) ([]content.Brief, error)
+	ListBySourceID(sourceID basis.ID, before *time.Time, options *structura.GetOptions) ([]content.Brief, error)
+	ListByTag(tag string, before *time.Time, options *structura.GetOptions) ([]content.Brief, error)
+	Read(basis.ID, *structura.GetOptions) (*Item, error)
 }
 
 type Administrator interface {
 	Has(*Source) (bool, error)
 	Save([]Item, *structura.SaveOptions) ([]basis.ID, error)
-	Remove(*selectors.Term, *structura.RemoveOptions) error
+	Remove(sourceIDs []basis.ID, before *time.Time, options *structura.RemoveOptions) error
 }
 
 //func (item *Item) PartesTexti() ([]textus.Pars, error) {

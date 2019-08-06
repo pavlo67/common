@@ -1,41 +1,28 @@
 {
-    mysql: {
-        table: {
+    sql: {
+        flow: {
             fields: [
-                ["id", "bigint(20) unsigned", "false", "", "auto_increment"],
-                ["global_is", "varchar(255)", "false", "", ""],
+                ["id", "BIGINT UNSIGNED", "false", "", "PRIMARY KEY"],
+                ["saved_at", "TIMESTAMP", "false", "CURRENT_TIMESTAMP", ""],
 
-                ["genus", "varchar(63)", "false", "", ""],
-                ["author", "varchar(255)", "false", "", ""],
+                ["source_id", "TEXT", "false", "", ""],
+                ["original", "TEXT", "false", "", ""],
+                ["source_time", "TIMESTAMP", "true", "", ""],
 
-                ["name", "text", "false", "", ""],
-                ["brief", "text", "false", "", ""],
-                ["content", "mediumtext", "false", "", ""],
-                ["links", "mediumtext", "false", "", ""],
-                ["count_linked", "smallint(5) unsigned", "false", "0", ""],
-                ["top_order", "smallint(5) unsigned", "false", "0", ""],
-                ["visibility", "varchar(255)", "false", "", ""],
+                ["source_url", "TEXT", "true", "", ""],
+                ["title", "TEXT", "false", "", ""],
+                ["summary", "TEXT", "true", "", ""],
+                ["details", "TEXT", "true", "", ""],
+                ["href", "TEXT", "true", "", ""],
+                ["embedded", "TEXT", "true", "", ""],
 
-                ["tags", "text", "false", "", ""],
-
-                ["r_view", "varchar(255)", "false", "", ""],
-                ["r_owner", "varchar(255)", "false", "", ""],
-                ["managers", "text", "false", "", ""],
-
-                ["status", "varchar(10)", "false", "", ""],
-                ["history", "text", "false", "", ""],
-
-                ["created_at", "timestamp", "false", "CURRENT_TIMESTAMP", ""],
-                ["updated_at", "timestamp", "true", "", "on update CURRENT_TIMESTAMP"],
+                ["tags", "TEXT", "true", "", ""],
+                ["r_view", "TEXT", "true", "", ""],
             ],
             indexes: [
-                {name: "PRIMARY", type: "PRIMARY", fields: ["id"]},
-                {name: "global_is", type: "", fields: ["global_is"]},
-                {name: "genus", type: "", fields: ["genus"]},
-                {name: "r_view", type: "", fields: ["r_view"]},
-                {name: "r_owner", type: "", fields: ["r_owner"]},
-                {name: "status", type: "", fields: ["status"]},
-                {name: "name", type: "FULLTEXT", fields: ["name", "content", "tags"]},
+                {name: "saved_at", type: "", fields: ["saved_at"]},
+                {name: "source",   type: "", fields: ["source_id", "original"]},
+                {name: "r_view",   type: "", fields: ["r_view"]},
             ],
         },
     },

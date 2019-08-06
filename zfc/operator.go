@@ -1,9 +1,23 @@
 package zfc
 
-type Condition func(Set) bool
+import "github.com/pavlo67/constructor/basis"
+
+type Condition func(Something) bool
+
+type Something interface {
+	IsEqual(Something) bool
+	DifferenceFrom(Something) []Something
+	Variations(basis.Info) []Something
+}
 
 type Set interface {
-	AreEqual(Set) bool
+	Something
+	Contains(Something) bool
+	Elements() []Something
+
+	Cardinality() int64
+	Height() int64
+
 	Tuple(...Set) Set
 	Boolean() Set
 	Union(...Set) Set
@@ -15,11 +29,9 @@ type Set interface {
 	Delta(Set) Set
 	Carthesian(Set) Set
 	Map(Set) Set
-
-	// Unwind() (Set, bool)
 }
 
 type Operator interface {
 	Empty() Set
-	Set(interface{}) Set
+	Set(...Something) Set
 }
