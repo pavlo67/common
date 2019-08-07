@@ -13,16 +13,14 @@ var ErrNull = errors.New("відсутнє значення")
 var ErrEmpty = errors.New("порожнє значення")
 var ErrDuplicate = errors.New("дублікат значення")
 
-var ErrEmptyQuery = errors.New("порожній запит")
-var ErrBadQuery = errors.New("помилковий запит")
 var ErrNotFound = errors.New("не знайдено")
 var ErrCantPerform = errors.New("не вдається виконати операцію")
 var ErrCantDecodeData = errors.New("не вдається декодувати дані")
 var ErrNoData = errors.New("відсутні дані")
 var ErrJSONFormat = errors.New("неприйнятний формат даних, мав би бути JSON")
 
-const CantPrepareQuery = "can't prepare (query='%s')"
-const CantExecQuery = "can't execute (query='%s', values='%#v')"
+var ErrEmptyQuery = errors.New("порожній запит")
+var ErrBadQuery = errors.New("помилковий запит")
 
 var ErrTest = errors.New("помилка на тесті")
 

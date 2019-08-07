@@ -13,7 +13,7 @@ import (
 	"github.com/pavlo67/constructor/basis"
 )
 
-type ServerComponentsIndex struct {
+type ComponentsIndex struct {
 	Endpoints map[string]Endpoint
 	MySQL     map[string]SQLTable
 	SQLite    map[string]SQLTable
@@ -21,16 +21,16 @@ type ServerComponentsIndex struct {
 	ParamsArr map[string][]string
 }
 
-type serverComponentsIndexRaw struct {
+type componentsIndexRaw struct {
 	Endpoints map[string]interface{}
 	MySQL     map[string]SQLTable
 	SQLite    map[string]SQLTable
 	Params    map[string]interface{}
 }
 
-func ComponentIndex(indexPath string, errs basis.Errors) (ServerComponentsIndex, basis.Errors) {
+func ComponentIndex(indexPath string, errs basis.Errors) (ComponentsIndex, basis.Errors) {
 	if indexPath == "" {
-		return ServerComponentsIndex{}, errs
+		return ComponentsIndex{}, errs
 	}
 
 	if indexPath[len(indexPath)-1] == '/' {
@@ -38,21 +38,21 @@ func ComponentIndex(indexPath string, errs basis.Errors) (ServerComponentsIndex,
 	}
 
 	if _, err := os.Stat(indexPath); err != nil {
-		return ServerComponentsIndex{}, errs
+		return ComponentsIndex{}, errs
 	}
 
 	data, err := ioutil.ReadFile(indexPath)
 	if err != nil {
-		return ServerComponentsIndex{}, append(errs, errors.Wrapf(err, "no index file in '%s'", indexPath))
+		return ComponentsIndex{}, append(errs, errors.Wrapf(err, "no index file in '%s'", indexPath))
 	}
 
-	var sciRaw serverComponentsIndexRaw
+	var sciRaw componentsIndexRaw
 	err = json5.Unmarshal(data, &sciRaw)
 	if err != nil {
-		return ServerComponentsIndex{}, append(errs, errors.Errorf("can't decode config data: '%s'\n", string(data)))
+		return ComponentsIndex{}, append(errs, errors.Errorf("can't decode config data: '%s'\n", string(data)))
 	}
 
-	sci := &ServerComponentsIndex{
+	sci := &ComponentsIndex{
 		Endpoints: map[string]Endpoint{},
 		MySQL:     sciRaw.MySQL,
 		Params:    map[string]string{},

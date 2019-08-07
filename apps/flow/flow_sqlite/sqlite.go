@@ -19,94 +19,43 @@ var _ flow.Operator = &flowSQLite{}
 type flowSQLite struct {
 	// grOp     groups.Operator
 
-	dbh *sql.DB
+	db *sql.DB
 
 	stmRead, stmListAll, stmListByTag, stmListBySourceID, stmTags, stmSources, stmHas, stmSave, stmRemove *sql.Stmt
 	sqlRead, sqlListAll, sqlListByTag, sqlListBySourceID, sqlTags, sqlSources, sqlHas, sqlSave, sqlRemove string
 }
 
-const onNew = "on flowSQLite.New()"
+const onNew = "on flowSQLite.New(): "
 
-//func NewCRUDOperator(grOp groups.Operator, mysqlConfig config.ServerAccess, table string, fields []crud.Field, managers rights.Managers) (crud.Operator, crud.Cleaner, error) {
-//	dbh, err := ConnectToMysql(mysqlConfig)
-//	if err != nil {
-//		return nil, nil, errors.Wrap(err, onNew)
-//	}
-//
-//	if grOp == nil {
-//		// DO WARNING, it's may be not ok
-//	}
-//
-//	if strings.TrimSpace(table) == "" {
-//		return nil, nil, errors.New(onNew + ": no table name defined")
-//	}
-//
-//	if len(fields) < 1 {
-//		return nil, nil, errors.New(onNew + ": no table fields defined")
-//	}
-//
-//	// TODO: customize special fields - id, created_at, updated_at, r_view, r_owner, managers
-//
-//	// {Key: "id", Unique: true, AutoUnique: true},
-//	// {Key: "r_view", Creatable: true, Editable: true, NotEmpty: true},
-//	// {Key: "r_owner", Creatable: true, Editable: true, NotEmpty: true},
-//	// {Key: "managers", Creatable: true, Editable: true},
-//	// {Key: "created_at", NotEmpty: true},
-//	// {Key: "updated_at"},
-//
-//	var fieldsToCreateList, fieldsToUpdateList, fieldsToReadList []string
-//	var wildcardsToCreate []string
-//	for _, f := range fields {
-//		//log.Printf("%#v", f)
-//		fieldsToReadList = append(fieldsToReadList, f.Key)
-//		if f.Creatable {
-//			fieldsToCreateList = append(fieldsToCreateList, f.Key)
-//			wildcardsToCreate = append(wildcardsToCreate, "?")
-//		}
-//		if f.Updatable {
-//			fieldsToUpdateList = append(fieldsToUpdateList, f.Key)
-//		}
-//	}
-//
-//	//log.Fatal(fieldsToUpdateList)
-//
-//	fieldsToCreate := "`" + strings.Join(fieldsToCreateList, "`, `") + "`"
-//	fieldsToRead := "`" + strings.Join(fieldsToReadList, "`, `") + "`"
-//	fieldsToUpdate := "`" + strings.Join(fieldsToUpdateList, "` = ?, `") + "` = ?"
-//
-//	crudOp := flowSQLite{
-//		grOp:        grOp,
-//		managers:    managers,
-//		dbh:         dbh,
-//		table:       table,
-//		fields:      fields,
-//		sqlCreate:   "insert into `" + table + "` (" + fieldsToCreate + ") values (" + strings.Join(wildcardsToCreate, ",") + ")",
-//		sqlRead:     "select " + fieldsToRead + " from `" + table + "` where id = ?",
-//		sqlUpdate:   "update `" + table + "` set " + fieldsToUpdate + " where id = ?",
-//		sqlDelete:   "delete from `" + table + "` where id = ?",
-//		sqlReadList: "select SQL_CALC_FOUND_ROWS " + fieldsToRead + " from `" + table + "`",
-//	}
-//
-//	sqlStmts := []SqlStmt{
-//		{&crudOp.stmCreate, crudOp.sqlCreate},
-//		{&crudOp.stmRead, crudOp.sqlRead},
-//		{&crudOp.stmUpdate, crudOp.sqlUpdate},
-//		{&crudOp.stmDelete, crudOp.sqlDelete},
-//	}
-//
-//	for _, sqlStmt := range sqlStmts {
-//		if err = Exec(dbh, sqlStmt.Sql, sqlStmt.Stmt); err != nil {
-//			return nil, nil, errors.Wrap(err, onNew)
-//		}
-//	}
-//
-//	return &crudOp, func() error { return crudOp.clean() }, nil
-//}
-//
-//func (crudOp *flowSQLite) clean() error {
-//	_, err := crudOp.dbh.Exec("truncate `" + crudOp.table + "`")
-//	return err
-//}
+func New(db *sql.DB) (flow.Operator, error) {
+	if db == nil {
+		return nil, errors.New(onNew + "no db")
+	}
+
+	flowOp := flowSQLite{
+		db: db,
+		//sqlSave:     "insert into `" + table + "` (" + fieldsToCreate + ") values (" + strings.Join(wildcardsToCreate, ",") + ")",
+		//sqlRead:     "select " + fieldsToRead + " from `" + table + "` where id = ?",
+		//sqlDelete:   "delete from `" + table + "` where id = ?",
+		//sqlReadList: "select SQL_CALC_FOUND_ROWS " + fieldsToRead + " from `" + table + "`",
+	}
+
+	sqlStmts := []sqllib.SqlStmt{
+		{&flowOp.stmSave, flowOp.sqlSave},
+		{&flowOp.stmRead, flowOp.sqlRead},
+		//{&flowOp.stmUpdate, flowOp.sqlUpdate},
+		//{&flowOp.stmDelete, flowOp.sqlDelete},
+	}
+
+	for _, sqlStmt := range sqlStmts {
+		if err := sqllib.Prepare(db, sqlStmt.Sql, sqlStmt.Stmt); err != nil {
+			return nil, errors.Wrap(err, onNew)
+		}
+	}
+
+	return &flowOp, nil
+
+}
 
 const onSources = "on flowSQLite.Sources(): "
 
@@ -179,17 +128,17 @@ func (flowOp *flowSQLite) Clean() error {
 
 //const onCreate = "on flowSQLite.Create()"
 //
-//func (crudOp *flowSQLite) Create(userIS auth.ID, native interface{}) (string, error) {
+//func (flowOp *flowSQLite) Create(userIS auth.ID, native interface{}) (string, error) {
 //	nativeMap, ok := native.(crud.NativeMap)
 //	if !ok {
 //		return "", errors.Wrapf(basis.ErrWrongDataType, "expected crud.NativeMap, actual = %T", native)
 //	}
 //
-//	//if err := groups.OneOfErr(userIS, crudOp.grOp, crudOp.managers[rights.Create]); err != nil {
+//	//if err := groups.OneOfErr(userIS, flowOp.grOp, flowOp.managers[rights.Create]); err != nil {
 //	//	return "", errors.Wrap(err, onCreate)
 //	//}
 //
-//	//rView, rOwner, managers, err := groups.SetRights(userIS, crudOp.grOp, record.RView, record.ROwner, record.Managers)
+//	//rView, rOwner, managers, err := groups.SetRights(userIS, flowOp.grOp, record.RView, record.ROwner, record.Managers)
 //	//if err != nil {
 //	//	return "", errors.Wrap(err, onCreate+": can't .SetRights)")
 //	//}
@@ -203,20 +152,20 @@ func (flowOp *flowSQLite) Clean() error {
 //	//
 //
 //	var values []interface{}
-//	for _, f := range crudOp.fields {
+//	for _, f := range flowOp.fields {
 //		if f.Creatable {
 //			values = append(values, nativeMap[f.Key])
 //		}
 //	}
 //
-//	res, err := crudOp.stmCreate.Exec(values...)
+//	res, err := flowOp.stmCreate.Exec(values...)
 //	if err != nil {
-//		return "", errors.Wrapf(err, onCreate+": can't exec SQL: %s, %#v", crudOp.sqlCreate, values)
+//		return "", errors.Wrapf(err, onCreate+": can't exec SQL: %s, %#v", flowOp.sqlCreate, values)
 //	}
 //
 //	id, err := res.LastInsertId()
 //	if err != nil {
-//		return "", errors.Wrapf(err, onCreate+": can't get LastInsertId() SQL: %s, %#v", crudOp.sqlCreate, values)
+//		return "", errors.Wrapf(err, onCreate+": can't get LastInsertId() SQL: %s, %#v", flowOp.sqlCreate, values)
 //	}
 //
 //	return strconv.FormatInt(id, 10), nil
@@ -224,7 +173,7 @@ func (flowOp *flowSQLite) Clean() error {
 //
 //const onRead = "on flowSQLite.Read()"
 //
-//func (crudOp *flowSQLite) Read(userIS auth.ID, idStr string) (interface{}, error) {
+//func (flowOp *flowSQLite) Read(userIS auth.ID, idStr string) (interface{}, error) {
 //	if len(idStr) < 1 {
 //		return nil, errors.Wrap(crud.ErrEmptySelector, onRead)
 //	}
@@ -234,7 +183,7 @@ func (flowOp *flowSQLite) Clean() error {
 //		return nil, errors.Wrap(crud.ErrBadSelector, onRead+": "+idStr)
 //	}
 //
-//	readValuesPtr, err := crud.StringMapToNativePtrList(nil, crudOp.fields)
+//	readValuesPtr, err := crud.StringMapToNativePtrList(nil, flowOp.fields)
 //	if err != nil {
 //		return nil, errors.Wrap(err, onRead)
 //	}
@@ -244,15 +193,15 @@ func (flowOp *flowSQLite) Clean() error {
 //		readValues = append(readValues, rv)
 //	}
 //
-//	err = crudOp.stmRead.QueryRow(id).Scan(readValues...)
+//	err = flowOp.stmRead.QueryRow(id).Scan(readValues...)
 //	if err == sql.ErrNoRows {
 //		return nil, nil
 //	}
 //	if err != nil {
-//		return nil, errors.Wrapf(err, onRead+": can't exec QueryRow: %s, id = %s", crudOp.sqlRead, id)
+//		return nil, errors.Wrapf(err, onRead+": can't exec QueryRow: %s, id = %s", flowOp.sqlRead, id)
 //	}
 //
-//	//if !groups.OneOf(userIS, crudOp.grOp, src.RView, src.ROwner) {
+//	//if !groups.OneOf(userIS, flowOp.grOp, src.RView, src.ROwner) {
 //	//	return nil, errors.Wrap(basis.ErrNotFound, onRead)
 //	//}
 //	//
@@ -262,12 +211,12 @@ func (flowOp *flowSQLite) Clean() error {
 //	//	}
 //	//}
 //
-//	return crud.NativePtrListToNativeMap(readValuesPtr, crudOp.fields)
+//	return crud.NativePtrListToNativeMap(readValuesPtr, flowOp.fields)
 //}
 //
 //const onReadList = "on flowSQLite.ReadList()"
 //
-//func (crudOp *flowSQLite) ReadList(userIS auth.ID, options *content.ListOptions) ([]interface{}, uint64, error) {
+//func (flowOp *flowSQLite) ReadList(userIS auth.ID, options *content.ListOptions) ([]interface{}, uint64, error) {
 //	var err error
 //	var values []interface{}
 //	var orderAndLimit, condition, conditionCompleted string
@@ -290,14 +239,14 @@ func (flowOp *flowSQLite) Clean() error {
 //	var rows *sql.Rows
 //
 //	// TODO: check it correct!!!
-//	if crudOp.grOp != nil {
-//		sqlQuery, rows, err = groups.QueryAccessible(crudOp.grOp, crudOp.dbh, userIS, crudOp.sqlReadList, condition, orderAndLimit, values)
+//	if flowOp.grOp != nil {
+//		sqlQuery, rows, err = groups.QueryAccessible(flowOp.grOp, flowOp.db, userIS, flowOp.sqlReadList, condition, orderAndLimit, values)
 //	} else {
 //		if strings.TrimSpace(condition) != "" {
 //			condition = "where " + condition
 //		}
-//		sqlQuery = crudOp.sqlReadList + " " + condition + " " + orderAndLimit
-//		rows, err = crudOp.dbh.Query(sqlQuery, values...)
+//		sqlQuery = flowOp.sqlReadList + " " + condition + " " + orderAndLimit
+//		rows, err = flowOp.db.Query(sqlQuery, values...)
 //	}
 //
 //	if err == sql.ErrNoRows || err == basis.ErrNotFound {
@@ -311,7 +260,7 @@ func (flowOp *flowSQLite) Clean() error {
 //
 //	for rows.Next() {
 //
-//		readValuesPtr, err := crud.StringMapToNativePtrList(nil, crudOp.fields)
+//		readValuesPtr, err := crud.StringMapToNativePtrList(nil, flowOp.fields)
 //		if err != nil {
 //			return nil, 0, errors.Wrap(err, onReadList)
 //		}
@@ -332,7 +281,7 @@ func (flowOp *flowSQLite) Clean() error {
 //		//	}
 //		//}
 //
-//		nativeMap, err := crud.NativePtrListToNativeMap(readValuesPtr, crudOp.fields)
+//		nativeMap, err := crud.NativePtrListToNativeMap(readValuesPtr, flowOp.fields)
 //		if err != nil {
 //			return items, 0, errors.Wrap(err, onReadList)
 //		}
@@ -345,7 +294,7 @@ func (flowOp *flowSQLite) Clean() error {
 //	}
 //
 //	var allCount uint64
-//	err = crudOp.dbh.QueryRow("SELECT FOUND_ROWS()").Scan(&allCount)
+//	err = flowOp.db.QueryRow("SELECT FOUND_ROWS()").Scan(&allCount)
 //	if err != nil {
 //		return nil, 0, errors.Wrapf(err, onReadList+": can't scan ('SELECT FOUND_ROWS()') for sql=%s (%#v)", sqlQuery, values)
 //	}
@@ -362,7 +311,7 @@ func (flowOp *flowSQLite) Clean() error {
 //		l.Warn(onNew + ": no contentTemplate is defined")
 //	}
 //
-//	dbh, err := mysqllib.ConnectToMysql(mysqlConfig)
+//	db, err := mysqllib.ConnectToMysql(mysqlConfig)
 //	if err != nil {
 //		return nil, errors.Wrap(err, onNew)
 //	}
@@ -373,7 +322,7 @@ func (flowOp *flowSQLite) Clean() error {
 //	fieldsToRead := "id," + fieldsToAdd + ", stored_at"
 //
 //	dsOp := datastoreMySQL{
-//		dbh:         dbh,
+//		db:         db,
 //		table:       table,
 //		tableStaged: tableStaged,
 //
@@ -407,7 +356,7 @@ func (flowOp *flowSQLite) Clean() error {
 //	}
 //
 //	for _, sqlStmt := range sqlStmts {
-//		if err = mysqllib.CreateStmt(dbh, sqlStmt.Sql, sqlStmt.Stmt); err != nil {
+//		if err = mysqllib.CreateStmt(db, sqlStmt.Sql, sqlStmt.Stmt); err != nil {
 //			return nil, errors.Wrap(err, onNew)
 //		}
 //	}
@@ -416,11 +365,11 @@ func (flowOp *flowSQLite) Clean() error {
 //}
 //
 //func (dsOp *datastoreMySQL) Clean() error {
-//	_, err1 := dsOp.dbh.Exec("truncate `" + dsOp.table + "`")
+//	_, err1 := dsOp.db.Exec("truncate `" + dsOp.table + "`")
 //
 //	var err2 error
 //	if dsOp.tableStaged != "" {
-//		_, err2 = dsOp.dbh.Exec("truncate `" + dsOp.tableStaged + "`")
+//		_, err2 = dsOp.db.Exec("truncate `" + dsOp.tableStaged + "`")
 //	}
 //
 //	return basis.MultiError(err1, err2).Err()
@@ -555,7 +504,7 @@ func (flowOp *flowSQLite) Clean() error {
 //	// log.Fatal(condition, values)
 //
 //	sqlQuery := dsOp.sqlReadList + " " + condition + " " + orderAndLimit
-//	rows, err := dsOp.dbh.Query(sqlQuery, values...)
+//	rows, err := dsOp.db.Query(sqlQuery, values...)
 //	if err == sql.ErrNoRows || err == basis.ErrNotFound {
 //		return nil, 0, nil
 //	} else if err != nil {
@@ -605,7 +554,7 @@ func (flowOp *flowSQLite) Clean() error {
 //	}
 //
 //	var allCount uint64
-//	err = dsOp.dbh.QueryRow("SELECT FOUND_ROWS()").Scan(&allCount)
+//	err = dsOp.db.QueryRow("SELECT FOUND_ROWS()").Scan(&allCount)
 //	if err != nil {
 //		return nil, 0, errors.Wrapf(err, onGet+": can't scan ('SELECT FOUND_ROWS()') for sql=%s (%#v)", sqlQuery, values)
 //	}
@@ -638,7 +587,7 @@ func (flowOp *flowSQLite) Clean() error {
 //	}
 //
 //	sqlQuery := dsOp.sqlDelete + " " + condition + " " + orderAndLimit
-//	res, err := dsOp.dbh.Exec(sqlQuery, values...)
+//	res, err := dsOp.db.Exec(sqlQuery, values...)
 //	if err != nil {
 //		return crud.Result{}, errors.Wrapf(err, onDelete+": can't exec SQL: %s, %s", sqlQuery, values)
 //	}
@@ -650,7 +599,7 @@ func (flowOp *flowSQLite) Clean() error {
 //}
 //
 //func (dsOp *datastoreMySQL) Close() error {
-//	return errors.Wrap(dsOp.dbh.Close(), "on datastoreMySQL.dbh.Close()")
+//	return errors.Wrap(dsOp.db.Close(), "on datastoreMySQL.db.Close()")
 //}
 //
 ////const onCommit = "on datastoreMySQL.Commit()"
@@ -658,7 +607,7 @@ func (flowOp *flowSQLite) Clean() error {
 ////func (dsOp *datastoreMySQL) Commit(options *crud.ReadOptions) error {
 ////	sql := "update `" + dsOp.tableStaged + "` set status = ?"
 ////	values := []interface{}{"confirmed " + time.Now().Format(time.RFC3339)}
-////	_, err := dsOp.dbh.Exec(sql, values...)
+////	_, err := dsOp.db.Exec(sql, values...)
 ////	if err != nil {
 ////		return errors.Wrapf(err, onCommit+": can't exec SQL: %s, %#v", sql, values)
 ////	}
@@ -671,3 +620,8 @@ func (flowOp *flowSQLite) Clean() error {
 ////	return nil
 ////}
 ////
+
+//func (flowOp *flowSQLite) clean() error {
+//	_, err := flowOp.db.Exec("truncate `" + flowOp.table + "`")
+//	return err
+//}

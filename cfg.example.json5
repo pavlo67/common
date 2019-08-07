@@ -15,12 +15,6 @@
         },
     },
 
-    founts: {
-        leveldb: "/home/user/...",
-    },
-    news: {
-        leveldb: "/home/user/...",
-    },
 
     mysql: {
         flower: {

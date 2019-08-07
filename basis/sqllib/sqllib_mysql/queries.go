@@ -9,7 +9,11 @@ import (
 
 var reIndexLimit = regexp.MustCompile(`\(\d+\)`)
 
-func CreateSQLQuery(table config.SQLTable) string {
+func TableExistsSQL(tableName string) string {
+	return "SHOW TABLES LIKE '" + tableName + "'"
+}
+
+func CreateSQL(table config.SQLTable) string {
 
 	//if version < MySQLVersionFullTextLimit {
 	//	// ignore FULLTEXT index for old mySQL version

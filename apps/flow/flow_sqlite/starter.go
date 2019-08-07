@@ -1,109 +1,86 @@
 package flow_sqlite
 
-//import (
-//	"github.com/pavlo67/constructor/basis"
-//	"github.com/pavlo67/constructor/basis/filelib"
-//	"github.com/pavlo67/constructor/basis/mysqllib"
-//	"github.com/pavlo67/constructor/starter"
-//	"github.com/pavlo67/constructor/starter/config"
-//	"github.com/pavlo67/constructor/starter/logger"
-//	"github.com/pkg/errors"
-//	"go.uber.org/zap"
-//)
-//
-//const DatabaseDefault = "processor"
-//const TableDefault = "data"
-//const TableTemporaryDefault = "data_temporary"
-//
-//func Starter(addCRUD, staged bool, contentTemplate interface{}) starter.Operator {
-//	return &datamysqlStarter{
-//		addCRUD:         addCRUD,
-//		staged:          staged,
-//		contentTemplate: contentTemplate,
-//	}
-//}
-//
-//var l *zap.SugaredLogger
-//
-//type datamysqlStarter struct {
-//	interfaceKey        program.InterfaceKey
-//	cleanerInterfaceKey program.InterfaceKey
-//	mysqlConfig         config.ServerAccess
-//	index               config.ServerComponentsIndex
-//	tables              []config.Table
-//	tableTemporary      string
-//	addCRUD             bool
-//	staged              bool
-//	contentTemplate     interface{}
-//}
-//
-//// TODO: implement addCRUD feature!!!
-//
-//func (ds *datamysqlStarter) Name() string {
-//	return logger.GetCallInfo().PackageName
-//}
-//
-//func (ds *datamysqlStarter) Prepare(conf *config.PunctumConfig, params basis.Params) error {
-//	l = logger.Get()
-//
-//	var errs basis.Errors
-//	ds.mysqlConfig, errs = conf.MySQL(params.StringKeyDefault("database", DatabaseDefault), errs)
-//
-//	indexPath := params.StringKeyDefault("index_path", filelib.CurrentPath())
-//
-//	ds.index, errs = config.ComponentIndex(indexPath, errs)
-//	if len(errs) > 0 {
-//		return errs.Err()
-//	}
-//
-//	ds.interfaceKey = program.InterfaceKey(params.StringKeyDefault("interface_key", string(datastore.InterfaceKey)))
-//	ds.cleanerInterfaceKey = program.InterfaceKey(params.StringKeyDefault("cleaner_interface_key", string(datastore.CleanerInterfaceKey)))
-//
-//	table := params.StringKeyDefault("table", TableDefault)
-//
-//	ds.tables = []config.Table{
-//		{Key: "table", Name: table},
-//	}
-//
-//	if ds.staged {
-//		ds.tableTemporary = params.StringKeyDefault("table_temporary", "")
-//		if ds.tableTemporary == "" {
-//			ds.tableTemporary = TableTemporaryDefault
-//		}
-//		ds.tables = append(ds.tables, config.Table{Key: "table_temporary", Name: ds.tableTemporary})
-//	}
-//
-//	return nil
-//}
-//
-//func (ds *datamysqlStarter) Check() (info []program.Info, err error) {
-//	return mysqllib.CheckMySQLTables(ds.mysqlConfig, ds.index.MySQL, ds.tables)
-//}
-//
-//func (ds *datamysqlStarter) Setup() error {
-//	return mysqllib.SetupMySQLTables(ds.mysqlConfig, ds.index.MySQL, ds.tables)
-//}
-//
-//func (ds *datamysqlStarter) Init(joiner program.Joiner) error {
-//	dataOp, err := New(
-//		ds.mysqlConfig,
-//		ds.tables[0].Name,
-//		ds.tableTemporary,
-//		ds.contentTemplate,
-//	)
-//	if err != nil {
-//		return err
-//	}
-//
-//	err = joiner.JoinInterface(dataOp, ds.interfaceKey)
-//	if err != nil {
-//		return errors.Wrapf(err, "can't join datastoremysql.Operator as %s", ds.interfaceKey)
-//	}
-//
-//	err = joiner.JoinInterface(dataOp.Clean, ds.cleanerInterfaceKey)
-//	if err != nil {
-//		return errors.Wrapf(err, "can't join datastoremysql.Operator.Clean as %s", ds.cleanerInterfaceKey)
-//	}
-//
-//	return nil
-//}
+import (
+	"github.com/pkg/errors"
+
+	"github.com/pavlo67/constructor/apps/flow"
+	"github.com/pavlo67/constructor/basis"
+	"github.com/pavlo67/constructor/basis/filelib"
+	"github.com/pavlo67/constructor/basis/sqllib"
+	"github.com/pavlo67/constructor/basis/sqllib/sqllib_sqlite"
+	"github.com/pavlo67/constructor/starter"
+	"github.com/pavlo67/constructor/starter/config"
+	"github.com/pavlo67/constructor/starter/joiner"
+	"github.com/pavlo67/constructor/starter/logger"
+)
+
+func Starter() starter.Operator {
+	return &flowSQLiteStarter{}
+}
+
+var l logger.Operator
+var _ starter.Operator = &flowSQLiteStarter{}
+
+type flowSQLiteStarter struct {
+	config       config.ServerAccess
+	index        config.ComponentsIndex
+	interfaceKey joiner.InterfaceKey
+}
+
+func (fs *flowSQLiteStarter) Name() string {
+	return logger.GetCallInfo().PackageName
+}
+
+func (fs *flowSQLiteStarter) Init(conf *config.Config, options basis.Info) ([]basis.Info, error) {
+	var errs basis.Errors
+
+	l = conf.Logger
+
+	fs.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(flow.InterfaceKey)))
+	fs.config = conf.SQLite
+	fs.index, errs = config.ComponentIndex(options.StringDefault("index_path", filelib.CurrentPath()), errs)
+
+	sqlOp, err := sqllib_sqlite.New(fs.config)
+	if err != nil {
+		return nil, err
+	}
+	defer sqllib.Close(sqlOp)
+
+	return sqllib.CheckTables(sqlOp, fs.index.SQLite)
+}
+
+func (fs *flowSQLiteStarter) Setup() error {
+
+	return nil
+
+	//return sqllib.SetupTables(
+	//	sm.mysqlConfig,
+	//	sm.index.MySQL,
+	//	[]config.Table{{Key: "table", Name: sm.table}},
+	//)
+}
+
+func (fs *flowSQLiteStarter) Run(joinerOp joiner.Operator) error {
+	sqlOp, err := sqllib_sqlite.New(fs.config)
+	if err != nil {
+		return errors.Wrap(err, "can't init sqllib.Operator")
+	}
+	defer sqllib.Close(sqlOp)
+
+	db, err := sqlOp.DB()
+	if err != nil {
+		return errors.Wrap(err, "can't get db from sqllib.Operator")
+	}
+
+	flowOp, err := New(db)
+	if err != nil {
+		return errors.Wrap(err, "can't init flow.Operator")
+	}
+
+	err = joinerOp.Join(flowOp, fs.interfaceKey)
+	if err != nil {
+		return errors.Wrapf(err, "can't join *flowSQLite as flow.Operator with key '%s'", fs.interfaceKey)
+	}
+
+	return nil
+}

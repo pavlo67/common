@@ -27,7 +27,7 @@ type records_mysqlStarter struct {
 	cleanerInterfaceKey joiner.InterfaceKey
 	mysqlConfig         config.ServerAccess
 	conf                config.Config
-	index               config.ServerComponentsIndex
+	index               config.ComponentsIndex
 	tables              []config.Table
 	jointLinks          bool
 }

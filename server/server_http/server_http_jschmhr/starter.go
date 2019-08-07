@@ -34,9 +34,8 @@ func (ss *server_http_jschmhrStarter) Name() string {
 }
 
 func (ss *server_http_jschmhrStarter) Init(conf *config.Config, options basis.Info) (info []basis.Info, err error) {
-	l = logger.Get()
-
 	var errs basis.Errors
+	l, errs = conf.Logger(nil)
 
 	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(server_http.InterfaceKey)))
 	// ss.interfaceKeyRouter = joiner.InterfaceKey(options.StringDefault("interface_key_router", string(controller.InterfaceKey)))

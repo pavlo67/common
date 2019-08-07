@@ -39,7 +39,7 @@ func TestReadFile(t *testing.T) {
 		},
 	}
 
-	//ExpectedIndex := map[string]serverhttp_jschmhr.ServerComponentsIndex{
+	//ExpectedIndex := map[string]serverhttp_jschmhr.ComponentsIndex{
 	//	"main": {
 	//		Endpoints: map[string]serverhttp_jschmhr.Endpoint{
 	//			"ep1": {Method: "GET", LocalPath: "/"},

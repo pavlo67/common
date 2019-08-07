@@ -1,5 +1,11 @@
 package sqllib
 
+import (
+	"github.com/pavlo67/constructor/basis"
+	"github.com/pavlo67/constructor/starter/config"
+	"github.com/pkg/errors"
+)
+
 const FieldNotFound = "field not found"
 const IndexNotFound = "index not found"
 const FieldNotUsed = "field not used"
@@ -7,6 +13,86 @@ const IndexNotUsed = "index not used"
 
 const BadField = "bad field struct"
 const BadIndex = "bad index"
+
+func CheckTables(sqlOp Operator, tablesConfig map[string]config.SQLTable) ([]basis.Info, error) {
+
+	tablesConfig = PrepareTables(tablesConfig)
+	isErr := false
+	info := []basis.Info{}
+
+	for _, table := range tablesConfig {
+
+		ok, err := TableExists(sqlOp, table.Name)
+		if err != nil {
+			info = append(info, basis.Info{"check if table exists": table, "status": err.Error()})
+			isErr = true
+			continue
+		}
+
+		if !ok {
+			info = append(info, basis.Info{"check if table exists": table, "status": "does not exist"})
+			isErr = true
+			continue
+		}
+
+		//fields, err := TableFields(dbh, table)
+		//if err != nil {
+		//	info = append(info, basis.Info{"check table fields": table, "status": err.Error()})
+		//	isErr = true
+		//	continue
+		//}
+
+		//
+		//		indexes, err := TableIndexes(dbh, table)
+		//		if err != nil {
+		//			info = append(info, basis.Info{"key": table, "status": err.Error()})
+		//			isErr = true
+		//			continue
+		//		}
+		//
+		//		resF, err := CheckTableFields(dbh, fields, tablesFields[table])
+		//		if err != nil {
+		//			info = append(info, basis.Info{"key": table, "status": err.Error()})
+		//			isErr = true
+		//		}
+		//		if len(resF) > 0 {
+		//			for e, v := range resF {
+		//				i := basis.Info{"key": table, "status": e, "details": v}
+		//				info = append(info, i)
+		//			}
+		//			isErr = true
+		//			//continue
+		//		}
+		//		if _, ok := tablesIndexes[table]; ok {
+		//			resI := CheckTableIndexes(dbh, table, indexes, tablesIndexes[table])
+		//			if len(resI) > 0 {
+		//				for e, v := range resI {
+		//					i := basis.Info{"key": table, "status": e, "details": v}
+		//					info = append(info, i)
+		//				}
+		//				isErr = true
+		//				continue
+		//			}
+		//		}
+
+		//for _, idx := range table.Indexes {
+		//	err = AddTableIndex(sqlOp, table.Name, idx.Name, idx.Type, idx.Fields)
+		//
+		//	if err != nil {
+		//		return err
+		//	}
+		//
+		//	log.Println("index '" + idx.Name + "' is created")
+		//
+		//}
+	}
+
+	if isErr {
+		return info, errors.New("check isn't ok")
+	}
+
+	return info, nil
+}
 
 //func TableFields(dbh *sql.DB, table string) ([]sqllib.SQLField, error) {
 //	var stmt *sql.Stmt
@@ -97,96 +183,6 @@ const BadIndex = "bad index"
 //}
 //
 
-//
-//func CheckSQLTables(cfg config.ServerAccess, tablesConfig map[string]SQLTable) ([]basis.Info, error) {
-//	dbh, userTablesJSON, userIndexesJSON, err := PrepareTables(cfg, tablesConfig)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	var userTables = map[string][]sqllib.SQLField{}
-//	var userIndexes = map[string][]sqllib.SQLIndex{}
-//	var ok bool
-//	var info []basis.Info
-//	isErr := false
-//	for _, t := range tables {
-//		if userTables[t.Name], ok = userTablesJSON[t.Key]; !ok {
-//			info = append(info, basis.Info{"key": t.Key, "status": "can't find table structure in mysql.json5"})
-//			isErr = true
-//		}
-//		if userIndexes[t.Name], ok = userIndexesJSON[t.Key]; !ok {
-//			info = append(info, basis.Info{"key": t.Key, "status": "can't find table indexes in mysql.json5"})
-//		}
-//	}
-//
-//	if !isErr {
-//		dbh, err := ConnectToMysql(cfg)
-//		if err != nil {
-//			return nil, errors.Wrap(err, "error connect to mySQL")
-//		}
-//		defer dbh.Close()
-//
-//		info, isErr = CheckTables(dbh, userTables, userIndexes)
-//	}
-//
-//	if isErr {
-//		return info, errors.New("check isn't ok")
-//	}
-//
-//	return info, nil
-//}
-//
-//func CheckTables(dbh *sql.DB, tablesFields map[string][]sqllib.SQLField, tablesIndexes map[string][]sqllib.SQLIndex) ([]basis.Info, bool) {
-//	isErr := false
-//	info := []basis.Info{}
-//	for table := range tablesFields {
-//		err := TableExists(dbh, table)
-//		if err != nil {
-//			info = append(info, basis.Info{"key": table, "status": err.Error()})
-//			isErr = true
-//			continue
-//		}
-//		fields, err := TableFields(dbh, table)
-//		if err != nil {
-//			info = append(info, basis.Info{"key": table, "status": err.Error()})
-//			isErr = true
-//			continue
-//		}
-//
-//		indexes, err := TableIndexes(dbh, table)
-//		if err != nil {
-//			info = append(info, basis.Info{"key": table, "status": err.Error()})
-//			isErr = true
-//			continue
-//		}
-//
-//		resF, err := CheckTableFields(dbh, fields, tablesFields[table])
-//		if err != nil {
-//			info = append(info, basis.Info{"key": table, "status": err.Error()})
-//			isErr = true
-//		}
-//		if len(resF) > 0 {
-//			for e, v := range resF {
-//				i := basis.Info{"key": table, "status": e, "details": v}
-//				info = append(info, i)
-//			}
-//			isErr = true
-//			//continue
-//		}
-//		if _, ok := tablesIndexes[table]; ok {
-//			resI := CheckTableIndexes(dbh, table, indexes, tablesIndexes[table])
-//			if len(resI) > 0 {
-//				for e, v := range resI {
-//					i := basis.Info{"key": table, "status": e, "details": v}
-//					info = append(info, i)
-//				}
-//				isErr = true
-//				continue
-//			}
-//		}
-//	}
-//	return info, isErr
-//}
 //
 //func CheckTableFields(dbh *sql.DB, is, need []sqllib.SQLField) (map[string]string, error) {
 //	version, err := MySQLVersion(dbh)
