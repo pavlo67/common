@@ -1,0 +1,65 @@
+{
+    sql: {
+        sources: {
+            fields: [
+                ["id",       "BIGINT UNSIGNED", "false", "", "PRIMARY KEY"],
+                ["saved_at", "TIMESTAMP", "false", "CURRENT_TIMESTAMP", ""],
+
+                ["title", "TEXT", "false", "", ""],
+                ["url",   "TEXT", "false", "", ""],
+
+                ["tags",  "TEXT", "true", "", ""],
+            ],
+            indexes: [
+                {name: "title",    type: "",       fields: ["title"]},
+                {name: "url",      type: "",       fields: ["url"]},
+                {name: "saved_at", type: "",       fields: ["saved_at"]},
+            ],
+        },
+
+
+        flow: {
+            fields: [
+                ["id",       "BIGINT UNSIGNED", "false", "", "PRIMARY KEY"],
+                ["saved_at", "TIMESTAMP", "false", "CURRENT_TIMESTAMP", ""],
+
+                ["source_id",   "TEXT", "false", "", ""],
+                ["source_key",  "TEXT", "false", "", ""],
+                ["origin",      "TEXT", "false", "", ""],
+                ["source_time", "TIMESTAMP", "true", "", ""],
+                ["source_url",  "TEXT", "true", "", ""],
+
+                ["title",    "TEXT", "false", "", ""],
+                ["summary",  "TEXT", "true", "", ""],
+                ["details",  "TEXT", "true", "", ""],
+                ["href",     "TEXT", "true", "", ""],
+                ["embedded", "TEXT", "true", "", ""],
+
+                ["tags", "TEXT", "true", "", ""],
+            ],
+            indexes: [
+                {name: "source",   type: "", fields: ["source_id", "source_key"]},
+                {name: "saved_at", type: "", fields: ["saved_at"]},
+            ],
+        },
+
+
+        tags: {
+            fields: [
+                ["tag",      "TEXT", "false", "", ""],
+                ["saved_at", "TIMESTAMP", "false", "CURRENT_TIMESTAMP", ""],
+
+                ["flow_id", "BIGINT UNSIGNED", "true", "", "REFERENCES flow(id) ON DELETE CASCADE"],
+                ["source_id", "BIGINT UNSIGNED", "true", "", "REFERENCES source(id) ON DELETE CASCADE"],
+            ],
+            indexes: [
+                {name: "tag",       type: "UNIQUE", fields: ["tag", "source_id"]},
+                {name: "saved_at",  type: "",       fields: ["saved_at"]},
+                {name: "flow_id",   type: "",       fields: ["flow_id"]},
+                {name: "source_id", type: "",       fields: ["source_id"]},
+            ],
+        },
+
+
+    },
+}
