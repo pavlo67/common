@@ -27,10 +27,10 @@ var tableSources = "sources"
 var fieldsToList = []string{"id", "source_time", "source_url", "title", "summary", "tags"}
 var fieldsToListStr = strings.Join(fieldsToRead, ", ")
 
-var fieldsToRead = []string{"source_id", "source_time", "source_url", "title", "summary", "details", "href", "embedded", "tags"}
+var fieldsToRead = []string{"flow.source_id", "source_time", "source_url", "title", "summary", "details", "href", "embedded", "tags"}
 var fieldsToReadStr = strings.Join(fieldsToRead, ", ")
 
-var fieldsToSave = append(fieldsToRead, "source_key", "origin")
+var fieldsToSave = []string{"source_id", "source_time", "source_url", "title", "summary", "details", "href", "embedded", "tags", "source_key", "origin"}
 var fieldsToSaveStr = strings.Join(fieldsToSave, ", ")
 
 var fieldsToSaveSource = []string{"title", "url", "tags"}
@@ -64,15 +64,16 @@ func New(db *sql.DB, limit int) (flow.Operator, error) {
 		db:    db,
 		limit: limit,
 
-		sqlListAll:        "SELECT " + fieldsToListStr + " FROM " + tableFlow + " WHERE saved_at <= ? ORDER BY saved_ad DESC LIMIT " + strconv.Itoa(limit),
-		sqlListBySourceID: "SELECT " + fieldsToListStr + " FROM " + tableFlow + " WHERE source_id = ? AND saved_at <= ? ORDER BY saved_ad DESC LIMIT " + strconv.Itoa(limit),
-		sqlListByTag:      "SELECT " + fieldsToListStr + " FROM " + tableTags + " JOIN " + tableFlow + " ON flow_id = flow.id WHERE tag = ? AND saved_at <= ? ORDER BY saved_ad DESC LIMIT " + strconv.Itoa(limit),
-		//sqlListSourcesByTag:      "SELECT " + fieldsToListStr + " FROM " + tableTags + " JOIN " + tableFlow + " ON flow_id = flow.id WHERE tag = ? AND saved_at <= ? ORDER BY saved_ad DESC LIMIT " + strconv.Itoa(limit),
+		sqlListAll:        "SELECT " + fieldsToListStr + " FROM " + tableFlow + " WHERE saved_at <= ? ORDER BY saved_at DESC LIMIT " + strconv.Itoa(limit),
+		sqlListBySourceID: "SELECT " + fieldsToListStr + " FROM " + tableFlow + " WHERE source_id = ? AND saved_at <= ? ORDER BY saved_at DESC LIMIT " + strconv.Itoa(limit),
+		sqlListByTag: "SELECT " + fieldsToListStr + " FROM " + tableTags + " JOIN " + tableFlow + " ON flow_id = flow." +
+			"id WHERE tag = ? AND flow.saved_at <= ? ORDER BY flow.saved_at DESC LIMIT " + strconv.Itoa(limit),
+		//sqlListSourcesByTag:      "SELECT " + fieldsToListStr + " FROM " + tableTags + " JOIN " + tableFlow + " ON flow_id = flow.id WHERE tag = ? AND saved_at <= ? ORDER BY saved_at DESC LIMIT " + strconv.Itoa(limit),
 		sqlRead: "SELECT " + fieldsToReadStr + " FROM " + tableFlow + " WHERE id = ?",
 
-		sqlSources: "SELECT sources.id, sources.title, sources.url, sources.tags, sources.saved_at, count(*) FROM " + tableFlow + " JOIN " + tableSources + " on source_id = sources." +
-			"id GROUP BY source_id",
-		sqlTags: "SELECT tag. count(*)                      FROM " + tableTags + " JOIN " + tableFlow + " on flow_id   = flow.id    GROUP BY tag ORDER BY tag",
+		sqlSources: "SELECT sources.id, sources.title, sources.url, sources.tags, sources.saved_at, " +
+			"count(*) FROM " + tableFlow + " JOIN " + tableSources + " on source_id = sources.id GROUP BY source_id",
+		sqlTags: "SELECT tag, count(*)                      FROM " + tableTags + " JOIN " + tableFlow + " on flow_id   = flow.id    GROUP BY tag ORDER BY tag",
 
 		sqlHas: "SELECT ID FROM " + tableFlow + " WHERE source_id = ? AND source_key = ?",
 

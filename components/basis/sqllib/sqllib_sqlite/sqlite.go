@@ -2,10 +2,10 @@ package sqllib_sqlite
 
 import (
 	"database/sql"
-
-	"github.com/pkg/errors"
-
 	"strings"
+
+	_ "github.com/mattn/go-sqlite3"
+	"github.com/pkg/errors"
 
 	"github.com/pavlo67/constructor/components/basis"
 	"github.com/pavlo67/constructor/components/basis/config"

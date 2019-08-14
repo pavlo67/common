@@ -7,7 +7,6 @@ import (
 
 	"github.com/pavlo67/constructor/components/basis"
 	"github.com/pavlo67/constructor/components/basis/logger"
-
 	"github.com/pavlo67/constructor/components/processor/importer"
 )
 

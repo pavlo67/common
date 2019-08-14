@@ -31,7 +31,7 @@ func StartComponent(c Starter, conf *config.Config, args []string, joinerOp join
 
 	err = c.Run(joinerOp)
 	if err != nil {
-		return fmt.Errorf("error calling zapInit() for component (%s): %s", c.Name(), err)
+		return fmt.Errorf("error calling .Run() for component (%s): %s", c.Name(), err)
 	}
 
 	return nil

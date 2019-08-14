@@ -3,6 +3,8 @@ package importer
 import (
 	"log"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 type ImporterTestCase struct {
@@ -11,36 +13,13 @@ type ImporterTestCase struct {
 }
 
 func TestImporterWithCases(t *testing.T, testCases []ImporterTestCase) {
-	var err error
-
 	for _, tc := range testCases {
-		err = tc.Operator.Init(tc.Source)
-		if err != nil {
-			t.Fatalf("can't init importer.Operator (%+v): %v", tc.Operator, err)
-		}
+		items, err := tc.Operator.Get(tc.Source, nil)
+		require.NoError(t, err)
+		require.True(t, len(items) > 0)
 
-		for {
-			entity, err := tc.Operator.Next()
-			if err != nil {
-				t.Fatalf("can't get next item: %v", err)
-			}
-			if entity == nil {
-				break
-			}
-
-			log.Println("/nID:", entity.Origin.Key, "\nItem:", entity.Content)
-
-			//if object != nil {
-			//	f, err := os.Create(`obj.html`)
-			//	if err != nil {
-			//		t.Fatalf("can't create file for write: %s", err)
-			//	}
-			//	_, err = f.Write([]byte(object.Contentus))
-			//	if err != nil {
-			//		t.Fatalf("error write to file: %s", err)
-			//	}
-			//}
-
+		for _, item := range items {
+			log.Printf("%#v", item)
 		}
 	}
 }

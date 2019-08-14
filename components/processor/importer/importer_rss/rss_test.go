@@ -3,7 +3,7 @@ package importer_rss
 import (
 	"testing"
 
-	"github.com/pavlo67/constructor/processor/importer"
+	"github.com/pavlo67/constructor/components/processor/importer"
 )
 
 var testCases = []importer.ImporterTestCase{
