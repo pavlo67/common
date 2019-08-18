@@ -51,7 +51,7 @@ func main() {
 
 	}
 
-	numAll, numNewAll, errs := flow.Load(urls, impOp, adminOp, l)
+	numAll, numProcessed, numNew, errs := flow.Load(urls, impOp, adminOp, l)
 
-	l.Infof("numAll = %d, numNewAll = %d, errs = %^#v", numAll, numNewAll, errs)
+	l.Infof("numAll = %d, numProcessed = %d, numNew = %d, errs = %s", numAll, numProcessed, numNew, errs)
 }

@@ -10,7 +10,7 @@ import (
 	"github.com/pavlo67/constructor/components/processor/importer"
 )
 
-func Load(urls []string, impOp importer.Operator, adminOp Administrator, l logger.Operator) (numAll, numNewAll int, errs basis.Errors) {
+func Load(urls []string, impOp importer.Operator, adminOp Administrator, l logger.Operator) (numAll, numProcessed, numNew int, errs basis.Errors) {
 
 	for _, url := range urls {
 		l.Info(url)
@@ -29,13 +29,14 @@ func Load(urls []string, impOp importer.Operator, adminOp Administrator, l logge
 			continue
 		}
 
-		var num, numNew int
+		numAll += len(items)
 
 		for _, item := range items {
-			num++
+			numProcessed++
 			ok, err := adminOp.Has(item.OriginKey)
 			if err != nil {
 				errs = append(errs, errors.Errorf("can't adminOp.Has(%#v): %s", item.OriginKey, err))
+				break
 			} else if ok {
 				// already exists!
 				continue
@@ -45,15 +46,13 @@ func Load(urls []string, impOp importer.Operator, adminOp Administrator, l logge
 			_, err = adminOp.Save([]importer.Item{item}, nil)
 			if err != nil {
 				errs = append(errs, errors.Errorf("can't adminOp.Save(%#v): %s", item, err))
+				break
 			} else {
 				numNew++
 			}
 		}
 
-		numAll += num
-		numNewAll += numNew
-
 	}
 
-	return numAll, numNewAll, errs
+	return numAll, numProcessed, numNew, errs
 }

@@ -45,7 +45,6 @@ func (fs *flowSQLiteStarter) Init(conf *config.Config, options basis.Info) ([]ba
 	if err != nil {
 		return nil, err
 	}
-	defer sqllib.Close(sqlOp)
 
 	return sqllib.CheckTables(sqlOp, fs.index.SQLite)
 }
@@ -66,7 +65,6 @@ func (fs *flowSQLiteStarter) Run(joinerOp joiner.Operator) error {
 	if err != nil {
 		return errors.Wrap(err, "can't init sqllib.Operator")
 	}
-	defer sqllib.Close(sqlOp)
 
 	db, err := sqlOp.DB()
 	if err != nil {

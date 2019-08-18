@@ -1,26 +1,8 @@
 {
     sql: {
-        sources: {
-            fields: [
-                ["id",       "BIGINT UNSIGNED", "false", "", "PRIMARY KEY"],
-                ["saved_at", "TIMESTAMP", "false", "CURRENT_TIMESTAMP", ""],
-
-                ["title", "TEXT", "false", "", ""],
-                ["url",   "TEXT", "false", "", ""],
-
-                ["tags",  "TEXT", "true", "", ""],
-            ],
-            indexes: [
-                {name: "title",    type: "",       fields: ["title"]},
-                {name: "url",      type: "",       fields: ["url"]},
-                {name: "saved_at", type: "",       fields: ["saved_at"]},
-            ],
-        },
-
-
         flow: {
             fields: [
-                ["id",       "BIGINT UNSIGNED", "false", "", "PRIMARY KEY"],
+                ["id",       "INTEGER", "true", "", "PRIMARY KEY AUTOINCREMENT"],
                 ["saved_at", "TIMESTAMP", "false", "CURRENT_TIMESTAMP", ""],
 
                 ["source_id",   "TEXT", "false", "", ""],
@@ -38,8 +20,9 @@
                 ["tags", "TEXT", "true", "", ""],
             ],
             indexes: [
-                {name: "source",   type: "", fields: ["source_id", "source_key"]},
-                {name: "saved_at", type: "", fields: ["saved_at"]},
+                {name: "source_url", type: "", fields: ["source_url"]},
+                {name: "source",     type: "", fields: ["source_id", "source_key"]},
+                {name: "saved_at",   type: "", fields: ["saved_at"]},
             ],
         },
 
@@ -48,15 +31,12 @@
             fields: [
                 ["tag",      "TEXT", "false", "", ""],
                 ["saved_at", "TIMESTAMP", "false", "CURRENT_TIMESTAMP", ""],
-
-                ["flow_id", "BIGINT UNSIGNED", "true", "", "REFERENCES flow(id) ON DELETE CASCADE"],
-                ["source_id", "BIGINT UNSIGNED", "true", "", "REFERENCES source(id) ON DELETE CASCADE"],
+                ["flow_id",   "INTEGER", "true", "", "REFERENCES flow(id) ON DELETE CASCADE"],
             ],
             indexes: [
-                {name: "tag",       type: "UNIQUE", fields: ["tag", "source_id"]},
+                {name: "tag",       type: "UNIQUE", fields: ["tag", "flow_id"]},
                 {name: "saved_at",  type: "",       fields: ["saved_at"]},
                 {name: "flow_id",   type: "",       fields: ["flow_id"]},
-                {name: "source_id", type: "",       fields: ["source_id"]},
             ],
         },
 

@@ -8,24 +8,27 @@ import (
 	"github.com/pavlo67/constructor/components/structura/content"
 
 	"github.com/pavlo67/constructor/components/processor/importer"
-	"github.com/pavlo67/constructor/components/processor/sources"
 )
 
 const InterfaceKey joiner.InterfaceKey = "flow"
 
+type Part struct {
+	Ket   string
+	Count uint64
+}
+
 type Operator interface {
 	ListAll(before *time.Time, options *content.GetOptions) ([]content.Brief, error)
-	ListBySourceID(sourceID basis.ID, before *time.Time, options *content.GetOptions) ([]content.Brief, error)
+	ListByURL(url string, before *time.Time, options *content.GetOptions) ([]content.Brief, error)
 	ListByTag(tag string, before *time.Time, options *content.GetOptions) ([]content.Brief, error)
 	Read(basis.ID, *content.GetOptions) (*importer.Item, error)
-	Sources(*content.GetOptions) ([]sources.Item, error)
-	Tags(*content.GetOptions) ([]string, error)
+	URLs(*content.GetOptions) ([]Part, error)
+	Tags(*content.GetOptions) ([]Part, error)
 }
 
 type Administrator interface {
 	Has(importer.OriginKey) (bool, error)
 	Save([]importer.Item, *content.SaveOptions) ([]basis.ID, error)
-	SaveSource(sources.Item, *content.SaveOptions) (*basis.ID, error)
 	// Remove(sourceIDs []basis.ID, before *time.Time, options *content.RemoveOptions) error
 }
 

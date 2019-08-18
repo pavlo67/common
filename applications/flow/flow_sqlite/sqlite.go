@@ -12,7 +12,6 @@ import (
 	"github.com/pavlo67/constructor/components/basis"
 	"github.com/pavlo67/constructor/components/basis/sqllib"
 	"github.com/pavlo67/constructor/components/processor/importer"
-	"github.com/pavlo67/constructor/components/processor/sources"
 	"github.com/pavlo67/constructor/components/structura/content"
 
 	"github.com/pavlo67/constructor/applications/flow"
@@ -33,10 +32,7 @@ var fieldsToReadStr = strings.Join(fieldsToRead, ", ")
 var fieldsToSave = []string{"source_id", "source_time", "source_url", "title", "summary", "details", "href", "embedded", "tags", "source_key", "origin"}
 var fieldsToSaveStr = strings.Join(fieldsToSave, ", ")
 
-var fieldsToSaveSource = []string{"title", "url", "tags"}
-var fieldsToSaveSourceStr = strings.Join(fieldsToSaveSource, ", ")
-
-var fieldsToSaveTag = []string{"tag", "flow_id", "source_id"}
+var fieldsToSaveTag = []string{"tag", "flow_id"}
 var fieldsToSaveTagStr = strings.Join(fieldsToSaveTag, ", ")
 
 var _ flow.Operator = &flowSQLite{}
@@ -45,8 +41,8 @@ type flowSQLite struct {
 	limit int
 	db    *sql.DB
 
-	stmListAll, stmListByTag, stmListSourcesByTag, stmListBySourceID, stmRead, stmSources, stmTags, stmHas, stmSave, stmSaveTag, stmSaveSource, stmRemove *sql.Stmt
-	sqlListAll, sqlListByTag, sqlListSourcesByTag, sqlListBySourceID, sqlRead, sqlSources, sqlTags, sqlHas, sqlSave, sqlSaveTag, sqlSaveSource, sqlRemove string
+	stmListAll, stmListByTag, stmListSourcesByTag, stmListByURL, stmRead, stmURLs, stmTags, stmHas, stmSave, stmSaveTag, stmRemove *sql.Stmt
+	sqlListAll, sqlListByTag, sqlListSourcesByTag, sqlListByURL, sqlRead, sqlURLs, sqlTags, sqlHas, sqlSave, sqlSaveTag, sqlRemove string
 }
 
 const onNew = "on flowSQLite.New(): "
@@ -64,37 +60,33 @@ func New(db *sql.DB, limit int) (flow.Operator, error) {
 		db:    db,
 		limit: limit,
 
-		sqlListAll:        "SELECT " + fieldsToListStr + " FROM " + tableFlow + " WHERE saved_at <= ? ORDER BY saved_at DESC LIMIT " + strconv.Itoa(limit),
-		sqlListBySourceID: "SELECT " + fieldsToListStr + " FROM " + tableFlow + " WHERE source_id = ? AND saved_at <= ? ORDER BY saved_at DESC LIMIT " + strconv.Itoa(limit),
+		sqlListAll:   "SELECT " + fieldsToListStr + " FROM " + tableFlow + " WHERE saved_at <= ? ORDER BY saved_at DESC LIMIT " + strconv.Itoa(limit),
+		sqlListByURL: "SELECT " + fieldsToListStr + " FROM " + tableFlow + " WHERE source_url = ? AND saved_at <= ? ORDER BY saved_at DESC LIMIT " + strconv.Itoa(limit),
 		sqlListByTag: "SELECT " + fieldsToListStr + " FROM " + tableTags + " JOIN " + tableFlow + " ON flow_id = flow." +
 			"id WHERE tag = ? AND flow.saved_at <= ? ORDER BY flow.saved_at DESC LIMIT " + strconv.Itoa(limit),
-		//sqlListSourcesByTag:      "SELECT " + fieldsToListStr + " FROM " + tableTags + " JOIN " + tableFlow + " ON flow_id = flow.id WHERE tag = ? AND saved_at <= ? ORDER BY saved_at DESC LIMIT " + strconv.Itoa(limit),
 		sqlRead: "SELECT " + fieldsToReadStr + " FROM " + tableFlow + " WHERE id = ?",
 
-		sqlSources: "SELECT sources.id, sources.title, sources.url, sources.tags, sources.saved_at, " +
-			"count(*) FROM " + tableFlow + " JOIN " + tableSources + " on source_id = sources.id GROUP BY source_id",
-		sqlTags: "SELECT tag, count(*)                      FROM " + tableTags + " JOIN " + tableFlow + " on flow_id   = flow.id    GROUP BY tag ORDER BY tag",
+		sqlURLs: "SELECT source_url, count(*) AS cnt FROM " + tableFlow + "                                               GROUP BY source_url ORDER BY cnt DESC",
+		sqlTags: "SELECT tag,        count(*) AS cnt FROM " + tableTags + " JOIN " + tableFlow + " on flow_id   = flow.id GROUP BY tag        ORDER BY cnt DESC",
 
-		sqlHas: "SELECT ID FROM " + tableFlow + " WHERE source_id = ? AND source_key = ?",
+		sqlHas: "SELECT COUNT(*) FROM " + tableFlow + " WHERE source_id = ? AND source_key = ?",
 
-		sqlSave:       "INSERT INTO " + tableFlow + " (" + fieldsToSaveStr + ") VALUES (" + strings.Repeat(",? ", len(fieldsToSave))[1:] + ")",
-		sqlSaveSource: "INSERT INTO " + tableSources + " (" + fieldsToSaveSourceStr + ") VALUES (" + strings.Repeat(",? ", len(fieldsToSaveSource))[1:] + ")",
-		sqlSaveTag:    "INSERT INTO " + tableTags + " (" + fieldsToSaveTagStr + ") VALUES (" + strings.Repeat(",? ", len(fieldsToSaveTag))[1:] + ")",
+		sqlSave:    "INSERT INTO " + tableFlow + " (" + fieldsToSaveStr + ") VALUES (" + strings.Repeat(",? ", len(fieldsToSave))[1:] + ")",
+		sqlSaveTag: "INSERT INTO " + tableTags + " (" + fieldsToSaveTagStr + ") VALUES (" + strings.Repeat(",? ", len(fieldsToSaveTag))[1:] + ")",
 
 		sqlRemove: "DELETE FROM " + tableFlow + " where ID = ?",
 	}
 
 	sqlStmts := []sqllib.SqlStmt{
 		{&flowOp.stmListAll, flowOp.sqlListAll},
-		{&flowOp.stmListBySourceID, flowOp.sqlListBySourceID},
+		{&flowOp.stmListByURL, flowOp.sqlListByURL},
 		{&flowOp.stmListByTag, flowOp.sqlListByTag},
 		{&flowOp.stmRead, flowOp.sqlRead},
-		{&flowOp.stmSources, flowOp.sqlSources},
+		{&flowOp.stmURLs, flowOp.sqlURLs},
 		{&flowOp.stmTags, flowOp.sqlTags},
 		{&flowOp.stmHas, flowOp.sqlHas},
 		{&flowOp.stmSave, flowOp.sqlSave},
 		{&flowOp.stmSaveTag, flowOp.sqlSaveTag},
-		{&flowOp.stmSaveSource, flowOp.sqlSaveSource},
 		{&flowOp.stmRemove, flowOp.sqlRemove},
 	}
 
@@ -155,8 +147,8 @@ func (flowOp *flowSQLite) ListAll(before *time.Time, options *content.GetOptions
 	return flowOp.List("on flowSQLite.ListAll(): ", flowOp.sqlListAll, flowOp.stmListAll, nil, before, options)
 }
 
-func (flowOp *flowSQLite) ListBySourceID(sourceID basis.ID, before *time.Time, options *content.GetOptions) ([]content.Brief, error) {
-	return flowOp.List("on flowSQLite.ListBySourceID(): ", flowOp.sqlListBySourceID, flowOp.stmListBySourceID, []interface{}{sourceID}, before, options)
+func (flowOp *flowSQLite) ListByURL(sourceURL string, before *time.Time, options *content.GetOptions) ([]content.Brief, error) {
+	return flowOp.List("on flowSQLite.ListByURL(): ", flowOp.sqlListByURL, flowOp.stmListByURL, []interface{}{sourceURL}, before, options)
 }
 
 func (flowOp *flowSQLite) ListByTag(tag string, before *time.Time, options *content.GetOptions) ([]content.Brief, error) {
@@ -199,53 +191,53 @@ func (flowOp *flowSQLite) Read(idStr basis.ID, options *content.GetOptions) (*im
 
 const onSources = "on flowSQLite.Sources(): "
 
-func (flowOp *flowSQLite) Sources(_ *content.GetOptions) ([]sources.Item, error) {
-	rows, err := flowOp.stmSources.Query()
+func (flowOp *flowSQLite) URLs(_ *content.GetOptions) ([]flow.Part, error) {
+	rows, err := flowOp.stmURLs.Query()
 	if err != nil {
-		return nil, errors.Errorf(onSources+sqllib.CantQuery, flowOp.sqlSources, nil)
+		return nil, errors.Errorf(onSources+sqllib.CantQuery, flowOp.sqlURLs, nil)
 	}
 	defer rows.Close()
 
-	var items []sources.Item
+	var parts []flow.Part
 
 	for rows.Next() {
-		var item sources.Item
-		var tags string
-		err = rows.Scan(&item.ID, &item.Title, &item.URL, &tags, &item.SavedAt)
+		var url string
+		var cnt uint64
+		err = rows.Scan(&url, &cnt)
 		if err != nil {
-			return nil, errors.Errorf(onSources+sqllib.CantScanQueryRow, flowOp.sqlSources, nil)
+			return nil, errors.Errorf(onSources+sqllib.CantScanQueryRow, flowOp.sqlURLs, nil)
 		}
 
-		item.Tags = strings.Split(tags, "\n")
-		items = append(items, item)
+		parts = append(parts, flow.Part{url, cnt})
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, errors.Errorf(onSources+sqllib.CantScanQueryRow, flowOp.sqlSources, nil)
+		return nil, errors.Errorf(onSources+sqllib.CantScanQueryRow, flowOp.sqlURLs, nil)
 
 	}
 
-	return items, nil
+	return parts, nil
 }
 
 const onTags = "on flowSQLite.Tags(): "
 
-func (flowOp *flowSQLite) Tags(*content.GetOptions) ([]string, error) {
+func (flowOp *flowSQLite) Tags(*content.GetOptions) ([]flow.Part, error) {
 	rows, err := flowOp.stmTags.Query()
 	if err != nil {
 		return nil, errors.Errorf(onTags+sqllib.CantQuery, flowOp.sqlTags, nil)
 	}
 	defer rows.Close()
 
-	var tags []string
+	var parts []flow.Part
 
 	for rows.Next() {
 		var tag string
-		err = rows.Scan(&tag)
+		var cnt uint64
+		err = rows.Scan(&tag, &cnt)
 		if err != nil {
 			return nil, errors.Errorf(onTags+sqllib.CantScanQueryRow, flowOp.sqlTags, nil)
 		}
-		tags = append(tags, tag)
+		parts = append(parts, flow.Part{tag, cnt})
 	}
 
 	if err = rows.Err(); err != nil {
@@ -253,34 +245,30 @@ func (flowOp *flowSQLite) Tags(*content.GetOptions) ([]string, error) {
 
 	}
 
-	return tags, nil
+	return parts, nil
 }
 
 const onHas = "on flowSQLite.Has(): "
 
 func (flowOp *flowSQLite) Has(originKey importer.OriginKey) (bool, error) {
-	if len(originKey.SourceID) < 1 || len(originKey.SourceKey) < 1 {
-		return false, errors.New(onRead + "empty ID")
+	if len(originKey.SourceKey) < 1 { // || len(originKey.SourceID) < 1
+		return false, errors.New(onHas + "empty ID")
 	}
 
 	values := []interface{}{originKey.SourceID, originKey.SourceKey}
-	var id uint64
+	var cnt uint64
 
-	err := flowOp.stmHas.QueryRow(values...).Scan(&id)
-	if err == sql.ErrNoRows {
-		return false, nil
-	}
+	err := flowOp.stmHas.QueryRow(values...).Scan(&cnt)
 	if err != nil {
 		return false, errors.Wrapf(err, onHas+sqllib.CantScanQueryRow, flowOp.sqlHas, values)
 	}
 
-	return true, nil
+	return cnt > 0, nil
 }
 
 type tagItem struct {
-	tag      string
-	flowID   *basis.ID
-	sourceID *basis.ID
+	tag    string
+	flowID *basis.ID
 }
 
 const onSaveTags = "on flowSQLite.saveTags(): "
@@ -290,7 +278,7 @@ func (flowOp *flowSQLite) saveTags(tagItems []tagItem) error {
 	var errs basis.Errors
 
 	for _, tagItem := range tagItems {
-		values := []interface{}{tagItem.tag, tagItem.flowID, tagItem.sourceID}
+		values := []interface{}{tagItem.tag, tagItem.flowID}
 
 		_, err := flowOp.stmSaveTag.Exec(values...)
 		if err != nil {
@@ -329,7 +317,7 @@ func (flowOp *flowSQLite) Save(items []importer.Item, options *content.SaveOptio
 
 		var tagItems []tagItem
 		for _, tag := range item.Tags {
-			tagItems = append(tagItems, tagItem{tag, &id, nil})
+			tagItems = append(tagItems, tagItem{tag, &id})
 		}
 
 		ids = append(ids, id)
@@ -337,30 +325,6 @@ func (flowOp *flowSQLite) Save(items []importer.Item, options *content.SaveOptio
 	}
 
 	return ids, errs.Err()
-}
-
-const onSaveSource = "on flowSQLite.SaveSource(): "
-
-func (flowOp *flowSQLite) SaveSource(source sources.Item, options *content.SaveOptions) (*basis.ID, error) {
-	values := []interface{}{source.Title, source.URL, strings.Join(source.Tags, "\n")}
-
-	res, err := flowOp.stmSaveSource.Exec(values...)
-	if err != nil {
-		return nil, errors.Wrapf(err, onSaveSource+sqllib.CantExec, flowOp.sqlSaveSource, values)
-	}
-
-	idSQLite, err := res.LastInsertId()
-	if err != nil {
-		return nil, errors.Wrapf(err, onSaveSource+sqllib.CantGetLastInsertId, flowOp.sqlSaveSource, values)
-	}
-	id := basis.ID(strconv.FormatInt(idSQLite, 10))
-
-	var tagItems []tagItem
-	for _, tag := range source.Tags {
-		tagItems = append(tagItems, tagItem{tag, nil, &id})
-	}
-
-	return &id, flowOp.saveTags(tagItems)
 }
 
 func (flowOp *flowSQLite) Close() error {
