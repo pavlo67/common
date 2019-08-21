@@ -1,10 +1,10 @@
 package elements_index
 
 import (
-	"github.com/pavlo67/constructor/components/basis"
+	"github.com/pavlo67/constructor/components/common"
 
 	"github.com/pavlo67/constructor/applications/records"
-	"github.com/pavlo67/constructor/components/basis/joiner"
+	"github.com/pavlo67/constructor/components/common/joiner"
 )
 
 type Item struct {
@@ -13,9 +13,9 @@ type Item struct {
 }
 
 func (item *Item) UnmarshalJSON([]byte) error {
-	return basis.ErrNotImplemented
+	return common.ErrNotImplemented
 }
 
 func (item *Item) MarshalJSON() ([]byte, error) {
-	return nil, basis.ErrNotImplemented
+	return nil, common.ErrNotImplemented
 }

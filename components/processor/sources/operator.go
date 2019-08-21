@@ -3,8 +3,8 @@ package sources
 import (
 	"time"
 
-	"github.com/pavlo67/constructor/components/basis"
-	"github.com/pavlo67/constructor/components/basis/joiner"
+	"github.com/pavlo67/constructor/components/common"
+	"github.com/pavlo67/constructor/components/common/joiner"
 	"github.com/pavlo67/constructor/components/processor"
 	"github.com/pavlo67/constructor/components/structura/content"
 )
@@ -12,7 +12,7 @@ import (
 const InterfaceKey joiner.InterfaceKey = "founts"
 
 type Item struct {
-	ID    basis.ID            `bson:"_id,omitempty"   json:"id,omitempty"`
+	ID    common.ID           `bson:"_id,omitempty"   json:"id,omitempty"`
 	Title string              `bson:"title,omitempty" json:"title,omitempty"`
 	URL   string              `bson:"url,omitempty"   json:"url,omitempty"`
 	Tags  []string            `bson:"tags,omitempty"  json:"tags,omitempty"`

@@ -4,10 +4,10 @@ import (
 	"time"
 
 	"github.com/pavlo67/constructor/components/auth"
-	"github.com/pavlo67/constructor/components/basis/joiner"
+	"github.com/pavlo67/constructor/components/common/joiner"
 
 	"github.com/pavlo67/constructor/applications/links"
-	"github.com/pavlo67/constructor/components/basis"
+	"github.com/pavlo67/constructor/components/common"
 	"github.com/pavlo67/constructor/components/structura/vcs"
 	"github.com/pavlo67/constructor/dataspace"
 	"github.com/pavlo67/constructor/dataspace/content"
@@ -26,7 +26,7 @@ const CleanerInterfaceKey joiner.InterfaceKey = "records.cleaner"
 //}
 
 type Item struct {
-	ID        basis.ID    `bson:"id"                   json:"id"`
+	ID        common.ID   `bson:"id"                   json:"id"`
 	Version   vcs.Version `bson:"version,omitempty"    json:"version,omitempty"`
 	CreatedAt time.Time   `bson:"created_at,omitempty" json:"created_at"`
 	UpdatedAt *time.Time  `bson:"updated_at,omitempty" json:"updated_at,omitempty"`

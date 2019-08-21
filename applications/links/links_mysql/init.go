@@ -3,12 +3,12 @@ package links_mysql
 import (
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/constructor/components/basis"
-	"github.com/pavlo67/constructor/components/basis/config"
-	"github.com/pavlo67/constructor/components/basis/filelib"
-	"github.com/pavlo67/constructor/components/basis/joiner"
-	"github.com/pavlo67/constructor/components/basis/logger"
-	"github.com/pavlo67/constructor/components/basis/starter"
+	"github.com/pavlo67/constructor/components/common"
+	"github.com/pavlo67/constructor/components/common/config"
+	"github.com/pavlo67/constructor/components/common/filelib"
+	"github.com/pavlo67/constructor/components/common/joiner"
+	"github.com/pavlo67/constructor/components/common/logger"
+	"github.com/pavlo67/constructor/components/common/starter"
 	"github.com/pavlo67/constructor/confidenter/groups"
 	"github.com/pavlo67/constructor/notebook/links"
 	"github.com/pavlo67/partes/libs/mysqllib"
@@ -38,11 +38,11 @@ func (lms *links_mysqlStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (lms *links_mysqlStarter) Prepare(conf *config.Config, params basis.Info) error {
+func (lms *links_mysqlStarter) Prepare(conf *config.Config, params common.Info) error {
 
 	l = logger.zapGet()
 
-	var errs basis.Errors
+	var errs common.Errors
 	lms.mysqlConfig, errs = conf.MySQL(params.StringDefault("database", ""), errs)
 
 	indexPath := params.StringDefault("index_path", filelib.CurrentPath())

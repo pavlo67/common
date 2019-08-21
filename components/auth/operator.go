@@ -3,15 +3,13 @@ package auth
 import (
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/constructor/components/basis"
-	"github.com/pavlo67/constructor/components/basis/joiner"
+	"github.com/pavlo67/constructor/components/common"
+	"github.com/pavlo67/constructor/components/common/joiner"
 )
 
 const InterfaceKey joiner.InterfaceKey = "auth"
 
-type ID string
-
-const Anyone ID = "_"
+const Anyone common.ID = "_"
 
 //type Access struct {
 //	TargetID   ID     `bson:"target_id"             json:"target_id"`
@@ -20,8 +18,8 @@ const Anyone ID = "_"
 //}
 
 type User struct {
-	ID   ID     `bson:"id"                 json:"id"`
-	Nick string `bson:"nick"               json:"nick"`
+	ID   common.ID `bson:"id"                 json:"id"`
+	Nick string    `bson:"nick"               json:"nick"`
 	// Accesses []Access `bson:"accesses,omitempty" json:"accesses,omitempty"`
 }
 
@@ -30,7 +28,7 @@ type Operator interface {
 	Authorize(toAuth []Creds) (*User, []Creds, error)
 
 	// SetCreds can require multi-steps (using returned []Creds)...
-	SetCreds(userID *ID, toSet []Creds) (*User, []Creds, error)
+	SetCreds(userID *common.ID, toSet []Creds) (*User, []Creds, error)
 
 	Accepts() ([]CredsType, error)
 }
@@ -42,7 +40,7 @@ var errNoIdentityOp = errors.New("no identity.Operator")
 
 const onGetUser = "on GetUser()"
 
-func GetUser(creds []Creds, identOpsMap map[CredsType][]Operator, errs basis.Errors) (*User, basis.Errors) {
+func GetUser(creds []Creds, identOpsMap map[CredsType][]Operator, errs common.Errors) (*User, common.Errors) {
 	if len(creds) < 1 {
 		return nil, append(errs, errNoCreds)
 	}

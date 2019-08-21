@@ -10,9 +10,9 @@ import (
 	"strings"
 
 	"github.com/pavlo67/constructor/components/auth"
-	"github.com/pavlo67/constructor/components/basis"
-	"github.com/pavlo67/constructor/components/basis/filelib"
-	"github.com/pavlo67/constructor/components/basis/strlib"
+	"github.com/pavlo67/constructor/components/common"
+	"github.com/pavlo67/constructor/components/common/filelib"
+	"github.com/pavlo67/constructor/components/common/strlib"
 	"github.com/pavlo67/constructor/confidenter/auth"
 	"github.com/pavlo67/constructor/confidenter/groups"
 	"github.com/pavlo67/constructor/confidenter/rights"
@@ -30,7 +30,7 @@ func ImportTo(userIS auth.ID, objectsOp Operator, id, status string) error {
 		return err
 	}
 	if o == nil {
-		return basis.ErrNull
+		return common.ErrNull
 	}
 
 	o.Status = status
@@ -42,7 +42,7 @@ func ImportTo(userIS auth.ID, objectsOp Operator, id, status string) error {
 }
 
 func Export(user *auth.User, objectsOp Operator, credentialsOp users.Operator, ctrl groups.Operator, filesOp files.Operator, selector selectors.Selector) (string, error) {
-	return "", basis.ErrNotImplemented
+	return "", common.ErrNotImplemented
 
 	//options := content.ListOptions{Selector: selector, ForExport: true}
 	//res, _, err := objectsOp.ReadList(user.Identity().String(), &options)
@@ -277,7 +277,7 @@ func FilesToRepository(userIS auth.ID, filesOp files.Operator, importDir string,
 }
 
 func ObjectsToJSON(user *auth.User, filesOp files.Operator, credentialsOpOp users.Operator, ctrl groups.Operator, objectsForPack []notes.Item) (string, error) {
-	return "", basis.ErrNotImplemented
+	return "", common.ErrNotImplemented
 	//
 	//
 	//var exportDir string

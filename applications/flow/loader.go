@@ -5,12 +5,12 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/constructor/components/basis"
-	"github.com/pavlo67/constructor/components/basis/logger"
+	"github.com/pavlo67/constructor/components/common"
+	"github.com/pavlo67/constructor/components/common/logger"
 	"github.com/pavlo67/constructor/components/processor/importer"
 )
 
-func Load(urls []string, impOp importer.Operator, adminOp Administrator, l logger.Operator) (numAll, numProcessed, numNew int, errs basis.Errors) {
+func Load(urls []string, impOp importer.Operator, adminOp Administrator, l logger.Operator) (numAll, numProcessed, numNew int, errs common.Errors) {
 
 	for _, url := range urls {
 		l.Info(url)

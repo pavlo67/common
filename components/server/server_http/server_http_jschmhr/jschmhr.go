@@ -1,22 +1,20 @@
 package server_http_jschmhr
 
 import (
+	"io"
 	"net/http"
+	"os"
+	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/pkg/errors"
 
-	"io"
-	"os"
-	"regexp"
-
-	"strings"
-
 	"github.com/pavlo67/constructor/components/auth"
-	"github.com/pavlo67/constructor/components/basis"
-	"github.com/pavlo67/constructor/components/serverents/server/server_http"
+	"github.com/pavlo67/constructor/components/common"
+	"github.com/pavlo67/constructor/components/server/server_http"
 )
 
 var _ server_http.Operator = &serverHTTPJschmhr{}
@@ -139,19 +137,19 @@ func (s *serverHTTPJschmhr) HandleEndpoint(endpoint server_http.Endpoint) error 
 			l.Error(err)
 		}
 
-		ok, err := auth.HasRights(user, s.identOpsMap, endpoint.AllowedIDs)
-		if err != nil {
-			l.Error(err)
-		}
-		if !ok {
-			w.WriteHeader(http.StatusNotFound)
-			return
-		}
+		//ok, err := auth.HasRights(user, s.identOpsMap, endpoint.AllowedIDs)
+		//if err != nil {
+		//	l.Error(err)
+		//}
+		//if !ok {
+		//	w.WriteHeader(http.StatusNotFound)
+		//	return
+		//}
 
-		var params basis.Params
+		var params common.Params
 		if len(paramsHR) > 0 {
 			for _, p := range paramsHR {
-				params = append(params, basis.Param{Name: p.Key, Value: p.Value})
+				params = append(params, common.Param{Name: p.Key, Value: p.Value})
 			}
 		}
 

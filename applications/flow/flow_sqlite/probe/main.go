@@ -8,10 +8,10 @@ import (
 
 	"github.com/pavlo67/constructor/applications/flow"
 	"github.com/pavlo67/constructor/applications/flow/flow_sqlite"
-	"github.com/pavlo67/constructor/components/basis/config"
-	"github.com/pavlo67/constructor/components/basis/filelib"
-	"github.com/pavlo67/constructor/components/basis/logger"
-	"github.com/pavlo67/constructor/components/basis/starter"
+	"github.com/pavlo67/constructor/components/common/config"
+	"github.com/pavlo67/constructor/components/common/filelib"
+	"github.com/pavlo67/constructor/components/common/logger"
+	"github.com/pavlo67/constructor/components/common/starter"
 	"github.com/pavlo67/constructor/components/processor/importer/importer_rss"
 	"github.com/pavlo67/constructor/components/server/server_http"
 )

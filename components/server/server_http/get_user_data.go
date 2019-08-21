@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/constructor/components/auth"
-	"github.com/pavlo67/constructor/components/basis"
+	"github.com/pavlo67/constructor/components/common"
 )
 
 var errNoIdentityOpsMap = errors.New("no map[CredsType]identity.Operator")
@@ -16,7 +16,7 @@ func UserWithRequest(r *http.Request, identOpsMap map[auth.CredsType][]auth.Oper
 		return nil, errNoIdentityOpsMap
 	}
 
-	var errs basis.Errors
+	var errs common.Errors
 	var user *auth.User
 
 	// TOKEN CHECK

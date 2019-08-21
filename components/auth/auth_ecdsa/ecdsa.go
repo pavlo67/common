@@ -4,17 +4,17 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/pkg/errors"
 
-	"strconv"
-	"sync"
-
-	"github.com/pavlo67/constructor/components/authonents/auth"
-	"github.com/pavlo67/constructor/components/basis/addrlib"
-	"github.com/pavlo67/constructor/components/basis/encrlib"
+	"github.com/pavlo67/constructor/components/auth"
+	"github.com/pavlo67/constructor/components/common"
+	"github.com/pavlo67/constructor/components/common/addrlib"
+	"github.com/pavlo67/constructor/components/common/encrlib"
 )
 
 const Proto addrlib.Proto = "ecdsa://"
@@ -45,7 +45,7 @@ func New(numberedIDs []string) (auth.Operator, error) {
 }
 
 // 	SetCreds ignores all input parameters, creates new "BTC identity" and returns it
-func (*identityECDSA) SetCreds(*auth.ID, []auth.Creds) (*auth.User, []auth.Creds, error) {
+func (*identityECDSA) SetCreds(*common.ID, []auth.Creds) (*auth.User, []auth.Creds, error) {
 	privKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
 		return nil, nil, err
@@ -66,7 +66,7 @@ func (*identityECDSA) SetCreds(*auth.ID, []auth.Creds) (*auth.User, []auth.Creds
 	publKeyAddress := string(Proto) + string(append(privKey.PublicKey.X.Bytes(), privKey.PublicKey.Y.Bytes()...))
 
 	return &auth.User{
-		ID:   auth.ID(publKeyAddress),
+		ID:   common.ID(publKeyAddress),
 		Nick: publKeyAddress,
 	}, privKeyCreds, nil
 }
@@ -119,7 +119,7 @@ func (is *identityECDSA) Authorize(toAuth []auth.Creds) (*auth.User, []auth.Cred
 	}
 
 	return &auth.User{
-		ID:   auth.ID(publKeyAddress),
+		ID:   common.ID(publKeyAddress),
 		Nick: publKeyAddress,
 	}, nil, nil
 }

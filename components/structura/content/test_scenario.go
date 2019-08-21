@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/pavlo67/constructor/components/basis"
+	"github.com/pavlo67/constructor/components/common"
 )
 
 type OperatorTestCase struct {
@@ -47,7 +47,7 @@ func OperatorTest(t *testing.T, testCases []OperatorTestCase) {
 	for i, tc := range testCases {
 		fmt.Println(i)
 
-		var id [numRepeats]basis.ID
+		var id [numRepeats]common.ID
 		var toSave [numRepeats]Item
 		// var data Item
 
@@ -128,7 +128,7 @@ func OperatorTest(t *testing.T, testCases []OperatorTestCase) {
 		// test List -------------------------------------------------------------------------------------
 
 		if !tc.ExcludeListTest {
-			var ids []basis.ID
+			var ids []common.ID
 			for _, idi := range id {
 				ids = append(ids, idi)
 			}

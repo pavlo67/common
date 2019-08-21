@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/pavlo67/constructor/components/auth"
-	"github.com/pavlo67/constructor/components/basis"
-	"github.com/pavlo67/constructor/components/basis/strlib"
+	"github.com/pavlo67/constructor/components/common"
+	"github.com/pavlo67/constructor/components/common/strlib"
 	"github.com/pavlo67/partes/crud/selectors"
 
 	"github.com/pavlo67/constructor/confidenter/groups"
@@ -53,7 +53,7 @@ LINKS_OLD:
 
 		if l.RView == "" || !groups.OneOf(userIS, grpsOp, l.RView) {
 			// to prevent unexpected link invisibility
-			l.RView = basis.Anyone
+			l.RView = common.Anyone
 		}
 
 		linksListFinal = append(linksListFinal, l)

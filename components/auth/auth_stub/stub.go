@@ -4,9 +4,10 @@ import (
 	"strings"
 
 	"github.com/GehirnInc/crypt"
-	"github.com/pavlo67/constructor/components/authonents/auth"
-	"github.com/pavlo67/constructor/components/basis"
-	"github.com/pavlo67/constructor/components/basis/encrlib"
+
+	"github.com/pavlo67/constructor/components/auth"
+	"github.com/pavlo67/constructor/components/common"
+	"github.com/pavlo67/constructor/components/common/encrlib"
 )
 
 var _ auth.Operator = &isentityLoginStub{}
@@ -30,8 +31,8 @@ func (u *isentityLoginStub) Accepts() ([]auth.CredsType, error) {
 	return []auth.CredsType{auth.CredsPassword}, nil
 }
 
-func (u *isentityLoginStub) SetCreds(userID *auth.ID, toSet []auth.Creds) (*auth.User, []auth.Creds, error) {
-	return nil, nil, basis.ErrNotImplemented
+func (u *isentityLoginStub) SetCreds(userID *common.ID, toSet []auth.Creds) (*auth.User, []auth.Creds, error) {
+	return nil, nil, common.ErrNotImplemented
 }
 
 func (u *isentityLoginStub) Authorize(toAuth []auth.Creds) (*auth.User, []auth.Creds, error) {

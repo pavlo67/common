@@ -3,14 +3,14 @@ package flow_sqlite
 import (
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/constructor/components/basis"
-	"github.com/pavlo67/constructor/components/basis/config"
-	"github.com/pavlo67/constructor/components/basis/filelib"
-	"github.com/pavlo67/constructor/components/basis/joiner"
-	"github.com/pavlo67/constructor/components/basis/logger"
-	"github.com/pavlo67/constructor/components/basis/sqllib"
-	"github.com/pavlo67/constructor/components/basis/sqllib/sqllib_sqlite"
-	"github.com/pavlo67/constructor/components/basis/starter"
+	"github.com/pavlo67/constructor/components/common"
+	"github.com/pavlo67/constructor/components/common/config"
+	"github.com/pavlo67/constructor/components/common/filelib"
+	"github.com/pavlo67/constructor/components/common/joiner"
+	"github.com/pavlo67/constructor/components/common/logger"
+	"github.com/pavlo67/constructor/components/common/sqllib"
+	"github.com/pavlo67/constructor/components/common/sqllib/sqllib_sqlite"
+	"github.com/pavlo67/constructor/components/common/starter"
 
 	"github.com/pavlo67/constructor/applications/flow"
 )
@@ -32,8 +32,8 @@ func (fs *flowSQLiteStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (fs *flowSQLiteStarter) Init(conf *config.Config, options basis.Info) ([]basis.Info, error) {
-	var errs basis.Errors
+func (fs *flowSQLiteStarter) Init(conf *config.Config, options common.Info) ([]common.Info, error) {
+	var errs common.Errors
 
 	l = conf.Logger
 

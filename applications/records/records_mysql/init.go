@@ -2,13 +2,13 @@ package records_mysql
 
 import (
 	"github.com/pavlo67/constructor/applications/records"
-	"github.com/pavlo67/constructor/components/basis"
-	"github.com/pavlo67/constructor/components/basis/config"
-	"github.com/pavlo67/constructor/components/basis/filelib"
-	"github.com/pavlo67/constructor/components/basis/joiner"
-	"github.com/pavlo67/constructor/components/basis/logger"
-	"github.com/pavlo67/constructor/components/basis/sqllib"
-	"github.com/pavlo67/constructor/components/basis/starter"
+	"github.com/pavlo67/constructor/components/common"
+	"github.com/pavlo67/constructor/components/common/config"
+	"github.com/pavlo67/constructor/components/common/filelib"
+	"github.com/pavlo67/constructor/components/common/joiner"
+	"github.com/pavlo67/constructor/components/common/logger"
+	"github.com/pavlo67/constructor/components/common/sqllib"
+	"github.com/pavlo67/constructor/components/common/starter"
 )
 
 var l logger.Operator
@@ -36,11 +36,11 @@ func (nms *records_mysqlStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (nms *records_mysqlStarter) Prepare(conf *config.Config, options, runtimeOptions basis.Info) error {
+func (nms *records_mysqlStarter) Prepare(conf *config.Config, options, runtimeOptions common.Info) error {
 
 	l = logger.Get()
 
-	var errs basis.Errors
+	var errs common.Errors
 	nms.mysqlConfig, errs = conf.MySQL(options.StringDefault("database", ""), errs)
 
 	indexPath := options.StringDefault("index_path", filelib.CurrentPath())
@@ -62,7 +62,7 @@ func (nms *records_mysqlStarter) Prepare(conf *config.Config, options, runtimeOp
 	return nil
 }
 
-func (nms *records_mysqlStarter) Check() (info []basis.Info, err error) {
+func (nms *records_mysqlStarter) Check() (info []common.Info, err error) {
 	return sqllib.CheckSQLTables(nms.mysqlConfig, nms.index.MySQL, nms.tables)
 }
 

@@ -3,8 +3,8 @@ package flow
 import (
 	"time"
 
-	"github.com/pavlo67/constructor/components/basis"
-	"github.com/pavlo67/constructor/components/basis/joiner"
+	"github.com/pavlo67/constructor/components/common"
+	"github.com/pavlo67/constructor/components/common/joiner"
 	"github.com/pavlo67/constructor/components/structura/content"
 
 	"github.com/pavlo67/constructor/components/processor/importer"
@@ -21,14 +21,14 @@ type Operator interface {
 	ListAll(before *time.Time, options *content.GetOptions) ([]content.Brief, error)
 	ListByURL(url string, before *time.Time, options *content.GetOptions) ([]content.Brief, error)
 	ListByTag(tag string, before *time.Time, options *content.GetOptions) ([]content.Brief, error)
-	Read(basis.ID, *content.GetOptions) (*importer.Item, error)
+	Read(common.ID, *content.GetOptions) (*importer.Item, error)
 	URLs(*content.GetOptions) ([]Part, error)
 	Tags(*content.GetOptions) ([]Part, error)
 }
 
 type Administrator interface {
 	Has(importer.OriginKey) (bool, error)
-	Save([]importer.Item, *content.SaveOptions) ([]basis.ID, error)
+	Save([]importer.Item, *content.SaveOptions) ([]common.ID, error)
 	// Remove(sourceIDs []basis.ID, before *time.Time, options *content.RemoveOptions) error
 }
 

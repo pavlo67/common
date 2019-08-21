@@ -3,12 +3,12 @@ package auth_stub
 import (
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/constructor/components/authonents/auth"
-	"github.com/pavlo67/constructor/components/basis"
-	"github.com/pavlo67/constructor/components/basis/config"
-	"github.com/pavlo67/constructor/components/basis/joiner"
-	"github.com/pavlo67/constructor/components/basis/logger"
-	"github.com/pavlo67/constructor/components/basis/starter"
+	"github.com/pavlo67/constructor/components/auth"
+	"github.com/pavlo67/constructor/components/common"
+	"github.com/pavlo67/constructor/components/common/config"
+	"github.com/pavlo67/constructor/components/common/joiner"
+	"github.com/pavlo67/constructor/components/common/logger"
+	"github.com/pavlo67/constructor/components/common/starter"
 )
 
 func Starter() starter.Operator {
@@ -16,7 +16,7 @@ func Starter() starter.Operator {
 }
 
 type UserStub struct {
-	ID       auth.ID
+	ID       common.ID
 	Login    string
 	Password string
 }
@@ -31,18 +31,19 @@ type identity_login_stubStarter struct {
 var _ starter.Operator = &identity_login_stubStarter{}
 var l logger.Operator
 
+var credentialsConf = map[string]string{}
+
 func (sc *identity_login_stubStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (sc *identity_login_stubStarter) Prepare(conf *config.Config, params basis.Info) error {
+func (sc *identity_login_stubStarter) Init(conf *config.Config, params common.Info) (info []common.Info, err error) {
 	l = logger.Get()
 
 	sc.interfaceKey = joiner.InterfaceKey(params.StringDefault("interface_key", string(auth.InterfaceKey)))
 
-	credentialsConf, errs := conf.Credentials(params.StringDefault("config_credentials_key", "default"), nil)
-
 	var ok bool
+	var errs common.Errors
 
 	if sc.users, ok = params["users"].([]UserStub); !ok || len(sc.users) < 1 {
 		errs = append(errs, errors.New("no users defined for identity_login_stub.Starter (in params['users'])"))
@@ -52,18 +53,14 @@ func (sc *identity_login_stubStarter) Prepare(conf *config.Config, params basis.
 		errs = append(errs, errors.Wrapf(config.ErrNoValue, "no data for key 'salt' in config.credentials in %#v", credentialsConf))
 	}
 
-	return errs.Err()
-}
-
-func (sc *identity_login_stubStarter) Check() (info []basis.Info, err error) {
-	return nil, nil
+	return nil, errs.Err()
 }
 
 func (sc *identity_login_stubStarter) Setup() error {
 	return nil
 }
 
-func (sc *identity_login_stubStarter) Init(joiner joiner.Operator) error {
+func (sc *identity_login_stubStarter) Run(joiner joiner.Operator) error {
 	u, err := New(sc.users, sc.salt)
 	if err != nil {
 		return errors.Wrapf(err, "can't init identity_login_stubStarter")

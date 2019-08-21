@@ -1,11 +1,11 @@
 package importer
 
 import (
-	"github.com/pavlo67/constructor/components/basis/joiner"
+	"github.com/pavlo67/constructor/components/common/joiner"
 
 	"time"
 
-	"github.com/pavlo67/constructor/components/basis"
+	"github.com/pavlo67/constructor/components/common"
 )
 
 const InterfaceKey joiner.InterfaceKey = "importer"
@@ -17,7 +17,7 @@ const InterfaceKey joiner.InterfaceKey = "importer"
 //var ErrNilItem = errors.New("item is nil")
 
 type Item struct {
-	ID      basis.ID   `bson:"_id,omitempty"      json:"id,omitempty"`
+	ID      common.ID  `bson:"_id,omitempty"      json:"id,omitempty"`
 	SavedAt *time.Time `bson:"saved_at,omitempty" json:"saved_at,omitempty"`
 
 	OriginKey `       bson:",inline"          json:",inline"`
@@ -33,8 +33,8 @@ type Item struct {
 }
 
 type OriginKey struct {
-	SourceID  basis.ID `bson:"source_id,omitempty"  json:"source_id,omitempty"`
-	SourceKey string   `bson:"source_key,omitempty" json:"source_key,omitempty"`
+	SourceID  common.ID `bson:"source_id,omitempty"  json:"source_id,omitempty"`
+	SourceKey string    `bson:"source_key,omitempty" json:"source_key,omitempty"`
 }
 
 type Content struct {

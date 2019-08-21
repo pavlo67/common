@@ -6,7 +6,7 @@ import (
 	"github.com/mmcdole/gofeed"
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/constructor/components/basis"
+	"github.com/pavlo67/constructor/components/common"
 	"github.com/pavlo67/constructor/components/processor/importer"
 )
 
@@ -15,7 +15,7 @@ import (
 var _ importer.Operator = &RSS{}
 
 type RSS struct {
-	sourceID basis.ID
+	sourceID common.ID
 }
 
 //var reHTTP = regexp.MustCompile("(?i)^https?://")

@@ -3,12 +3,12 @@ package auth_ecdsa
 import (
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/constructor/components/authonents/auth"
-	"github.com/pavlo67/constructor/components/basis"
-	"github.com/pavlo67/constructor/components/basis/config"
-	"github.com/pavlo67/constructor/components/basis/joiner"
-	"github.com/pavlo67/constructor/components/basis/logger"
-	"github.com/pavlo67/constructor/components/basis/starter"
+	"github.com/pavlo67/constructor/components/auth"
+	"github.com/pavlo67/constructor/components/common"
+	"github.com/pavlo67/constructor/components/common/config"
+	"github.com/pavlo67/constructor/components/common/joiner"
+	"github.com/pavlo67/constructor/components/common/logger"
+	"github.com/pavlo67/constructor/components/common/starter"
 )
 
 func Starter() starter.Operator {
@@ -26,7 +26,7 @@ func (ss *identity_btcStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *identity_btcStarter) Init(conf *config.Config, options basis.Info) (info []basis.Info, err error) {
+func (ss *identity_btcStarter) Init(conf *config.Config, options common.Info) (info []common.Info, err error) {
 	l = logger.Get()
 
 	// var errs basis.Errors

@@ -6,11 +6,11 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/constructor/components/auth"
-	"github.com/pavlo67/constructor/components/basis"
-	"github.com/pavlo67/constructor/components/basis/config"
-	"github.com/pavlo67/constructor/components/basis/joiner"
-	"github.com/pavlo67/constructor/components/basis/logger"
-	"github.com/pavlo67/constructor/components/basis/starter"
+	"github.com/pavlo67/constructor/components/common"
+	"github.com/pavlo67/constructor/components/common/config"
+	"github.com/pavlo67/constructor/components/common/joiner"
+	"github.com/pavlo67/constructor/components/common/logger"
+	"github.com/pavlo67/constructor/components/common/starter"
 	"github.com/pavlo67/constructor/components/server/server_http"
 )
 
@@ -33,14 +33,14 @@ func (ss *server_http_jschmhrStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *server_http_jschmhrStarter) Init(conf *config.Config, options basis.Info) (info []basis.Info, err error) {
-	var errs basis.Errors
-	l, errs = conf.Logger(nil)
+func (ss *server_http_jschmhrStarter) Init(conf *config.Config, options common.Info) (info []common.Info, err error) {
+	var errs common.Errors
+	l = conf.Logger
 
 	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(server_http.InterfaceKey)))
 	// ss.interfaceKeyRouter = joiner.InterfaceKey(options.StringDefault("interface_key_router", string(controller.InterfaceKey)))
 
-	ss.config, errs = conf.Server(options.StringDefault("config_server_key", "default"), errs)
+	ss.config = conf.Server
 	if ss.config.Port <= 0 {
 		errs = append(errs, fmt.Errorf("wrong port for serverOp: %d", ss.config.Port))
 	}

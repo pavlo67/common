@@ -3,7 +3,7 @@ package server_http
 import (
 	"net/http"
 
-	"github.com/pavlo67/constructor/components/basis"
+	"github.com/pavlo67/constructor/components/common"
 )
 
 // REST -------------------------------------------------------------------------------------
@@ -14,7 +14,7 @@ type RESTDataMessage struct {
 }
 
 type RESTDataError struct {
-	Error basis.Errors `json:"error,omitempty"`
+	Error common.Errors `json:"error,omitempty"`
 }
 
 //func RESTError(err error) server.Response {

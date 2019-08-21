@@ -2,8 +2,8 @@ package links
 
 import (
 	"github.com/pavlo67/constructor/components/auth"
-	"github.com/pavlo67/constructor/components/basis/joiner"
-	"github.com/pavlo67/constructor/components/basis/selectors"
+	"github.com/pavlo67/constructor/components/common/joiner"
+	"github.com/pavlo67/constructor/components/common/selectors"
 )
 
 const InterfaceKey joiner.InterfaceKey = "links"

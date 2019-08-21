@@ -2,18 +2,18 @@ package content
 
 import (
 	"github.com/pavlo67/constructor/components/auth"
-	"github.com/pavlo67/constructor/components/basis"
-	"github.com/pavlo67/constructor/components/basis/joiner"
-	"github.com/pavlo67/constructor/components/basis/selectors"
+	"github.com/pavlo67/constructor/components/common"
+	"github.com/pavlo67/constructor/components/common/joiner"
+	"github.com/pavlo67/constructor/components/common/selectors"
 )
 
 const InterfaceKey joiner.InterfaceKey = "content"
 
 type Brief struct {
-	ID      basis.ID   `bson:"_id,omitempty"     json:"id,omitempty"`
-	Title   string     `bson:"title"             json:"title"`
-	Summary string     `bson:"summary,omitempty" json:"summary,omitempty"`
-	Info    basis.Info `bson:"info,omitempty"    json:"info,omitempty"`
+	ID      common.ID   `bson:"_id,omitempty"     json:"id,omitempty"`
+	Title   string      `bson:"title"             json:"title"`
+	Summary string      `bson:"summary,omitempty" json:"summary,omitempty"`
+	Info    common.Info `bson:"info,omitempty"    json:"info,omitempty"`
 }
 
 type Item struct {
@@ -29,13 +29,13 @@ type Description struct {
 type Operator interface {
 	Descript() (*Description, error)
 
-	Save(content Item, options *SaveOptions) (id basis.ID, err error)
+	Save(content Item, options *SaveOptions) (id common.ID, err error)
 
-	Read(id basis.ID, options *GetOptions) (*Item, error)
+	Read(id common.ID, options *GetOptions) (*Item, error)
 
 	List(selector *selectors.Term, options *GetOptions) ([]Brief, error)
 
-	Remove(id basis.ID, options *RemoveOptions) error
+	Remove(id common.ID, options *RemoveOptions) error
 }
 
 type Cleaner func() error

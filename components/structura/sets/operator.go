@@ -1,6 +1,6 @@
 package sets
 
-import "github.com/pavlo67/constructor/components/basis"
+import "github.com/pavlo67/constructor/components/common"
 
 type Condition func(Something) bool
 
@@ -10,9 +10,9 @@ type Compare func(Something, Something) int64
 type Something interface {
 	IsEqual(Something) bool
 	DifferenceFrom(Something) []Something
-	Variations(basis.Info) []Something
+	Variations(common.Info) []Something
 
-	Configure(basis.Info)
+	Configure(common.Info)
 }
 
 type Set interface {

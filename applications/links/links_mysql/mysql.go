@@ -8,8 +8,8 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/constructor/components/auth"
-	"github.com/pavlo67/constructor/components/basis"
-	"github.com/pavlo67/constructor/components/basis/config"
+	"github.com/pavlo67/constructor/components/common"
+	"github.com/pavlo67/constructor/components/common/config"
 	"github.com/pavlo67/constructor/confidenter/groups"
 	"github.com/pavlo67/constructor/confidenter/rights"
 	"github.com/pavlo67/partes/crud/selectors"
@@ -72,7 +72,7 @@ func New(mysqlConfig config.ServerAccess, linkTable string, ctrlOp groups.Operat
 	l.ctrlOp = ctrlOp
 	l.dataManagers = managers
 	if len(l.dataManagers) < 1 {
-		l.dataManagers = rights.Managers{rights.Create: basis.Anyone}
+		l.dataManagers = rights.Managers{rights.Create: common.Anyone}
 	}
 
 	l.dbh = dbh
@@ -176,7 +176,7 @@ func (linksOp *linksMySQL) SetLinks(userIS auth.ID, linkedType, linkedID string,
 	values = []interface{}{linkedType, linkedID}
 	_, err = linksOp.stmtdeleteLinks.Exec(values...)
 	if err != nil {
-		return nil, errors.Wrapf(err, onSetLinks+": "+basis.CantExecQuery, linksOp.sqldeleteLinks, values)
+		return nil, errors.Wrapf(err, onSetLinks+": "+common.CantExecQuery, linksOp.sqldeleteLinks, values)
 	}
 
 	for _, n := range linksList {
@@ -191,7 +191,7 @@ func (linksOp *linksMySQL) SetLinks(userIS auth.ID, linkedType, linkedID string,
 		values := []interface{}{linkedType, linkedID, n.Type, n.Name, id, string(n.RView), string(n.ROwner)}
 		_, err = linksOp.stmtCreate.Exec(values...)
 		if err != nil {
-			return nil, errors.Wrapf(err, onSetLinks+"linksOp: "+basis.CantExecQuery, linksOp.sqlCreate, values)
+			return nil, errors.Wrapf(err, onSetLinks+"linksOp: "+common.CantExecQuery, linksOp.sqlCreate, values)
 		}
 
 		if id > 0 {
@@ -215,10 +215,10 @@ func (linksOp *linksMySQL) SetLinks(userIS auth.ID, linkedType, linkedID string,
 	var linkedInfo []links.LinkedInfo
 
 	// TODO: QueryAccessible
-	sql := linksOp.tplCountLinked + " where r_view = '" + string(basis.Anyone) + "' and object_id in (" + strings.Join(idStrings, ",") + ") " + linksOp.tplCountLinkedFin
+	sql := linksOp.tplCountLinked + " where r_view = '" + string(common.Anyone) + "' and object_id in (" + strings.Join(idStrings, ",") + ") " + linksOp.tplCountLinkedFin
 	rows, err := linksOp.dbh.Query(sql)
 	if err != nil {
-		return nil, errors.Wrapf(err, onSetLinks+": "+basis.CantPrepareQuery, sql, nil)
+		return nil, errors.Wrapf(err, onSetLinks+": "+common.CantPrepareQuery, sql, nil)
 	}
 	defer rows.Close()
 
@@ -257,7 +257,7 @@ func (linksOp *linksMySQL) Query(userIS auth.ID, selector selectors.Selector) (l
 
 	rows, err := linksOp.dbh.Query(sqlQuery, values...)
 	if err != nil {
-		return nil, errors.Wrapf(err, onQuery+": "+basis.CantExecQuery, sqlQuery, values)
+		return nil, errors.Wrapf(err, onQuery+": "+common.CantExecQuery, sqlQuery, values)
 	}
 	defer rows.Close()
 
@@ -285,7 +285,7 @@ func (linksOp *linksMySQL) QueryByTag(userIS auth.ID, tag string) (linked []link
 
 	rows, err := linksOp.stmtQueryByTag.Query(tag)
 	if err != nil {
-		return nil, errors.Wrapf(err, onQueryByTag+": "+basis.CantExecQuery, linksOp.sqlQueryByTag, tag)
+		return nil, errors.Wrapf(err, onQueryByTag+": "+common.CantExecQuery, linksOp.sqlQueryByTag, tag)
 	}
 	defer rows.Close()
 
@@ -313,7 +313,7 @@ func (linksOp *linksMySQL) QueryByObjectID(userIS auth.ID, id string) (linked []
 
 	rows, err := linksOp.stmtQueryByObjectID.Query(strings.TrimSpace(id))
 	if err != nil {
-		return nil, errors.Wrapf(err, onQueryByObjectID+": "+basis.CantExecQuery, linksOp.sqlQueryByObjectID, id)
+		return nil, errors.Wrapf(err, onQueryByObjectID+": "+common.CantExecQuery, linksOp.sqlQueryByObjectID, id)
 	}
 	defer rows.Close()
 
@@ -350,7 +350,7 @@ func (linksOp *linksMySQL) QueryTags(userIS auth.ID, selector selectors.Selector
 	_, rows, err := groups.QueryAccessible(linksOp.ctrlOp, linksOp.dbh, userIS, linksOp.tplQueryTags, condition, linksOp.tplQueryTagsFin, values)
 
 	if err != nil {
-		return nil, errors.Wrapf(err, onQueryTags+": "+basis.CantExecQuery, sqlQueryTags)
+		return nil, errors.Wrapf(err, onQueryTags+": "+common.CantExecQuery, sqlQueryTags)
 	}
 	defer rows.Close()
 
@@ -381,7 +381,7 @@ func (linksOp *linksMySQL) QueryTagsByOwner(userIS auth.ID, rOwner auth.ID) ([]l
 
 	sql := linksOp.tplQueryTagsByOwner + "::" + linksOp.tplQueryTagsByOwnerFin
 	if err != nil {
-		return nil, errors.Wrapf(err, onQueryTagsByOwner+": "+basis.CantExecQuery, sql, rOwner)
+		return nil, errors.Wrapf(err, onQueryTagsByOwner+": "+common.CantExecQuery, sql, rOwner)
 	}
 	defer rows.Close()
 

@@ -8,7 +8,7 @@ import (
 	"strconv"
 
 	"github.com/pavlo67/constructor/components/auth"
-	"github.com/pavlo67/constructor/components/basis"
+	"github.com/pavlo67/constructor/components/common"
 	"github.com/pavlo67/constructor/notebook/links"
 	"github.com/pavlo67/constructor/things_old/files"
 	"github.com/pavlo67/partes/crud/selectors"
@@ -90,7 +90,7 @@ func ContentByID(userIS auth.ID, objectsOp Operator, genusKey string, content Co
 
 	if o.Genus != genusKey {
 		// TODO: wrap!!!
-		return errors.Wrapf(basis.ErrBadGenus, onContentByID+": %s", genusKey, content, o.Genus)
+		return errors.Wrapf(common.ErrBadGenus, onContentByID+": %s", genusKey, content, o.Genus)
 	}
 
 	return content.FromObject(o)

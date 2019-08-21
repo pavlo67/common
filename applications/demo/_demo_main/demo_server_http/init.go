@@ -3,11 +3,11 @@ package demo_server_http
 import (
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/constructor/components/basis"
-	"github.com/pavlo67/constructor/components/basis/config"
-	"github.com/pavlo67/constructor/components/basis/joiner"
-	"github.com/pavlo67/constructor/components/basis/logger"
-	"github.com/pavlo67/constructor/components/basis/starter"
+	"github.com/pavlo67/constructor/components/common"
+	"github.com/pavlo67/constructor/components/common/config"
+	"github.com/pavlo67/constructor/components/common/joiner"
+	"github.com/pavlo67/constructor/components/common/logger"
+	"github.com/pavlo67/constructor/components/common/starter"
 	"github.com/pavlo67/constructor/components/server/server_http"
 )
 
@@ -25,7 +25,7 @@ func (dcs *demoServerHTTPStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (dcs *demoServerHTTPStarter) Init(conf *config.Config, options basis.Info) ([]basis.Info, error) {
+func (dcs *demoServerHTTPStarter) Init(conf *config.Config, options common.Info) ([]common.Info, error) {
 	l = logger.Get()
 
 	return nil, nil

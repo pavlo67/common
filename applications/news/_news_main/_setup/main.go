@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/pavlo67/constructor/components/basis/filelib"
-	"github.com/pavlo67/constructor/components/basis/joiner"
-	"github.com/pavlo67/constructor/components/basis/starter"
+	"github.com/pavlo67/constructor/components/common/filelib"
+	"github.com/pavlo67/constructor/components/common/joiner"
+	"github.com/pavlo67/constructor/components/common/starter"
 
 	"github.com/pavlo67/constructor/processor/_starter_process_rsss_rss/process_rss_config"
 )

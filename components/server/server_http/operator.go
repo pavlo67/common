@@ -4,14 +4,14 @@ import (
 	"net/http"
 
 	"github.com/pavlo67/constructor/components/auth"
-	"github.com/pavlo67/constructor/components/basis"
-	"github.com/pavlo67/constructor/components/basis/joiner"
+	"github.com/pavlo67/constructor/components/common"
+	"github.com/pavlo67/constructor/components/common/joiner"
 	"github.com/pavlo67/constructor/components/server"
 )
 
 const InterfaceKey joiner.InterfaceKey = "server_http"
 
-type WorkerHTTP func(*auth.User, basis.Params, *http.Request) (server.Response, error)
+type WorkerHTTP func(*auth.User, common.Params, *http.Request) (server.Response, error)
 
 type Operator interface {
 	HandleEndpoint(endpoint Endpoint) error
@@ -20,8 +20,8 @@ type Operator interface {
 	Start()
 }
 
-func InitEndpoints(op Operator, endpoints []Endpoint) basis.Errors {
-	var errs basis.Errors
+func InitEndpoints(op Operator, endpoints []Endpoint) common.Errors {
+	var errs common.Errors
 
 	for _, ep := range endpoints {
 		errs = errs.Append(op.HandleEndpoint(ep))

@@ -11,7 +11,7 @@ import (
 	"sort"
 
 	"github.com/pavlo67/constructor/components/auth"
-	"github.com/pavlo67/constructor/components/basis"
+	"github.com/pavlo67/constructor/components/common"
 )
 
 // TODO: test .Selector
@@ -39,7 +39,7 @@ type SetLinksStep struct {
 type QueryTagsStep struct {
 	IS              auth.ID
 	ISBad           *auth.ID
-	Selector        *basis.Term
+	Selector        *common.Term
 	ExpectedErr     error
 	ExpectedTagInfo []TagInfo
 }
@@ -99,7 +99,7 @@ type QueryByTagTestCase struct {
 type QueryStep struct {
 	IS             auth.ID
 	ISBad          *auth.ID
-	Selector       *basis.Term
+	Selector       *common.Term
 	ExpectedErr    error
 	ExpectedLinked []Linked
 }

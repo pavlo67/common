@@ -1,7 +1,7 @@
 package news_starters
 
 import (
-	"github.com/pavlo67/constructor/components/basis/starter"
+	"github.com/pavlo67/constructor/components/common/starter"
 
 	"github.com/pavlo67/constructor/applications/flow/news_leveldb"
 	"github.com/pavlo67/constructor/components/auth/auth_ecdsa"

@@ -1,6 +1,6 @@
 package auth
 
-import "github.com/pavlo67/constructor/components/basis/encrlib"
+import "github.com/pavlo67/constructor/components/common/encrlib"
 
 type CredsType string
 

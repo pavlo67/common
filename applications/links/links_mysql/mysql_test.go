@@ -5,10 +5,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/pavlo67/constructor/components/basis"
-	"github.com/pavlo67/constructor/components/basis/config"
-	"github.com/pavlo67/constructor/components/basis/filelib"
-	"github.com/pavlo67/constructor/components/basis/joiner"
+	"github.com/pavlo67/constructor/components/common"
+	"github.com/pavlo67/constructor/components/common/config"
+	"github.com/pavlo67/constructor/components/common/filelib"
+	"github.com/pavlo67/constructor/components/common/joiner"
 )
 
 var conf *config.Config
@@ -28,7 +28,7 @@ func TestMain(m *testing.M) {
 		log.Fatal("no config data after setup.Run()")
 	}
 
-	var errs basis.Errors
+	var errs common.Errors
 	mysqlConfig, errs = conf.MySQL("notebook", nil)
 	if len(errs) > 0 {
 		log.Fatal(errs)

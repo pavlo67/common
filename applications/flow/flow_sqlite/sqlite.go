@@ -9,8 +9,8 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/constructor/components/basis"
-	"github.com/pavlo67/constructor/components/basis/sqllib"
+	"github.com/pavlo67/constructor/components/common"
+	"github.com/pavlo67/constructor/components/common/sqllib"
 	"github.com/pavlo67/constructor/components/processor/importer"
 	"github.com/pavlo67/constructor/components/structura/content"
 
@@ -117,7 +117,7 @@ func (flowOp *flowSQLite) List(errTitle, sqlQuery string, stm *sql.Stmt, values 
 	var briefs []content.Brief
 
 	for rows.Next() {
-		brief := content.Brief{Info: basis.Info{}}
+		brief := content.Brief{Info: common.Info{}}
 
 		var sourceTime *time.Time
 		var sourceURL, tags string
@@ -159,7 +159,7 @@ func (flowOp *flowSQLite) ListByTag(tag string, before *time.Time, options *cont
 
 const onRead = "on flowSQLite.Read(): "
 
-func (flowOp *flowSQLite) Read(idStr basis.ID, options *content.GetOptions) (*importer.Item, error) {
+func (flowOp *flowSQLite) Read(idStr common.ID, options *content.GetOptions) (*importer.Item, error) {
 	if len(idStr) < 1 {
 		return nil, errors.New(onRead + "empty ID")
 	}
@@ -174,7 +174,7 @@ func (flowOp *flowSQLite) Read(idStr basis.ID, options *content.GetOptions) (*im
 
 	err = flowOp.stmRead.QueryRow(id).Scan(&item.SourceID, &item.SourceTime, &item.SourceURL, &item.Title, &item.Summary, &item.Details, &item.Href, &embedded, &tags)
 	if err == sql.ErrNoRows {
-		return nil, basis.ErrNotFound
+		return nil, common.ErrNotFound
 	}
 	if err != nil {
 		return nil, errors.Wrapf(err, onRead+sqllib.CantScanQueryRow, flowOp.sqlRead, id)
@@ -268,14 +268,14 @@ func (flowOp *flowSQLite) Has(originKey importer.OriginKey) (bool, error) {
 
 type tagItem struct {
 	tag    string
-	flowID *basis.ID
+	flowID *common.ID
 }
 
 const onSaveTags = "on flowSQLite.saveTags(): "
 
 func (flowOp *flowSQLite) saveTags(tagItems []tagItem) error {
 
-	var errs basis.Errors
+	var errs common.Errors
 
 	for _, tagItem := range tagItems {
 		values := []interface{}{tagItem.tag, tagItem.flowID}
@@ -292,9 +292,9 @@ func (flowOp *flowSQLite) saveTags(tagItems []tagItem) error {
 
 const onSave = "on flowSQLite.Save(): "
 
-func (flowOp *flowSQLite) Save(items []importer.Item, options *content.SaveOptions) ([]basis.ID, error) {
-	var ids []basis.ID
-	var errs basis.Errors
+func (flowOp *flowSQLite) Save(items []importer.Item, options *content.SaveOptions) ([]common.ID, error) {
+	var ids []common.ID
+	var errs common.Errors
 
 	for _, item := range items {
 		embedded, err := json.Marshal(item.Embedded)
@@ -313,7 +313,7 @@ func (flowOp *flowSQLite) Save(items []importer.Item, options *content.SaveOptio
 		if err != nil {
 			return ids, errs.Append(errors.Wrapf(err, onSave+sqllib.CantGetLastInsertId, flowOp.sqlSave, values)).Err()
 		}
-		id := basis.ID(strconv.FormatInt(idSQLite, 10))
+		id := common.ID(strconv.FormatInt(idSQLite, 10))
 
 		var tagItems []tagItem
 		for _, tag := range item.Tags {
@@ -336,7 +336,7 @@ func (flowOp *flowSQLite) Clean() error {
 	_, err2 := flowOp.db.Exec("TRUNCATE " + tableTags)
 	_, err3 := flowOp.db.Exec("TRUNCATE " + tableSources)
 
-	return basis.MultiError(err1, err2, err3).Err()
+	return common.MultiError(err1, err2, err3).Err()
 }
 
 //const onRemove = "on flowSQLite.Remove()"

@@ -6,10 +6,10 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/pavlo67/constructor/components/basis/config"
-	"github.com/pavlo67/constructor/components/basis/filelib"
-	"github.com/pavlo67/constructor/components/basis/logger"
-	"github.com/pavlo67/constructor/components/basis/starter"
+	"github.com/pavlo67/constructor/components/common/config"
+	"github.com/pavlo67/constructor/components/common/filelib"
+	"github.com/pavlo67/constructor/components/common/logger"
+	"github.com/pavlo67/constructor/components/common/starter"
 	"github.com/pavlo67/constructor/components/server/server_http"
 
 	"github.com/pavlo67/constructor/applications/demo/_demo_mainns/demo/_demo_main/demo_starters"

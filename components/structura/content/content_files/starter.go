@@ -5,11 +5,11 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/constructor/components/basis"
-	"github.com/pavlo67/constructor/components/basis/config"
-	"github.com/pavlo67/constructor/components/basis/joiner"
-	"github.com/pavlo67/constructor/components/basis/logger"
-	"github.com/pavlo67/constructor/components/basis/starter"
+	"github.com/pavlo67/constructor/components/common"
+	"github.com/pavlo67/constructor/components/common/config"
+	"github.com/pavlo67/constructor/components/common/joiner"
+	"github.com/pavlo67/constructor/components/common/logger"
+	"github.com/pavlo67/constructor/components/common/starter"
 	"github.com/pavlo67/constructor/components/structura"
 )
 
@@ -23,14 +23,14 @@ func Starter() starter.Operator {
 type contentFilesStarter struct {
 	interfaceKey joiner.InterfaceKey
 	path         string
-	marshaler    basis.Marshaler
+	marshaler    common.Marshaler
 }
 
 func (nms *contentFilesStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (nms *contentFilesStarter) Init(conf *config.Config, options basis.Info) (info []basis.Info, err error) {
+func (nms *contentFilesStarter) Init(conf *config.Config, options common.Info) (info []common.Info, err error) {
 	l = logger.Get()
 
 	var ok bool
@@ -47,7 +47,7 @@ func (nms *contentFilesStarter) Init(conf *config.Config, options basis.Info) (i
 		return nil, errors.Errorf("'%s' isn't a directory", nms.path)
 	}
 
-	nms.marshaler, ok = options["marshaler"].(basis.Marshaler)
+	nms.marshaler, ok = options["marshaler"].(common.Marshaler)
 	if !ok || nms.marshaler == nil {
 		return nil, errors.New("no marshaler for contentFilesStarter.Init()")
 	}

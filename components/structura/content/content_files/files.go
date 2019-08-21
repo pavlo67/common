@@ -9,8 +9,8 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/constructor/components/basis"
-	"github.com/pavlo67/constructor/components/basis/selectors"
+	"github.com/pavlo67/constructor/components/common"
+	"github.com/pavlo67/constructor/components/common/selectors"
 	"github.com/pavlo67/constructor/components/structura"
 )
 
@@ -18,12 +18,12 @@ var _ structura.Operator = &contentFiles{}
 
 type contentFiles struct {
 	path      string
-	marshaler basis.Marshaler
+	marshaler common.Marshaler
 }
 
 const onNew = "on contentFiles.New()"
 
-func New(path string, marshaler basis.Marshaler) (*contentFiles, error) {
+func New(path string, marshaler common.Marshaler) (*contentFiles, error) {
 	path = strings.TrimSpace(path)
 	if path == "" {
 		return nil, errors.New(onNew + ": no path")
@@ -50,13 +50,13 @@ func (cfOp contentFiles) Descript() (*structura.Description, error) {
 
 const onSave = "on contentFiles.Save()"
 
-func (cfOp contentFiles) Save(item structura.Item, options *structura.SaveOptions) (id basis.ID, err error) {
+func (cfOp contentFiles) Save(item structura.Item, options *structura.SaveOptions) (id common.ID, err error) {
 	data, err := cfOp.marshaler.Marshal(item)
 	if err != nil {
 		return "", errors.Wrapf(err, onSave+" with native value (%#v)", item)
 	}
 
-	id = basis.ID(strconv.FormatInt(time.Now().UnixNano(), 10))
+	id = common.ID(strconv.FormatInt(time.Now().UnixNano(), 10))
 	err = ioutil.WriteFile(cfOp.path+string(id), data, 0755)
 	if err != nil {
 		return "", errors.Wrapf(err, onSave+" with path (%s) & id (%s)", cfOp.path, id)
@@ -67,7 +67,7 @@ func (cfOp contentFiles) Save(item structura.Item, options *structura.SaveOption
 
 const onRead = "on contentFiles.Read()"
 
-func (cfOp contentFiles) Read(id basis.ID, options *structura.GetOptions) (*structura.Item, error) {
+func (cfOp contentFiles) Read(id common.ID, options *structura.GetOptions) (*structura.Item, error) {
 	data, err := ioutil.ReadFile(cfOp.path + string(id))
 	if err != nil {
 		return nil, errors.Wrapf(err, onRead+" with path (%s) & id (%s)", cfOp.path, id)
@@ -97,7 +97,7 @@ func (cfOp contentFiles) List(selector *selectors.Term, options *structura.GetOp
 			continue
 		}
 
-		item, err := cfOp.Read(basis.ID(file.Name()), nil)
+		item, err := cfOp.Read(common.ID(file.Name()), nil)
 		if err != nil {
 			return nil, errors.Wrapf(err, onList)
 		}
@@ -110,7 +110,7 @@ func (cfOp contentFiles) List(selector *selectors.Term, options *structura.GetOp
 
 const onRemove = "on contentFiles.Remove()"
 
-func (cfOp contentFiles) Remove(id basis.ID, options *structura.RemoveOptions) error {
+func (cfOp contentFiles) Remove(id common.ID, options *structura.RemoveOptions) error {
 	err := os.Remove(cfOp.path + string(id))
 	if err != nil {
 		return errors.Wrapf(err, onRemove+" with path (%s) & id (%s)", cfOp.path, id)
