@@ -1,4 +1,4 @@
-package common
+package server_http
 
 type Param struct {
 	Name  string

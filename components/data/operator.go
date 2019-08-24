@@ -48,11 +48,11 @@ type Operator interface {
 	Read(common.ID, *crud.GetOptions) (*Item, error)
 
 	Save([]Item, marks.Operator, indexer.Operator, *crud.SaveOptions) ([]common.ID, error)
-	Remove(selectors.Term, marks.Operator, indexer.Operator, *crud.RemoveOptions) error
+	Remove(*selectors.Term, marks.Operator, indexer.Operator, *crud.RemoveOptions) error
 
-	List(selectors.Term, indexer.Operator, *crud.GetOptions) ([]crud.Brief, error)
-	Count(selectors.Term, indexer.Operator, *crud.GetOptions) ([]crud.Part, error)
-	Reindex(selectors.Term, indexer.Operator, *crud.GetOptions) error
+	List(*selectors.Term, indexer.Operator, *crud.GetOptions) ([]crud.Brief, error)
+	Count(*selectors.Term, indexer.Operator, *crud.GetOptions) ([]crud.Part, error)
+	Reindex(*selectors.Term, indexer.Operator, *crud.GetOptions) error
 }
 
 //func (item *Item) PartesTexti() ([]textus.Pars, error) {

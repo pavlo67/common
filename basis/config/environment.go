@@ -17,19 +17,16 @@ var ErrNoValue = errors.New("no value")
 
 // -----------------------------------------------------------------------------
 
-func Get(path string, l logger.Operator) (*Config, error) {
+func Get(path, environment string, l logger.Operator) (*Config, error) {
 
-	var data []byte
-	var err error
 	if len(path) < 1 {
 		return nil, errors.New("empty config path")
-	} else if path[len(path)-1] == '/' {
-		data, err = ioutil.ReadFile(path + "cfg.json5")
-	} else {
-		data, err = ioutil.ReadFile(path)
 	}
+
+	cfgFile := path + "/" + environment + ".json5"
+	data, err := ioutil.ReadFile(cfgFile)
 	if err != nil {
-		return nil, errors.Wrapf(err, "no config file in %v", path)
+		return nil, errors.Wrapf(err, "no config file in '%s'", cfgFile)
 	}
 
 	return readConfig(data, l)

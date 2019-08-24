@@ -6,8 +6,9 @@ import (
 	"os"
 	"path"
 	"regexp"
-	"runtime"
 	"time"
+
+	"runtime"
 
 	"github.com/pkg/errors"
 )

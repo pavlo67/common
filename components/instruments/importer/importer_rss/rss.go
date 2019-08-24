@@ -7,7 +7,9 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/basis/common"
-	"github.com/pavlo67/workshop/basis/instruments/importer"
+
+	"github.com/pavlo67/workshop/components/data"
+	"github.com/pavlo67/workshop/components/instruments/importer"
 )
 
 // const SourceTypeRSS f.SourceType = "rss"
@@ -20,7 +22,7 @@ type RSS struct {
 
 //var reHTTP = regexp.MustCompile("(?i)^https?://")
 
-func (r *RSS) Get(feedURL string, nimKey *string) ([]importer.Item, error) {
+func (r *RSS) Get(feedURL string, nimKey *string) ([]data.Item, error) {
 
 	fp := gofeed.NewParser()
 	feed, err := fp.ParseURL(feedURL)
@@ -32,7 +34,7 @@ func (r *RSS) Get(feedURL string, nimKey *string) ([]importer.Item, error) {
 
 	// language := feed.Language
 
-	var items []importer.Item
+	var items []data.Item
 
 	for _, item := range feed.Items {
 		originalID := item.GUID
@@ -53,34 +55,34 @@ func (r *RSS) Get(feedURL string, nimKey *string) ([]importer.Item, error) {
 
 		// Original:   interface{}(item),
 
-		var embedded []importer.Content
+		var embedded []data.Content
 		if item.Image != nil {
-			embedded = append(embedded, importer.Content{
+			embedded = append(embedded, data.Content{
 				Href:  item.Image.URL,
 				Title: item.Image.Title,
 			})
 		}
 		if len(item.Enclosures) > 0 {
 			for _, p := range item.Enclosures {
-				embedded = append(embedded, importer.Content{
+				embedded = append(embedded, data.Content{
 					Href:  p.URL,
 					Title: p.Type + ": " + p.Length,
 				})
 			}
 		}
 
-		items = append(items, importer.Item{
+		items = append(items, data.Item{
 			SourceURL:  feedURL,
 			SourceTime: &sourceTime,
 
-			OriginKey: importer.OriginKey{
+			OriginKey: data.OriginKey{
 				SourceID:  r.sourceID,
 				SourceKey: originalID,
 			},
 
 			// Origin
 
-			Content: importer.Content{
+			Content: data.Content{
 				Title:   item.Title,
 				Summary: item.Description,
 				Details: item.Content,

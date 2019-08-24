@@ -7,10 +7,11 @@ import (
 
 	"github.com/pavlo67/workshop/basis/common"
 	"github.com/pavlo67/workshop/basis/logger"
-	"github.com/pavlo67/workshop/basis/instruments/importer"
+	"github.com/pavlo67/workshop/components/data"
+	"github.com/pavlo67/workshop/components/instruments/importer"
 )
 
-func Load(urls []string, impOp importer.Operator, adminOp Administrator, l logger.Operator) (numAll, numProcessed, numNew int, errs common.Errors) {
+func Load(urls []string, impOp importer.Operator, dataOp data.Operator, l logger.Operator) (numAll, numProcessed, numNew int, errs common.Errors) {
 
 	for _, url := range urls {
 		l.Info(url)
@@ -33,17 +34,17 @@ func Load(urls []string, impOp importer.Operator, adminOp Administrator, l logge
 
 		for _, item := range items {
 			numProcessed++
-			ok, err := adminOp.Has(item.OriginKey)
+			cnt, err := dataOp.Has(item.OriginKey, nil)
 			if err != nil {
 				errs = append(errs, errors.Errorf("can't adminOp.Has(%#v): %s", item.OriginKey, err))
 				break
-			} else if ok {
+			} else if cnt > 0 {
 				// already exists!
 				continue
 			}
 
 			item.SavedAt = &savedAt
-			_, err = adminOp.Save([]importer.Item{item}, nil)
+			_, err = dataOp.Save([]data.Item{item}, nil, nil, nil)
 			if err != nil {
 				errs = append(errs, errors.Errorf("can't adminOp.Save(%#v): %s", item, err))
 				break

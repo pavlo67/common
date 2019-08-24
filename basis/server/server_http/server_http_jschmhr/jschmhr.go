@@ -13,7 +13,6 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/basis/auth"
-	"github.com/pavlo67/workshop/basis/common"
 	"github.com/pavlo67/workshop/basis/server/server_http"
 )
 
@@ -142,10 +141,10 @@ func (s *serverHTTPJschmhr) HandleEndpoint(endpoint server_http.Endpoint) error 
 		//	return
 		//}
 
-		var params common.Params
+		var params server_http.Params
 		if len(paramsHR) > 0 {
 			for _, p := range paramsHR {
-				params = append(params, common.Param{Name: p.Key, Value: p.Value})
+				params = append(params, server_http.Param{Name: p.Key, Value: p.Value})
 			}
 		}
 
