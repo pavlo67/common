@@ -1,0 +1,42 @@
+{
+    mysql: {
+        Host: "localhost",
+        Port: 3306,
+        User: "",
+        Pass: "",
+        Path: "database_name"
+    },
+
+    postgres: {
+        Host: "localhost",
+        Port: 5427,
+        User: "",
+        Pass: "",
+        Path: "database_name"
+    },
+
+    sqlite: {
+        Path: "database_path"
+    },
+
+    server: {
+        port: 3333,
+        tls_cert_file: "",
+        tls_key_file:  "",
+    },
+
+
+    smtp: {
+        Host: "",
+        Port: 2525,
+        User: "",
+        Pass: ""
+    },
+
+    pop3: {
+        Host: "pop.zoho.com:995",
+        User: "",
+        Pass: "",
+    },
+
+}

@@ -1,0 +1,11 @@
+[
+  1  configure on {variations: {min: 1, max: 100}},
+  10 configure on {variations: {min: 1, max: 50}},
+]
+
+variations on
+
+{
+  diff:  @ => (@ summa on ($ => ($ changed ? 1 ! 0))),
+  allow: @ => (@ diff <= 2),
+},
