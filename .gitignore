@@ -1,10 +1,20 @@
-config.json5
-config.remote.json5
-cfg.json5
-cfg.remote.json5
+*.json5
+.env
+
 
 *.test
+
 .idea
-.env
-_storage
-_test
+
+node_modules
+coverage
+build
+
+.DS_Store
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+
+
