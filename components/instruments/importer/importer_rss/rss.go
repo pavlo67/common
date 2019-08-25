@@ -22,7 +22,7 @@ type RSS struct {
 
 //var reHTTP = regexp.MustCompile("(?i)^https?://")
 
-func (r *RSS) Get(feedURL string, nimKey *string) ([]data.Item, error) {
+func (r *RSS) Get(feedURL string, minKey *string) (*importer.Series, error) {
 
 	fp := gofeed.NewParser()
 	feed, err := fp.ParseURL(feedURL)
@@ -34,7 +34,9 @@ func (r *RSS) Get(feedURL string, nimKey *string) ([]data.Item, error) {
 
 	// language := feed.Language
 
-	var items []data.Item
+	series := importer.Series{
+		URL: feedURL,
+	}
 
 	for _, item := range feed.Items {
 		originalID := item.GUID
@@ -71,7 +73,7 @@ func (r *RSS) Get(feedURL string, nimKey *string) ([]data.Item, error) {
 			}
 		}
 
-		items = append(items, data.Item{
+		series.Items = append(series.Items, data.Item{
 			SourceURL:  feedURL,
 			SourceTime: &sourceTime,
 
@@ -95,7 +97,7 @@ func (r *RSS) Get(feedURL string, nimKey *string) ([]data.Item, error) {
 
 	}
 
-	return items, nil
+	return &series, nil
 }
 
 // type Census struct {

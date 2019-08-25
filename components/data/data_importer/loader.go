@@ -24,15 +24,19 @@ func Load(urls []string, impOp importer.Operator, dataOp data.Operator, l logger
 
 		savedAt := time.Now()
 
-		items, err := impOp.Get(url, nil)
+		series, err := impOp.Get(url, nil)
 		if err != nil {
-			errs = append(errs, errors.Errorf("can't impOp.Get('%s', nil)", url, err))
+			errs = append(errs, errors.Wrapf(err, "can't impOp.Get('%s', nil)", url))
+			continue
+		}
+		if series == nil {
+			errs = append(errs, errors.Errorf("no series from impOp.Get('%s', nil)", url))
 			continue
 		}
 
-		numAll += len(items)
+		numAll += len(series.Items)
 
-		for _, item := range items {
+		for _, item := range series.Items {
 			numProcessed++
 			cnt, err := dataOp.Has(item.OriginKey, nil)
 			if err != nil {
