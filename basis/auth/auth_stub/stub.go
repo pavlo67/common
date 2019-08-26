@@ -31,11 +31,11 @@ func (u *isentityLoginStub) Accepts() ([]auth.CredsType, error) {
 	return []auth.CredsType{auth.CredsPassword}, nil
 }
 
-func (u *isentityLoginStub) SetCreds(userID *common.ID, toSet []auth.Creds) (*auth.User, []auth.Creds, error) {
+func (u *isentityLoginStub) SetCreds(userID *common.ID, toSet ...auth.Creds) (*auth.User, []auth.Creds, error) {
 	return nil, nil, common.ErrNotImplemented
 }
 
-func (u *isentityLoginStub) Authorize(toAuth []auth.Creds) (*auth.User, []auth.Creds, error) {
+func (u *isentityLoginStub) Authorize(toAuth ...auth.Creds) (*auth.User, []auth.Creds, error) {
 	var login, password string
 	var cryptype encrlib.Cryptype
 

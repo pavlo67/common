@@ -25,10 +25,10 @@ type User struct {
 
 type Operator interface {
 	// Authorize can require multi-steps (using returned []Creds)...
-	Authorize(toAuth []Creds) (*User, []Creds, error)
+	Authorize(toAuth ...Creds) (*User, []Creds, error)
 
 	// SetCreds can require multi-steps (using returned []Creds)...
-	SetCreds(userID *common.ID, toSet []Creds) (*User, []Creds, error)
+	SetCreds(userID *common.ID, toSet ...Creds) (*User, []Creds, error)
 
 	Accepts() ([]CredsType, error)
 }
@@ -51,7 +51,7 @@ func GetUser(creds []Creds, op Operator, errs common.Errors) (*User, common.Erro
 		return nil, append(errs, errors.Wrapf(errNoIdentityOp, onGetUser+": for Authorize with "+string(credsType)))
 	}
 
-	user, _, err := op.Authorize(creds)
+	user, _, err := op.Authorize(creds...)
 	if err != nil {
 		return nil, append(errs, errors.Wrapf(err, onGetUser+`: on identOp.Authorize(%#v)`, creds))
 	}

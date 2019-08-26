@@ -45,7 +45,7 @@ func New(numberedIDs []string) (auth.Operator, error) {
 }
 
 // 	SetCreds ignores all input parameters, creates new "BTC identity" and returns it
-func (*identityECDSA) SetCreds(*common.ID, []auth.Creds) (*auth.User, []auth.Creds, error) {
+func (*identityECDSA) SetCreds(*common.ID, ...auth.Creds) (*auth.User, []auth.Creds, error) {
 	privKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
 		return nil, nil, err
@@ -73,7 +73,7 @@ func (*identityECDSA) SetCreds(*common.ID, []auth.Creds) (*auth.User, []auth.Cre
 
 const proto = `ecdsa://`
 
-func (is *identityECDSA) Authorize(toAuth []auth.Creds) (*auth.User, []auth.Creds, error) {
+func (is *identityECDSA) Authorize(toAuth ...auth.Creds) (*auth.User, []auth.Creds, error) {
 	var publKeyAddress, publKeyEncoded string
 	var contentToSignature, numberToSignature, signature []byte
 

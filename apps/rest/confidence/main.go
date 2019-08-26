@@ -8,16 +8,15 @@ import (
 	"os"
 	"time"
 
-	"github.com/pavlo67/workshop/apps/rest/flow/flow_routes"
-	"github.com/pavlo67/workshop/apps/rest/flow/flow_routes/v1"
-	"github.com/pavlo67/workshop/basis/auth/auth_ecdsa"
+	"github.com/pavlo67/workshop/apps/rest/confidence/confidence_routes"
+	"github.com/pavlo67/workshop/apps/rest/confidence/confidence_routes/v1"
+	"github.com/pavlo67/workshop/basis/auth/auth_stub"
 	"github.com/pavlo67/workshop/basis/common/filelib"
 	"github.com/pavlo67/workshop/basis/config"
 	"github.com/pavlo67/workshop/basis/logger"
 	"github.com/pavlo67/workshop/basis/server/server_http"
 	"github.com/pavlo67/workshop/basis/server/server_http/server_http_jschmhr"
 	"github.com/pavlo67/workshop/basis/starter"
-	"github.com/pavlo67/workshop/components/data/data_sqlite"
 )
 
 var (
@@ -79,17 +78,13 @@ func main() {
 	//
 	//}
 
-	// !!! kostyl
-	l.Info(ep_flow.ToInit)
-
 	starters := []starter.Starter{
-		{auth_ecdsa.Starter(), nil},
+		{auth_stub.Starter(), nil},
 		{server_http_jschmhr.Starter(), nil},
-		{data_sqlite.Starter(), nil},
-		{flow_routes.Starter(), nil},
+		{confidence_routes.Starter(), nil},
 	}
 
-	label := "DATA REST BUILD"
+	label := "CONFIDENCE REST BUILD"
 
 	joiner, err := starter.Run(starters, cfg, os.Args[1:], label)
 	if err != nil {
@@ -103,8 +98,11 @@ func main() {
 		log.Fatalf("no server_http.Operator with key %s", server_http.InterfaceKey)
 	}
 
-	srvOp.HandleFiles("/flow/api-docs/*filepath", filelib.CurrentPath()+"../_api-docs/", nil)
-	srvOp.HandleFiles("/flow/swagger/*filepath", filelib.CurrentPath()+"api-docs/", nil)
+	// !!! kostyl
+	l.Info(confidence_v1.ToInit)
+
+	srvOp.HandleFiles("/confidence/api-docs/*filepath", filelib.CurrentPath()+"../_api-docs/", nil)
+	srvOp.HandleFiles("/confidence/swagger/*filepath", filelib.CurrentPath()+"api-docs/", nil)
 
 	srvOp.Start()
 

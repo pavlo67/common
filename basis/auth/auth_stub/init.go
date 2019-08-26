@@ -12,7 +12,7 @@ import (
 )
 
 func Starter() starter.Operator {
-	return &identity_login_stubStarter{}
+	return &auth_stubStarter{}
 }
 
 type UserStub struct {
@@ -21,54 +21,62 @@ type UserStub struct {
 	Password string
 }
 
-type identity_login_stubStarter struct {
+var UserStubDefault = UserStub{
+	ID:       "1",
+	Login:    "aaa",
+	Password: "bbb",
+}
+
+type auth_stubStarter struct {
 	interfaceKey joiner.InterfaceKey
 
 	users []UserStub
-	salt  string
+	// salt  string
 }
 
-var _ starter.Operator = &identity_login_stubStarter{}
+var _ starter.Operator = &auth_stubStarter{}
 var l logger.Operator
 
 var credentialsConf = map[string]string{}
 
-func (sc *identity_login_stubStarter) Name() string {
+func (sc *auth_stubStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (sc *identity_login_stubStarter) Init(conf *config.Config, params common.Info) (info []common.Info, err error) {
+func (sc *auth_stubStarter) Init(conf *config.Config, params common.Info) (info []common.Info, err error) {
 	l = logger.Get()
 
 	sc.interfaceKey = joiner.InterfaceKey(params.StringDefault("interface_key", string(auth.InterfaceKey)))
 
-	var ok bool
+	// var ok bool
 	var errs common.Errors
 
-	if sc.users, ok = params["users"].([]UserStub); !ok || len(sc.users) < 1 {
-		errs = append(errs, errors.New("no users defined for identity_login_stub.Starter (in params['users'])"))
-	}
+	//if sc.users, ok = params["users"].([]UserStub); !ok || len(sc.users) < 1 {
+	//	errs = append(errs, errors.New("no users defined for auth_stub.Starter (in params['users'])"))
+	//}
 
-	if sc.salt, ok = credentialsConf["salt"]; !ok {
-		errs = append(errs, errors.Wrapf(config.ErrNoValue, "no data for key 'salt' in config.credentials in %#v", credentialsConf))
-	}
+	sc.users = []UserStub{UserStubDefault}
+
+	//if sc.salt, ok = credentialsConf["salt"]; !ok {
+	//	errs = append(errs, errors.Wrapf(config.ErrNoValue, "no data for key 'salt' in config.credentials in %#v", credentialsConf))
+	//}
 
 	return nil, errs.Err()
 }
 
-func (sc *identity_login_stubStarter) Setup() error {
+func (sc *auth_stubStarter) Setup() error {
 	return nil
 }
 
-func (sc *identity_login_stubStarter) Run(joiner joiner.Operator) error {
-	u, err := New(sc.users, sc.salt)
+func (sc *auth_stubStarter) Run(joiner joiner.Operator) error {
+	u, err := New(sc.users, "") // sc.salt
 	if err != nil {
-		return errors.Wrapf(err, "can't init identity_login_stubStarter")
+		return errors.Wrapf(err, "can't init auth_stubStarter")
 	}
 
 	err = joiner.Join(u, sc.interfaceKey)
 	if err != nil {
-		return errors.Wrap(err, "can't join identity_login_stubStarter as identity.Operator interface")
+		return errors.Wrap(err, "can't join auth_stubStarter as identity.Operator interface")
 	}
 
 	return nil
