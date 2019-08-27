@@ -53,18 +53,15 @@ func (ss *flowStarter) Setup() error {
 
 func (ss *flowStarter) Run(joinerOp joiner.Operator) error {
 
-	srvOp, ok := joinerOp.Interface(server_http.InterfaceKey).(server_http.Operator)
-	if !ok {
-		log.Fatalf("no server_http.Operator with key %s", server_http.InterfaceKey)
-	}
+	//srvOp, ok := joinerOp.Interface(server_http.InterfaceKey).(server_http.Operator)
+	//if !ok {
+	//	log.Fatalf("no server_http.Operator with key %s", server_http.InterfaceKey)
+	//}
 
+	var ok bool
 	DataOp, ok = joinerOp.Interface(data.InterfaceKey).(data.Operator)
 	if !ok {
 		log.Fatalf("no data.Operator with key %s", data.InterfaceKey)
-	}
-
-	for _, ep := range Endpoints {
-		srvOp.HandleEndpoint(ep)
 	}
 
 	return nil

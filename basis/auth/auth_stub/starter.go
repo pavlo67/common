@@ -11,6 +11,8 @@ import (
 	"github.com/pavlo67/workshop/basis/starter"
 )
 
+const InterfaceKey joiner.InterfaceKey = "auth_stub"
+
 func Starter() starter.Operator {
 	return &auth_stubStarter{}
 }

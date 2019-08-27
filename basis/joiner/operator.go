@@ -39,18 +39,24 @@ type joiner struct {
 }
 
 var ErrJoiningNil = errors.New("can't join nil interface")
+var ErrJoiningDuplicate = errors.New("can't join interface over joined before")
 
 func (j *joiner) Join(intrfc interface{}, interfaceKey InterfaceKey) error {
 	if j == nil {
-		return errors.Wrap(common.ErrNull, "on .Join()")
+		return errors.Wrapf(common.ErrNull, "on .Join(%s)", interfaceKey)
 	}
 	if intrfc == nil {
-		return ErrJoiningNil
+		return errors.Wrapf(ErrJoiningNil, "on .Join(%s)", interfaceKey)
 	}
 
 	j.mutex.Lock()
+	defer j.mutex.Unlock()
+
+	if _, ok := j.components[interfaceKey]; ok {
+		return errors.Wrapf(ErrJoiningDuplicate, "on .Join(%s)", interfaceKey)
+	}
+
 	j.components[interfaceKey] = intrfc
-	j.mutex.Unlock()
 
 	return nil
 }

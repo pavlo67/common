@@ -15,8 +15,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func RelativePath(pathPrefix, pathFull string) string {
-	pathBase := CurrentPath()
+func RelativePath(pathFull, pathBase, pathPrefix string) string {
 	path := ""
 
 	if pathFull[:len(pathBase)] == pathBase {

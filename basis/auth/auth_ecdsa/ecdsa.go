@@ -45,35 +45,30 @@ func New(numberedIDs []string) (auth.Operator, error) {
 }
 
 // 	SetCreds ignores all input parameters, creates new "BTC identity" and returns it
-func (*identityECDSA) SetCreds(*common.ID, ...auth.Creds) (*auth.User, []auth.Creds, error) {
+func (*identityECDSA) SetCreds(auth.User, ...auth.Creds) ([]auth.Creds, error) {
 	privKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	} else if privKey == nil {
-		return nil, nil, errEmptyPrivateKeyGenerated
+		return nil, errEmptyPrivateKeyGenerated
 	}
 
 	privKeyBytes, err := encrlib.ECDSASerialize(*privKey)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-
-	privKeyCreds := []auth.Creds{{
-		Type:  auth.CredsPrivateKey,
-		Value: string(privKeyBytes),
-	}}
 
 	publKeyAddress := string(Proto) + string(append(privKey.PublicKey.X.Bytes(), privKey.PublicKey.Y.Bytes()...))
 
-	return &auth.User{
-		ID:   common.ID(publKeyAddress),
-		Nick: publKeyAddress,
-	}, privKeyCreds, nil
+	creds := []auth.Creds{
+		{Type: auth.CredsPrivateKey, Value: string(privKeyBytes)},
+		{Type: auth.CredsPublicKeyAddress, Value: publKeyAddress},
+	}
+
+	return creds, nil
 }
 
-const proto = `ecdsa://`
-
-func (is *identityECDSA) Authorize(toAuth ...auth.Creds) (*auth.User, []auth.Creds, error) {
+func (is *identityECDSA) Authorize(toAuth ...auth.Creds) (*auth.User, error) {
 	var publKeyAddress, publKeyEncoded string
 	var contentToSignature, numberToSignature, signature []byte
 
@@ -81,10 +76,10 @@ func (is *identityECDSA) Authorize(toAuth ...auth.Creds) (*auth.User, []auth.Cre
 		switch creds.Type {
 		case auth.CredsPublicKeyAddress:
 			publKeyAddress = strings.TrimSpace(creds.Value)
-			if len(publKeyAddress) < len(proto) || publKeyAddress[:len(proto)] != proto {
-				return nil, nil, errWrongAddressProto
+			if len(publKeyAddress) < len(string(Proto)) || publKeyAddress[:len(string(Proto))] != string(Proto) {
+				return nil, errWrongAddressProto
 			}
-			publKeyEncoded = publKeyAddress[len(proto):]
+			publKeyEncoded = publKeyAddress[len(string(Proto)):]
 
 		case auth.CredsContentToSignature:
 			contentToSignature = []byte(creds.Value)
@@ -98,7 +93,7 @@ func (is *identityECDSA) Authorize(toAuth ...auth.Creds) (*auth.User, []auth.Cre
 	}
 
 	if len(publKeyEncoded) < 1 {
-		return nil, nil, errEmptyPublicKeyAddress
+		return nil, errEmptyPublicKeyAddress
 	}
 
 	publKey := base58.Decode(publKeyEncoded)
@@ -108,20 +103,20 @@ func (is *identityECDSA) Authorize(toAuth ...auth.Creds) (*auth.User, []auth.Cre
 		numNew, _ := strconv.ParseUint(string(numberToSignature), 10, 64)
 		if numNew <= num {
 			is.numberedMutex.Unlock()
-			return nil, nil, errWrongNumber
+			return nil, errWrongNumber
 		}
 		is.numberedIDs[publKeyEncoded] = numNew
 	}
 	is.numberedMutex.Unlock()
 
 	if !encrlib.ECDSAVerify(publKey, append(contentToSignature, numberToSignature...), signature) {
-		return nil, nil, errWrongSignature
+		return nil, errWrongSignature
 	}
 
 	return &auth.User{
 		ID:   common.ID(publKeyAddress),
 		Nick: publKeyAddress,
-	}, nil, nil
+	}, nil
 }
 
 func (*identityECDSA) Accepts() ([]auth.CredsType, error) {

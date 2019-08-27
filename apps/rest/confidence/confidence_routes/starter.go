@@ -2,15 +2,17 @@ package confidence_routes
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/pavlo67/workshop/basis/auth"
+	"github.com/pavlo67/workshop/basis/auth/auth_jwt"
 	"github.com/pavlo67/workshop/basis/common"
+	"github.com/pavlo67/workshop/basis/common/filelib"
 	"github.com/pavlo67/workshop/basis/config"
 	"github.com/pavlo67/workshop/basis/joiner"
 	"github.com/pavlo67/workshop/basis/logger"
 	"github.com/pavlo67/workshop/basis/server/server_http"
 	"github.com/pavlo67/workshop/basis/starter"
+	"github.com/pkg/errors"
 )
 
 const Name = "confidence_starter"
@@ -20,8 +22,12 @@ func Starter() starter.Operator {
 }
 
 var L logger.Operator
-var AuthOp auth.Operator
+var AuthOps []auth.Operator
+var AuthOpToSetToken auth.Operator
+
 var Endpoints []server_http.Endpoint
+
+var BasePath = filelib.CurrentPath()
 var Prefix = "/confidence/"
 
 var _ starter.Operator = &confidenceStarter{}
@@ -55,12 +61,26 @@ func (ss *confidenceStarter) Run(joinerOp joiner.Operator) error {
 
 	srvOp, ok := joinerOp.Interface(server_http.InterfaceKey).(server_http.Operator)
 	if !ok {
-		log.Fatalf("no server_http.Operator with key %s", server_http.InterfaceKey)
+		return errors.Errorf("no server_http.Operator with key %s", server_http.InterfaceKey)
 	}
 
-	AuthOp, ok = joinerOp.Interface(auth.InterfaceKey).(auth.Operator)
-	if !ok {
-		log.Fatalf("no auth.Operator with key %s", auth.InterfaceKey)
+	authOpNil := auth.Operator(nil)
+	authComps := joinerOp.ComponentsAllWithInterface(&authOpNil)
+
+	AuthOps = nil
+	AuthOpToSetToken = nil
+
+	for _, authComp := range authComps {
+		if authOp, ok := authComp.Interface.(auth.Operator); ok {
+			AuthOps = append(AuthOps, authOp)
+			if authComp.InterfaceKey == auth_jwt.InterfaceKey {
+				AuthOpToSetToken = authOp
+			}
+		}
+	}
+
+	if AuthOpToSetToken == nil {
+		return errors.New("no auth_jwt.Operator")
 	}
 
 	for _, ep := range Endpoints {

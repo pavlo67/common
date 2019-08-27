@@ -27,15 +27,15 @@ func New(users []UserStub, salt string) (*isentityLoginStub, error) {
 	}, nil
 }
 
-func (u *isentityLoginStub) Accepts() ([]auth.CredsType, error) {
-	return []auth.CredsType{auth.CredsPassword}, nil
+//func (u *isentityLoginStub) Accepts() ([]auth.CredsType, error) {
+//	return []auth.CredsType{auth.CredsPassword}, nil
+//}
+
+func (u *isentityLoginStub) SetCreds(user auth.User, toSet ...auth.Creds) ([]auth.Creds, error) {
+	return nil, common.ErrNotImplemented
 }
 
-func (u *isentityLoginStub) SetCreds(userID *common.ID, toSet ...auth.Creds) (*auth.User, []auth.Creds, error) {
-	return nil, nil, common.ErrNotImplemented
-}
-
-func (u *isentityLoginStub) Authorize(toAuth ...auth.Creds) (*auth.User, []auth.Creds, error) {
+func (u *isentityLoginStub) Authorize(toAuth ...auth.Creds) (*auth.User, error) {
 	var login, password string
 	var cryptype encrlib.Cryptype
 
@@ -56,15 +56,15 @@ func (u *isentityLoginStub) Authorize(toAuth ...auth.Creds) (*auth.User, []auth.
 				crypt := crypt.SHA256.New()
 				passwordHash, _ := crypt.Generate([]byte(strings.TrimSpace(password)), []byte(u.salt))
 				if password == passwordHash {
-					return &auth.User{ID: user.ID, Nick: user.Login}, nil, nil
+					return &auth.User{ID: user.ID, Nick: user.Login}, nil
 				}
 			default:
 				if password == user.Password {
-					return &auth.User{ID: user.ID, Nick: user.Login}, nil, nil
+					return &auth.User{ID: user.ID, Nick: user.Login}, nil
 				}
 			}
 		}
 	}
 
-	return nil, nil, auth.ErrBadPassword
+	return nil, auth.ErrBadPassword
 }

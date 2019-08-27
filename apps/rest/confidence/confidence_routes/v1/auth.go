@@ -15,7 +15,8 @@ import (
 	"github.com/pavlo67/workshop/basis/common/filelib"
 )
 
-var ToInit = server_http.InitEndpoint(&confidence_routes.Endpoints, "POST", filelib.RelativePath(confidence_routes.Prefix, filelib.CurrentFile(true)), nil, workerAuth, "")
+var ToInit = server_http.InitEndpoint(&confidence_routes.Endpoints, "POST", filelib.RelativePath(filelib.CurrentFile(true), confidence_routes.BasePath, confidence_routes.Prefix),
+	nil, workerAuth, "")
 var _ server_http.WorkerHTTP = workerAuth
 
 func workerAuth(_ *auth.User, _ server_http.Params, req *http.Request) (server.Response, error) {
@@ -31,10 +32,19 @@ func workerAuth(_ *auth.User, _ server_http.Params, req *http.Request) (server.R
 		return server.ResponseRESTError(http.StatusBadRequest, errors.Wrapf(err, "can't unmarshal body: %s", credsJSON))
 	}
 
-	user, creds, err := confidence_routes.AuthOp.Authorize(toAuth...)
-	if err != nil {
-		return server.ResponseRESTError(http.StatusForbidden, err)
+	user, errs := auth.GetUser(toAuth, confidence_routes.AuthOps, nil)
+	if len(errs) > 0 {
+		return server.ResponseRESTError(http.StatusForbidden, errs.Err())
+	}
+	if user == nil {
+		return server.ResponseRESTError(http.StatusForbidden, errors.New("no user authorized"))
 	}
 
-	return server.ResponseRESTOk(map[string]interface{}{"user": user, "creds": creds})
+	creds, err := confidence_routes.AuthOpToSetToken.SetCreds(*user) // TODO!!! add custom creds
+	if err != nil {
+		return server.ResponseRESTError(http.StatusInternalServerError, errors.Wrap(err, "can't create JWT"))
+	}
+
+	user.Creds = append(user.Creds, creds...)
+	return server.ResponseRESTOk(map[string]interface{}{"user": user})
 }

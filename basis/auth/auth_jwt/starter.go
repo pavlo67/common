@@ -1,4 +1,4 @@
-package auth_ecdsa
+package auth_jwt
 
 import (
 	"github.com/pkg/errors"
@@ -11,22 +11,24 @@ import (
 	"github.com/pavlo67/workshop/basis/starter"
 )
 
+const InterfaceKey joiner.InterfaceKey = "auth_jwt"
+
 func Starter() starter.Operator {
-	return &identity_btcStarter{}
+	return &identity_jwtStarter{}
 }
 
 var l logger.Operator
-var _ starter.Operator = &identity_btcStarter{}
+var _ starter.Operator = &identity_jwtStarter{}
 
-type identity_btcStarter struct {
+type identity_jwtStarter struct {
 	interfaceKey joiner.InterfaceKey
 }
 
-func (ss *identity_btcStarter) Name() string {
+func (ss *identity_jwtStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *identity_btcStarter) Init(conf *config.Config, options common.Info) (info []common.Info, err error) {
+func (ss *identity_jwtStarter) Init(conf *config.Config, options common.Info) (info []common.Info, err error) {
 	l = logger.Get()
 
 	// var errs basis.Errors
@@ -36,19 +38,19 @@ func (ss *identity_btcStarter) Init(conf *config.Config, options common.Info) (i
 	return nil, nil
 }
 
-func (ss *identity_btcStarter) Setup() error {
+func (ss *identity_jwtStarter) Setup() error {
 	return nil
 }
 
-func (ss *identity_btcStarter) Run(joiner joiner.Operator) error {
-	identOp, err := New(nil)
+func (ss *identity_jwtStarter) Run(joiner joiner.Operator) error {
+	identOp, err := New()
 	if err != nil {
-		return errors.Wrap(err, "can't init identity_ecdsa.Operator")
+		return errors.Wrap(err, "can't init identity_jwt.Operator")
 	}
 
 	err = joiner.Join(identOp, ss.interfaceKey)
 	if err != nil {
-		return errors.Wrapf(err, "can't join identity_ecdsa identOp as identity.Operator with key '%s'", ss.interfaceKey)
+		return errors.Wrapf(err, "can't join identity_jwt identOp as identity.Operator with key '%s'", ss.interfaceKey)
 	}
 
 	return nil

@@ -18,19 +18,18 @@ const Anyone common.ID = "_"
 //}
 
 type User struct {
-	ID   common.ID `bson:"id"                 json:"id"`
-	Nick string    `bson:"nick"               json:"nick"`
+	ID    common.ID `bson:"id"                json:"id"`
+	Nick  string    `bson:"nick"              json:"nick"`
+	Creds []Creds   `bson:"creds, omitempty" json:"creds, omitempty"`
 	// Accesses []Access `bson:"accesses,omitempty" json:"accesses,omitempty"`
 }
 
 type Operator interface {
 	// Authorize can require multi-steps (using returned []Creds)...
-	Authorize(toAuth ...Creds) (*User, []Creds, error)
+	Authorize(toAuth ...Creds) (*User, error)
 
 	// SetCreds can require multi-steps (using returned []Creds)...
-	SetCreds(userID *common.ID, toSet ...Creds) (*User, []Creds, error)
-
-	Accepts() ([]CredsType, error)
+	SetCreds(user User, toSet ...Creds) ([]Creds, error)
 }
 
 // to use with map[CredsType]identity.Operator  --------------------------------------------------------------------
@@ -40,23 +39,20 @@ var errNoIdentityOp = errors.New("no identity.Operator")
 
 const onGetUser = "on GetUser()"
 
-func GetUser(creds []Creds, op Operator, errs common.Errors) (*User, common.Errors) {
+func GetUser(creds []Creds, ops []Operator, errs common.Errors) (*User, common.Errors) {
 	if len(creds) < 1 {
 		return nil, append(errs, errNoCreds)
 	}
 
-	credsType := creds[0].Type
+	for _, op := range ops {
+		user, err := op.Authorize(creds...)
+		if err != nil {
+			errs = append(errs, errors.Wrapf(err, onGetUser+`: on identOp.Authorize(%#v)`, creds))
+		}
 
-	if op == nil {
-		return nil, append(errs, errors.Wrapf(errNoIdentityOp, onGetUser+": for Authorize with "+string(credsType)))
-	}
-
-	user, _, err := op.Authorize(creds...)
-	if err != nil {
-		return nil, append(errs, errors.Wrapf(err, onGetUser+`: on identOp.Authorize(%#v)`, creds))
-	}
-	if user != nil {
-		return user, errs
+		if user != nil {
+			return user, errs
+		}
 	}
 
 	return nil, errs

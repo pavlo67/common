@@ -23,13 +23,13 @@ type serverHTTPJschmhr struct {
 	httpServeMux *httprouter.Router
 	certFileTLS  string
 	keyFileTLS   string
-	authOp       auth.Operator
+	authOps      []auth.Operator
 
 	//htmlTemplate string
 	//templator    server_http.Templator
 }
 
-func New(port int, certFileTLS, keyFileTLS string, authOp auth.Operator) (server_http.Operator, error) {
+func New(port int, certFileTLS, keyFileTLS string, authOps []auth.Operator) (server_http.Operator, error) {
 	if port <= 0 {
 		return nil, errors.Errorf("serverOp hasn't started: no correct data for http port: %d", port)
 	}
@@ -49,7 +49,7 @@ func New(port int, certFileTLS, keyFileTLS string, authOp auth.Operator) (server
 		certFileTLS: certFileTLS,
 		keyFileTLS:  keyFileTLS,
 
-		authOp: authOp,
+		authOps: authOps,
 	}, nil
 }
 
@@ -127,7 +127,7 @@ func (s *serverHTTPJschmhr) HandleEndpoint(endpoint server_http.Endpoint) error 
 	}
 
 	handler := func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
-		user, err := server_http.UserWithRequest(r, s.authOp)
+		user, err := server_http.UserWithRequest(r, s.authOps)
 		if err != nil {
 			l.Error(err)
 		}
