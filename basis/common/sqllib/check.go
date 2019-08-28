@@ -94,7 +94,7 @@ func CheckTables(sqlOp Operator, tablesConfig map[string]config.SQLTable) ([]com
 	return info, nil
 }
 
-//func TableFields(dbh *sql.DB, table string) ([]sqllib.SQLField, error) {
+//func TableFields(dbh *sql.db, table string) ([]sqllib.SQLField, error) {
 //	var stmt *sql.Stmt
 //	sqlQuery := "desc `" + table + "`"
 //	if err := Exec(dbh, sqlQuery, &stmt); err != nil {
@@ -127,7 +127,7 @@ func CheckTables(sqlOp Operator, tablesConfig map[string]config.SQLTable) ([]com
 //	return fields, nil
 //}
 //
-//func TableIndexes(dbh *sql.DB, table string) ([]sqllib.SQLIndex, error) {
+//func TableIndexes(dbh *sql.db, table string) ([]sqllib.SQLIndex, error) {
 //	version, err := MySQLVersion(dbh)
 //	if err != nil {
 //		return nil, err
@@ -184,7 +184,7 @@ func CheckTables(sqlOp Operator, tablesConfig map[string]config.SQLTable) ([]com
 //
 
 //
-//func CheckTableFields(dbh *sql.DB, is, need []sqllib.SQLField) (map[string]string, error) {
+//func CheckTableFields(dbh *sql.db, is, need []sqllib.SQLField) (map[string]string, error) {
 //	version, err := MySQLVersion(dbh)
 //	if err != nil {
 //		return nil, err
@@ -239,7 +239,7 @@ func CheckTables(sqlOp Operator, tablesConfig map[string]config.SQLTable) ([]com
 //	return res, nil
 //}
 //
-//func CheckTableIndexes(dbh *sql.DB, table string, is, need []sqllib.SQLIndex) map[string]string {
+//func CheckTableIndexes(dbh *sql.db, table string, is, need []sqllib.SQLIndex) map[string]string {
 //	version, err := MySQLVersion(dbh)
 //	if err != nil {
 //		log.Println(err.Error(), "can't get version of mySQL")

@@ -9,12 +9,12 @@ import (
 const InterfaceKey joiner.InterfaceKey = "kv"
 
 type Item struct {
-	Key      []string
+	Key      string
 	Value    string
 	StoredAt time.Time
 }
 
 type Operator interface {
-	Set(key [][]string, value string) error
-	Get(key [][]string) ([]Item, error)
+	Set(key string, value string) error
+	Get(key string) (*Item, error)
 }
