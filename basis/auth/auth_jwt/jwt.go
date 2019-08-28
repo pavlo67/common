@@ -65,7 +65,9 @@ func (authOp *authJWT) SetCreds(user auth.User, creds ...auth.Creds) ([]auth.Cre
 			IssuedAt: jwt.NewNumericDate(time.Now()),
 			// Expiry:   jwt.NewNumericDate(time.Date(2017, 1, 1, 0, 8, 0, 0, time.UTC)),
 		},
-		Creds: append(user.Creds, append(creds, auth.Creds{Type: auth.CredsNickname, Value: user.Nick})...),
+
+		// !!! original user.Creds are disabled here
+		Creds: append(creds, auth.Creds{Type: auth.CredsNickname, Value: user.Nick}),
 	}
 	// add claims to the Builder
 	builder := authOp.builder.Claims(jc)
