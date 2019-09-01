@@ -31,7 +31,7 @@ func Starters() ([]starter.Starter, string) {
 func main() {
 	err := logger.Init(logger.Config{LogLevel: logger.DebugLevel})
 	if err != nil {
-		os.Stderr.WriteString(fmt.Sprintf("can't logger.Run(logger.Config{LogLevel: logger.DebugLevel}): %s", err))
+		os.Stderr.WriteString(fmt.Sprintf("can't logger.Prepare(logger.Config{LogLevel: logger.DebugLevel}): %s", err))
 		os.Exit(1)
 	}
 

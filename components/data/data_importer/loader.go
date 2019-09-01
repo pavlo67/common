@@ -18,7 +18,7 @@ func Load(urls []string, impOp importer.Operator, dataOp data.Operator, l logger
 
 		//err := impOp.Init(url)
 		//if err != nil {
-		//	errs = append(errs, errors.Errorf("can't impOp.Run('%s')", url, err))
+		//	errs = append(errs, errors.Errorf("can't impOp.Prepare('%s')", url, err))
 		//	continue
 		//}
 

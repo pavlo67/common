@@ -33,7 +33,7 @@ type Entity struct {
 var reTwitterUser = regexp.MustCompile(`.*/`)
 var reTwitterUser2 = regexp.MustCompile(`\?.*`)
 
-// Run opens import session with selected data fount
+// Prepare opens import session with selected data fount
 func (t *Twitter) Init(feedURL, dbKey string, testMode bool) error {
 
 	t.feedURL = reTwitterUser2.ReplaceAllString(feedURL, "")

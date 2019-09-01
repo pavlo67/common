@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/pavlo67/workshop/basis/common"
-	"github.com/pavlo67/workshop/basis/config"
 	"github.com/pavlo67/workshop/basis/common/filelib"
+	"github.com/pavlo67/workshop/basis/config"
 	"github.com/pavlo67/workshop/basis/joiner"
 )
 
@@ -25,7 +25,7 @@ func TestMain(m *testing.M) {
 		log.Fatal(err)
 	}
 	if conf == nil {
-		log.Fatal("no config data after setup.Run()")
+		log.Fatal("no config data after setup.Prepare()")
 	}
 
 	var errs common.Errors
@@ -47,9 +47,9 @@ func TestMain(m *testing.M) {
 	//		}
 	//		log.Fatalf("error calling Check() for component (%s): %s", c.Nick, err)
 	//	}
-	//	err = c.Run()
+	//	err = c.Prepare()
 	//	if err != nil {
-	//		log.Fatalf("error calling Run() for component (%s): %s", c.Nick, err)
+	//		log.Fatalf("error calling Prepare() for component (%s): %s", c.Nick, err)
 	//	}
 	//}
 	//

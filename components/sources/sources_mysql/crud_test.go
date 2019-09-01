@@ -31,7 +31,7 @@ func TestCRUD(t *testing.T) {
 	//starters := []starter.Starter{
 	//	//{groupsmysql.Starter(), ""},
 	//}
-	//err = starter.Run(conf, starters, "TEST BUILD", false, false)
+	//err = starter.Prepare(conf, starters, "TEST BUILD", false, false)
 	//if err != nil {
 	//	t.Fatal(err)
 	//}

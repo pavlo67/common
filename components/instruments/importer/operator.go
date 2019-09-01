@@ -21,7 +21,7 @@ type Series struct {
 }
 
 type Operator interface {
-	// Run opens import session with selected data source
+	// Prepare opens import session with selected data source
 	// Init() error
 
 	Get(url string, minKey *string) (*Series, error)

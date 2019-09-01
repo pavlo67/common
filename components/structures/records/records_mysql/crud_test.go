@@ -20,13 +20,13 @@ package records_mysql
 //)
 //
 //func TestCRUD(t *testing.T) {
-//	_, conf, err := joiner.Run(filelib.CurrentPath() + "../../../cfg.json5")
+//	_, conf, err := joiner.Prepare(filelib.CurrentPath() + "../../../cfg.json5")
 //
 //	if err != nil {
 //		t.Fatal(err)
 //	}
 //	if conf == nil {
-//		t.Fatal("no config data after setup.Run()")
+//		t.Fatal("no config data after setup.Prepare()")
 //	}
 //
 //	mysqlConfig, errs := conf.MySQL("notebook", nil)
@@ -39,7 +39,7 @@ package records_mysql
 //		{links_mysql.Starter(), ""},
 //		{generastub.Starter(), ""},
 //	}
-//	err = starter.Run(conf, starters, "TEST BUILD", false, false)
+//	err = starter.Prepare(conf, starters, "TEST BUILD", false, false)
 //	if err != nil {
 //		log.Println(err)
 //	}
