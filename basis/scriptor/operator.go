@@ -4,6 +4,8 @@ import (
 	"regexp"
 	"strconv"
 
+	"log"
+
 	"github.com/pkg/errors"
 )
 
@@ -52,6 +54,7 @@ var itemPairs = map[string]string{
 }
 
 func Read(sOriginal string, openedWith string, constants Values) (action *Element, rest string, err error) {
+
 	item := Item{}
 	if constants == nil {
 		constants = Values{}
@@ -99,9 +102,12 @@ func Read(sOriginal string, openedWith string, constants Values) (action *Elemen
 			continue
 		}
 
+		// log.Print(111111111111, reInfix)
+
 		if s0 := reInfix.FindString(s); s0 != "" {
 
 			if err := item.ToInfixes(s0, constants); err != nil {
+
 				return nil, s, err // TODO!!! show details errors.Errorf("open infixes (%#v) remain: %s", item.infixes, sOriginal[:offset+len(s0)])
 			}
 
@@ -116,6 +122,7 @@ func Read(sOriginal string, openedWith string, constants Values) (action *Elemen
 				return nil, s, nil
 			}
 			if err := item.ToStack(value); err != nil {
+
 				return nil, s, err // TODO!!! show details
 			}
 
@@ -135,12 +142,12 @@ func Read(sOriginal string, openedWith string, constants Values) (action *Elemen
 				return nil, s, err
 			}
 			if len(item.stack) > 1 {
-				return nil, s, errors.Errorf("open stack (%#v) remain: %s", item.stack, sOriginal[:offset+len(s0)])
+				return nil, s, errors.Errorf("open stack remains: %s / %#v", sOriginal[:offset+len(s0)], item.stack)
 			} else if len(item.stack) == 1 {
 				if openedWith != openBr {
-					return nil, s, errors.Errorf("open stack (%#v) remain: %s", item.stack, sOriginal[:offset+len(s0)])
+					return nil, s, errors.Errorf("open stack remains: %s / %s / %#v", openedWith, sOriginal[:offset+len(s0)], item.stack)
 				} else if len(item.Sequence) > 0 {
-					return nil, s, errors.Errorf("open stack (%#v) remain: %s", item.stack, sOriginal[:offset+len(s0)])
+					return nil, s, errors.Errorf("open stack remains: %s / %#v / %#v", sOriginal[:offset+len(s0)], item.stack, item.Sequence)
 				}
 				return &item.stack[0], s[len(s0):], nil
 			}
@@ -164,9 +171,12 @@ func Read(sOriginal string, openedWith string, constants Values) (action *Elemen
 	if err := item.PrepareInfixesAll(constants); err != nil {
 		return nil, "", err
 	}
-	if len(item.stack) > 0 {
-		return nil, s, errors.Errorf("open stack (%#v) remain: %s", item.stack, sOriginal)
-	}
+	//if len(item.stack) > 1 {
+	//	return nil, s, errors.Errorf("open stack remains: %#v", item.stack)
+	//}
+
+	log.Printf("%#v", item.stack)
+
 	return &Element{TypeSequence, item.Sequence}, "", nil
 
 	// /original string finished ----------------------------------------------------------------

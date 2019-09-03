@@ -1,6 +1,8 @@
 package scriptor
 
-import "github.com/pkg/errors"
+import (
+	"github.com/pkg/errors"
+)
 
 type Item struct {
 	Sequence
@@ -68,8 +70,14 @@ func (item *Item) PrepareInfix(constants Values) error {
 		return errors.Errorf("wrong right operand type (%d) for infix %#v", rightOp.Type, infix)
 	}
 
-	item.stack = append(item.stack[:len(item.stack)-2], Element{infix.Signatura[2], infix.Func(leftOp, rightOp)})
+	//log.Printf("stack: %#v", item.stack)
+	//log.Printf("infixes: %#v", item.infixes)
+
+	item.stack = append(item.stack[:len(item.stack)-2], Element{infix.Signatura[2], infix.Func(leftOp.Value, rightOp.Value)})
 	item.infixes = item.infixes[:len(item.infixes)-1]
+
+	//log.Printf("stack: %#v", item.stack)
+	//log.Printf("infixes: %#v", item.infixes)
 
 	return nil
 }
