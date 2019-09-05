@@ -4,8 +4,6 @@ import (
 	"regexp"
 	"strconv"
 
-	"log"
-
 	"github.com/pkg/errors"
 )
 
@@ -22,15 +20,14 @@ const (
 	TypeInt
 	TypeFloat
 	TypeString
-	TypePrefix
-	TypeInfix
-	TypePostfix
-	TypePostfix2
 	TypeSequence
+	TypeObject
+	TypeExecutor
 )
 
 type Values map[string]Element
-type Sequence []Element
+
+// type Sequence []Element
 
 type Variables struct {
 	Values
@@ -47,17 +44,39 @@ var reSpace = regexp.MustCompile("^\\s+")
 const openBr = "("
 const closeBr = ")"
 
+const openSc = "["
+const closeSc = "]"
+
 var itemPairs = map[string]string{
 	openBr: closeBr,
-	"[":    "]",
+	openSc: closeSc,
 	"{":    "}",
 }
 
-func Read(sOriginal string, openedWith string, constants Values) (action *Element, rest string, err error) {
+func ReadAll(s string) (*Element, error) {
+	constants := Values{}
 
+	value, rest, err := Read(s, "", constants)
+
+	if err != nil {
+		if rest != "" {
+			err = errors.Wrapf(err, "unread rest: %s", rest)
+		}
+		return value, err
+	}
+
+	if rest != "" {
+		return value, errors.Errorf("unread rest: %s", rest)
+	}
+
+	return value, nil
+}
+
+func Read(sOriginal string, openedWith string, constants Values) (value *Element, rest string, err error) {
 	item := Item{}
-	if constants == nil {
-		constants = Values{}
+
+	if openedWith == openSc {
+		item.Sequence = []Element{}
 	}
 
 	s := sOriginal
@@ -102,12 +121,9 @@ func Read(sOriginal string, openedWith string, constants Values) (action *Elemen
 			continue
 		}
 
-		// log.Print(111111111111, reInfix)
-
 		if s0 := reInfix.FindString(s); s0 != "" {
 
 			if err := item.ToInfixes(s0, constants); err != nil {
-
 				return nil, s, err // TODO!!! show details errors.Errorf("open infixes (%#v) remain: %s", item.infixes, sOriginal[:offset+len(s0)])
 			}
 
@@ -138,23 +154,13 @@ func Read(sOriginal string, openedWith string, constants Values) (action *Elemen
 			if itemPairs[openedWith] != s0 {
 				return nil, s, errors.Errorf("wrong close bracket: %s", openedWith+sOriginal[:offset+len(s0)])
 			}
-			if err := item.PrepareInfixesAll(constants); err != nil {
-				return nil, s, err
+
+			value, err := item.Value(constants)
+			if err != nil {
+				return value, s, errors.Wrapf(err, "error on .ReadAll(%s)", sOriginal[:offset+len(s0)])
 			}
-			if len(item.stack) > 1 {
-				return nil, s, errors.Errorf("open stack remains: %s / %#v", sOriginal[:offset+len(s0)], item.stack)
-			} else if len(item.stack) == 1 {
-				if openedWith != openBr {
-					return nil, s, errors.Errorf("open stack remains: %s / %s / %#v", openedWith, sOriginal[:offset+len(s0)], item.stack)
-				} else if len(item.Sequence) > 0 {
-					return nil, s, errors.Errorf("open stack remains: %s / %#v / %#v", sOriginal[:offset+len(s0)], item.stack, item.Sequence)
-				}
-				return &item.stack[0], s[len(s0):], nil
-			}
-			if openedWith != openBr {
-				return nil, s[len(s0):], nil
-			}
-			return &Element{TypeSequence, item.Sequence}, s[len(s0):], nil
+
+			return value, s[len(s0):], nil
 
 			// /original string closed with some bracket ---------------------------------------------------
 
@@ -168,17 +174,36 @@ func Read(sOriginal string, openedWith string, constants Values) (action *Elemen
 	if openedWith != "" {
 		return nil, s, errors.Errorf("no close bracket: %s", openedWith+sOriginal)
 	}
-	if err := item.PrepareInfixesAll(constants); err != nil {
-		return nil, "", err
+
+	value, err = item.Value(constants)
+	if err != nil {
+		return value, "", errors.Wrapf(err, "error on .ReadAll(%s)", sOriginal)
 	}
-	//if len(item.stack) > 1 {
-	//	return nil, s, errors.Errorf("open stack remains: %#v", item.stack)
-	//}
 
-	log.Printf("%#v", item.stack)
-
-	return &Element{TypeSequence, item.Sequence}, "", nil
+	return value, "", nil
 
 	// /original string finished ----------------------------------------------------------------
+}
 
+func (item *Item) Value(constants Values) (value *Element, err error) {
+
+	if err := item.PrepareInfixesAll(constants); err != nil {
+		return nil, err
+	}
+	if len(item.stack) > 1 {
+		return nil, errors.Errorf("open stack remains: %#v / %#v", item.stack, item.infixes)
+	}
+
+	if item.Sequence != nil {
+		if len(item.stack) == 1 {
+			item.Sequence = append(item.Sequence, item.stack[0])
+		}
+		return &Element{TypeSequence, item.Sequence}, nil
+	}
+
+	if len(item.stack) == 1 {
+		return &item.stack[0], nil
+	}
+
+	return nil, nil
 }

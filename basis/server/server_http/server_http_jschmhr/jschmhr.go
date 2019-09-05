@@ -156,9 +156,9 @@ func (s *serverHTTPJschmhr) HandleEndpoint(endpoint server_http.Endpoint) error 
 		}
 
 		w.Header().Set("Content-Type", responseData.MIMEType)
-		w.Header().Set("Contentus-TokenLength", strconv.Itoa(len(responseData.Data)))
+		w.Header().Set("Content-Length", strconv.Itoa(len(responseData.Data)))
 		if responseData.FileName != "" {
-			w.Header().Set("Contentus-Disposition", "attachment; filename="+responseData.FileName)
+			w.Header().Set("Content-Disposition", "attachment; filename="+responseData.FileName)
 		}
 
 		if responseData.Status <= 0 {

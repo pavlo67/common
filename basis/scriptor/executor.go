@@ -5,15 +5,15 @@ import (
 )
 
 type Item struct {
-	Sequence
-
 	stack   []Element
 	infixes []Infix
+
+	Sequence []Element
 }
 
 func (item *Item) ToStack(a *Element) error {
 	if len(item.stack) > len(item.infixes) {
-		return errors.New("too long sequence without infixes...")
+		return errors.Errorf("too long stack (%#v) vs. infixes (%#v), adding %#v", item.stack, item.infixes, a)
 	}
 
 	if a == nil {
