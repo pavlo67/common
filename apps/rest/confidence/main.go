@@ -16,6 +16,7 @@ import (
 	"github.com/pavlo67/workshop/basis/common"
 	"github.com/pavlo67/workshop/basis/common/filelib"
 	"github.com/pavlo67/workshop/basis/config"
+	"github.com/pavlo67/workshop/basis/kv/kv_sqlite"
 	"github.com/pavlo67/workshop/basis/logger"
 	"github.com/pavlo67/workshop/basis/server/server_http"
 	"github.com/pavlo67/workshop/basis/server/server_http/server_http_jschmhr"
@@ -82,9 +83,10 @@ func main() {
 	//}
 
 	starters := []starter.Starter{
-		{auth_stub.Starter(), common.Info{"interface_key": auth_stub.InterfaceKey}},
-		{auth_ecdsa.Starter(), common.Info{"interface_key": auth_ecdsa.InterfaceKey}},
-		{auth_jwt.Starter(), common.Info{"interface_key": auth_jwt.InterfaceKey}},
+		{auth_stub.Starter(), common.Info{"interface_key": string(auth_stub.InterfaceKey)}},
+		{auth_ecdsa.Starter(), common.Info{"interface_key": string(auth_ecdsa.InterfaceKey)}},
+		{auth_jwt.Starter(), common.Info{"interface_key": string(auth_jwt.InterfaceKey)}},
+		{kv_sqlite.Starter(), nil},
 		{server_http_jschmhr.Starter(), nil},
 		{confidence_routes.Starter(), nil},
 	}
@@ -103,11 +105,11 @@ func main() {
 		log.Fatalf("no server_http.Operator with key %s", server_http.InterfaceKey)
 	}
 
-	srvOp.HandleFiles("/confidence/api-docs/*filepath", filelib.CurrentPath()+"../_api-docs/", nil)
-	srvOp.HandleFiles("/confidence/swagger/*filepath", filelib.CurrentPath()+"api-docs/", nil)
+	srvOp.HandleFiles("/confidence/api-docs/*filepath", filelib.CurrentPath()+"_api-docs/", nil)
+	// srvOp.HandleFiles("/confidence/swagger/*filepath", filelib.CurrentPath()+"api-docs/", nil)
 
 	// !!! kostyl
-	l.Info(confidence_v1.ToInit)
+	_ = confidence_v1.ToInit
 	for _, ep := range confidence_routes.Endpoints {
 		srvOp.HandleEndpoint(ep)
 	}

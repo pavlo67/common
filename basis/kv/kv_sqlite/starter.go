@@ -10,7 +10,7 @@ import (
 	"github.com/pavlo67/workshop/basis/starter"
 )
 
-const InterfaceName = "kvmysql"
+const InterfaceName = "kv_sqlite"
 
 func Starter() starter.Operator {
 	return &kv_sqliteStarter{}

@@ -35,10 +35,10 @@ func PrepareTables(tablesConfig map[string]config.SQLTable) map[string]config.SQ
 }
 
 func SetupTables(sqlOp Operator, tablesConfig map[string]config.SQLTable) error {
-	db, err := sqlOp.DB()
-	if err != nil {
-		return err
-	}
+	db := sqlOp.DB()
+	//if err != nil {
+	//	return err
+	//}
 
 	tablesConfig = PrepareTables(tablesConfig)
 
@@ -77,10 +77,10 @@ func SetupTables(sqlOp Operator, tablesConfig map[string]config.SQLTable) error 
 
 func AddTableIndex(sqlOp Operator, table, indexName, indexType string, indexFields []string) error {
 
-	db, err := sqlOp.DB()
-	if err != nil {
-		return err
-	}
+	db := sqlOp.DB()
+	//if err != nil {
+	//	return err
+	//}
 
 	sqlQuery := "alter table `" + table + "` add "
 	if strings.ToUpper(indexType) == "PRIMARY" {
@@ -115,10 +115,10 @@ func AddTableIndex(sqlOp Operator, table, indexName, indexType string, indexFiel
 
 func DropTableIndex(sqlOp Operator, table, indexName string) error {
 
-	db, err := sqlOp.DB()
-	if err != nil {
-		return err
-	}
+	db := sqlOp.DB()
+	//if err != nil {
+	//	return err
+	//}
 
 	if strings.ToUpper(indexName) == "PRIMARY" {
 		return errors.New("reindex does not change PRIMARY index ")

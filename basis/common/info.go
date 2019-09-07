@@ -7,8 +7,13 @@ import (
 type Info map[string]interface{}
 
 func (p Info) StringDefault(key, defaultStr string) string {
+	// log.Printf("00000000: %T %#v", p[key], p[key])
+
 	switch value := p[key].(type) {
 	case string:
+
+		// log.Printf("1111111111: %#v", value)
+
 		return value
 	case []string:
 		if len(value) > 0 {
