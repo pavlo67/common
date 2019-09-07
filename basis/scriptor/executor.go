@@ -73,7 +73,11 @@ func (item *Item) PrepareInfix(constants Values) error {
 	//log.Printf("stack: %#v", item.stack)
 	//log.Printf("infixes: %#v", item.infixes)
 
-	item.stack = append(item.stack[:len(item.stack)-2], Element{infix.Signatura[2], infix.Func(leftOp.Value, rightOp.Value)})
+	item.stack = append(
+		item.stack[:len(item.stack)-2],
+		Element{infix.Signatura[2], Executor{[]interface{}{leftOp.Value, rightOp.Value, infix.Func2}}},
+		//Element{infix.Signatura[2], infix.Func2(leftOp.Value, rightOp.Value), false},
+	)
 	item.infixes = item.infixes[:len(item.infixes)-1]
 
 	//log.Printf("stack: %#v", item.stack)

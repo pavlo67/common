@@ -14,6 +14,41 @@ type Element struct {
 	Value
 }
 
+func Execute(el interface{}, stack []interface{}) ([]interface{}, error) {
+	var err error
+
+	switch v := el.(type) {
+	case Executor:
+		for _, st := range v.Steps {
+			stack, err = Execute(st, stack)
+			if err != nil {
+				return stack, err
+			}
+		}
+
+	case Func2:
+		if len(stack) < 2 {
+			return stack, errors.Errorf("too short stack to apply postfix: %#v / %#v", stack, el)
+		}
+		stack = append(stack[:len(stack)-2], v(stack[len(stack)-2], stack[len(stack)-1]))
+
+	default:
+		stack = append(stack, el)
+	}
+
+	return stack, nil
+}
+
+type Variable struct {
+	// Type  ???
+	Name string
+}
+
+type Executor struct {
+	// Type  ???
+	Steps []interface{}
+}
+
 const (
 	TypeNil Type = iota
 	TypeByte
@@ -22,7 +57,7 @@ const (
 	TypeString
 	TypeSequence
 	TypeObject
-	TypeExecutor
+	TypePostfix
 )
 
 type Values map[string]Element

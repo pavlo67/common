@@ -16,4 +16,8 @@ func TestRead(t *testing.T) {
 	require.NotNil(t, elem)
 	log.Printf("%#v", *elem)
 
+	stack, err := Execute(elem.Value, nil)
+	require.NoError(t, err)
+
+	log.Printf("%#v", stack)
 }

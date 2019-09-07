@@ -19,12 +19,12 @@ func init() {
 	reInfix = regexp.MustCompile(infixesStr)
 }
 
-type Func func(a, b interface{}) interface{}
+type Func2 func(a, b interface{}) interface{}
 
 type Infix struct {
 	Priority  int
 	Signatura [3]Type
-	Func
+	Func2
 }
 
 var Infixes = map[string][]Infix{
@@ -48,7 +48,7 @@ var Infixes = map[string][]Infix{
 
 // + --------------------------------------------------------------------
 
-var _ Func = AddInt
+var _ Func2 = AddInt
 
 func AddInt(a, b interface{}) interface{} {
 	aInt, _ := a.(int64)
@@ -56,7 +56,7 @@ func AddInt(a, b interface{}) interface{} {
 	return aInt + bInt
 }
 
-var _ Func = AddFloat
+var _ Func2 = AddFloat
 
 func AddFloat(a, b interface{}) interface{} {
 	aFloat, _ := a.(float64)
@@ -66,7 +66,7 @@ func AddFloat(a, b interface{}) interface{} {
 
 // + --------------------------------------------------------------------
 
-var _ Func = SubInt
+var _ Func2 = SubInt
 
 func SubInt(a, b interface{}) interface{} {
 	aInt, _ := a.(int64)
@@ -74,7 +74,7 @@ func SubInt(a, b interface{}) interface{} {
 	return aInt - bInt
 }
 
-var _ Func = SubFloat
+var _ Func2 = SubFloat
 
 func SubFloat(a, b interface{}) interface{} {
 	aFloat, _ := a.(float64)
@@ -84,7 +84,7 @@ func SubFloat(a, b interface{}) interface{} {
 
 // * --------------------------------------------------------------------
 
-var _ Func = MultInt
+var _ Func2 = MultInt
 
 func MultInt(a, b interface{}) interface{} {
 	aInt, _ := a.(int64)
@@ -92,7 +92,7 @@ func MultInt(a, b interface{}) interface{} {
 	return aInt * bInt
 }
 
-var _ Func = MultFloat
+var _ Func2 = MultFloat
 
 func MultFloat(a, b interface{}) interface{} {
 	aFloat, _ := a.(float64)
@@ -102,7 +102,7 @@ func MultFloat(a, b interface{}) interface{} {
 
 // * --------------------------------------------------------------------
 
-var _ Func = DivInt
+var _ Func2 = DivInt
 
 func DivInt(a, b interface{}) interface{} {
 	aInt, _ := a.(int64)
@@ -110,7 +110,7 @@ func DivInt(a, b interface{}) interface{} {
 	return aInt / bInt
 }
 
-var _ Func = DivFloat
+var _ Func2 = DivFloat
 
 func DivFloat(a, b interface{}) interface{} {
 	aFloat, _ := a.(float64)
