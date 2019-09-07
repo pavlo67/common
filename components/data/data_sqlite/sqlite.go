@@ -144,12 +144,12 @@ func (dataOp *dataSQLite) Save(items []data.Item, marksOp marks.Operator, indexe
 	for _, item := range items {
 		embedded, err := json.Marshal(item.Embedded)
 		if err != nil {
-			return ids, errs.Append(errors.Wrapf(err, onSave+"can't .Marshal: %s", item.Embedded)).Err()
+			return ids, errs.Append(errors.Wrapf(err, onSave+"can't .marshal: %s", item.Embedded)).Err()
 		}
 
 		index, err := json.Marshal(item.Index)
 		if err != nil {
-			return ids, errs.Append(errors.Wrapf(err, onSave+"can't .Marshal: %s", item.Index)).Err()
+			return ids, errs.Append(errors.Wrapf(err, onSave+"can't .marshal: %s", item.Index)).Err()
 		}
 
 		values := []interface{}{item.SourceID, item.SourceTime, item.SourceURL, item.Type, item.Title, item.Summary, item.Details, item.Href, embedded, strings.Join(item.Tags,

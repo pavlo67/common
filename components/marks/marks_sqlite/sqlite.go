@@ -299,7 +299,7 @@ func (flowOp *flowSQLite) Save(items []importer.Item, options *crud.SaveOptions)
 	for _, item := range items {
 		embedded, err := json.Marshal(item.Embedded)
 		if err != nil {
-			return ids, errs.Append(errors.Wrapf(err, onSave+"can't .Marshal: %s", item.Embedded)).Err()
+			return ids, errs.Append(errors.Wrapf(err, onSave+"can't .marshal: %s", item.Embedded)).Err()
 		}
 
 		values := []interface{}{item.SourceID, item.SourceTime, item.SourceURL, item.Title, item.Summary, item.Details, item.Href, embedded, strings.Join(item.Tags, "\n"), item.SourceKey, item.Origin}

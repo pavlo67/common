@@ -46,7 +46,7 @@ func (ss *server_http_jschmhrStarter) Init(conf *config.Config, options common.I
 	}
 
 	// TODO: use more then one static path
-	if staticPath, ok := options.String("static_path"); ok {
+	if staticPath, ok := options["static_path"]; ok {
 		ss.staticPaths = map[string]string{"static": staticPath}
 	}
 

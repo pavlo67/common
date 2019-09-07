@@ -9,9 +9,9 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/pavlo67/lingua/structura"
 	"github.com/pavlo67/workshop/basis/common"
 	"github.com/pavlo67/workshop/basis/selectors"
-	"github.com/pavlo67/workshop/basis/structura"
 )
 
 var _ structura.Operator = &contentFiles{}

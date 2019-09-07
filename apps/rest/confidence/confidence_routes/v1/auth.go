@@ -11,6 +11,8 @@ import (
 	"github.com/pavlo67/workshop/basis/server"
 	"github.com/pavlo67/workshop/basis/server/server_http"
 
+	"log"
+
 	"github.com/pavlo67/workshop/apps/rest/confidence/confidence_routes"
 	"github.com/pavlo67/workshop/basis/common/filelib"
 )
@@ -25,6 +27,8 @@ func workerAuth(_ *auth.User, _ server_http.Params, req *http.Request) (server.R
 	if err != nil {
 		return server.ResponseRESTError(http.StatusBadRequest, errors.Wrap(err, "can't read body"))
 	}
+
+	log.Printf("%s", credsJSON)
 
 	var toAuth []auth.Creds
 	err = json.Unmarshal(credsJSON, &toAuth)

@@ -9,7 +9,6 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/workshop/basis/common"
 	"github.com/pavlo67/partes/crud"
 	"github.com/pavlo67/partes/crud/selectors"
 	"github.com/pavlo67/partes/libs/mysqllib"
@@ -18,6 +17,7 @@ import (
 	"github.com/pavlo67/punctum/confidenter/rights"
 	"github.com/pavlo67/punctum/processor/sources"
 	"github.com/pavlo67/punctum/starter/config"
+	"github.com/pavlo67/workshop/basis/common"
 )
 
 type sourcesMySQL struct {
@@ -100,13 +100,13 @@ func (srcOp *sourcesMySQL) Create(userIS common.ID, source sources.Item) (string
 	var managersStr []byte
 	if managers != nil {
 		if managersStr, err = json.Marshal(managers); err != nil {
-			return "", errors.Wrapf(err, onCreate+": can't json.Marshal($#v)", managers)
+			return "", errors.Wrapf(err, onCreate+": can't json.marshal($#v)", managers)
 		}
 	}
 
 	paramsStr, err := json.Marshal(source.Params)
 	if err != nil {
-		return "", errors.Wrapf(err, onCreate+": can't json.Marshal(%#v)", source.Params)
+		return "", errors.Wrapf(err, onCreate+": can't json.marshal(%#v)", source.Params)
 	}
 
 	values := []interface{}{source.URL, source.Title, string(source.Type), paramsStr, string(rView), string(rOwner), managersStr}
@@ -157,7 +157,7 @@ func (srcOp *sourcesMySQL) Read(userIS common.ID, idStr string) (*sources.Item, 
 
 	if len(managers) > 0 {
 		if err = json.Unmarshal(managers, &src.Managers); err != nil {
-			return nil, errors.Wrapf(err, onRead+": can't json.Unmarshal() for managers field(%s)", managers)
+			return nil, errors.Wrapf(err, onRead+": can't json.unmarshal() for managers field(%s)", managers)
 		}
 	}
 
@@ -205,7 +205,7 @@ func (srcOp *sourcesMySQL) ReadList(userIS common.ID, options *content.ListOptio
 
 		if len(managers) > 0 {
 			if err = json.Unmarshal(managers, &src.Managers); err != nil {
-				return items, 0, errors.Wrapf(err, onReadList+": can't json.Unmarshal() for managers field(%s)", managers)
+				return items, 0, errors.Wrapf(err, onReadList+": can't json.unmarshal() for managers field(%s)", managers)
 			}
 		}
 
@@ -244,13 +244,13 @@ func (srcOp *sourcesMySQL) Update(userIS common.ID, source sources.Item) (crud.R
 	var managersStr []byte
 	if managers != nil {
 		if managersStr, err = json.Marshal(managers); err != nil {
-			return crud.Result{}, errors.Wrapf(err, onUpdate+": can't json.Marshal($#v)", managers)
+			return crud.Result{}, errors.Wrapf(err, onUpdate+": can't json.marshal($#v)", managers)
 		}
 	}
 
 	paramsStr, err := json.Marshal(source.Params)
 	if err != nil {
-		return crud.Result{}, errors.Wrapf(err, onUpdate+": can't json.Marshal(%#v)", source.Params)
+		return crud.Result{}, errors.Wrapf(err, onUpdate+": can't json.marshal(%#v)", source.Params)
 	}
 
 	values := []interface{}{source.URL, source.Title, string(source.Type), paramsStr, string(rView), string(rOwner), managersStr, source.ID}

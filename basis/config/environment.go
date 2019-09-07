@@ -84,7 +84,7 @@ func readConfig(data []byte, l logger.Operator) (*Config, error) {
 	for k, v0 := range config {
 		switch k {
 		//case "identity":
-		//	err = json5.Unmarshal(configRaw[k], &conf.identity)
+		//	err = json5.unmarshal(configRaw[k], &conf.identity)
 
 		case "mysql":
 			err = json5.Unmarshal(configRaw[k], &conf.MySQL)
@@ -98,24 +98,24 @@ func readConfig(data []byte, l logger.Operator) (*Config, error) {
 		case "pop3":
 			err = json5.Unmarshal(configRaw[k], &conf.POP3)
 		//case "sender":
-		//	err = json5.Unmarshal(configRaw[k], &conf.Sender)
+		//	err = json5.unmarshal(configRaw[k], &conf.Sender)
 		case "server":
 			err = json5.Unmarshal(configRaw[k], &conf.Server)
 		//case "fileslocal":
-		//	err = json5.Unmarshal(configRaw[k], &conf.fileslocal)
+		//	err = json5.unmarshal(configRaw[k], &conf.fileslocal)
 		//case "paths":
-		//	err = json5.Unmarshal(configRaw[k], &conf.paths)
+		//	err = json5.unmarshal(configRaw[k], &conf.paths)
 		//case "credentials":
-		//	err = json5.Unmarshal(configRaw[k], &conf.Credentials)
+		//	err = json5.unmarshal(configRaw[k], &conf.Credentials)
 
 		//case "twitter":
-		//	err = json5.Unmarshal(configRaw[k], &conf.twitter)
+		//	err = json5.unmarshal(configRaw[k], &conf.twitter)
 		//case "instagram":
-		//	err = json5.Unmarshal(configRaw[k], &conf.instagram)
+		//	err = json5.unmarshal(configRaw[k], &conf.instagram)
 		//case "google":
-		//	err = json5.Unmarshal(configRaw[k], &conf.google)
+		//	err = json5.unmarshal(configRaw[k], &conf.google)
 		//case "facebook":
-		//	err = json5.Unmarshal(configRaw[k], &conf.facebook)
+		//	err = json5.unmarshal(configRaw[k], &conf.facebook)
 		default:
 			switch v := v0.(type) {
 			case string:

@@ -29,6 +29,6 @@ const CredsPrivateKey CredsType = "private_key"
 
 type Creds struct {
 	Type     CredsType        `json:"type"`
-	Cryptype encrlib.Cryptype `json:"cryptype"`
-	Value    string           `json:"value,omitempty"`
+	Cryptype encrlib.Cryptype `json:"cryptype,omitempty"`
+	Value    string           `json:"value"`
 }

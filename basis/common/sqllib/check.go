@@ -1,6 +1,8 @@
 package sqllib
 
 import (
+	"fmt"
+
 	"github.com/pavlo67/workshop/basis/common"
 	"github.com/pavlo67/workshop/basis/config"
 	"github.com/pkg/errors"
@@ -24,13 +26,13 @@ func CheckTables(sqlOp Operator, tablesConfig map[string]config.SQLTable) ([]com
 
 		ok, err := TableExists(sqlOp, table.Name)
 		if err != nil {
-			info = append(info, common.Info{"check if table exists": table, "status": err.Error()})
+			info = append(info, common.Info{"check if table exists": fmt.Sprintf("%#v", table), "status": err.Error()})
 			isErr = true
 			continue
 		}
 
 		if !ok {
-			info = append(info, common.Info{"check if table exists": table, "status": "does not exist"})
+			info = append(info, common.Info{"check if table exists": fmt.Sprintf("%#v", table), "status": "does not exist"})
 			isErr = true
 			continue
 		}

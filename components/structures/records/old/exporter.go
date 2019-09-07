@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/pavlo67/partes/crud/selectors"
 	"github.com/pavlo67/workshop/basis/auth"
 	"github.com/pavlo67/workshop/basis/common"
 	"github.com/pavlo67/workshop/basis/common/filelib"
@@ -18,7 +19,6 @@ import (
 	"github.com/pavlo67/workshop/confidenter/rights"
 	"github.com/pavlo67/workshop/confidenter/users"
 	"github.com/pavlo67/workshop/notebook/notes"
-	"github.com/pavlo67/partes/crud/selectors"
 
 	"github.com/pavlo67/workshop/things_old/files"
 	"github.com/pkg/errors"
@@ -350,9 +350,9 @@ func ObjectsToJSON(user *auth.User, filesOp files.Operator, credentialsOpOp user
 	//			o.Links[i].Label = "/" + filepath.Join123(objDir, f.Label)
 	//		}
 	//	}
-	//	buf, err := json.Marshal(o)
+	//	buf, err := json.marshal(o)
 	//	if err != nil {
-	//		return "", nil.Wrapf(err, "can't Marshal object:", o)
+	//		return "", nil.Wrapf(err, "can't marshal object:", o)
 	//	}
 	//	_, err = f.WriteString(string(buf) + "\n")
 	//	if err != nil {
@@ -366,7 +366,7 @@ func ObjectsToJSON(user *auth.User, filesOp files.Operator, credentialsOpOp user
 	//for _, ei := range identityGlobalIS {
 	//	arrIdentities = append(arrIdentities, ei)
 	//}
-	//identitiesJSON, err := json.Marshal(arrIdentities)
+	//identitiesJSON, err := json.marshal(arrIdentities)
 	//if err != nil {
 	//	return "", nil.Wrapf(err, "can't marshal identities: %v for identities.json", arrIdentities)
 	//}

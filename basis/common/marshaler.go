@@ -7,10 +7,6 @@ import (
 	"github.com/yosuke-furukawa/json5/encoding/json5"
 )
 
-type Marshal func(v interface{}) ([]byte, error)
-type MarshalIndent func(v interface{}, prefix, indent string) ([]byte, error)
-type Unmarshal func(data []byte, v interface{}) error
-
 type Marshaler interface {
 	Marshal(v interface{}) ([]byte, error)
 	MarshalIndent(v interface{}, prefix, indent string) ([]byte, error)
@@ -20,9 +16,9 @@ type Marshaler interface {
 var MarshalerJSON = MarshalerStruct{json.Marshal, json.MarshalIndent, json.Unmarshal}
 var MarshalerJSON5 = MarshalerStruct{json5.Marshal, json5.MarshalIndent, json5.Unmarshal}
 
-// var ConvertorXML = MarshalerStruct{xml.Marshal, xml.MarshalIndent, xml.Unmarshal}
+// var ConvertorXML = MarshalerStruct{xml.marshal, xml.marshalIndent, xml.unmarshal}
 
-func MarshalerCustom(marshal Marshal, marshalIndent MarshalIndent, unmarshal Unmarshal) (Marshaler, error) {
+func MarshalerCustom(marshal marshal, marshalIndent marshalIndent, unmarshal unmarshal) (Marshaler, error) {
 	var errs Errors
 	if marshal == nil {
 		errs = append(errs, errors.New("marshal method is nil"))
@@ -42,12 +38,16 @@ func MarshalerCustom(marshal Marshal, marshalIndent MarshalIndent, unmarshal Unm
 
 // MarshalerStruct ----------------------------------------------------------------------------------------
 
+type marshal func(v interface{}) ([]byte, error)
+type marshalIndent func(v interface{}, prefix, indent string) ([]byte, error)
+type unmarshal func(data []byte, v interface{}) error
+
 var _ Marshaler = &MarshalerStruct{}
 
 type MarshalerStruct struct {
-	marshal       Marshal
-	marshalIndent MarshalIndent
-	unmarshal     Unmarshal
+	marshal
+	marshalIndent
+	unmarshal
 }
 
 func (cs MarshalerStruct) Marshal(v interface{}) ([]byte, error) {

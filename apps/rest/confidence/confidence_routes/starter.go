@@ -59,35 +59,29 @@ func (ss *confidenceStarter) Setup() error {
 
 func (ss *confidenceStarter) Run(joinerOp joiner.Operator) error {
 
-	_, ok := joinerOp.Interface(server_http.InterfaceKey).(server_http.Operator)
-	if !ok {
-		return errors.Errorf("no server_http.Operator with key %s", server_http.InterfaceKey)
-	}
-
-	// authOpNil := auth.Operator(nil)
+	authOpNil := auth.Operator(nil)
 
 	AuthOps = nil
 	AuthOpToSetToken = nil
 
-	// authComps := joinerOp.ComponentsAllWithInterface(&authOpNil)
-	//for _, authComp := range authComps {
-	//	if authOp, ok := authComp.Interface.(auth.Operator); ok {
-	//		AuthOps = append(AuthOps, authOp)
-	//		if authComp.InterfaceKey == auth_jwt.InterfaceKey {
-	//			AuthOpToSetToken = authOp
-	//		}
-	//	}
-	//}
-
-	AuthOpToSetToken, ok := joinerOp.Interface(auth_jwt.InterfaceKey).(auth.Operator)
-	if !ok {
-		return errors.Errorf("no auth.Operator with key %s", auth_jwt.InterfaceKey)
+	authComps := joinerOp.ComponentsAllWithInterface(&authOpNil)
+	for _, authComp := range authComps {
+		if authOp, ok := authComp.Interface.(auth.Operator); ok {
+			AuthOps = append(AuthOps, authOp)
+			if authComp.InterfaceKey == auth_jwt.InterfaceKey {
+				AuthOpToSetToken = authOp
+			}
+		}
 	}
 
 	if AuthOpToSetToken == nil {
 		return errors.New("no auth_jwt.Operator")
 	}
 
+	//_, ok := joinerOp.Interface(server_http.InterfaceKey).(server_http.Operator)
+	//if !ok {
+	//	return errors.Errorf("no server_http.Operator with key %s", server_http.InterfaceKey)
+	//}
 	//for _, ep := range Endpoints {
 	//	srvOp.HandleEndpoint(ep)
 	//}
