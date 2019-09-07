@@ -7,9 +7,8 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/workshop/basis/common"
-	"github.com/pavlo67/workshop/basis/config"
 	"github.com/pavlo67/workshop/basis/common/sqllib"
+	"github.com/pavlo67/workshop/basis/config"
 )
 
 var _ sqllib.Operator = &SQLite{}
@@ -36,14 +35,10 @@ type SQLite struct {
 	db *sql.DB
 }
 
-func (sqlOp *SQLite) DB() (*sql.DB, error) {
+func (sqlOp *SQLite) DB() *sql.DB {
 	if sqlOp == nil {
-		return nil, common.ErrNull
+		return nil
 	}
 
-	if sqlOp.db == nil {
-		return nil, errors.New("no SQLite connection")
-	}
-
-	return sqlOp.db, nil
+	return sqlOp.db
 }

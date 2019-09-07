@@ -31,7 +31,7 @@ func StartComponent(c Starter, conf *config.Config, args []string, joinerOp join
 
 	err = c.Run(joinerOp)
 	if err != nil {
-		return fmt.Errorf("error calling .Run() for component (%s): %s", c.Name(), err)
+		return fmt.Errorf("error calling .Prepare() for component (%s): %s", c.Name(), err)
 	}
 
 	return nil
@@ -47,7 +47,7 @@ func Run(starters []Starter, conf *config.Config, args []string, label string) (
 	l := logger.Get()
 
 	if conf == nil {
-		return nil, errors.New("no config data for starter.Run()")
+		return nil, errors.New("no config data for starter.Prepare()")
 	}
 
 	joinerOp := joiner.New()

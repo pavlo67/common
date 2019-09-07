@@ -21,7 +21,7 @@ package crud_files
 //		{links_mysql.Starter(), ""},
 //		{generastub.Starter(), ""},
 //	}
-//	err = starter.Run(conf, starters, "TEST BUILD", false, false)
+//	err = starter.Prepare(conf, starters, "TEST BUILD", false, false)
 //	if err != nil {
 //		log.Println(err)
 //	}

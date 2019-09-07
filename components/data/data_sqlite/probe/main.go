@@ -1,25 +1,26 @@
 package main
 
 import (
-	"os"
-
 	"fmt"
 	"log"
+	"os"
 
-	"github.com/pavlo67/workshop/applications/flow"
-	"github.com/pavlo67/workshop/applications/flow/flow_sqlite"
-	"github.com/pavlo67/workshop/basis/config"
 	"github.com/pavlo67/workshop/basis/common/filelib"
+	"github.com/pavlo67/workshop/basis/config"
 	"github.com/pavlo67/workshop/basis/logger"
-	"github.com/pavlo67/workshop/basis/starter"
-	"github.com/pavlo67/workshop/basis/instruments/importer/importer_rss"
 	"github.com/pavlo67/workshop/basis/server/server_http"
+	"github.com/pavlo67/workshop/basis/starter"
+
+	"github.com/pavlo67/workshop/components/data"
+	"github.com/pavlo67/workshop/components/data/data_importer"
+	"github.com/pavlo67/workshop/components/data/data_sqlite"
+	"github.com/pavlo67/workshop/components/instruments/importer/importer_rss"
 )
 
 func main() {
 	err := logger.Init(logger.Config{LogLevel: logger.DebugLevel})
 	if err != nil {
-		os.Stderr.WriteString(fmt.Sprintf("can't logger.Run(logger.Config{LogLevel: logger.DebugLevel}): %s", err))
+		os.Stderr.WriteString(fmt.Sprintf("can't logger.Prepare(logger.Config{LogLevel: logger.DebugLevel}): %s", err))
 		os.Exit(1)
 	}
 	l := logger.Get()
@@ -31,7 +32,7 @@ func main() {
 	}
 
 	starters := []starter.Starter{
-		{Operator: flow_sqlite.Starter()},
+		{Operator: data_sqlite.Starter()},
 	}
 
 	joiner, err := starter.Run(starters, cfg, os.Args[1:], "!!!")
@@ -45,13 +46,13 @@ func main() {
 
 	impOp := &importer_rss.RSS{}
 
-	adminOp, ok := joiner.Interface(flow.InterfaceKey).(flow.Administrator)
+	dataOp, ok := joiner.Interface(data.InterfaceKey).(data.Operator)
 	if !ok {
 		log.Fatalf("no server_http.Operator with key %s", server_http.InterfaceKey)
 
 	}
 
-	numAll, numProcessed, numNew, errs := flow.Load(urls, impOp, adminOp, l)
+	numAll, numProcessed, numNew, errs := data_importer.Load(urls, impOp, dataOp, l)
 
 	l.Infof("numAll = %d, numProcessed = %d, numNew = %d, errs = %s", numAll, numProcessed, numNew, errs)
 }

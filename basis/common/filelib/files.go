@@ -6,15 +6,49 @@ import (
 	"os"
 	"path"
 	"regexp"
-	"runtime"
 	"time"
+
+	"runtime"
+
+	"strings"
 
 	"github.com/pkg/errors"
 )
 
+func RelativePath(pathFull, pathBase, pathPrefix string) string {
+	path := ""
+
+	if pathFull[:len(pathBase)] == pathBase {
+		path = pathFull[len(pathBase):]
+	} else {
+		// TODO? error?
+	}
+
+	return pathPrefix + path
+}
+
 func CurrentPath() string {
 	if _, filename, _, ok := runtime.Caller(1); ok {
 		return path.Dir(filename) + "/"
+	}
+	return ""
+}
+
+var reBackslash = regexp.MustCompile(`\\`)
+var reExt = regexp.MustCompile(`\..*`)
+
+func CurrentFile(removeExt bool) string {
+	if _, filename, _, ok := runtime.Caller(1); ok {
+		if removeExt {
+			filenamePOSIX := reBackslash.ReplaceAllString(filename, "/")
+			partes := strings.Split(filenamePOSIX, "/")
+			if len(partes) < 1 {
+				return ""
+			}
+			partes[len(partes)-1] = reExt.ReplaceAllString(partes[len(partes)-1], "")
+			return strings.Join(partes, "/")
+		}
+		return filename
 	}
 	return ""
 }

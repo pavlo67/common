@@ -1,10 +1,15 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
+	"time"
 
+	"github.com/pavlo67/workshop/apps/rest/flow/flow_routes"
+	"github.com/pavlo67/workshop/apps/rest/flow/flow_routes/v1"
 	"github.com/pavlo67/workshop/basis/auth/auth_ecdsa"
 	"github.com/pavlo67/workshop/basis/common/filelib"
 	"github.com/pavlo67/workshop/basis/config"
@@ -12,35 +17,57 @@ import (
 	"github.com/pavlo67/workshop/basis/server/server_http"
 	"github.com/pavlo67/workshop/basis/server/server_http/server_http_jschmhr"
 	"github.com/pavlo67/workshop/basis/starter"
+	"github.com/pavlo67/workshop/components/data/data_sqlite"
 )
 
-func Starters() ([]starter.Starter, string) {
-	//paramsServerStatic := basis.Info{
-	//	"static_path": filelib.CurrentPath() + "../demo_server_http/static/",
-	//}
-
-	var starters []starter.Starter
-
-	starters = append(starters, starter.Starter{auth_ecdsa.Starter(), nil})
-	starters = append(starters, starter.Starter{server_http_jschmhr.Starter(), nil})
-	// starters = append(starters, starter.Starter{rector_server.Starter(), nil})
-
-	return starters, "FLOW BUILD"
-}
+var (
+	BuildDate    = "unknown"
+	BuildRelease = "unknown"
+	BuildCommit  = "unknown"
+)
 
 func main() {
+	start := time.Now()
+	rand.Seed(start.UnixNano())
+
+	var versionOnly bool
+	flag.BoolVar(&versionOnly, "version", false, "show build vars only")
+	flag.Parse()
+	if versionOnly {
+		fmt.Printf("builded: %s, revision: %s, commit: %s\n", BuildDate, BuildRelease, BuildCommit)
+		return
+	}
+
+	configPath := filelib.CurrentPath() + "../../../environments"
+	configEnv, ok := os.LookupEnv("ENV")
+	if !ok {
+		configEnv = "local"
+	}
+
 	err := logger.Init(logger.Config{LogLevel: logger.DebugLevel})
 	if err != nil {
-		os.Stderr.WriteString(fmt.Sprintf("can't logger.Run(logger.Config{LogLevel: logger.DebugLevel}): %s", err))
+		fmt.Printf("can't logger.Init, error: %v\n", err)
 		os.Exit(1)
 	}
 
 	l := logger.Get()
+	if l == nil {
+		fmt.Printf("no logger!")
+		os.Exit(1)
+	}
 
-	cfgPath := filelib.CurrentPath() + "../../../environments/cfg.json5"
-	conf, err := config.Get(cfgPath, l)
+	cfg, err := config.Get(configPath, configEnv, l)
 	if err != nil {
-		l.Fatalf("can't config.Get(%s): %s", cfgPath, err)
+		l.Fatalf("can't config.Get(%s): %s", configPath, err)
+	}
+
+	if err != nil {
+		fmt.Printf("can't load config, error: %v\n", err)
+		os.Exit(1)
+	}
+	if cfg == nil {
+		fmt.Printf("can't load config, no data!")
+		os.Exit(1)
 	}
 
 	// flag.Parse()
@@ -52,8 +79,19 @@ func main() {
 	//
 	//}
 
-	starters, label := Starters()
-	joiner, err := starter.Run(starters, conf, os.Args[1:], label)
+	// !!! kostyl
+	l.Info(ep_flow.ToInit)
+
+	starters := []starter.Starter{
+		{auth_ecdsa.Starter(), nil},
+		{server_http_jschmhr.Starter(), nil},
+		{data_sqlite.Starter(), nil},
+		{flow_routes.Starter(), nil},
+	}
+
+	label := "DATA REST BUILD"
+
+	joiner, err := starter.Run(starters, cfg, os.Args[1:], label)
 	if err != nil {
 		l.Fatal(err)
 
@@ -64,6 +102,9 @@ func main() {
 	if !ok {
 		log.Fatalf("no server_http.Operator with key %s", server_http.InterfaceKey)
 	}
+
+	srvOp.HandleFiles("/flow/api-docs/*filepath", filelib.CurrentPath()+"../_api-docs/", nil)
+	srvOp.HandleFiles("/flow/swagger/*filepath", filelib.CurrentPath()+"api-docs/", nil)
 
 	srvOp.Start()
 

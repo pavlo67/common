@@ -6,7 +6,7 @@ import (
 
 var reVersion = regexp.MustCompile("^\\d+\\.\\d+")
 
-//func MySQLVersion(dbh *sql.DB) (string, error) {
+//func MySQLVersion(dbh *sql.db) (string, error) {
 //	var stmt *sql.Stmt
 //	sqlQuery := "select VERSION()"
 //	if err := Exec(dbh, sqlQuery, &stmt); err != nil {

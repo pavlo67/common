@@ -11,7 +11,7 @@ import (
 
 const InterfaceKey joiner.InterfaceKey = "server_http"
 
-type WorkerHTTP func(*auth.User, common.Params, *http.Request) (server.Response, error)
+type WorkerHTTP func(*auth.User, Params, *http.Request) (server.Response, error)
 
 type Operator interface {
 	HandleEndpoint(endpoint Endpoint) error

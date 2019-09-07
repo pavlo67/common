@@ -9,7 +9,7 @@ import (
 )
 
 type Operator interface {
-	DB() (*sql.DB, error)
+	DB() *sql.DB
 
 	TableExistsSQL(tableName string) (string, error)
 	CreateSQL(table config.SQLTable) (string, error)
@@ -18,9 +18,9 @@ type Operator interface {
 // helpers ------------------------------------------------------------
 
 func Close(op Operator) error {
-	db, err := op.DB()
-	if err != nil {
-		return err
+	db := op.DB()
+	if db == nil {
+		return nil
 	}
 
 	return db.Close()
@@ -34,9 +34,9 @@ func TableExists(op Operator, tableName string) (bool, error) {
 		return false, errors.Wrap(err, onTableExists)
 	}
 
-	db, err := op.DB()
-	if err != nil {
-		return false, errors.Wrap(err, onTableExists)
+	db := op.DB()
+	if db == nil {
+		return false, errors.New(onTableExists + ": no .db")
 	}
 
 	rows, err := Query(db, sqlQuery)

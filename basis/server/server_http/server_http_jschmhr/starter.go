@@ -5,8 +5,6 @@ import (
 
 	"github.com/pkg/errors"
 
-	"log"
-
 	"github.com/pavlo67/workshop/basis/auth"
 	"github.com/pavlo67/workshop/basis/common"
 	"github.com/pavlo67/workshop/basis/config"
@@ -61,12 +59,17 @@ func (ss *server_http_jschmhrStarter) Setup() error {
 
 func (ss *server_http_jschmhrStarter) Run(joinerOp joiner.Operator) error {
 
-	authOp, ok := joinerOp.Interface(auth.InterfaceKey).(auth.Operator)
-	if !ok {
-		log.Fatalf("no auth.Operator with key %s", auth.InterfaceKey)
+	authOpNil := auth.Operator(nil)
+	authComps := joinerOp.ComponentsAllWithInterface(&authOpNil)
+
+	var authOps []auth.Operator
+	for _, authComp := range authComps {
+		if authOp, ok := authComp.Interface.(auth.Operator); ok {
+			authOps = append(authOps, authOp)
+		}
 	}
 
-	srvOp, err := New(ss.config.Port, ss.config.TLSCertFile, ss.config.TLSKeyFile, authOp)
+	srvOp, err := New(ss.config.Port, ss.config.TLSCertFile, ss.config.TLSKeyFile, authOps)
 	if err != nil {
 		return errors.Wrap(err, "can't init serverHTTPJschmhr.Operator")
 	}

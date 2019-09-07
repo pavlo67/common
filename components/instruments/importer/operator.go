@@ -14,11 +14,15 @@ const InterfaceKey joiner.InterfaceKey = "importer"
 //var ErrBadItem = errors.New("bad item")
 //var ErrNilItem = errors.New("item is nil")
 
-
+type Series struct {
+	URL string
+	// MinKey *string
+	Items []data.Item
+}
 
 type Operator interface {
-	// Run opens import session with selected data source
+	// Prepare opens import session with selected data source
 	// Init() error
 
-	Get(url string, minKey *string) ([]data.Item, error)
+	Get(url string, minKey *string) (*Series, error)
 }

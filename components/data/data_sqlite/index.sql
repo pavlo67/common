@@ -1,6 +1,6 @@
 // flow --------------------------------------------------
 
-CREATE TABLE datas (
+CREATE TABLE data (
   id           INTEGER             PRIMARY KEY AUTOINCREMENT,
   saved_at     TIMESTAMP           DEFAULT CURRENT_TIMESTAMP,
   source_id    TEXT       NOT NULL,
@@ -18,10 +18,10 @@ CREATE TABLE datas (
   indexes      TEXT
 );
 
-CREATE INDEX idx_datas_source     ON datas(source_id, source_key);
+CREATE INDEX idx_data_source     ON data(source_id, source_key);
 
-CREATE INDEX idx_datas_source_url ON datas(source_url);
+CREATE INDEX idx_data_source_url ON data(source_url);
 
-CREATE INDEX idx_datas_types      ON datas(types, saved_at);
+CREATE INDEX idx_data_types      ON data(types, saved_at);
 
 

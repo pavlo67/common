@@ -4,6 +4,8 @@ import "github.com/pavlo67/workshop/basis/common/encrlib"
 
 type CredsType string
 
+const CredsJWT CredsType = "jwt"
+
 const CredsToken CredsType = "token"
 const CredsPartnerToken CredsType = "partner_token"
 

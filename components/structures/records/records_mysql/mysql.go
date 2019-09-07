@@ -36,7 +36,7 @@ package records_mysql
 //
 //	// generaOp genera.Operator
 //
-//	dbh   *sql.DB
+//	dbh   *sql.db
 //	table string
 //
 //	stmtCreate        *sql.Stmt

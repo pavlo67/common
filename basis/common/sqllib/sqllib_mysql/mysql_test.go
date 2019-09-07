@@ -16,7 +16,7 @@ func TestDesc(t *testing.T) {
 	//		log.Fatal(err)
 	//	}
 	//	if conf == nil {
-	//		log.Fatal(nil.New("no config data after setup.Run()"))
+	//		log.Fatal(nil.New("no config data after setup.Prepare()"))
 	//	}
 	//	partKeys := config.PartKeys{
 	//		"mysql": "items",
@@ -68,7 +68,7 @@ func TestDesc(t *testing.T) {
 	//		log.Fatal(err)
 	//	}
 	//	if conf == nil {
-	//		log.Fatal(nil.New("no config data after setup.Run()"))
+	//		log.Fatal(nil.New("no config data after setup.Prepare()"))
 	//	}
 	//	partKeys := config.PartKeys{
 	//		"mysql": "items",

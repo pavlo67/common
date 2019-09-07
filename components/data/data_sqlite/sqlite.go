@@ -21,10 +21,10 @@ import (
 
 const limitDefault = 200
 
-var tabledata = "datas"
+var tableData = "data"
 
 var fieldsToList = []string{"id", "source_time", "source_url", "types", "title", "summary", "tags"}
-var fieldsToListStr = strings.Join(fieldsToRead, ", ")
+var fieldsToListStr = strings.Join(fieldsToList, ", ")
 
 var fieldsToRead = []string{"source_id", "source_time", "source_url", "types", "title", "summary", "details", "href", "embedded", "tags"}
 var fieldsToReadStr = strings.Join(fieldsToRead, ", ")
@@ -57,13 +57,13 @@ func New(db *sql.DB, limit int) (data.Operator, error) {
 		db:    db,
 		limit: limit,
 
-		sqlHas:  "SELECT count(*) FROM " + tabledata + " WHERE source_id = ? AND source_key = ?",
-		sqlRead: "SELECT " + fieldsToReadStr + " FROM " + tabledata + " WHERE id = ?",
+		sqlHas:  "SELECT count(*) FROM " + tableData + " WHERE source_id = ? AND source_key = ?",
+		sqlRead: "SELECT " + fieldsToReadStr + " FROM " + tableData + " WHERE id = ?",
 
-		sqlSave:   "INSERT INTO " + tabledata + " (" + fieldsToSaveStr + ") VALUES (" + strings.Repeat(",? ", len(fieldsToSave))[1:] + ")",
-		sqlRemove: "DELETE FROM " + tabledata + " where ID = ?",
+		sqlSave:   "INSERT INTO " + tableData + " (" + fieldsToSaveStr + ") VALUES (" + strings.Repeat(",? ", len(fieldsToSave))[1:] + ")",
+		sqlRemove: "DELETE FROM " + tableData + " where ID = ?",
 
-		sqlList: "SELECT " + fieldsToListStr + " FROM " + tabledata + " ORDER BY saved_at DESC LIMIT " + strconv.Itoa(limit),
+		sqlList: "SELECT " + fieldsToListStr + " FROM " + tableData + " ORDER BY saved_at DESC LIMIT " + strconv.Itoa(limit),
 	}
 
 	sqlStmts := []sqllib.SqlStmt{
@@ -180,7 +180,7 @@ func (dataOp *dataSQLite) Save(items []data.Item, marksOp marks.Operator, indexe
 
 const onRemove = "on dataSQLite.Remove()"
 
-func (dataOp *dataSQLite) Remove(selectors.Term, marks.Operator, indexer.Operator, *crud.RemoveOptions) error {
+func (dataOp *dataSQLite) Remove(*selectors.Term, marks.Operator, indexer.Operator, *crud.RemoveOptions) error {
 	//		var err error
 	//		var values []interface{}
 	//		var orderAndLimit, condition, conditionCompleted string
@@ -220,7 +220,7 @@ func (dataOp *dataSQLite) Remove(selectors.Term, marks.Operator, indexer.Operato
 
 const onList = "on dataSQLite.List()"
 
-func (dataOp *dataSQLite) List(selector selectors.Term, indexerOp indexer.Operator, options *crud.GetOptions) ([]crud.Brief, error) {
+func (dataOp *dataSQLite) List(selector *selectors.Term, indexerOp indexer.Operator, options *crud.GetOptions) ([]crud.Brief, error) {
 	var values []interface{}
 
 	rows, err := dataOp.stmList.Query(values...)
@@ -236,13 +236,16 @@ func (dataOp *dataSQLite) List(selector selectors.Term, indexerOp indexer.Operat
 	for rows.Next() {
 		brief := crud.Brief{Info: common.Info{}}
 
+		var id int64
 		var sourceTime *time.Time
 		var sourceURL, tags string
 
-		err = rows.Scan(&brief.ID, &sourceTime, &sourceURL, &brief.Type, &brief.Title, &brief.Summary, &tags)
+		err = rows.Scan(&id, &sourceTime, &sourceURL, &brief.Type, &brief.Title, &brief.Summary, &tags)
 		if err != nil {
 			return briefs, errors.Wrapf(err, onList+sqllib.CantScanQueryRow, dataOp.sqlList, values)
 		}
+
+		brief.ID = common.ID(strconv.FormatInt(id, 10))
 
 		if sourceTime != nil {
 			brief.Info["source_time"] = *sourceTime
@@ -262,13 +265,13 @@ func (dataOp *dataSQLite) List(selector selectors.Term, indexerOp indexer.Operat
 
 const onCount = "on dataSQLite.Count()"
 
-func (dataOp *dataSQLite) Count(selectors.Term, indexer.Operator, *crud.GetOptions) ([]crud.Part, error) {
+func (dataOp *dataSQLite) Count(*selectors.Term, indexer.Operator, *crud.GetOptions) ([]crud.Part, error) {
 	return nil, common.ErrNotImplemented
 }
 
 const onReindex = "on dataSQLite.Reindex()"
 
-func (dataOp *dataSQLite) Reindex(selectors.Term, indexer.Operator, *crud.GetOptions) error {
+func (dataOp *dataSQLite) Reindex(*selectors.Term, indexer.Operator, *crud.GetOptions) error {
 	return common.ErrNotImplemented
 }
 
@@ -277,7 +280,7 @@ func (dataOp *dataSQLite) Close() error {
 }
 
 func (dataOp *dataSQLite) Clean() error {
-	_, err := dataOp.db.Exec("TRUNCATE " + tabledata)
+	_, err := dataOp.db.Exec("TRUNCATE " + tableData)
 
 	return err
 }

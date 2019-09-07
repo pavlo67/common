@@ -23,7 +23,7 @@ type Operator interface {
 	// Setup sets up the component
 	Setup() error
 
-	// Run inits the component to use in application
+	// Prepare inits the component to use in application
 	Run(joiner.Operator) error
 }
 
@@ -47,5 +47,5 @@ func (starter Starter) CorrectedOptions(options common.Info) common.Info {
 }
 
 //type Runner interface {
-//	Run() error
+//	Prepare() error
 //}

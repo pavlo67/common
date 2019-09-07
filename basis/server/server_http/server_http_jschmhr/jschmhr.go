@@ -13,7 +13,6 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/basis/auth"
-	"github.com/pavlo67/workshop/basis/common"
 	"github.com/pavlo67/workshop/basis/server/server_http"
 )
 
@@ -24,13 +23,13 @@ type serverHTTPJschmhr struct {
 	httpServeMux *httprouter.Router
 	certFileTLS  string
 	keyFileTLS   string
-	authOp       auth.Operator
+	authOps      []auth.Operator
 
 	//htmlTemplate string
 	//templator    server_http.Templator
 }
 
-func New(port int, certFileTLS, keyFileTLS string, authOp auth.Operator) (server_http.Operator, error) {
+func New(port int, certFileTLS, keyFileTLS string, authOps []auth.Operator) (server_http.Operator, error) {
 	if port <= 0 {
 		return nil, errors.Errorf("serverOp hasn't started: no correct data for http port: %d", port)
 	}
@@ -50,7 +49,7 @@ func New(port int, certFileTLS, keyFileTLS string, authOp auth.Operator) (server
 		certFileTLS: certFileTLS,
 		keyFileTLS:  keyFileTLS,
 
-		authOp: authOp,
+		authOps: authOps,
 	}, nil
 }
 
@@ -128,7 +127,7 @@ func (s *serverHTTPJschmhr) HandleEndpoint(endpoint server_http.Endpoint) error 
 	}
 
 	handler := func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
-		user, err := server_http.UserWithRequest(r, s.authOp)
+		user, err := server_http.UserWithRequest(r, s.authOps)
 		if err != nil {
 			l.Error(err)
 		}
@@ -142,10 +141,10 @@ func (s *serverHTTPJschmhr) HandleEndpoint(endpoint server_http.Endpoint) error 
 		//	return
 		//}
 
-		var params common.Params
+		var params server_http.Params
 		if len(paramsHR) > 0 {
 			for _, p := range paramsHR {
-				params = append(params, common.Param{Name: p.Key, Value: p.Value})
+				params = append(params, server_http.Param{Name: p.Key, Value: p.Value})
 			}
 		}
 
@@ -157,9 +156,9 @@ func (s *serverHTTPJschmhr) HandleEndpoint(endpoint server_http.Endpoint) error 
 		}
 
 		w.Header().Set("Content-Type", responseData.MIMEType)
-		w.Header().Set("Contentus-TokenLength", strconv.Itoa(len(responseData.Data)))
+		w.Header().Set("Content-Length", strconv.Itoa(len(responseData.Data)))
 		if responseData.FileName != "" {
-			w.Header().Set("Contentus-Disposition", "attachment; filename="+responseData.FileName)
+			w.Header().Set("Content-Disposition", "attachment; filename="+responseData.FileName)
 		}
 
 		if responseData.Status <= 0 {
