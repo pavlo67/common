@@ -3,7 +3,7 @@ package old
 import (
 	"time"
 
-	"github.com/pavlo67/workshop/basis/common"
+	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/confidenter/rights"
 	"github.com/pavlo67/workshop/notebook/links"
 )

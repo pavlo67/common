@@ -10,8 +10,8 @@ import (
 
 	"sort"
 
-	"github.com/pavlo67/workshop/basis/auth"
-	"github.com/pavlo67/workshop/basis/common"
+	"github.com/pavlo67/workshop/common"
+	"github.com/pavlo67/workshop/components/auth"
 )
 
 // TODO: test .Selector
@@ -39,7 +39,7 @@ type SetLinksStep struct {
 type QueryTagsStep struct {
 	IS              common.ID
 	ISBad           *common.ID
-	Selector        *common.Term
+	Selector        *libs.Term
 	ExpectedErr     error
 	ExpectedTagInfo []TagInfo
 }
@@ -99,7 +99,7 @@ type QueryByTagTestCase struct {
 type QueryStep struct {
 	IS             common.ID
 	ISBad          *common.ID
-	Selector       *common.Term
+	Selector       *libs.Term
 	ExpectedErr    error
 	ExpectedLinked []Linked
 }

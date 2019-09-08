@@ -9,10 +9,11 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/workshop/basis/common"
-	"github.com/pavlo67/workshop/basis/common/sqllib"
-	"github.com/pavlo67/workshop/basis/crud"
-	"github.com/pavlo67/workshop/basis/selectors"
+	"github.com/pavlo67/workshop/common"
+	"github.com/pavlo67/workshop/common/crud"
+
+	"github.com/pavlo67/workshop/common/libs/sqllib"
+	"github.com/pavlo67/workshop/common/selectors"
 
 	"github.com/pavlo67/workshop/components/data"
 	"github.com/pavlo67/workshop/components/instruments/indexer"

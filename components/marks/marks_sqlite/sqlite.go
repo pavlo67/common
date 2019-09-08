@@ -9,10 +9,11 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/workshop/basis/common"
-	"github.com/pavlo67/workshop/basis/common/sqllib"
-	"github.com/pavlo67/workshop/basis/crud"
-	"github.com/pavlo67/workshop/basis/instruments/importer"
+	"github.com/pavlo67/workshop/common"
+	"github.com/pavlo67/workshop/common/crud"
+	"github.com/pavlo67/workshop/common/instruments/importer"
+
+	"github.com/pavlo67/workshop/common/libs/sqllib"
 
 	"github.com/pavlo67/workshop/applications/flow"
 )
@@ -336,7 +337,7 @@ func (flowOp *flowSQLite) Clean() error {
 	_, err2 := flowOp.db.Exec("TRUNCATE " + tableTags)
 	_, err3 := flowOp.db.Exec("TRUNCATE " + tableSources)
 
-	return common.MultiError(err1, err2, err3).Err()
+	return libs.MultiError(err1, err2, err3).Err()
 }
 
 //const onRemove = "on flowSQLite.Remove()"

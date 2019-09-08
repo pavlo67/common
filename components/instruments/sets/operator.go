@@ -1,6 +1,6 @@
 package sets
 
-import "github.com/pavlo67/workshop/basis/common"
+import "github.com/pavlo67/workshop/common"
 
 type Condition func(Something) bool
 

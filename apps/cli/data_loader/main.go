@@ -5,13 +5,13 @@ import (
 	"log"
 	"os"
 
-	"github.com/pavlo67/workshop/basis/auth/auth_ecdsa"
-	"github.com/pavlo67/workshop/basis/common/filelib"
-	"github.com/pavlo67/workshop/basis/config"
-	"github.com/pavlo67/workshop/basis/logger"
-	"github.com/pavlo67/workshop/basis/server/server_http"
-	"github.com/pavlo67/workshop/basis/server/server_http/server_http_jschmhr"
-	"github.com/pavlo67/workshop/basis/starter"
+	"github.com/pavlo67/workshop/common/config"
+	"github.com/pavlo67/workshop/common/libs/filelib"
+	"github.com/pavlo67/workshop/common/logger"
+	"github.com/pavlo67/workshop/common/server/server_http"
+	"github.com/pavlo67/workshop/common/server/server_http/server_http_jschmhr"
+	"github.com/pavlo67/workshop/common/starter"
+	"github.com/pavlo67/workshop/components/auth/auth_ecdsa"
 )
 
 func Starters() ([]starter.Starter, string) {

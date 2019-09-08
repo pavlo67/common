@@ -4,9 +4,10 @@ import (
 	"log"
 	"strings"
 
-	"github.com/pavlo67/workshop/basis/common"
-	"github.com/pavlo67/workshop/basis/common/strlib"
 	"github.com/pavlo67/partes/crud/selectors"
+	"github.com/pavlo67/workshop/common"
+
+	"github.com/pavlo67/workshop/common/libs/strlib"
 
 	"github.com/pavlo67/workshop/confidenter/groups"
 
@@ -52,7 +53,7 @@ LINKS_OLD:
 
 		if l.RView == "" || !groups.OneOf(userIS, grpsOp, l.RView) {
 			// to prevent unexpected link invisibility
-			l.RView = common.Anyone
+			l.RView = libs.Anyone
 		}
 
 		linksListFinal = append(linksListFinal, l)

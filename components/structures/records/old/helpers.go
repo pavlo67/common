@@ -7,10 +7,11 @@ import (
 
 	"strconv"
 
-	"github.com/pavlo67/workshop/basis/common"
+	"github.com/pavlo67/partes/crud/selectors"
+	"github.com/pavlo67/workshop/common"
+
 	"github.com/pavlo67/workshop/notebook/links"
 	"github.com/pavlo67/workshop/things_old/files"
-	"github.com/pavlo67/partes/crud/selectors"
 )
 
 //func RViewDefault(dataManagers rights.Managers) common.ID {

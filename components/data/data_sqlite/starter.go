@@ -3,14 +3,14 @@ package data_sqlite
 import (
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/workshop/basis/common"
-	"github.com/pavlo67/workshop/basis/common/filelib"
-	"github.com/pavlo67/workshop/basis/common/sqllib"
-	"github.com/pavlo67/workshop/basis/common/sqllib/sqllib_sqlite"
-	"github.com/pavlo67/workshop/basis/config"
-	"github.com/pavlo67/workshop/basis/joiner"
-	"github.com/pavlo67/workshop/basis/logger"
-	"github.com/pavlo67/workshop/basis/starter"
+	"github.com/pavlo67/workshop/common"
+	"github.com/pavlo67/workshop/common/config"
+	"github.com/pavlo67/workshop/common/joiner"
+	"github.com/pavlo67/workshop/common/libs/filelib"
+	"github.com/pavlo67/workshop/common/libs/sqllib"
+	"github.com/pavlo67/workshop/common/libs/sqllib/sqllib_sqlite"
+	"github.com/pavlo67/workshop/common/logger"
+	"github.com/pavlo67/workshop/common/starter"
 
 	"github.com/pavlo67/workshop/components/data"
 )

@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/pavlo67/workshop/basis/common"
-	"github.com/pavlo67/workshop/basis/config"
-	"github.com/pavlo67/workshop/basis/joiner"
-	"github.com/pavlo67/workshop/basis/logger"
-	"github.com/pavlo67/workshop/basis/server/server_http"
-	"github.com/pavlo67/workshop/basis/starter"
+	"github.com/pavlo67/workshop/common"
+	"github.com/pavlo67/workshop/common/config"
+	"github.com/pavlo67/workshop/common/joiner"
+	"github.com/pavlo67/workshop/common/logger"
+	"github.com/pavlo67/workshop/common/server/server_http"
+	"github.com/pavlo67/workshop/common/starter"
 	"github.com/pavlo67/workshop/components/data"
 )
 

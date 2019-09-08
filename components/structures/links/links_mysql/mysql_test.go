@@ -5,10 +5,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/pavlo67/workshop/basis/common"
-	"github.com/pavlo67/workshop/basis/common/filelib"
-	"github.com/pavlo67/workshop/basis/config"
-	"github.com/pavlo67/workshop/basis/joiner"
+	"github.com/pavlo67/workshop/common"
+	"github.com/pavlo67/workshop/common/config"
+	"github.com/pavlo67/workshop/common/joiner"
+	"github.com/pavlo67/workshop/common/libs/filelib"
 )
 
 var conf *config.Config

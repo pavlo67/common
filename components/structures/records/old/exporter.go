@@ -10,10 +10,10 @@ import (
 	"strings"
 
 	"github.com/pavlo67/partes/crud/selectors"
-	"github.com/pavlo67/workshop/basis/auth"
-	"github.com/pavlo67/workshop/basis/common"
-	"github.com/pavlo67/workshop/basis/common/filelib"
-	"github.com/pavlo67/workshop/basis/common/strlib"
+	"github.com/pavlo67/workshop/common"
+
+	"github.com/pavlo67/workshop/common/libs/filelib"
+	"github.com/pavlo67/workshop/common/libs/strlib"
 	"github.com/pavlo67/workshop/confidenter/auth"
 	"github.com/pavlo67/workshop/confidenter/groups"
 	"github.com/pavlo67/workshop/confidenter/rights"

@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/pavlo67/workshop/basis/common"
+	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/confidenter"
 	"github.com/pavlo67/workshop/confidenter/groups/groupsstub"
 	"github.com/pavlo67/workshop/notebook/notes"

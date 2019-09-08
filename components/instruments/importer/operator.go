@@ -1,7 +1,7 @@
 package importer
 
 import (
-	"github.com/pavlo67/workshop/basis/joiner"
+	"github.com/pavlo67/workshop/common/joiner"
 
 	"github.com/pavlo67/workshop/components/data"
 )

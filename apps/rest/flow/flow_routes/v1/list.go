@@ -4,10 +4,10 @@ import (
 	"net/http"
 
 	"github.com/pavlo67/workshop/apps/rest/flow/flow_routes"
-	"github.com/pavlo67/workshop/basis/auth"
-	"github.com/pavlo67/workshop/basis/common/filelib"
-	"github.com/pavlo67/workshop/basis/server"
-	"github.com/pavlo67/workshop/basis/server/server_http"
+	"github.com/pavlo67/workshop/common/libs/filelib"
+	"github.com/pavlo67/workshop/common/server"
+	"github.com/pavlo67/workshop/common/server/server_http"
+	"github.com/pavlo67/workshop/components/auth"
 )
 
 var ToInit = server_http.InitEndpoint(&flow_routes.Endpoints, "GET", filelib.RelativePath(flow_routes.Prefix, filelib.CurrentFile(true)), nil, workerList, "")

@@ -3,7 +3,7 @@ package importer_rss
 import (
 	"testing"
 
-	"github.com/pavlo67/workshop/basis/instruments/importer"
+	"github.com/pavlo67/workshop/common/instruments/importer"
 )
 
 var testCases = []importer.ImporterTestCase{

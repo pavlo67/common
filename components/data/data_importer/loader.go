@@ -5,8 +5,8 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/workshop/basis/common"
-	"github.com/pavlo67/workshop/basis/logger"
+	"github.com/pavlo67/workshop/common"
+	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/components/data"
 	"github.com/pavlo67/workshop/components/instruments/importer"
 )

@@ -17,7 +17,7 @@ import (
 	"github.com/pavlo67/punctum/confidenter/rights"
 	"github.com/pavlo67/punctum/processor/sources"
 	"github.com/pavlo67/punctum/starter/config"
-	"github.com/pavlo67/workshop/basis/common"
+	"github.com/pavlo67/workshop/common"
 )
 
 type sourcesMySQL struct {

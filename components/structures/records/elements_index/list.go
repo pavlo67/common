@@ -3,8 +3,8 @@ package elements_index
 import (
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/workshop/basis/common"
-	"github.com/pavlo67/workshop/basis/joiner"
+	"github.com/pavlo67/workshop/common"
+	"github.com/pavlo67/workshop/common/joiner"
 
 	"github.com/pavlo67/workshop/applications/records"
 )
