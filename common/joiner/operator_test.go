@@ -43,10 +43,10 @@ func TestInterface(t *testing.T) {
 //	joiner.Join(structB1, keyB1)
 //	joiner.Join(structA2, keyA2)
 //
-//	components := joiner.ComponentsAll(keyA1)
-//	require.Equal(t, 2, len(components))
+//	routes := joiner.ComponentsAll(keyA1)
+//	require.Equal(t, 2, len(routes))
 //
-//	for _, component := range components {
+//	for _, component := range routes {
 //		require.Equal(t, keyA1, component.Key)
 //
 //		interfaceA, ok := component.Interface.(InterfaceA)

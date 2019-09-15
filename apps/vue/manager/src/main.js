@@ -4,16 +4,14 @@ import router from './router';
 import store from './store';
 import './registerServiceWorker';
 
-Vue.config.productionTip = false;
+import routes from './routes';
 
-let items = [
-  { path: "/",      title: 'Home' },
-  { path: "/about", title: 'About' }
-];
+
+Vue.config.productionTip = false;
 
 
 new Vue({
-  data: { items },
+  data: { routes },
   router,
   store,
   // render: h => h(App),
@@ -21,7 +19,4 @@ new Vue({
 }).$mount('#app');
 
 
-// vm.items = items;
-
-// console.log(vm.items);
 
