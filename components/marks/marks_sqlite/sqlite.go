@@ -118,7 +118,7 @@ func (flowOp *flowSQLite) List(errTitle, sqlQuery string, stm *sql.Stmt, values 
 	var briefs []crud.Brief
 
 	for rows.Next() {
-		brief := crud.Brief{Info: common.Info{}}
+		brief := crud.Brief{Info: common.Map{}}
 
 		var sourceTime *time.Time
 		var sourceURL, tags string
@@ -252,7 +252,7 @@ func (flowOp *flowSQLite) Tags(*crud.GetOptions) ([]flow.Part, error) {
 const onHas = "on flowSQLite.Has(): "
 
 func (flowOp *flowSQLite) Has(originKey importer.OriginKey) (bool, error) {
-	if len(originKey.SourceKey) < 1 { // || len(originKey.SourceID) < 1
+	if len(originKey.SourceKey) < 1 { // || len(originKey.ID) < 1
 		return false, errors.New(onHas + "empty ID")
 	}
 

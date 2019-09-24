@@ -10,9 +10,9 @@ type Compare func(Something, Something) int64
 type Something interface {
 	IsEqual(Something) bool
 	DifferenceFrom(Something) []Something
-	Variations(common.Info) []Something
+	Variations(common.Map) []Something
 
-	Configure(common.Info)
+	Configure(common.Map)
 }
 
 type Set interface {

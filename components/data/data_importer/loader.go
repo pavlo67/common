@@ -38,9 +38,9 @@ func Load(urls []string, impOp importer.Operator, dataOp data.Operator, l logger
 
 		for _, item := range series.Items {
 			numProcessed++
-			cnt, err := dataOp.Has(item.OriginKey, nil)
+			cnt, err := dataOp.Has(item.Origin, nil)
 			if err != nil {
-				errs = append(errs, errors.Errorf("can't adminOp.Has(%#v): %s", item.OriginKey, err))
+				errs = append(errs, errors.Errorf("can't adminOp.Has(%#v): %s", item.Origin, err))
 				break
 			} else if cnt > 0 {
 				// already exists!

@@ -45,7 +45,7 @@ func (sc *auth_stubStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (sc *auth_stubStarter) Init(conf *config.Config, params common.Info) (info []common.Info, err error) {
+func (sc *auth_stubStarter) Init(conf *config.Config, params common.Map) (info []common.Map, err error) {
 	l = logger.Get()
 
 	sc.interfaceKey = joiner.InterfaceKey(params.StringDefault("interface_key", string(auth.InterfaceKey)))

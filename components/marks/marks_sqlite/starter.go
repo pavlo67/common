@@ -32,7 +32,7 @@ func (fs *flowSQLiteStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (fs *flowSQLiteStarter) Init(conf *config.Config, options common.Info) ([]common.Info, error) {
+func (fs *flowSQLiteStarter) Init(conf *config.Config, options common.Map) ([]common.Map, error) {
 	var errs common.Errors
 
 	l = conf.Logger

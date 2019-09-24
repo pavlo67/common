@@ -35,7 +35,7 @@ func setParams(t *testing.T) []importer_test.ImporterTestCase {
 				//PathToJSON: path,
 
 			},
-			Fount: "https://www.googleapis.com/plus/v1/people/103228082707112449686/activities/public",
+			Fount: "https://www.googleapis.com/plus/flow_v1/people/103228082707112449686/activities/public",
 			DBKey: "",
 		},
 	}

@@ -76,12 +76,12 @@ func (r *RSS) Get(feedURL string, minKey *string) (*importer.Series, error) {
 			SourceURL:  feedURL,
 			SourceTime: &sourceTime,
 
-			OriginKey: data.OriginKey{
-				SourceID:  r.sourceID,
-				SourceKey: originalID,
+			Origin: data.Origin{
+				ID:  r.sourceID,
+				Key: originalID,
 			},
 
-			// Origin
+			// OriginData
 
 			Content: data.Content{
 				Title:   item.Title,

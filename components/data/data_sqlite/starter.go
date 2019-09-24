@@ -66,10 +66,7 @@ func (fs *flowSQLiteStarter) Run(joinerOp joiner.Operator) error {
 		return errors.Wrap(err, "can't init sqllib.Operator")
 	}
 
-	db, err := sqlOp.DB()
-	if err != nil {
-		return errors.Wrap(err, "can't get db from sqllib.Operator")
-	}
+	db := sqlOp.DB()
 
 	flowOp, err := New(db, 0)
 	if err != nil {

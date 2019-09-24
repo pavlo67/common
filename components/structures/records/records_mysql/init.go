@@ -36,7 +36,7 @@ func (nms *records_mysqlStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (nms *records_mysqlStarter) Prepare(conf *config.Config, options, runtimeOptions common.Info) error {
+func (nms *records_mysqlStarter) Prepare(conf *config.Config, options, runtimeOptions common.Map) error {
 
 	l = logger.Get()
 
@@ -62,7 +62,7 @@ func (nms *records_mysqlStarter) Prepare(conf *config.Config, options, runtimeOp
 	return nil
 }
 
-func (nms *records_mysqlStarter) Check() (info []common.Info, err error) {
+func (nms *records_mysqlStarter) Check() (info []common.Map, err error) {
 	return sqllib.CheckSQLTables(nms.mysqlConfig, nms.index.MySQL, nms.tables)
 }
 

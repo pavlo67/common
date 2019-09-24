@@ -88,12 +88,12 @@ func New(db *sql.DB, limit int) (data.Operator, error) {
 
 const onHas = "on dataSQLite.Has(): "
 
-func (dataOp *dataSQLite) Has(originKey data.OriginKey, _ *crud.GetOptions) (uint, error) {
-	if len(originKey.SourceKey) < 1 { // || len(originKey.SourceID) < 1
+func (dataOp *dataSQLite) Has(originKey data.Origin, _ *crud.GetOptions) (uint, error) {
+	if len(originKey.Key) < 1 { // || len(originKey.ID) < 1
 		return 0, errors.New(onHas + "empty ID")
 	}
 
-	values := []interface{}{originKey.SourceID, originKey.SourceKey}
+	values := []interface{}{originKey.ID, originKey.Key}
 
 	var cnt uint
 	err := dataOp.stmHas.QueryRow(values...).Scan(&cnt)
@@ -119,7 +119,7 @@ func (dataOp *dataSQLite) Read(idStr common.ID, _ *crud.GetOptions) (*data.Item,
 	var item data.Item
 	var embedded, tags string
 
-	err = dataOp.stmRead.QueryRow(id).Scan(&item.SourceID, &item.SourceTime, &item.SourceURL, &item.Type, &item.Title, &item.Summary, &item.Details, &item.Href, &embedded, &tags)
+	err = dataOp.stmRead.QueryRow(id).Scan(&item.ID, &item.SourceTime, &item.SourceURL, &item.Type, &item.Title, &item.Summary, &item.Details, &item.Href, &embedded, &tags)
 	if err == sql.ErrNoRows {
 		return nil, common.ErrNotFound
 	}
@@ -153,8 +153,8 @@ func (dataOp *dataSQLite) Save(items []data.Item, marksOp marks.Operator, indexe
 			return ids, errs.Append(errors.Wrapf(err, onSave+"can't .marshal: %s", item.Index)).Err()
 		}
 
-		values := []interface{}{item.SourceID, item.SourceTime, item.SourceURL, item.Type, item.Title, item.Summary, item.Details, item.Href, embedded, strings.Join(item.Tags,
-			"\n"), index, item.SourceKey, item.Origin}
+		values := []interface{}{item.ID, item.SourceTime, item.SourceURL, item.Type, item.Title, item.Summary, item.Details, item.Href, embedded, strings.Join(item.Tags,
+			"\n"), index, item.Key, item.OriginData}
 
 		res, err := dataOp.stmSave.Exec(values...)
 		if err != nil {
@@ -235,7 +235,7 @@ func (dataOp *dataSQLite) List(selector *selectors.Term, indexerOp indexer.Opera
 	var briefs []crud.Brief
 
 	for rows.Next() {
-		brief := crud.Brief{Info: common.Info{}}
+		brief := crud.Brief{Info: common.Map{}}
 
 		var id int64
 		var sourceTime *time.Time
@@ -249,7 +249,7 @@ func (dataOp *dataSQLite) List(selector *selectors.Term, indexerOp indexer.Opera
 		brief.ID = common.ID(strconv.FormatInt(id, 10))
 
 		if sourceTime != nil {
-			brief.Info["source_time"] = *sourceTime
+			brief.Info["source_time"] = sourceTime.Format(time.RFC3339)
 		}
 		brief.Info["source_url"] = sourceURL
 		brief.Info["tags"] = strings.Split(tags, "\n")

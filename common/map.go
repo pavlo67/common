@@ -54,7 +54,7 @@ func (p Map) Strings(key string) []string {
 	return nil
 }
 
-//func (p Map) StringMapKeyDefault(key string, defaultMap map[string]string) map[string]string {
+//func (p Info) StringMapKeyDefault(key string, defaultMap map[string]string) map[string]string {
 //	if valueMap, ok := p[key].(map[string]string); ok {
 //		return valueMap
 //	}

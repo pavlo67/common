@@ -38,7 +38,7 @@ func (lms *links_mysqlStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (lms *links_mysqlStarter) Prepare(conf *config.Config, params common.Info) error {
+func (lms *links_mysqlStarter) Prepare(conf *config.Config, params common.Map) error {
 
 	l = logger.zapGet()
 

@@ -14,43 +14,36 @@ import (
 const InterfaceKey joiner.InterfaceKey = "data"
 
 type Item struct {
-	ID      common.ID  `bson:"_id,omitempty"      json:"id,omitempty"`
-	SavedAt *time.Time `bson:"saved_at,omitempty" json:"saved_at,omitempty"`
-
-	OriginKey `       bson:",inline"          json:",inline"`
-	Origin    string `bson:"origin,omitempty" json:"origin,omitempty"`
-
-	SourceURL  string     `bson:"source_url,omitempty"  json:"source_url,omitempty"`
-	SourceTime *time.Time `bson:"source_time,omitempty" json:"source_time,omitempty"`
-
-	Content  `          bson:"content"            json:"content"`
-	Embedded []Content `bson:"embedded,omitempty" json:"embedded,omitempty"`
+	Brief   `            bson:",inline"           json:",inline"`
+	Details interface{} `bson:"details,omitempty" json:"details,omitempty"`
 
 	Tags  []string       `bson:"tags,omitempty"  json:"tags,omitempty"`
 	Index map[string]int `bson:"index,omitempty" json:"index,omitempty"`
+
+	Origin     `           bson:"origin,omitempty"      json:"origin,omitempty"`
+	OriginTime *time.Time `bson:"origin_time,omitempty" json:"origin_time,omitempty"`
+	OriginData string     `bson:"origin_data,omitempty" json:"origin_data,omitempty"`
 }
 
-type OriginKey struct {
-	SourceID  common.ID `bson:"source_id,omitempty"  json:"source_id,omitempty"`
-	SourceKey string    `bson:"source_key,omitempty" json:"source_key,omitempty"`
+type Origin struct {
+	ID  common.ID `bson:"id,omitempty"  json:"id,omitempty"`
+	Key string    `bson:"key,omitempty" json:"key,omitempty"`
 }
 
-type Content struct {
-	Type    crud.Type `bson:"type"              json:"type"`
-	Title   string    `bson:"title"             json:"title"`
-	Summary string    `bson:"summary,omitempty" json:"summary,omitempty"`
-	Details string    `bson:"details,omitempty" json:"details,omitempty"`
-	Href    string    `bson:"href,omitempty"    json:"href,omitempty"`
+type Brief struct {
+	crud.Brief `             bson:",inline"            json:",inline"`
+	Embedded   []crud.Brief `bson:"embedded,omitempty" json:"embedded,omitempty"`
+	SavedAt    time.Time    `bson:"saved_at,omitempty" json:"saved_at,omitempty"`
 }
 
 type Operator interface {
-	Has(OriginKey, *crud.GetOptions) (uint, error)
+	Has(Origin, *crud.GetOptions) (uint, error)
 	Read(common.ID, *crud.GetOptions) (*Item, error)
 
 	Save([]Item, marks.Operator, indexer.Operator, *crud.SaveOptions) ([]common.ID, error)
 	Remove(*selectors.Term, marks.Operator, indexer.Operator, *crud.RemoveOptions) error
 
-	List(*selectors.Term, indexer.Operator, *crud.GetOptions) ([]crud.Brief, error)
+	List(*selectors.Term, indexer.Operator, *crud.GetOptions) ([]Brief, error)
 	Count(*selectors.Term, indexer.Operator, *crud.GetOptions) ([]crud.Part, error)
 	Reindex(*selectors.Term, indexer.Operator, *crud.GetOptions) error
 }
@@ -62,7 +55,7 @@ type Operator interface {
 //
 //	return []textus.Pars{
 //		{
-//			Fons:            item.Origin,
+//			Fons:            item.OriginData,
 //			Origo:           item.Original,
 //			ClavisContentus: item.ContentKey,
 //			Contentus: &textus.Contentus{
@@ -76,7 +69,7 @@ type Operator interface {
 //
 //}
 
-//func (src *Origin) Key(keyAdd string) string {
+//func (src *OriginData) Key(keyAdd string) string {
 //	if src == nil {
 //		return ""
 //	}
@@ -96,7 +89,7 @@ type Operator interface {
 //		url += "#" + keyAdd
 //	}
 //
-//	sourceID := strings.TrimSpace(src.SourceID)
+//	sourceID := strings.TrimSpace(src.ID)
 //	if sourceID == "" {
 //		return url
 //	}

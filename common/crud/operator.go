@@ -11,11 +11,11 @@ const InterfaceKey joiner.InterfaceKey = "content"
 type Type string
 
 type Brief struct {
-	ID      common.ID   `bson:"_id,omitempty"     json:"id,omitempty"`
-	Type    Type        `bson:"type"                 json:"type"`
-	Title   string      `bson:"title"             json:"title"`
-	Summary string      `bson:"summary,omitempty" json:"summary,omitempty"`
-	Info    common.Info `bson:"info,omitempty"    json:"info,omitempty"`
+	ID        common.ID `bson:"_id,omitempty"        json:"id,omitempty"`
+	Type      Type      `bson:"type"                 json:"type"`
+	Title     string    `bson:"title"                json:"title"`
+	Summary   string    `bson:"summary,omitempty"    json:"summary,omitempty"`
+	OriginURL string    `bson:"origin_url,omitempty" json:"origin_url,omitempty"`
 }
 
 type Item struct {
