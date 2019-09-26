@@ -1,9 +1,15 @@
 <template>
   <div id="app">
     <div id="nav">
+
+      <Confidence/>
+      &nbsp;<br>
+
       <router-link v-for="item in routes" v-bind:key="item.path" :to="item.path">
         {{ item.title }}<br>
       </router-link>
+      <br>&nbsp;<br> {{ aaa }}
+
     </div>
     <router-view/>
   </div>
@@ -35,3 +41,15 @@
 </style>
 
 
+<script>
+  import Confidence from '../../confidence/_vue/Confidence.vue';
+
+  export default {
+    components: {
+      Confidence,
+    },
+  };
+
+
+
+</script>
