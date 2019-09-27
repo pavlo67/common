@@ -1,46 +1,82 @@
 <template>
   <div id="confidence">
-    {{ user }}
+    {{ user.nickname }}
     <br>
-    <button v-on:click="signIn">Авторизуватись</button>
+    <span v-if="user.id">
+      <button v-on:click="signOut">Вийти</button>
+    </span>
+    <span v-else>
+      <input v-model="inputLogin"><input v-model="inputPassword">
+      <button v-on:click="signIn">Авторизуватись</button>
+    </span>
+
   </div>
 </template>
 
 <script>
-    let n;
-    let user;
+    const unauthorizedUser = {nickname: "<unauthorized>"};
+    const authorizedUser = {id: 1, nickname: "pavlo"};
 
-    let userOld = localStorage.getItem('user');
-    if (userOld) {
-      try {
-        user = JSON.parse(userOld);
-      } catch (err) {
-        console.error(err);
-      }
+    // getUserFromAuth -------------------------------------------------------
+    function getUserFromAuth(login, password, cb) {
+        fetch('http://localhost:3333/confidence/v1/auth/auth', { 
+            method: 'POST', // *GET, POST, PUT, DELETE, etc.
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({login, password}),
+
+            // mode: 'cors', // no-cors, cors, *same-origin
+            // cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+            // credentials: 'same-origin', // include, *same-origin, omit
+            // redirect: 'follow', // manual, *follow, error
+            // referrer: 'no-referrer', // no-referrer, *client
+        })
+        .then(response => cb(response.json()));
     }
 
-    if (user instanceof Object) {
-        n = user.id
-    } else {
-        n = 1;
-        user = {id:n, nickname:"pavlo"};
+    // getUser ---------------------------------------------------------------
+    function getUser() {
+        let user;
+
+        let userStored = localStorage.getItem('user');
+        if (userStored) {
+            try {
+                user = JSON.parse(userStored);
+            } catch (err) {
+                console.error(err);
+                return null;
+            }
+        }
+
+        return user instanceof Object ? user : unauthorizedUser;
     }
 
-    localStorage.setItem('user', JSON.stringify(user));
+    // setUser ---------------------------------------------------------------
+    function setUser(user) {
+        localStorage.setItem('user', JSON.stringify(user));
+    }
 
+    // -----------------------------------------------------------------------
     export default {
         name: 'Confidence',
         data: () => {
             return {
-                user: localStorage.getItem('user'),
+                user: getUser(),
             };
         },
 
         methods: {
             signIn: function () {
-                this.user = JSON.stringify({id:++n, nickname:"pavlo"});
-                localStorage.setItem('user', this.user);
-            }
+                getUserFromAuth(this.inputLogin, this.inputPassword, user => {
+                    this.user = user;
+                    setUser(this.user);
+                });
+            },
+            signOut: function () {
+                this.user = unauthorizedUser;
+                setUser(this.user);
+            },
         },
     };
 </script>

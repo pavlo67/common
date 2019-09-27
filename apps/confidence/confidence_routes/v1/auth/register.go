@@ -7,14 +7,13 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/pavlo67/workshop/apps/confidence/confidence_routes"
+	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/libs/filelib"
+	"github.com/pavlo67/workshop/common/libs/strlib"
 	"github.com/pavlo67/workshop/common/server"
 	"github.com/pavlo67/workshop/common/server/server_http"
 	"github.com/pavlo67/workshop/components/auth"
-
-	"github.com/pavlo67/workshop/apps/rest/confidence/confidence_routes"
-	"github.com/pavlo67/workshop/common/config"
-	"github.com/pavlo67/workshop/common/libs/strlib"
 )
 
 var _ = server_http.InitEndpoint(&confidence_routes.Endpoints, "POST", filelib.RelativePath(filelib.CurrentFile(true), confidence_routes.BasePath, confidence_routes.Prefix),

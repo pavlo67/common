@@ -28,7 +28,7 @@ func (ss *identity_jwtStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *identity_jwtStarter) Init(conf *config.Config, options common.Map) (info []common.Map, err error) {
+func (ss *identity_jwtStarter) Init(conf *config.Config, options common.Info) (info []common.Info, err error) {
 	l = logger.Get()
 
 	// var errs basis.Errors

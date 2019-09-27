@@ -37,13 +37,24 @@ func (u *isentityLoginStub) SetCreds(user auth.User, toSet auth.Creds) (*auth.Cr
 }
 
 func (u *isentityLoginStub) Authorize(toAuth auth.Creds) (*auth.User, error) {
-	login := toAuth.Values[auth.CredsNickname]
-	login = toAuth.Values[auth.CredsEmail]
+	login := toAuth.Values[auth.CredsLogin]
+
+	nickname := toAuth.Values[auth.CredsNickname]
+	if nickname != "" {
+		login = nickname
+	}
+
+	email := toAuth.Values[auth.CredsEmail]
+	if email != "" {
+		login = email
+	}
 
 	password := toAuth.Values[auth.CredsPassword]
 	cryptype := toAuth.Cryptype
 
 	for _, user := range u.users {
+		l.Infof("%#v: %s, %s", user, login, password)
+
 		if user.Login == login {
 			switch cryptype {
 			case encrlib.SHA256:

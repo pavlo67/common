@@ -10,6 +10,7 @@ const CredsToken CredsType = "token"
 const CredsPartnerToken CredsType = "partner_token"
 
 const CredsID CredsType = "id"
+const CredsLogin CredsType = "login"
 const CredsNickname CredsType = "nickname"
 const CredsEmail CredsType = "email"
 const CredsPassword CredsType = "password"

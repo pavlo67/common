@@ -8,7 +8,6 @@
       <router-link v-for="item in routes" v-bind:key="item.path" :to="item.path">
         {{ item.title }}<br>
       </router-link>
-      <br>&nbsp;<br> {{ aaa }}
 
     </div>
     <router-view/>

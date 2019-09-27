@@ -7,12 +7,11 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/pavlo67/workshop/apps/confidence/confidence_routes"
 	"github.com/pavlo67/workshop/common/libs/filelib"
 	"github.com/pavlo67/workshop/common/server"
 	"github.com/pavlo67/workshop/common/server/server_http"
 	"github.com/pavlo67/workshop/components/auth"
-
-	"github.com/pavlo67/workshop/apps/rest/confidence/confidence_routes"
 )
 
 var _ = server_http.InitEndpoint(&confidence_routes.Endpoints, "POST", filelib.RelativePath(filelib.CurrentFile(true), confidence_routes.BasePath, confidence_routes.Prefix),
@@ -48,6 +47,10 @@ func workerAuth(_ *auth.User, _ server_http.Params, req *http.Request) (server.R
 	}
 
 	if toAddModified != nil {
+		if user.Creds.Values == nil {
+			user.Creds.Values = map[auth.CredsType]string{}
+		}
+
 		for t, c := range toAddModified.Values {
 			user.Creds.Values[t] = c
 		}

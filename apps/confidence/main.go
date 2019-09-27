@@ -8,8 +8,11 @@ import (
 	"os"
 	"time"
 
+	"github.com/pavlo67/workshop/apps/confidence/confidence_routes"
+	"github.com/pavlo67/workshop/apps/confidence/confidence_routes/v1/auth"
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
+	"github.com/pavlo67/workshop/common/control"
 	"github.com/pavlo67/workshop/common/kv/kv_sqlite"
 	"github.com/pavlo67/workshop/common/libs/filelib"
 	"github.com/pavlo67/workshop/common/logger"
@@ -18,11 +21,7 @@ import (
 	"github.com/pavlo67/workshop/common/starter"
 	"github.com/pavlo67/workshop/components/auth/auth_ecdsa"
 	"github.com/pavlo67/workshop/components/auth/auth_jwt"
-
-	"github.com/pavlo67/workshop/apps/rest/confidence/confidence_routes"
-	"github.com/pavlo67/workshop/apps/rest/confidence/confidence_routes/v1/auth"
-	"github.com/pavlo67/workshop/common/control"
-	"github.com/pavlo67/workshop/components/auth/auth_users_sqlite"
+	"github.com/pavlo67/workshop/components/auth/auth_stub"
 )
 
 var (
@@ -43,7 +42,7 @@ func main() {
 		return
 	}
 
-	configPath := filelib.CurrentPath() + "../../../environments"
+	configPath := filelib.CurrentPath() + "../../environments"
 	configEnv, ok := os.LookupEnv("ENV")
 	if !ok {
 		configEnv = "local"
@@ -87,10 +86,10 @@ func main() {
 	//}
 
 	starters := []starter.Starter{
-		// {auth_stub.Starter(), common.Info{"interface_key": string(auth_stub.InterfaceKey)}},
-		{auth_users_sqlite.Starter(), common.Map{"interface_key": string(auth_users_sqlite.InterfaceKey)}},
-		{auth_ecdsa.Starter(), common.Map{"interface_key": string(auth_ecdsa.InterfaceKey)}},
-		{auth_jwt.Starter(), common.Map{"interface_key": string(auth_jwt.InterfaceKey)}},
+		{auth_stub.Starter(), common.Info{"interface_key": string(auth_stub.InterfaceKey)}},
+		// {auth_users_sqlite.Starter(), common.Info{"interface_key": string(auth_users_sqlite.InterfaceKey)}},
+		{auth_ecdsa.Starter(), common.Info{"interface_key": string(auth_ecdsa.InterfaceKey)}},
+		{auth_jwt.Starter(), common.Info{"interface_key": string(auth_jwt.InterfaceKey)}},
 		{kv_sqlite.Starter(), nil},
 		{server_http_jschmhr.Starter(), nil},
 		{confidence_routes.Starter(), nil},
@@ -110,7 +109,7 @@ func main() {
 		log.Fatalf("no server_http.Operator with key %s", server_http.InterfaceKey)
 	}
 
-	srvOp.HandleFiles("/confidence/api-docs/*filepath", filelib.CurrentPath()+"_api-docs/", nil)
+	srvOp.HandleFiles("/confidence/api-docs/*filepath", filelib.CurrentPath()+"api-docs/", nil)
 
 	v1_auth.Init()
 	for _, ep := range confidence_routes.Endpoints {

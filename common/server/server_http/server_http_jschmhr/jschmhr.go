@@ -85,6 +85,7 @@ func (s *serverHTTPJschmhr) HandleFiles(serverRoute, localPath string, mimeType 
 
 	//fileServer := http.FileServer(http.Dir(localPath))
 	s.httpServeMux.GET(serverRoute, func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Content-Type", *mimeType)
 		OpenFile, err := os.Open(localPath + "/" + p.ByName("filepath"))
 		defer OpenFile.Close()
@@ -162,7 +163,7 @@ func (s *serverHTTPJschmhr) HandleEndpoint(endpoint server_http.Endpoint) error 
 			http.Error(w, err.Error(), responseData.Status)
 			return
 		}
-
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Content-Type", responseData.MIMEType)
 		w.Header().Set("Content-Length", strconv.Itoa(len(responseData.Data)))
 		if responseData.FileName != "" {
