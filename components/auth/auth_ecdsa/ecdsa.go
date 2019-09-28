@@ -105,8 +105,8 @@ func (is *identityECDSA) Authorize(toAuth auth.Creds) (*auth.User, error) {
 	}
 
 	return &auth.User{
-		ID:   common.ID(publKeyAddress),
-		Nick: publKeyAddress,
+		ID:       common.ID(publKeyAddress),
+		Nickname: publKeyAddress,
 	}, nil
 }
 

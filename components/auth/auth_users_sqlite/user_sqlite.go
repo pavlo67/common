@@ -50,11 +50,11 @@ func (u *isentityLoginStub) Authorize(toAuth auth.Creds) (*auth.User, error) {
 				crypt := crypt.SHA256.New()
 				passwordHash, _ := crypt.Generate([]byte(strings.TrimSpace(password)), []byte(u.salt))
 				if password == passwordHash {
-					return &auth.User{ID: user.ID, Nick: user.Login}, nil
+					return &auth.User{ID: user.ID, Nickname: user.Login}, nil
 				}
 			default:
 				if password == user.Password {
-					return &auth.User{ID: user.ID, Nick: user.Login}, nil
+					return &auth.User{ID: user.ID, Nickname: user.Login}, nil
 				}
 			}
 		}

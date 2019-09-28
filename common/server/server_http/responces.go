@@ -6,6 +6,13 @@ import (
 	"github.com/pavlo67/workshop/common"
 )
 
+const (
+	CORSAllowHeaders     = "authorization,content-type"
+	CORSAllowMethods     = "HEAD,GET,POST,PUT,DELETE,OPTIONS"
+	CORSAllowOrigin      = "*"
+	CORSAllowCredentials = "true"
+)
+
 // REST -------------------------------------------------------------------------------------
 
 type RESTDataMessage struct {

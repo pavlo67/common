@@ -53,7 +53,7 @@ func (u *isentityLoginStub) Authorize(toAuth auth.Creds) (*auth.User, error) {
 	cryptype := toAuth.Cryptype
 
 	for _, user := range u.users {
-		l.Infof("%#v: %s, %s", user, login, password)
+		// l.Infof("%#v: %s, %s", user, login, password)
 
 		if user.Login == login {
 			switch cryptype {
@@ -61,11 +61,11 @@ func (u *isentityLoginStub) Authorize(toAuth auth.Creds) (*auth.User, error) {
 				crypt := crypt.SHA256.New()
 				passwordHash, _ := crypt.Generate([]byte(strings.TrimSpace(password)), []byte(u.salt))
 				if password == passwordHash {
-					return &auth.User{ID: user.ID, Nick: user.Login}, nil
+					return &auth.User{ID: user.ID, Nickname: user.Login}, nil
 				}
 			default:
 				if password == user.Password {
-					return &auth.User{ID: user.ID, Nick: user.Login}, nil
+					return &auth.User{ID: user.ID, Nickname: user.Login}, nil
 				}
 			}
 		}

@@ -24,15 +24,17 @@
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({login, password}),
+            body: JSON.stringify({values: {login, password}}),
+            mode: 'cors', // no-cors, cors, *same-origin
 
-            // mode: 'cors', // no-cors, cors, *same-origin
             // cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
             // credentials: 'same-origin', // include, *same-origin, omit
             // redirect: 'follow', // manual, *follow, error
             // referrer: 'no-referrer', // no-referrer, *client
         })
-        .then(response => cb(response.json()));
+        .then(response => {
+            return response.json();
+        }).then(data => cb(data));
     }
 
     // getUser ---------------------------------------------------------------
@@ -68,9 +70,11 @@
 
         methods: {
             signIn: function () {
-                getUserFromAuth(this.inputLogin, this.inputPassword, user => {
-                    this.user = user;
-                    setUser(this.user);
+                getUserFromAuth(this.inputLogin, this.inputPassword, data => {
+                    if (data instanceof Object && data.user instanceof Object) {
+                        this.user = data.user;
+                        setUser(this.user);
+                    }
                 });
             },
             signOut: function () {

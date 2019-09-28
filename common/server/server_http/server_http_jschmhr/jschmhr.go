@@ -79,13 +79,28 @@ func (s *serverHTTPJschmhr) HandleFiles(serverRoute, localPath string, mimeType 
 	// TODO: check localPath
 
 	if mimeType == nil {
+		// TODO!!! CORS
+
 		s.httpServeMux.ServeFiles(serverRoute, http.Dir(localPath))
 		return nil
 	}
 
+	s.httpServeMux.OPTIONS(serverRoute, func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		l.Infof("OPTIONS: %s", serverRoute)
+
+		w.Header().Set("Access-Control-Allow-Origin", server_http.CORSAllowOrigin)
+		w.Header().Set("Access-Control-Allow-Headers", server_http.CORSAllowHeaders)
+		w.Header().Set("Access-Control-Allow-Methods", server_http.CORSAllowMethods)
+		w.Header().Set("Access-Control-Allow-Credentials", server_http.CORSAllowCredentials)
+		w.Header().Set("Content-Type", *mimeType)
+	})
+
 	//fileServer := http.FileServer(http.Dir(localPath))
 	s.httpServeMux.GET(serverRoute, func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Origin", server_http.CORSAllowOrigin)
+		w.Header().Set("Access-Control-Allow-Headers", server_http.CORSAllowHeaders)
+		w.Header().Set("Access-Control-Allow-Methods", server_http.CORSAllowMethods)
+		w.Header().Set("Access-Control-Allow-Credentials", server_http.CORSAllowCredentials)
 		w.Header().Set("Content-Type", *mimeType)
 		OpenFile, err := os.Open(localPath + "/" + p.ByName("filepath"))
 		defer OpenFile.Close()
@@ -157,13 +172,17 @@ func (s *serverHTTPJschmhr) HandleEndpoint(endpoint server_http.Endpoint) error 
 		//	}
 		//}
 
+		w.Header().Set("Access-Control-Allow-Origin", server_http.CORSAllowOrigin)
+		w.Header().Set("Access-Control-Allow-Headers", server_http.CORSAllowHeaders)
+		w.Header().Set("Access-Control-Allow-Methods", server_http.CORSAllowMethods)
+		w.Header().Set("Access-Control-Allow-Credentials", server_http.CORSAllowCredentials)
+
 		responseData, err := endpoint.WorkerHTTP(user, params, r)
 		if err != nil {
 			l.Error(err)
 			http.Error(w, err.Error(), responseData.Status)
 			return
 		}
-		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Content-Type", responseData.MIMEType)
 		w.Header().Set("Content-Length", strconv.Itoa(len(responseData.Data)))
 		if responseData.FileName != "" {
@@ -180,6 +199,16 @@ func (s *serverHTTPJschmhr) HandleEndpoint(endpoint server_http.Endpoint) error 
 			l.Error("can't write response data", err)
 		}
 	}
+
+	s.httpServeMux.OPTIONS(path, func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		// l.Infof("OPTIONS: %s", path)
+
+		w.Header().Set("Access-Control-Allow-Origin", server_http.CORSAllowOrigin)
+		w.Header().Set("Access-Control-Allow-Headers", server_http.CORSAllowHeaders)
+		w.Header().Set("Access-Control-Allow-Methods", server_http.CORSAllowMethods)
+		w.Header().Set("Access-Control-Allow-Credentials", server_http.CORSAllowCredentials)
+		// w.Header().Set("Content-Type", *mimeType)
+	})
 
 	l.Infof("%-6s: %s", method, path)
 	switch method {

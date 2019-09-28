@@ -67,7 +67,7 @@ func (authOp *authJWT) SetCreds(user auth.User, creds auth.Creds) (*auth.Creds, 
 		},
 
 		// !!! original user.Creds are disabled here
-		Creds: auth.Creds{Values: map[auth.CredsType]string{auth.CredsNickname: user.Nick}},
+		Creds: auth.Creds{Values: map[auth.CredsType]string{auth.CredsNickname: user.Nickname}},
 	}
 	// add claims to the Builder
 	builder := authOp.builder.Claims(jc)
@@ -107,9 +107,9 @@ func (authOp *authJWT) Authorize(toAuth auth.Creds) (*auth.User, error) {
 	}
 
 	return &auth.User{
-		ID:    common.ID(res.ID),
-		Nick:  nick,
-		Creds: res.Creds,
+		ID:       common.ID(res.ID),
+		Nickname: nick,
+		Creds:    res.Creds,
 	}, nil
 }
 

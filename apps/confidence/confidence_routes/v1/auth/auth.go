@@ -7,14 +7,14 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/workshop/apps/confidence/confidence_routes"
+	r "github.com/pavlo67/workshop/apps/confidence/confidence_routes"
 	"github.com/pavlo67/workshop/common/libs/filelib"
 	"github.com/pavlo67/workshop/common/server"
 	"github.com/pavlo67/workshop/common/server/server_http"
 	"github.com/pavlo67/workshop/components/auth"
 )
 
-var _ = server_http.InitEndpoint(&confidence_routes.Endpoints, "POST", filelib.RelativePath(filelib.CurrentFile(true), confidence_routes.BasePath, confidence_routes.Prefix),
+var _ = server_http.InitEndpoint(&r.Endpoints, "POST", filelib.RelativePath(filelib.CurrentFile(true), r.BasePath, r.Prefix),
 	nil, workerAuth, "")
 var _ server_http.WorkerHTTP = workerAuth
 
@@ -25,7 +25,7 @@ func workerAuth(_ *auth.User, _ server_http.Params, req *http.Request) (server.R
 		return server.ResponseRESTError(http.StatusBadRequest, errors.Wrap(err, "can't read body"))
 	}
 
-	// log.Printf("%s", credsJSON)
+	r.L.Infof("%s", credsJSON)
 
 	var toAuth auth.Creds
 	err = json.Unmarshal(credsJSON, &toAuth)
@@ -33,7 +33,7 @@ func workerAuth(_ *auth.User, _ server_http.Params, req *http.Request) (server.R
 		return server.ResponseRESTError(http.StatusBadRequest, errors.Wrapf(err, "can't unmarshal body: %s", credsJSON))
 	}
 
-	user, errs := auth.GetUser(toAuth, confidence_routes.AuthOps, nil)
+	user, errs := auth.GetUser(toAuth, r.AuthOps, nil)
 	if len(errs) > 0 {
 		return server.ResponseRESTError(http.StatusForbidden, errs.Err())
 	}
@@ -41,7 +41,7 @@ func workerAuth(_ *auth.User, _ server_http.Params, req *http.Request) (server.R
 		return server.ResponseRESTError(http.StatusForbidden, errors.New("no user authorized"))
 	}
 
-	toAddModified, err := confidence_routes.AuthOpToSetToken.SetCreds(*user, auth.Creds{}) // TODO!!! add custom toAddModified
+	toAddModified, err := r.AuthOpToSetToken.SetCreds(*user, auth.Creds{}) // TODO!!! add custom toAddModified
 	if err != nil {
 		return server.ResponseRESTError(http.StatusInternalServerError, errors.Wrap(err, "can't create JWT"))
 	}
@@ -55,5 +55,8 @@ func workerAuth(_ *auth.User, _ server_http.Params, req *http.Request) (server.R
 			user.Creds.Values[t] = c
 		}
 	}
+
+	r.L.Info(user)
+
 	return server.ResponseRESTOk(map[string]interface{}{"user": user})
 }

@@ -18,9 +18,9 @@ const Anyone common.ID = "_"
 //}
 
 type User struct {
-	ID    common.ID `bson:"id"                json:"id"`
-	Nick  string    `bson:"nick"              json:"nick"`
-	Creds Creds     `bson:"creds, omitempty" json:"creds, omitempty"`
+	ID       common.ID `bson:"id"               json:"id"`
+	Nickname string    `bson:"nickname"         json:"nickname"`
+	Creds    Creds     `bson:"creds, omitempty" json:"creds, omitempty"`
 	// Accesses []Access `bson:"accesses,omitempty" json:"accesses,omitempty"`
 }
 
