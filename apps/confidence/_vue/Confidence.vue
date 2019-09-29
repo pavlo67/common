@@ -1,21 +1,21 @@
 <template>
   <div id="confidence">
-    {{ user.nickname }}
-    <br>
-    <span v-if="user.id">
-      <button v-on:click="signOut">Вийти</button>
+    <span v-if="user">
+      {{ user.nickname }}
+      <br><button v-on:click="signOut">Вийти</button>
     </span>
     <span v-else>
-      <input v-model="inputLogin"><input v-model="inputPassword">
-      <button v-on:click="signIn">Авторизуватись</button>
+      <input v-model="inputLogin"    style="width:80px;margin-right:5px;">
+      <input v-model="inputPassword" style="width:80px;margin-right:5px;" type="password">
+      <button v-on:click="signIn">»</button>
+      <br>забули-сте пароль?
     </span>
 
   </div>
 </template>
 
 <script>
-    const unauthorizedUser = {nickname: "<unauthorized>"};
-    const authorizedUser = {id: 1, nickname: "pavlo"};
+    const unauthorizedUser = undefined;
 
     // getUserFromAuth -------------------------------------------------------
     function getUserFromAuth(login, password, cb) {
@@ -88,5 +88,6 @@
 <style lang="scss">
   #confidence {
     background-color: #ffffff;
+    padding: 5px;
   }
 </style>

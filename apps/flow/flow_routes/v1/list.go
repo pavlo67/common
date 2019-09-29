@@ -2,10 +2,9 @@ package flow_v1
 
 import (
 	"net/http"
-
 	"time"
 
-	"github.com/pavlo67/workshop/apps/rest/flow/flow_routes"
+	r "github.com/pavlo67/workshop/apps/flow/flow_routes"
 	"github.com/pavlo67/workshop/common/crud"
 	"github.com/pavlo67/workshop/common/libs/filelib"
 	"github.com/pavlo67/workshop/common/server"
@@ -14,7 +13,7 @@ import (
 	"github.com/pavlo67/workshop/components/data"
 )
 
-var _ = server_http.InitEndpoint(&flow_routes.Endpoints, "GET", filelib.RelativePath(filelib.CurrentFile(true), flow_routes.PathBase, flow_routes.Prefix), nil, workerList, "")
+var _ = server_http.InitEndpoint(&r.Endpoints, "GET", filelib.RelativePath(filelib.CurrentFile(true), r.PathBase, r.Prefix), nil, workerList, "")
 
 var _ server_http.WorkerHTTP = workerList
 

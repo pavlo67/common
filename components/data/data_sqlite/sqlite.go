@@ -5,13 +5,11 @@ import (
 	"encoding/json"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/crud"
-
 	"github.com/pavlo67/workshop/common/libs/sqllib"
 	"github.com/pavlo67/workshop/common/selectors"
 
@@ -24,13 +22,13 @@ const limitDefault = 200
 
 var tableData = "data"
 
-var fieldsToList = []string{"id", "source_time", "source_url", "types", "title", "summary", "tags"}
+var fieldsToList = []string{"id", "source_url", "types", "title", "summary", "tags", "saved_at"}
 var fieldsToListStr = strings.Join(fieldsToList, ", ")
 
-var fieldsToRead = []string{"source_id", "source_time", "source_url", "types", "title", "summary", "details", "href", "embedded", "tags"}
+var fieldsToRead = []string{"source_id", "source_time", "source_url", "types", "title", "summary", "details", "embedded", "tags", "saved_at"}
 var fieldsToReadStr = strings.Join(fieldsToRead, ", ")
 
-var fieldsToSave = []string{"source_id", "source_time", "source_url", "types", "title", "summary", "details", "href", "embedded", "tags", "indexes", "source_key", "origin"}
+var fieldsToSave = []string{"source_id", "source_time", "source_url", "types", "title", "summary", "details", "embedded", "tags", "indexes", "source_key", "origin"}
 var fieldsToSaveStr = strings.Join(fieldsToSave, ", ")
 
 var _ data.Operator = &dataSQLite{}
@@ -119,7 +117,7 @@ func (dataOp *dataSQLite) Read(idStr common.ID, _ *crud.GetOptions) (*data.Item,
 	var item data.Item
 	var embedded, tags string
 
-	err = dataOp.stmRead.QueryRow(id).Scan(&item.ID, &item.SourceTime, &item.SourceURL, &item.Type, &item.Title, &item.Summary, &item.Details, &item.Href, &embedded, &tags)
+	err = dataOp.stmRead.QueryRow(id).Scan(&item.ID, &item.OriginTime, &item.OriginURL, &item.Type, &item.Title, &item.Summary, &item.Details, &embedded, &tags, &item.SavedAt)
 	if err == sql.ErrNoRows {
 		return nil, common.ErrNotFound
 	}
@@ -153,7 +151,7 @@ func (dataOp *dataSQLite) Save(items []data.Item, marksOp marks.Operator, indexe
 			return ids, errs.Append(errors.Wrapf(err, onSave+"can't .marshal: %s", item.Index)).Err()
 		}
 
-		values := []interface{}{item.ID, item.SourceTime, item.SourceURL, item.Type, item.Title, item.Summary, item.Details, item.Href, embedded, strings.Join(item.Tags,
+		values := []interface{}{item.ID, item.OriginTime, item.OriginURL, item.Type, item.Title, item.Summary, item.Details, embedded, strings.Join(item.Tags,
 			"\n"), index, item.Key, item.OriginData}
 
 		res, err := dataOp.stmSave.Exec(values...)
@@ -221,7 +219,7 @@ func (dataOp *dataSQLite) Remove(*selectors.Term, marks.Operator, indexer.Operat
 
 const onList = "on dataSQLite.List()"
 
-func (dataOp *dataSQLite) List(selector *selectors.Term, indexerOp indexer.Operator, options *crud.GetOptions) ([]crud.Brief, error) {
+func (dataOp *dataSQLite) List(selector *selectors.Term, indexerOp indexer.Operator, options *crud.GetOptions) ([]data.Brief, error) {
 	var values []interface{}
 
 	rows, err := dataOp.stmList.Query(values...)
@@ -232,28 +230,19 @@ func (dataOp *dataSQLite) List(selector *selectors.Term, indexerOp indexer.Opera
 	}
 	defer rows.Close()
 
-	var briefs []crud.Brief
+	var briefs []data.Brief
 
 	for rows.Next() {
-		brief := crud.Brief{Info: common.Map{}}
+		brief := data.Brief{}
 
 		var id int64
-		var sourceTime *time.Time
-		var sourceURL, tags string
 
-		err = rows.Scan(&id, &sourceTime, &sourceURL, &brief.Type, &brief.Title, &brief.Summary, &tags)
+		err = rows.Scan(&id, &brief.OriginURL, &brief.Type, &brief.Title, &brief.Summary, &brief.Tags, &brief.SavedAt)
 		if err != nil {
 			return briefs, errors.Wrapf(err, onList+sqllib.CantScanQueryRow, dataOp.sqlList, values)
 		}
 
 		brief.ID = common.ID(strconv.FormatInt(id, 10))
-
-		if sourceTime != nil {
-			brief.Info["source_time"] = sourceTime.Format(time.RFC3339)
-		}
-		brief.Info["source_url"] = sourceURL
-		brief.Info["tags"] = strings.Split(tags, "\n")
-
 		briefs = append(briefs, brief)
 	}
 	err = rows.Err()

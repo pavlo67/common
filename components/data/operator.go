@@ -17,7 +17,6 @@ type Item struct {
 	Brief   `            bson:",inline"           json:",inline"`
 	Details interface{} `bson:"details,omitempty" json:"details,omitempty"`
 
-	Tags  []string       `bson:"tags,omitempty"  json:"tags,omitempty"`
 	Index map[string]int `bson:"index,omitempty" json:"index,omitempty"`
 
 	Origin     `           bson:"origin,omitempty"      json:"origin,omitempty"`
@@ -33,6 +32,7 @@ type Origin struct {
 type Brief struct {
 	crud.Brief `             bson:",inline"            json:",inline"`
 	Embedded   []crud.Brief `bson:"embedded,omitempty" json:"embedded,omitempty"`
+	Tags       []string     `bson:"tags,omitempty"  json:"tags,omitempty"`
 	SavedAt    time.Time    `bson:"saved_at,omitempty" json:"saved_at,omitempty"`
 }
 
