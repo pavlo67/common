@@ -9,9 +9,9 @@ import routes from './parts';
 
 Vue.config.productionTip = false;
 
-
-var appManager = new Vue({
-  data: { routes, aaa: "asdgfttry" },
+// var appManager =
+new Vue({
+  data: { routes },
   router,
   // store,
   // render: h => h(App),
