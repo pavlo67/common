@@ -1,24 +1,17 @@
 package manager
 
 import (
-	"bufio"
 	"io"
-	"os"
 
 	"github.com/pavlo67/workshop/common/logger"
 )
 
-func Log(dataStream io.Reader, logfile string, l logger.Operator) {
+func Redirect(key string, dataStream io.ReadCloser, outStream io.Writer, l logger.Operator) {
+	defer dataStream.Close()
+	if _, err := io.Copy(outStream, dataStream); err != nil {
 
-	outfile, err := os.Create(logfile)
-	if err != nil {
-		l.Errorf("can't os.Create('%s')", logfile)
+		// TODO: insert key into each output line
 
-		// TODO??? panic(err)
-
-		return
+		l.Errorf("%s: can't io.Copy(outStream, dataStream): %s", key, err)
 	}
-	defer outfile.Close()
-
-	io.Copy(bufio.NewWriter(outfile), dataStream)
 }

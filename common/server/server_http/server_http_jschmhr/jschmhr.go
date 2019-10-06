@@ -24,21 +24,13 @@ type serverHTTPJschmhr struct {
 	certFileTLS  string
 	keyFileTLS   string
 	authOps      []auth.Operator
-
-	//htmlTemplate string
-	//templator    server_http.Templator
 }
 
-func New(port int, certFileTLS, keyFileTLS string, authOps []auth.Operator) (server_http.Operator, error) {
-	if port <= 0 {
-		return nil, errors.Errorf("serverOp hasn't started: no correct data for http port: %d", port)
-	}
-
+func New(certFileTLS, keyFileTLS string, authOps []auth.Operator) (server_http.Operator, error) {
 	router := httprouter.New()
 
 	return &serverHTTPJschmhr{
 		httpServer: &http.Server{
-			Addr:           ":" + strconv.Itoa(port),
 			Handler:        router,
 			ReadTimeout:    10 * time.Second,
 			WriteTimeout:   10 * time.Second,
@@ -54,21 +46,25 @@ func New(port int, certFileTLS, keyFileTLS string, authOps []auth.Operator) (ser
 }
 
 // start wraps and verbalizes http.Server.ListenAndServe method.
-func (s *serverHTTPJschmhr) Start() {
-	l.Info("Server is starting on address ", s.httpServer.Addr)
+func (s *serverHTTPJschmhr) Start(port int) error {
+	if s == nil {
+		return errors.Errorf("no serverOp to start")
+	}
 
-	var err error
+	if port <= 0 {
+		return errors.Errorf("serverOp can't start: no correct data for http port: %d", port)
+	}
+
+	s.httpServer.Addr = ":" + strconv.Itoa(port)
+
+	l.Info("Server is starting on address ", s.httpServer.Addr)
 
 	if s.certFileTLS != "" && s.keyFileTLS != "" {
 		go http.ListenAndServe(":80", http.HandlerFunc(server_http.Redirect))
-		err = s.httpServer.ListenAndServeTLS(s.certFileTLS, s.keyFileTLS)
-	} else {
-		err = s.httpServer.ListenAndServe()
+		return s.httpServer.ListenAndServeTLS(s.certFileTLS, s.keyFileTLS)
 	}
 
-	if err != nil {
-		l.Error(err)
-	}
+	return s.httpServer.ListenAndServe()
 }
 
 var reHTMLExt = regexp.MustCompile(`\.html?$`)

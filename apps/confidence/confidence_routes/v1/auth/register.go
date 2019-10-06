@@ -8,7 +8,6 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/apps/confidence/confidence_routes"
-	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/libs/filelib"
 	"github.com/pavlo67/workshop/common/libs/strlib"
 	"github.com/pavlo67/workshop/common/server"
@@ -24,8 +23,7 @@ func workerRegister(_ *auth.User, _ server_http.Params, req *http.Request) (serv
 
 	var testModePath string
 
-	cfg := config.GetActual()
-	if cfg != nil && strlib.In(cfg.Server.Testers, req.RemoteAddr) {
+	if confidence_routes.Cfg != nil && strlib.In(confidence_routes.Cfg.ServerHTTP.Testers, req.RemoteAddr) {
 		testModePath = req.Header.Get("Test-Mode-Path")
 	}
 

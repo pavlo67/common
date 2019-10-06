@@ -1,8 +1,6 @@
 package server_http_jschmhr
 
 import (
-	"fmt"
-
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
@@ -40,10 +38,7 @@ func (ss *server_http_jschmhrStarter) Init(conf *config.Config, options common.I
 	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(server_http.InterfaceKey)))
 	// ss.interfaceKeyRouter = joiner.InterfaceKey(options.StringDefault("interface_key_router", string(controller.InterfaceKey)))
 
-	ss.config = conf.Server
-	if ss.config.Port <= 0 {
-		errs = append(errs, fmt.Errorf("wrong port for serverOp: %#v", ss.config))
-	}
+	ss.config = conf.ServerHTTP
 
 	// TODO: use more then one static path
 	if staticPath, ok := options["static_path"]; ok {
@@ -69,7 +64,7 @@ func (ss *server_http_jschmhrStarter) Run(joinerOp joiner.Operator) error {
 		}
 	}
 
-	srvOp, err := New(ss.config.Port, ss.config.TLSCertFile, ss.config.TLSKeyFile, authOps)
+	srvOp, err := New(ss.config.TLSCertFile, ss.config.TLSKeyFile, authOps)
 	if err != nil {
 		return errors.Wrap(err, "can't init serverHTTPJschmhr.Operator")
 	}

@@ -22,6 +22,7 @@ func Starter() starter.Operator {
 	return &confidenceStarter{}
 }
 
+var Cfg *config.Config
 var L logger.Operator
 var AuthOps []auth.Operator
 
@@ -44,6 +45,8 @@ func (ss *confidenceStarter) Name() string {
 }
 
 func (ss *confidenceStarter) Init(cfg *config.Config, options common.Info) (info []common.Info, err error) {
+	Cfg = cfg
+
 	var errs common.Errors
 
 	L = cfg.Logger

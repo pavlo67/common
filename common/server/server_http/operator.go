@@ -17,7 +17,7 @@ type Operator interface {
 	HandleEndpoint(endpoint Endpoint) error
 	HandleFiles(serverPath, localPath string, mimeType *string) error
 
-	Start()
+	Start(port int) error
 }
 
 func InitEndpoints(op Operator, endpoints []Endpoint) common.Errors {

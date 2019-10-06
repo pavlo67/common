@@ -5,7 +5,11 @@ import (
 	"fmt"
 	"os"
 
+	"log"
+
+	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/control"
+	"github.com/pavlo67/workshop/common/libs/filelib"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/manager"
 )
@@ -15,19 +19,25 @@ func main() {
 	flag.StringVar(&path, "path", "", "application manifest path")
 	flag.Parse()
 
-	//configPath := filelib.CurrentPath() + "../../environments"
-	//configEnv, ok := os.LookupEnv("ENV")
-	//if !ok {
-	//	configEnv = "local"
-	//}
+	configPath := filelib.CurrentPath() + "../../environments"
+	configEnv, ok := os.LookupEnv("ENV")
+	if !ok {
+		configEnv = "local"
+	}
 
-	err := logger.Init(logger.Config{LogLevel: logger.DebugLevel})
+	cfg, err := config.Get(configPath, configEnv)
+	if err != nil {
+		log.Fatalf("can't config.Get(%s): %s", configPath, err)
+	}
+	if cfg == nil {
+		log.Fatalf("can't load config, no data!")
+	}
+
+	l, err := logger.Init(logger.Config{LogLevel: logger.DebugLevel}, cfg)
 	if err != nil {
 		fmt.Printf("can't logger.Init, error: %v\n", err)
 		os.Exit(1)
 	}
-
-	l := logger.Get()
 	if l == nil {
 		fmt.Printf("no logger!")
 		os.Exit(1)
@@ -35,7 +45,7 @@ func main() {
 
 	control.Init(l)
 
-	app, err := manager.Init(path, l)
+	app, err := manager.Init(path, cfg, nil)
 	if err != nil {
 		l.Fatal(err)
 	}

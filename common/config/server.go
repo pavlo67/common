@@ -10,8 +10,6 @@ type ServerAccess struct {
 
 // Server ...
 type Server struct {
-	Port int `bson:"port" json:"port"`
-
 	TLSCertFile string `bson:"tls_cert_file" json:"tls_cert_file"`
 	TLSKeyFile  string `bson:"tls_key_file"  json:"tls_key_file"`
 

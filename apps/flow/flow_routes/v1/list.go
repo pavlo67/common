@@ -4,13 +4,14 @@ import (
 	"net/http"
 	"time"
 
-	r "github.com/pavlo67/workshop/apps/flow/flow_routes"
 	"github.com/pavlo67/workshop/common/crud"
 	"github.com/pavlo67/workshop/common/libs/filelib"
 	"github.com/pavlo67/workshop/common/server"
 	"github.com/pavlo67/workshop/common/server/server_http"
 	"github.com/pavlo67/workshop/components/auth"
 	"github.com/pavlo67/workshop/components/data"
+
+	r "github.com/pavlo67/workshop/apps/flow/flow_routes"
 )
 
 var _ = server_http.InitEndpoint(&r.Endpoints, "GET", filelib.RelativePath(filelib.CurrentFile(true), r.PathBase, r.Prefix), nil, workerList, "")

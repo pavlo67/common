@@ -14,14 +14,14 @@ import (
 	"github.com/pavlo67/workshop/common/logger"
 )
 
-func StartComponent(c Starter, conf *config.Config, args []string, joinerOp joiner.Operator) error {
+func StartComponent(c Starter, cfg *config.Config, args []string, joinerOp joiner.Operator) error {
 	l := logger.Get()
 
 	l.Info("checking component: ", c.Name())
 
 	startOptions := c.CorrectedOptions(ReadOptions(args))
 
-	info, err := c.Init(conf, startOptions)
+	info, err := c.Init(cfg, startOptions)
 	for _, i := range info {
 		log.Println(i)
 	}
@@ -48,8 +48,6 @@ func Run(starters []Starter, cfg *config.Config, args []string, label string) (j
 	if cfg == nil {
 		return nil, errors.New("no config data for starter.Prepare()")
 	}
-
-	config.SetActual(cfg)
 
 	l := cfg.Logger
 

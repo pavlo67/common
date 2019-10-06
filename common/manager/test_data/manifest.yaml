@@ -1,5 +1,8 @@
-requested: ['flow_port', 'confidence_port']
+requested: [flow_port, 'confidence_port']
 subpaths:
   - '../flow'
   - '../condidence'
   - '../manager.vue'
+command: test
+args: [sample]
+workdir: './'

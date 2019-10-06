@@ -1,29 +1,34 @@
-*.json5
+# Environments
+environments/*.json5
+environments/*.yaml
+environments/*.yml
 .env
-
-*.test
-
-node_modules
-coverage
-build
-
-.DS_Store
-
-/dist
-
-/tests/e2e/videos/
-/tests/e2e/screenshots/
-
-# local env files
 .env.local
 .env.*.local
 
-# Log files
+# Dependencies
+node_modules
+#vendor
+
+# Test files & executables
+build
+dist
+coverage
+*.test
+/tests/e2e/videos/
+/tests/e2e/screenshots/
+
+
+# Log files & reports
+*.xls
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Editor directories and files
+
+# IDE & editor temporary files & configs
+.DS_Store
 .idea
 .vscode
 *.suo

@@ -1,5 +1,9 @@
 package logger
 
+import (
+	"errors"
+)
+
 type Level int32
 
 type Config struct {
@@ -39,8 +43,18 @@ type Operator interface {
 	Fatalf(template string, args ...interface{})
 }
 
-func Init(cfg Config) error {
-	return zapInit(cfg)
+func Init(loggerCfg Config) (Operator, error) {
+	err := zapInit(loggerCfg)
+	if err != nil {
+		return nil, err
+	}
+
+	l := Operator(zapGet())
+	if l == nil {
+		return nil, errors.New("no logger ???")
+	}
+
+	return l, nil
 }
 
 func Get() Operator {

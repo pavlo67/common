@@ -1,14 +1,11 @@
 package config
 
 import (
-	"fmt"
 	"io/ioutil"
-	"sync"
-
-	"github.com/pkg/errors"
-	"github.com/yosuke-furukawa/json5/encoding/json5"
 
 	"github.com/pavlo67/workshop/common/logger"
+	"github.com/pkg/errors"
+	"gopkg.in/yaml.v2"
 )
 
 var ErrNoConfig = errors.New("no config")
@@ -17,150 +14,47 @@ var ErrNoValue = errors.New("no value")
 
 // -----------------------------------------------------------------------------
 
-var mutex = &sync.RWMutex{}
-var actualConfig *Config
+type Config struct {
+	ServerHTTP Server `yaml:"server_http,omitempty"  json:"server_http,omitempty"`
 
-func SetActual(cfg *Config) {
-	mutex.Lock()
-	defer mutex.Unlock()
+	Postgres ServerAccess `yaml:"postgres,omitempty" json:"postgres,omitempty"`
+	MySQL    ServerAccess `yaml:"mysql,omitempty"    json:"mysql,omitempty"`
+	SQLite   ServerAccess `yaml:"sqlite,omitempty"   json:"sqlite,omitempty"`
+	SMTP     ServerAccess `yaml:"smtp,omitempty"     json:"smtp,omitempty"`
+	POP3     ServerAccess `yaml:"pop3,omitempty"     json:"pop3,omitempty"`
 
-	actualConfig = cfg
+	Envs map[string]string `yaml:"envs,omitempty"  json:"envs,omitempty"`
+
+	Logger logger.Operator `yaml:"-"  json:"-"`
 }
 
-func GetActual() *Config {
-	mutex.RLock()
-	defer mutex.RUnlock()
+// -----------------------------------------------------------------------------
 
-	cfg := &Config{}
-	*cfg = *actualConfig
-
-	return cfg
-}
-
-func Get(path, environment string, l logger.Operator) (*Config, error) {
+func Get(path, environment string) (*Config, logger.Operator, error) {
 
 	if len(path) < 1 {
-		return nil, errors.New("empty config path")
+		return nil, nil, errors.New("empty config path")
 	}
 
-	cfgFile := path + "/" + environment + ".json5"
+	cfgFile := path + "/" + environment + ".yaml"
 	data, err := ioutil.ReadFile(cfgFile)
 	if err != nil {
-		return nil, errors.Wrapf(err, "no config file in '%s'", cfgFile)
+		return nil, nil, errors.Wrapf(err, "can't read config file from '%s'", cfgFile)
 	}
 
-	return readConfig(data, l)
-}
-
-type Config struct {
-	//Identity map[string]string
-	//Credentials map[string]string
-
-	Server Server
-
-	SMTP ServerAccess
-	POP3 ServerAccess
-
-	MySQL    ServerAccess
-	SQLite   ServerAccess
-	Postgres ServerAccess
-
-	//Facebook  []string
-	//Twitter   map[string]string
-	//Instagram map[string]string
-	//Google    map[string]string
-
-	//Strings map[string]string
-	//Flags   map[string]bool
-
-	Logger logger.Operator
-}
-
-func readConfig(data []byte, l logger.Operator) (*Config, error) {
-	if l == nil {
-		return nil, errors.New("no logger")
-	}
-
-	var configRaw map[string]json5.RawMessage
-	err := json5.Unmarshal(data, &configRaw)
+	cfg := &Config{}
+	err = yaml.Unmarshal(data, cfg)
 	if err != nil {
-		return nil, errors.Wrapf(err, "error reading json to configRaw: %v", string(data))
+		return nil, nil, errors.Wrapf(err, "can't yaml.Unmarshal('%s') from config '%s'", data, cfgFile)
 	}
 
-	var config map[string]interface{}
-
-	err = json5.Unmarshal(data, &config)
+	// TODO: use debug level from environment or config
+	cfg.Logger, err = logger.Init(logger.Config{LogLevel: logger.DebugLevel})
 	if err != nil {
-		return nil, errors.Wrapf(err, "error reading json to config: %v", string(data))
+		return nil, nil, errors.Wrap(err, "can't logger.Init()")
 	}
 
-	conf := Config{
-		//Identity: map[string]string{},
-		//Strings: map[string]string{},
-		//Flags:   map[string]bool{},
-		Logger: l,
-	}
-
-	for k := range config {
-		switch k {
-		//case "identity":
-		//	err = json5.unmarshal(configRaw[k], &conf.identity)
-
-		case "mysql":
-			err = json5.Unmarshal(configRaw[k], &conf.MySQL)
-		case "sqlite":
-			err = json5.Unmarshal(configRaw[k], &conf.SQLite)
-		case "postgres":
-			err = json5.Unmarshal(configRaw[k], &conf.Postgres)
-
-		case "smtp":
-			err = json5.Unmarshal(configRaw[k], &conf.SMTP)
-		case "pop3":
-			err = json5.Unmarshal(configRaw[k], &conf.POP3)
-		//case "sender":
-		//	err = json5.unmarshal(configRaw[k], &conf.Sender)
-		case "server":
-			err = json5.Unmarshal(configRaw[k], &conf.Server)
-			//case "fileslocal":
-			//	err = json5.unmarshal(configRaw[k], &conf.fileslocal)
-			//case "paths":
-			//	err = json5.unmarshal(configRaw[k], &conf.paths)
-			//case "credentials":
-			//	err = json5.unmarshal(configRaw[k], &conf.Credentials)
-
-			//case "twitter":
-			//	err = json5.unmarshal(configRaw[k], &conf.twitter)
-			//case "instagram":
-			//	err = json5.unmarshal(configRaw[k], &conf.instagram)
-			//case "google":
-			//	err = json5.unmarshal(configRaw[k], &conf.google)
-			//case "facebook":
-			//	err = json5.unmarshal(configRaw[k], &conf.facebook)
-			//default:
-			//	switch v := v0.(type) {
-			//	case string:
-			//		conf.Strings[k] = v
-			//	case []byte:
-			//		conf.Strings[k] = string(v)
-			//	case float64, float32:
-			//		conf.Strings[k] = fmt.Sprintf("%.3f", v)
-			//		// no integer values in JSON, only float
-			//	case bool:
-			//		conf.Flags[k] = v
-			//	default:
-			//		l.Errorf("bad config value for key `%s`: %#v\n", k, v)
-			//	}
-			//	continue
-			//
-		}
-
-		if err != nil {
-			fmt.Printf("can't decode config value %v: %v\n", k, string(configRaw[k]))
-		}
-
-	}
-
-	return &conf, nil
+	return cfg, cfg.Logger, nil
 }
 
 //// String ...
