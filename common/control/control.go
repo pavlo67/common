@@ -9,8 +9,7 @@ import (
 )
 
 var (
-	signalChan = make(chan os.Signal, 1)
-	exitChan   = make(chan int, 1)
+	signalChan = make(chan os.Signal, 1000)
 )
 
 var l logger.Operator
@@ -22,29 +21,19 @@ func Init(lInit logger.Operator) {
 	signal.Notify(signalChan, syscall.SIGTERM)
 	signal.Notify(signalChan, syscall.SIGQUIT)
 	signal.Notify(signalChan, syscall.SIGPIPE)
-	//signal.Ignore(syscall.SIGPIPE) //this is totally unhandled ignoring of signal
 
-	go processExit()
 	go processSignal()
 }
 
 func processSignal() {
-	sig := <-signalChan
-	l.Errorf("got signal, value = \"%s\"\n", sig.String())
-	if sig == syscall.SIGPIPE {
-		signal.Reset(syscall.SIGPIPE)
-		return
-	}
-	exitChan <- 1
-}
+	for {
+		sig := <-signalChan
 
-func processExit() {
-	select {
-	case code := <-exitChan:
-		//ohlc.Close()
-		//sheduler.Stop()
-		l.Infof("service exiting, code %d\n", code)
-
-		os.Exit(code)
+		if sig == syscall.SIGPIPE {
+			signal.Reset(sig)
+			l.Warnf("got & ignored signal %s", sig)
+		} else {
+			l.Warnf("got signal %s", sig)
+		}
 	}
 }

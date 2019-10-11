@@ -1,6 +1,8 @@
+app_key:   flow
 requested: [flow_port]
-command: go
-args: [run]
+command:   go
+args:      [run]
+
 
 #workdir: './'
 

@@ -2,7 +2,6 @@ package filelib
 
 import (
 	"io"
-	"log"
 	"os"
 	"path"
 	"regexp"
@@ -54,16 +53,20 @@ func CurrentFile(removeExt bool) string {
 }
 
 func Dir(path string) error {
+	path = strings.TrimSpace(path)
+	if path == "" {
+		return errors.New("can't create dir for empty path")
+	}
+
 	if _, err := os.Stat(path); err != nil {
 		if os.IsNotExist(err) {
 			err = os.MkdirAll(path, os.ModePerm)
 			if err != nil {
-				return errors.Wrapf(err, "can't create user`s static_repository '%v'", path)
+				return errors.Wrapf(err, "can't create dir '%s'", path)
 			}
-			log.Println("create new user`s static_repository " + path)
 			return nil
 		}
-		return errors.Wrapf(err, "can't get stat for file '%v'", path)
+		return errors.Wrapf(err, "can't get stat for file '%s'", path)
 	}
 	return nil
 }

@@ -28,10 +28,15 @@ type App struct {
 
 // Init ----------------------------------------------------------------------------
 
-func Init(path string, cfg *config.Config, already *[]string) (*App, error) {
+func Init(path string, cfg *config.Config, l logger.Operator, already *[]string) (*App, error) {
 	if cfg == nil {
 		return nil, errors.Errorf("no config to init app jn path %s", path)
 	}
+
+	if l == nil {
+		return nil, errors.Errorf("no logger to init app jn path %s", path)
+	}
+
 	envsCommon := cfg.Envs
 
 	if already == nil {
@@ -39,6 +44,8 @@ func Init(path string, cfg *config.Config, already *[]string) (*App, error) {
 		already = &alreadyData
 
 	} else if strlib.In(*already, path) {
+		l.Info(*already, path)
+
 		// to prevent infinite loop
 		return nil, nil
 
@@ -53,27 +60,32 @@ func Init(path string, cfg *config.Config, already *[]string) (*App, error) {
 
 	key := strings.TrimSpace(manifest.AppKey)
 	if key == "" {
-		return nil, errors.Wrapf(err, "no key to run app in path %s", path)
+		return nil, errors.Errorf("no key to run app in path %s", path)
 	}
 
 	command := strings.TrimSpace(manifest.Command)
 	if command == "" {
-		return nil, errors.Wrapf(err, "no command to run app in path %s", path)
+		return nil, errors.Errorf("no command to run app in path %s", path)
 	}
 
 	workdir := strings.TrimSpace(manifest.Workdir)
-	err = filelib.Dir(workdir)
-	if err != nil {
-		return nil, errors.Wrapf(err, "no workdir '%s' for app path %s", workdir, path)
+	if workdir == "" {
+		workdir = path
+	} else {
+		err = filelib.Dir(workdir)
+		if err != nil {
+			return nil, errors.Wrapf(err, "no workdir '%s' for app path %s", workdir, path)
+		}
 	}
 
 	app := &App{
 		key:     key,
 		path:    path,
 		envs:    common.Info{},
-		command: command,
+		command: path + command,
 		args:    manifest.Args,
 		workdir: workdir,
+		l:       l,
 	}
 	if manifest == nil {
 		return app, nil
@@ -88,7 +100,7 @@ func Init(path string, cfg *config.Config, already *[]string) (*App, error) {
 	}
 
 	for _, subpath := range manifest.Subpaths {
-		part, err := Init(subpath, cfg, already)
+		part, err := Init(subpath, cfg, l, already)
 		if err != nil {
 			return app, err
 		}
