@@ -1,8 +1,7 @@
-package common
+package encodelib
 
 import (
 	"encoding/json"
-	"errors"
 
 	"github.com/yosuke-furukawa/json5/encoding/json5"
 )
@@ -16,38 +15,38 @@ type Marshaler interface {
 var MarshalerJSON = MarshalerStruct{json.Marshal, json.MarshalIndent, json.Unmarshal}
 var MarshalerJSON5 = MarshalerStruct{json5.Marshal, json5.MarshalIndent, json5.Unmarshal}
 
-// var ConvertorXML = MarshalerStruct{xml.marshal, xml.marshalIndent, xml.unmarshal}
-
-func MarshalerCustom(marshal marshal, marshalIndent marshalIndent, unmarshal unmarshal) (Marshaler, error) {
-	var errs Errors
-	if marshal == nil {
-		errs = append(errs, errors.New("marshal method is nil"))
-	}
-	if marshalIndent == nil {
-		errs = append(errs, errors.New("marshalIndent method is nil"))
-	}
-	if unmarshal == nil {
-		errs = append(errs, errors.New("unmarshal method is nil"))
-	}
-	if errs != nil {
-		return nil, errs.Err()
-	}
-
-	return &MarshalerStruct{marshal, marshalIndent, unmarshal}, nil
-}
+//// var ConvertorXML = MarshalerStruct{xml.Marshal, xml.marshalIndent, xml.unmarshal}
+//
+//func MarshalerCustom(Marshal Marshal, marshalIndent marshalIndent, unmarshal unmarshal) (Marshaler, error) {
+//	var errs common.Errors
+//	if Marshal == nil {
+//		errs = append(errs, errors.New("Marshal method is nil"))
+//	}
+//	if marshalIndent == nil {
+//		errs = append(errs, errors.New("marshalIndent method is nil"))
+//	}
+//	if unmarshal == nil {
+//		errs = append(errs, errors.New("unmarshal method is nil"))
+//	}
+//	if errs != nil {
+//		return nil, errs.Err()
+//	}
+//
+//	return &MarshalerStruct{Marshal, marshalIndent, unmarshal}, nil
+//}
 
 // MarshalerStruct ----------------------------------------------------------------------------------------
 
-type marshal func(v interface{}) ([]byte, error)
-type marshalIndent func(v interface{}, prefix, indent string) ([]byte, error)
-type unmarshal func(data []byte, v interface{}) error
+type Marshal func(v interface{}) ([]byte, error)
+type MarshalIndent func(v interface{}, prefix, indent string) ([]byte, error)
+type Unmarshal func(data []byte, v interface{}) error
 
 var _ Marshaler = &MarshalerStruct{}
 
 type MarshalerStruct struct {
-	marshal
-	marshalIndent
-	unmarshal
+	marshal       Marshal
+	marshalIndent MarshalIndent
+	unmarshal     Unmarshal
 }
 
 func (cs MarshalerStruct) Marshal(v interface{}) ([]byte, error) {

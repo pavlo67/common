@@ -8,7 +8,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common/config"
-	"github.com/pavlo67/workshop/common/libs/sqllib"
+	"github.com/pavlo67/workshop/libraries/sqllib"
 )
 
 var _ sqllib.Operator = &SQLite{}

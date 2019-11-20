@@ -1,4 +1,4 @@
-package config
+package server
 
 import (
 	"reflect"
@@ -72,4 +72,18 @@ func readEndpoint(e0 interface{}, localPath string) (*Endpoint, error) {
 		return &ep, nil
 	}
 	return nil, errors.Errorf("bad Endpoint JSON length: %s", len(e1))
+}
+
+func stringifySlice(s0 []interface{}) ([]string, error) {
+	var s1 []string
+	for _, v0 := range s0 {
+		if v, ok := v0.(string); ok {
+			s1 = append(s1, v)
+			//} else if v, ok := v0.(float64); ok {
+			//	s1 = append(s1, strconv.FormatFloat(v, 10))
+		} else {
+			return nil, errors.Errorf("bad string value %v type %#v", v0, reflect.TypeOf(v0))
+		}
+	}
+	return s1, nil
 }

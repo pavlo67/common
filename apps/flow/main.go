@@ -10,13 +10,13 @@ import (
 
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/control"
-	"github.com/pavlo67/workshop/common/libs/filelib"
 	"github.com/pavlo67/workshop/common/manager"
 	"github.com/pavlo67/workshop/common/server/server_http"
 	"github.com/pavlo67/workshop/common/server/server_http/server_http_jschmhr"
 	"github.com/pavlo67/workshop/common/starter"
 	"github.com/pavlo67/workshop/components/auth/auth_ecdsa"
 	"github.com/pavlo67/workshop/components/data/data_sqlite"
+	"github.com/pavlo67/workshop/libraries/filelib"
 
 	"github.com/pavlo67/workshop/apps/flow/flow_routes/starter"
 )

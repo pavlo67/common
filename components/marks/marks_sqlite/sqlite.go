@@ -13,7 +13,7 @@ import (
 	"github.com/pavlo67/workshop/common/crud"
 	"github.com/pavlo67/workshop/common/instruments/importer"
 
-	"github.com/pavlo67/workshop/common/libs/sqllib"
+	"github.com/pavlo67/workshop/libraries/sqllib"
 
 	"github.com/pavlo67/workshop/applications/flow"
 )
@@ -118,7 +118,7 @@ func (flowOp *flowSQLite) List(errTitle, sqlQuery string, stm *sql.Stmt, values 
 	var briefs []crud.Brief
 
 	for rows.Next() {
-		brief := crud.Brief{Info: common.Map{}}
+		brief := crud.Brief{Info: common.Options{}}
 
 		var sourceTime *time.Time
 		var sourceURL, tags string

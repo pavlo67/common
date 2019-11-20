@@ -6,6 +6,7 @@ import (
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/joiner"
+
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/starter"
 
@@ -46,7 +47,7 @@ func (sc *auth_user_sqliteStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (sc *auth_user_sqliteStarter) Init(conf *config.Config, params common.Info) (info []common.Info, err error) {
+func (sc *auth_user_sqliteStarter) Init(conf *config.Config, params common.Options) (info []common.Options, err error) {
 	l = logger.Get()
 
 	sc.interfaceKey = joiner.InterfaceKey(params.StringDefault("interface_key", string(auth.InterfaceKey)))

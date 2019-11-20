@@ -5,7 +5,6 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/pavlo67/workshop/common"
 	"github.com/pkg/errors"
 )
 
@@ -19,7 +18,7 @@ type Component struct {
 type Operator interface {
 	Join(interface{}, InterfaceKey) error
 	Interface(InterfaceKey) interface{}
-	ComponentsAllWithInterface(ptrToInterface interface{}) []Component
+	InterfacesAll(ptrToInterface interface{}) []Component
 	CloseAll()
 }
 
@@ -42,7 +41,7 @@ var ErrJoiningDuplicate = errors.New("can't join interface over joined before")
 
 func (j *joiner) Join(intrfc interface{}, interfaceKey InterfaceKey) error {
 	if j == nil {
-		return errors.Wrapf(common.ErrNull, "on .Join(%s)", interfaceKey)
+		return errors.Errorf("got nil on .Join(%s)", interfaceKey)
 	}
 	if intrfc == nil {
 		return errors.Wrapf(ErrJoiningNil, "on .Join(%s)", interfaceKey)
@@ -75,7 +74,7 @@ func (j *joiner) Interface(interfaceKey InterfaceKey) interface{} {
 	return nil
 }
 
-func (j *joiner) ComponentsAllWithInterface(ptrToInterface interface{}) []Component {
+func (j *joiner) InterfacesAll(ptrToInterface interface{}) []Component {
 	j.mutex.Lock()
 	defer j.mutex.Unlock()
 
@@ -110,7 +109,7 @@ func (j *joiner) CloseAll() {
 		return
 	}
 
-	closerComponents := j.ComponentsAllWithInterface((*Closer)(nil))
+	closerComponents := j.InterfacesAll((*Closer)(nil))
 
 	for _, closerComponent := range closerComponents {
 		if closer, _ := closerComponent.Interface.(Closer); closer != nil {

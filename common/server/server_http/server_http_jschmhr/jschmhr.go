@@ -33,7 +33,7 @@ func New(certFileTLS, keyFileTLS string, authOps []auth.Operator) (server_http.O
 		httpServer: &http.Server{
 			Handler:        router,
 			ReadTimeout:    10 * time.Second,
-			WriteTimeout:   10 * time.Second,
+			WriteTimeout:   60 * time.Second,
 			MaxHeaderBytes: 1 << 20,
 		},
 		httpServeMux: router,

@@ -9,16 +9,16 @@ import (
 
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
-	"github.com/pavlo67/workshop/common/libs/filelib"
-	"github.com/pavlo67/workshop/common/libs/strlib"
 	"github.com/pavlo67/workshop/common/logger"
+	"github.com/pavlo67/workshop/libraries/filelib"
+	"github.com/pavlo67/workshop/libraries/strlib"
 )
 
 type App struct {
 	key          string
 	path         string
 	dependencies []App
-	envs         common.Info
+	envs         common.Options
 	command      string
 	args         []string
 	workdir      string
@@ -81,7 +81,7 @@ func Init(path string, cfg *config.Config, l logger.Operator, already *[]string)
 	app := &App{
 		key:     key,
 		path:    path,
-		envs:    common.Info{},
+		envs:    common.Options{},
 		command: path + command,
 		args:    manifest.Args,
 		workdir: workdir,

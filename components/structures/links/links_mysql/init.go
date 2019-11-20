@@ -7,10 +7,11 @@ import (
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/joiner"
-	"github.com/pavlo67/workshop/common/libs/filelib"
+
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/starter"
 	"github.com/pavlo67/workshop/confidenter/groups"
+	"github.com/pavlo67/workshop/libraries/filelib"
 	"github.com/pavlo67/workshop/notebook/links"
 	"go.uber.org/zap"
 )
@@ -38,7 +39,7 @@ func (lms *links_mysqlStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (lms *links_mysqlStarter) Prepare(conf *config.Config, params common.Map) error {
+func (lms *links_mysqlStarter) Prepare(conf *config.Config, params common.Options) error {
 
 	l = logger.zapGet()
 

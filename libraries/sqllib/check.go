@@ -16,30 +16,30 @@ const IndexNotUsed = "index not used"
 const BadField = "bad field struct"
 const BadIndex = "bad index"
 
-func CheckTables(sqlOp Operator, tablesConfig map[string]config.SQLTable) ([]common.Info, error) {
+func CheckTables(sqlOp Operator, tablesConfig map[string]config.SQLTable) ([]common.Options, error) {
 
 	tablesConfig = PrepareTables(tablesConfig)
 	isErr := false
-	info := []common.Info{}
+	info := []common.Options{}
 
 	for _, table := range tablesConfig {
 
 		ok, err := TableExists(sqlOp, table.Name)
 		if err != nil {
-			info = append(info, common.Info{"check if table exists": fmt.Sprintf("%#v", table), "status": err.Error()})
+			info = append(info, common.Options{"check if table exists": fmt.Sprintf("%#v", table), "status": err.Error()})
 			isErr = true
 			continue
 		}
 
 		if !ok {
-			info = append(info, common.Info{"check if table exists": fmt.Sprintf("%#v", table), "status": "does not exist"})
+			info = append(info, common.Options{"check if table exists": fmt.Sprintf("%#v", table), "status": "does not exist"})
 			isErr = true
 			continue
 		}
 
 		//fields, err := TableFields(dbh, table)
 		//if err != nil {
-		//	info = append(info, basis.Info{"check table fields": table, "status": err.Error()})
+		//	info = append(info, basis.Options{"check table fields": table, "status": err.Error()})
 		//	isErr = true
 		//	continue
 		//}
@@ -47,19 +47,19 @@ func CheckTables(sqlOp Operator, tablesConfig map[string]config.SQLTable) ([]com
 		//
 		//		indexes, err := TableIndexes(dbh, table)
 		//		if err != nil {
-		//			info = append(info, basis.Info{"key": table, "status": err.Error()})
+		//			info = append(info, basis.Options{"key": table, "status": err.Error()})
 		//			isErr = true
 		//			continue
 		//		}
 		//
 		//		resF, err := CheckTableFields(dbh, fields, tablesFields[table])
 		//		if err != nil {
-		//			info = append(info, basis.Info{"key": table, "status": err.Error()})
+		//			info = append(info, basis.Options{"key": table, "status": err.Error()})
 		//			isErr = true
 		//		}
 		//		if len(resF) > 0 {
 		//			for e, v := range resF {
-		//				i := basis.Info{"key": table, "status": e, "details": v}
+		//				i := basis.Options{"key": table, "status": e, "details": v}
 		//				info = append(info, i)
 		//			}
 		//			isErr = true
@@ -69,7 +69,7 @@ func CheckTables(sqlOp Operator, tablesConfig map[string]config.SQLTable) ([]com
 		//			resI := CheckTableIndexes(dbh, table, indexes, tablesIndexes[table])
 		//			if len(resI) > 0 {
 		//				for e, v := range resI {
-		//					i := basis.Info{"key": table, "status": e, "details": v}
+		//					i := basis.Options{"key": table, "status": e, "details": v}
 		//					info = append(info, i)
 		//				}
 		//				isErr = true

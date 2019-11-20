@@ -1,1 +1,0 @@
-package rector_stub

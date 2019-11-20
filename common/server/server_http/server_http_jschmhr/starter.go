@@ -6,6 +6,7 @@ import (
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/joiner"
+
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/server/server_http"
 	"github.com/pavlo67/workshop/common/starter"
@@ -31,7 +32,7 @@ func (ss *server_http_jschmhrStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *server_http_jschmhrStarter) Init(conf *config.Config, options common.Info) (info []common.Info, err error) {
+func (ss *server_http_jschmhrStarter) Init(conf *config.Config, options common.Options) (info []common.Options, err error) {
 	var errs common.Errors
 	l = conf.Logger
 
@@ -55,7 +56,7 @@ func (ss *server_http_jschmhrStarter) Setup() error {
 func (ss *server_http_jschmhrStarter) Run(joinerOp joiner.Operator) error {
 
 	authOpNil := auth.Operator(nil)
-	authComps := joinerOp.ComponentsAllWithInterface(&authOpNil)
+	authComps := joinerOp.InterfacesAll(&authOpNil)
 
 	var authOps []auth.Operator
 	for _, authComp := range authComps {

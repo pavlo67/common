@@ -1,4 +1,4 @@
-package rector_server
+package rights_server
 
 import (
 	"net/http"

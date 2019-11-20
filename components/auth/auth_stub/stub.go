@@ -8,7 +8,7 @@ import (
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/components/auth"
 
-	"github.com/pavlo67/workshop/common/libs/encrlib"
+	"github.com/pavlo67/workshop/libraries/encrlib"
 )
 
 var _ auth.Operator = &isentityLoginStub{}

@@ -9,8 +9,8 @@ import (
 
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/kv"
-	"github.com/pavlo67/workshop/common/libs/sqllib"
-	"github.com/pavlo67/workshop/common/libs/sqllib/sqllib_sqlite"
+	"github.com/pavlo67/workshop/libraries/sqllib"
+	"github.com/pavlo67/workshop/libraries/sqllib/sqllib_sqlite"
 )
 
 type kvSQLite struct {

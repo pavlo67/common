@@ -8,11 +8,12 @@ import (
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/joiner"
-	"github.com/pavlo67/workshop/common/libs/filelib"
+
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/server/server_http"
 	"github.com/pavlo67/workshop/common/starter"
 	"github.com/pavlo67/workshop/components/data"
+	"github.com/pavlo67/workshop/libraries/filelib"
 	"github.com/pkg/errors"
 )
 
@@ -35,7 +36,7 @@ func (ss *flowStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *flowStarter) Init(cfg *config.Config, options common.Info) (info []common.Info, err error) {
+func (ss *flowStarter) Init(cfg *config.Config, options common.Options) (info []common.Options, err error) {
 	var errs common.Errors
 
 	L = cfg.Logger

@@ -1,4 +1,4 @@
-package rector_server
+package rights_server
 
 import (
 	"github.com/pkg/errors"
@@ -30,7 +30,7 @@ func (ss *rector_serverStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *rector_serverStarter) Init(conf *config.Config, options common.Map) (info []common.Map, err error) {
+func (ss *rector_serverStarter) Init(conf *config.Config, options common.Options) (info []common.Options, err error) {
 	l = conf.Logger
 
 	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(rector.InterfaceKey)))

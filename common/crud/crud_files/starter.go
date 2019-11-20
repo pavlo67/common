@@ -31,7 +31,7 @@ func (nms *contentFilesStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (nms *contentFilesStarter) Init(conf *config.Config, options common.Map) (info []common.Map, err error) {
+func (nms *contentFilesStarter) Init(conf *config.Config, options common.Options) (info []common.Options, err error) {
 	l = logger.Get()
 
 	var ok bool

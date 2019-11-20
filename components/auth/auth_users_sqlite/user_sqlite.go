@@ -6,7 +6,7 @@ import (
 	"github.com/GehirnInc/crypt"
 
 	"github.com/pavlo67/workshop/common"
-	"github.com/pavlo67/workshop/common/libs/encrlib"
+	"github.com/pavlo67/workshop/libraries/encrlib"
 
 	"github.com/pavlo67/workshop/components/auth"
 )

@@ -10,8 +10,9 @@ import (
 
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/crud"
-	"github.com/pavlo67/workshop/common/libs/sqllib"
+
 	"github.com/pavlo67/workshop/common/selectors"
+	"github.com/pavlo67/workshop/libraries/sqllib"
 
 	"github.com/pavlo67/workshop/components/data"
 	"github.com/pavlo67/workshop/components/instruments/indexer"

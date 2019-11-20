@@ -6,13 +6,14 @@ import (
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/joiner"
-	"github.com/pavlo67/workshop/common/libs/filelib"
+
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/server/server_http"
 	"github.com/pavlo67/workshop/common/starter"
 	"github.com/pavlo67/workshop/components/auth"
 	"github.com/pavlo67/workshop/components/auth/auth_jwt"
 	"github.com/pavlo67/workshop/components/auth/auth_users_sqlite"
+	"github.com/pavlo67/workshop/libraries/filelib"
 	"github.com/pkg/errors"
 )
 
@@ -44,7 +45,7 @@ func (ss *confidenceStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *confidenceStarter) Init(cfg *config.Config, options common.Info) (info []common.Info, err error) {
+func (ss *confidenceStarter) Init(cfg *config.Config, options common.Options) (info []common.Options, err error) {
 	Cfg = cfg
 
 	var errs common.Errors
@@ -70,7 +71,7 @@ func (ss *confidenceStarter) Run(joinerOp joiner.Operator) error {
 	AuthOps = nil
 	AuthOpToSetToken = nil
 
-	authComps := joinerOp.ComponentsAllWithInterface(&authOpNil)
+	authComps := joinerOp.InterfacesAll(&authOpNil)
 	for _, authComp := range authComps {
 		if authOp, ok := authComp.Interface.(auth.Operator); ok {
 			AuthOps = append(AuthOps, authOp)

@@ -37,7 +37,7 @@ func StartComponent(c Starter, cfg *config.Config, args []string, joinerOp joine
 	return nil
 }
 
-func ReadOptions(args []string) common.Info {
+func ReadOptions(args []string) common.Options {
 	// TODO!!!
 
 	return nil

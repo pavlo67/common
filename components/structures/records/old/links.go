@@ -7,7 +7,7 @@ import (
 	"github.com/pavlo67/partes/crud/selectors"
 	"github.com/pavlo67/workshop/common"
 
-	"github.com/pavlo67/workshop/common/libs/strlib"
+	"github.com/pavlo67/workshop/libraries/strlib"
 
 	"github.com/pavlo67/workshop/confidenter/groups"
 

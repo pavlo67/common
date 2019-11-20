@@ -3,58 +3,50 @@ package config
 import (
 	"io/ioutil"
 
-	"github.com/pavlo67/workshop/common/logger"
+	"github.com/pavlo67/workshop/libraries/encodelib"
 	"github.com/pkg/errors"
-	"gopkg.in/yaml.v2"
 )
-
-var ErrNoConfig = errors.New("no config")
-var ErrNoLogger = errors.New("no logger")
-var ErrNoValue = errors.New("no value")
 
 // -----------------------------------------------------------------------------
 
 type Config struct {
-	ServerHTTP Server `yaml:"server_http,omitempty"  json:"server_http,omitempty"`
+	data      map[string]interface{}
+	marshaler encodelib.Marshaler
+}
 
-	Postgres ServerAccess `yaml:"postgres,omitempty" json:"postgres,omitempty"`
-	MySQL    ServerAccess `yaml:"mysql,omitempty"    json:"mysql,omitempty"`
-	SQLite   ServerAccess `yaml:"sqlite,omitempty"   json:"sqlite,omitempty"`
-	SMTP     ServerAccess `yaml:"smtp,omitempty"     json:"smtp,omitempty"`
-	POP3     ServerAccess `yaml:"pop3,omitempty"     json:"pop3,omitempty"`
+func (c Config) Value(key string, target interface{}) error {
+	if value, ok := c.data[key]; ok {
+		valueRaw, err := c.marshaler.Marshal(value)
+		if err != nil {
+			return errors.Wrapf(err, "can't marshal value (%s / %#v) to raw bytes", key, value)
+		}
 
-	Envs map[string]string `yaml:"envs,omitempty"  json:"envs,omitempty"`
+		return c.marshaler.Unmarshal(valueRaw, target)
+	}
 
-	Logger logger.Operator `yaml:"-"  json:"-"`
+	return nil
 }
 
 // -----------------------------------------------------------------------------
 
-func Get(path, environment string) (*Config, logger.Operator, error) {
+func Get(cfgFile string, marshaler encodelib.Marshaler) (*Config, error) {
 
-	if len(path) < 1 {
-		return nil, nil, errors.New("empty config path")
+	if len(cfgFile) < 1 {
+		return nil, errors.New("empty config path")
 	}
 
-	cfgFile := path + "/" + environment + ".yaml"
 	data, err := ioutil.ReadFile(cfgFile)
 	if err != nil {
-		return nil, nil, errors.Wrapf(err, "can't read config file from '%s'", cfgFile)
+		return nil, errors.Wrapf(err, "can't read config file from '%s'", cfgFile)
 	}
 
-	cfg := &Config{}
-	err = yaml.Unmarshal(data, cfg)
+	cfg := Config{marshaler: marshaler}
+	err = marshaler.Unmarshal(data, &cfg.data)
 	if err != nil {
-		return nil, nil, errors.Wrapf(err, "can't yaml.Unmarshal('%s') from config '%s'", data, cfgFile)
+		return nil, errors.Wrapf(err, "can't .Unmarshal('%s') from config '%s'", data, cfgFile)
 	}
 
-	// TODO: use debug level from environment or config
-	cfg.Logger, err = logger.Init(logger.Config{LogLevel: logger.DebugLevel})
-	if err != nil {
-		return nil, nil, errors.Wrap(err, "can't logger.Init()")
-	}
-
-	return cfg, cfg.Logger, nil
+	return &cfg, nil
 }
 
 //// String ...

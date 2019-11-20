@@ -1,0 +1,1 @@
+package rights_stub

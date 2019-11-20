@@ -1,4 +1,4 @@
-package common
+package httplib
 
 import (
 	"bytes"
@@ -8,10 +8,11 @@ import (
 
 	"log"
 
+	"github.com/pavlo67/workshop/common"
 	"github.com/pkg/errors"
 )
 
-func RequestJSON(method, url string, data []byte, headers map[string]string) (Map, error) {
+func RequestJSON(method, url string, data []byte, headers map[string]string) (common.Options, error) {
 	client := &http.Client{}
 
 	req, err := http.NewRequest(method, url, bytes.NewReader(data))
@@ -36,7 +37,7 @@ func RequestJSON(method, url string, data []byte, headers map[string]string) (Ma
 
 	log.Printf("%s", body)
 
-	result := Map{}
+	result := common.Options{}
 	err = json.Unmarshal(body, &result)
 	if err != nil {
 		return result, errors.Wrapf(err, "can't unmarsal: %s", body)

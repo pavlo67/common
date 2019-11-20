@@ -1,4 +1,4 @@
-package config
+package server
 
 type ServerAccess struct {
 	Host string `bson:"host,omitempty" json:"host,omitempty"`

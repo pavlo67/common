@@ -12,12 +12,12 @@ import (
 	"github.com/pavlo67/partes/crud/selectors"
 	"github.com/pavlo67/workshop/common"
 
-	"github.com/pavlo67/workshop/common/libs/filelib"
-	"github.com/pavlo67/workshop/common/libs/strlib"
 	"github.com/pavlo67/workshop/confidenter/auth"
 	"github.com/pavlo67/workshop/confidenter/groups"
 	"github.com/pavlo67/workshop/confidenter/rights"
 	"github.com/pavlo67/workshop/confidenter/users"
+	"github.com/pavlo67/workshop/libraries/filelib"
+	"github.com/pavlo67/workshop/libraries/strlib"
 	"github.com/pavlo67/workshop/notebook/notes"
 
 	"github.com/pavlo67/workshop/things_old/files"
@@ -377,7 +377,7 @@ func ObjectsToJSON(user *auth.User, filesOp files.Operator, credentialsOpOp user
 	//filesForZip = append(filesForZip, filelib.FileForZip{Label: identitiesPath, Temporary: true})
 	//
 	//// zipping
-	//t := time.Now().Info("2006_01_02_15_04_05")
+	//t := time.Now().Options("2006_01_02_15_04_05")
 	//zipName := filepath.Join123(exportDir, user.UserIS.SystemDomain+"_"+t+".zip")
 	//// delete, if old zip exist
 	//os.Remove(zipName)

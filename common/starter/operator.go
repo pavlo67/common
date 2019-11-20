@@ -6,34 +6,27 @@ import (
 	"github.com/pavlo67/workshop/common/joiner"
 )
 
-//type Info struct {
-//	Service string
-//	Path    string
-//	Status  string
-//	Details interface{}
-//}
-
 type Operator interface {
 
 	// Title returns started component name
 	Name() string
 
-	Init(conf *config.Config, options common.Info) (info []common.Info, err error)
+	Init(conf *config.Config, options common.Options) (info []common.Options, err error)
 
 	// Setup sets up the component
 	Setup() error
 
-	// Prepare inits the component to use in application
+	// Run inits the component to use in application
 	Run(joiner.Operator) error
 }
 
 type Starter struct {
 	Operator
-	Options common.Info
+	Options common.Options
 }
 
-func (starter Starter) CorrectedOptions(options common.Info) common.Info {
-	newOptions := common.Info{}
+func (starter Starter) CorrectedOptions(options common.Options) common.Options {
+	newOptions := common.Options{}
 
 	for k, v := range starter.Options {
 		newOptions[k] = v

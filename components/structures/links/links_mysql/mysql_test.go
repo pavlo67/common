@@ -8,7 +8,8 @@ import (
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/joiner"
-	"github.com/pavlo67/workshop/common/libs/filelib"
+
+	"github.com/pavlo67/workshop/libraries/filelib"
 )
 
 var conf *config.Config

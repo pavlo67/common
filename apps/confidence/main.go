@@ -14,7 +14,6 @@ import (
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/control"
 	"github.com/pavlo67/workshop/common/kv/kv_sqlite"
-	"github.com/pavlo67/workshop/common/libs/filelib"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/server/server_http"
 	"github.com/pavlo67/workshop/common/server/server_http/server_http_jschmhr"
@@ -22,6 +21,7 @@ import (
 	"github.com/pavlo67/workshop/components/auth/auth_ecdsa"
 	"github.com/pavlo67/workshop/components/auth/auth_jwt"
 	"github.com/pavlo67/workshop/components/auth/auth_stub"
+	"github.com/pavlo67/workshop/libraries/filelib"
 )
 
 var (
@@ -86,10 +86,10 @@ func main() {
 	//}
 
 	starters := []starter.Starter{
-		{auth_stub.Starter(), common.Info{"interface_key": string(auth_stub.InterfaceKey)}},
-		// {auth_users_sqlite.Starter(), common.Info{"interface_key": string(auth_users_sqlite.InterfaceKey)}},
-		{auth_ecdsa.Starter(), common.Info{"interface_key": string(auth_ecdsa.InterfaceKey)}},
-		{auth_jwt.Starter(), common.Info{"interface_key": string(auth_jwt.InterfaceKey)}},
+		{auth_stub.Starter(), common.Options{"interface_key": string(auth_stub.InterfaceKey)}},
+		// {auth_users_sqlite.Starter(), common.Options{"interface_key": string(auth_users_sqlite.InterfaceKey)}},
+		{auth_ecdsa.Starter(), common.Options{"interface_key": string(auth_ecdsa.InterfaceKey)}},
+		{auth_jwt.Starter(), common.Options{"interface_key": string(auth_jwt.InterfaceKey)}},
 		{kv_sqlite.Starter(), nil},
 		{server_http_jschmhr.Starter(), nil},
 		{confidence_routes.Starter(), nil},
@@ -123,6 +123,6 @@ func main() {
 	//c := make(chan os.Signal, 1)
 	//signal.Notify(c, os.Interrupt)
 	//signal := <-c
-	//l.Info("\nGot signal:", signal)
+	//l.Options("\nGot signal:", signal)
 
 }

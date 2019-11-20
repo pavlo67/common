@@ -12,9 +12,9 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
-	"github.com/pavlo67/workshop/common/libs/addrlib"
-	"github.com/pavlo67/workshop/common/libs/encrlib"
 	"github.com/pavlo67/workshop/components/auth"
+	"github.com/pavlo67/workshop/libraries/addrlib"
+	"github.com/pavlo67/workshop/libraries/encrlib"
 )
 
 const Proto addrlib.Proto = "ecdsa://"

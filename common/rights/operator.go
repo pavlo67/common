@@ -1,4 +1,4 @@
-package rector
+package rights
 
 import (
 	"github.com/pavlo67/workshop/common"

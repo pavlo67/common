@@ -8,8 +8,8 @@ import (
 
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/control"
-	"github.com/pavlo67/workshop/common/libs/filelib"
 	"github.com/pavlo67/workshop/common/manager"
+	"github.com/pavlo67/workshop/libraries/filelib"
 )
 
 func TestFlow(t *testing.T) {

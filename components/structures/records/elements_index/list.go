@@ -15,7 +15,7 @@ func All(joinerOp joiner.Operator) ([]Item, common.Errors) {
 	var items []Item
 	var errs common.Errors
 
-	for _, component := range joinerOp.ComponentsAllWithInterface(&elementsOp) {
+	for _, component := range joinerOp.InterfacesAll(&elementsOp) {
 		elementsOp, ok := component.Interface.(records.Operator)
 		if ok {
 			items = append(items, Item{component.InterfaceKey, elementsOp})

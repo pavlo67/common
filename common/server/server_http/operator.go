@@ -5,6 +5,7 @@ import (
 
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/joiner"
+
 	"github.com/pavlo67/workshop/common/server"
 	"github.com/pavlo67/workshop/components/auth"
 )

@@ -8,10 +8,10 @@ import (
 	"github.com/pkg/errors"
 
 	r "github.com/pavlo67/workshop/apps/confidence/confidence_routes"
-	"github.com/pavlo67/workshop/common/libs/filelib"
 	"github.com/pavlo67/workshop/common/server"
 	"github.com/pavlo67/workshop/common/server/server_http"
 	"github.com/pavlo67/workshop/components/auth"
+	"github.com/pavlo67/workshop/libraries/filelib"
 )
 
 var _ = server_http.InitEndpoint(&r.Endpoints, "POST", filelib.RelativePath(filelib.CurrentFile(true), r.BasePath, r.Prefix),

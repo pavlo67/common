@@ -83,7 +83,7 @@ func TestComponentsAllWithSignature(t *testing.T) {
 	joiner.Join(structB1, keyB1)
 	joiner.Join(structA2, keyA2)
 
-	components := joiner.ComponentsAllWithInterface((*InterfaceA)(nil))
+	components := joiner.InterfacesAll((*InterfaceA)(nil))
 	require.Equal(t, 3, len(components))
 
 	for _, component := range components {
