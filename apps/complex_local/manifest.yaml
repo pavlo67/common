@@ -1,5 +1,0 @@
-requested: ['flow_port', 'confidence_port']
-subpaths:
-  - '../flow'
-  - '../condidence'
-  - '../manager.vue'
