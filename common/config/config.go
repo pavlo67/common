@@ -3,7 +3,7 @@ package config
 import (
 	"io/ioutil"
 
-	"github.com/pavlo67/workshop/libraries/encodelib"
+	"github.com/pavlo67/workshop/common/libraries/encodelib"
 	"github.com/pkg/errors"
 )
 
@@ -12,6 +12,15 @@ import (
 type Config struct {
 	data      map[string]interface{}
 	marshaler encodelib.Marshaler
+}
+
+type Access struct {
+	Host    string
+	Port    int
+	User    string
+	Pass    string
+	Path    string
+	Options string
 }
 
 func (c Config) Value(key string, target interface{}) error {

@@ -52,7 +52,7 @@ func OperatorTest(t *testing.T, testCases []OperatorTestCase) {
 
 		// ClearDatabase ------------------------------------------------------------------------------------
 
-		err := tc.Cleaner()
+		err := tc.Cleaner.Clean()
 		require.NoError(t, err, "what is the error on .Cleaner()?")
 
 		// test Describe ------------------------------------------------------------------------------------
@@ -98,9 +98,11 @@ func OperatorTest(t *testing.T, testCases []OperatorTestCase) {
 		for i := 0; i < numRepeats; i++ {
 			toSave[i] = tc.ToSave
 
-			id[i], err = tc.Save(toSave[i], nil)
+			idI, err := tc.Save(toSave[i], nil)
 			require.NoError(t, err, "what is the error on .Create()?")
-			require.NotEmpty(t, id[i])
+			require.NotEmpty(t, idI)
+
+			id[i] = *idI
 		}
 
 		// test Read ----------------------------------------------------------------------------------------

@@ -21,7 +21,7 @@ func StartComponent(c Starter, cfg *config.Config, args []string, joinerOp joine
 
 	startOptions := c.CorrectedOptions(ReadOptions(args))
 
-	info, err := c.Init(cfg, startOptions)
+	info, err := c.Init(cfg, l, startOptions)
 	for _, i := range info {
 		log.Println(i)
 	}
@@ -49,7 +49,7 @@ func Run(starters []Starter, cfg *config.Config, args []string, label string) (j
 		return nil, errors.New("no config data for starter.Prepare()")
 	}
 
-	l := cfg.Logger
+	l := logger.Get()
 
 	joinerOp := joiner.New()
 	for _, c := range starters {
@@ -64,14 +64,6 @@ func Run(starters []Starter, cfg *config.Config, args []string, label string) (j
 		env = "(default)"
 	}
 	l.Info(label + "; environment = " + env)
-
-	// wait-runner
-	//if waitForInterrupt {
-	//	c := make(chan os.Signal, 1)
-	//	signal.Notify(c, os.Interrupt)
-	//	signal := <-c
-	//	fmt.Println("\nGot signal:", signal)
-	//}
 
 	return joinerOp, nil
 }

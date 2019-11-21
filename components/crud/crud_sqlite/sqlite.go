@@ -1,4 +1,4 @@
-package data_sqlite
+package crud_sqlite
 
 import (
 	"database/sql"

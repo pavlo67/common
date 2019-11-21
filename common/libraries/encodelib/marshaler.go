@@ -4,16 +4,18 @@ import (
 	"encoding/json"
 
 	"github.com/yosuke-furukawa/json5/encoding/json5"
+	"gopkg.in/yaml.v2"
 )
 
 type Marshaler interface {
 	Marshal(v interface{}) ([]byte, error)
-	MarshalIndent(v interface{}, prefix, indent string) ([]byte, error)
+	// MarshalIndent(v interface{}, prefix, indent string) ([]byte, error)
 	Unmarshal(data []byte, v interface{}) error
 }
 
-var MarshalerJSON = MarshalerStruct{json.Marshal, json.MarshalIndent, json.Unmarshal}
-var MarshalerJSON5 = MarshalerStruct{json5.Marshal, json5.MarshalIndent, json5.Unmarshal}
+var MarshalerYAML = MarshalerStruct{yaml.Marshal, yaml.Unmarshal}
+var MarshalerJSON = MarshalerStruct{json.Marshal, json.Unmarshal}
+var MarshalerJSON5 = MarshalerStruct{json5.Marshal, json5.Unmarshal}
 
 //// var ConvertorXML = MarshalerStruct{xml.Marshal, xml.marshalIndent, xml.unmarshal}
 //
@@ -44,18 +46,18 @@ type Unmarshal func(data []byte, v interface{}) error
 var _ Marshaler = &MarshalerStruct{}
 
 type MarshalerStruct struct {
-	marshal       Marshal
-	marshalIndent MarshalIndent
-	unmarshal     Unmarshal
+	marshal   Marshal
+	unmarshal Unmarshal
+	// marshalIndent MarshalIndent
 }
 
 func (cs MarshalerStruct) Marshal(v interface{}) ([]byte, error) {
 	return cs.marshal(v)
 }
 
-func (cs MarshalerStruct) MarshalIndent(v interface{}, prefix, indent string) ([]byte, error) {
-	return cs.marshalIndent(v, prefix, indent)
-}
+//func (cs MarshalerStruct) MarshalIndent(v interface{}, prefix, indent string) ([]byte, error) {
+//	return cs.marshalIndent(v, prefix, indent)
+//}
 
 func (cs MarshalerStruct) Unmarshal(data []byte, v interface{}) error {
 	return cs.unmarshal(data, v)

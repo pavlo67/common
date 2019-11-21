@@ -6,7 +6,12 @@ server_http:
   testers: ["127.0.0.1"]
 
 sqlite:
-  path: "/home/pavlo/0/_datastore/flow_sqlite/test.sqlite"
+  path: "/home/pavlo/0/_datastore/sqlite"
+
+mongodb:
+  host: "localhost"
+  port: 27017
+
 
 smtp:
   host: "smtp.mailtrap.io"
