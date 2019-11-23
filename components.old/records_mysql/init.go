@@ -121,6 +121,6 @@ func (nms *records_mysqlStarter) Init(joiner joiner.Operator) error {
 //	return string(notes.InterfaceKey)
 //}
 //
-//func (nms *records_mysqlStarter) Load(userIS common.ID, selector selectors.Selector, fixture fixturer.Fixture) error {
+//func (nms *records_mysqlStarter) Load(userIS common.ID, selector selector.Selector, fixture fixturer.Fixture) error {
 //	return nms.objectsOp.loadFixture(userIS, selector, fixture)
 //}

@@ -477,7 +477,7 @@ func QueryTestCases(linksOp Operator, userISToSet, userISToSetAnother common.ID)
 				// 0 all ok for userISToSet
 				//{
 				//	IS:       userISToSet,
-				//	Selector: selectors.FieldEqual(FieldTag, linkName1),
+				//	Selector: selector.FieldEqual(FieldTag, linkName1),
 				//	ExpectedLinked: []Linked{
 				//		{LinkedType: linkedType1, LinkedID: linkedID1, Type: TypeTag, Tag: linkName1, ObjectID: objectID1},
 				//		{LinkedType: linkedType1, LinkedID: linkedID2, Type: TypeTag, Tag: linkName1, ObjectID: objectID1},
@@ -490,7 +490,7 @@ func QueryTestCases(linksOp Operator, userISToSet, userISToSetAnother common.ID)
 				//// 1 all ok for userISToSetAnother
 				//{
 				//	IS:       userISToSet,
-				//	Selector: selectors.FieldEqual(FieldTag, linkName2),
+				//	Selector: selector.FieldEqual(FieldTag, linkName2),
 				//	ExpectedLinked: []Linked{
 				//		{LinkedType: linkedType1, LinkedID: linkedID1, Type: TypeTag, Tag: linkName2, ObjectID: objectID2},
 				//		{LinkedType: linkedType1, LinkedID: linkedID2, Type: TypeTag, Tag: linkName2, ObjectID: objectID4},
@@ -501,7 +501,7 @@ func QueryTestCases(linksOp Operator, userISToSet, userISToSetAnother common.ID)
 				//// 2 all ok for userISNil
 				//{
 				//	IS:       userISNil,
-				//	Selector: selectors.FieldEqual(FieldTag, linkName3),
+				//	Selector: selector.FieldEqual(FieldTag, linkName3),
 				//	ExpectedLinked: []Linked{
 				//		{LinkedType: linkedType1, LinkedID: linkedID1, Type: "", Tag: linkName3, ObjectID: objectID2},
 				//	},

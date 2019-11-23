@@ -1,14 +1,16 @@
-package crud
+package data
 
 import (
 	"time"
 
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/joiner"
+	"github.com/pavlo67/workshop/components/crud"
 	"github.com/pavlo67/workshop/components/selector"
+	"github.com/pavlo67/workshop/components/tagger"
 )
 
-const InterfaceKey joiner.InterfaceKey = "crud"
+const InterfaceKey joiner.InterfaceKey = "data"
 
 type Item struct {
 	ID       common.ID `bson:"_id,omitempty"`
@@ -16,7 +18,7 @@ type Item struct {
 	Summary  string
 	URL      string
 	Embedded []Item
-	Tags     []string
+	Tags     []tagger.Tag
 
 	Status
 
@@ -38,34 +40,13 @@ type Part struct {
 }
 
 type Operator interface {
-	Save(Item, *SaveOptions) (*common.ID, error)
-	Read(common.ID, *GetOptions) (*Item, error)
+	Save(Item, *crud.SaveOptions) (*common.ID, error)
+	Read(common.ID, *crud.GetOptions) (*Item, error)
 	Details(item *Item, exemplar interface{}) error
 
-	Exists(*selector.Term, *GetOptions) ([]Part, error)
-	List(*selector.Term, *GetOptions) ([]Item, error)
-	Remove(*selector.Term, *RemoveOptions) error
-}
-
-type Cleaner interface {
-	Clean() error
-}
-
-type SaveOptions struct {
-	AuthID    common.ID
-	Replace   bool
-	ReturnIDs bool
-}
-
-type GetOptions struct {
-	AuthID  common.ID
-	GroupBy []string
-	OrderBy []string
-}
-
-type RemoveOptions struct {
-	AuthID common.ID
-	Delete bool
+	Exists(*selector.Term, *crud.GetOptions) ([]Part, error)
+	List(*selector.Term, *crud.GetOptions) ([]Item, error)
+	Remove(*selector.Term, *crud.RemoveOptions) error
 }
 
 // TODO: .History, etc...

@@ -4,7 +4,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/pavlo67/partes/crud/selectors"
+	"github.com/pavlo67/partes/crud/selector"
 	"github.com/pavlo67/workshop/common"
 
 	"github.com/pavlo67/workshop/libraries/strlib"
@@ -103,7 +103,7 @@ func Linked(userIS common.ID, objectsOp Operator, linksOp links.Operator, o *Ite
 	for _, l := range linked {
 		ids = append(ids, l.LinkedID)
 	}
-	selector := selectors.FieldEqual("id", ids...)
+	selector := selector.FieldEqual("id", ids...)
 	options := &content.ListOptions{Selector: selector, SortBy: []string{"name"}}
 	linkedObjects, _, err := objectsOp.ReadList(userIS, options)
 	if err != nil {

@@ -18,7 +18,7 @@ package links
 //}
 
 //func SelectString(userIS common.ID, linksOp Operator, linkType string) (selects viewshtml.SelectString) {
-//	linked, err := linksOp.Query(userIS, selectors.FieldStr(FieldType, linkType))
+//	linked, err := linksOp.Query(userIS, selector.FieldStr(FieldType, linkType))
 //	if err != nil {
 //		log.Println(err)
 //	}

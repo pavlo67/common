@@ -1,4 +1,4 @@
-package crud
+package data
 
 import (
 	"os"
@@ -146,7 +146,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 			}
 
 			if tc.ExpectedReadErr != nil {
-				// TODO: selectors.InStr(keyFields[0], ids...)
+				// TODO: selector.InStr(keyFields[0], ids...)
 				briefsAll, err := tc.List(nil, nil)
 
 				require.Equal(t, 0, len(briefsAll), "why len(dataAll) is not zero after .List()?")
@@ -154,7 +154,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 				continue
 			}
 
-			// TODO: selectors.InStr(keyFields[0], ids...)
+			// TODO: selector.InStr(keyFields[0], ids...)
 			briefsAll, err := tc.List(nil, nil)
 			require.NoError(t, err, "what is the error on .ReadList()?")
 			require.True(t, len(briefsAll) >= numRepeats, "must be len(dataAll) (%d) >= numRepeats (%d)", len(briefsAll), numRepeats)

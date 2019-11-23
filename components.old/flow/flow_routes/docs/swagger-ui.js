@@ -21711,7 +21711,7 @@ SwaggerUi.Views.ApiKeyAuthView = Backbone.View.extend({ // TODO: append this to 
         'change .input_apiKey_entry': 'apiKeyChange'
     },
 
-    selectors: {
+    selector: {
         apikeyInput: '.input_apiKey_entry'
     },
 
@@ -21731,7 +21731,7 @@ SwaggerUi.Views.ApiKeyAuthView = Backbone.View.extend({ // TODO: append this to 
     apiKeyChange: function (e) {
         var val = $(e.target).val();
         if (val) {
-            this.$(this.selectors.apikeyInput).removeClass('error');
+            this.$(this.selector.apikeyInput).removeClass('error');
         }
 
         this.model.set('value', val);
@@ -21743,7 +21743,7 @@ SwaggerUi.Views.ApiKeyAuthView = Backbone.View.extend({ // TODO: append this to 
 
     highlightInvalid: function () {
         if (!this.isValid()) {
-            this.$(this.selectors.apikeyInput).addClass('error');
+            this.$(this.selector.apikeyInput).addClass('error');
         }
     }
 
@@ -21983,7 +21983,7 @@ SwaggerUi.Views.AuthView = Backbone.View.extend({
         main: Handlebars.templates.auth_view
     },
 
-    selectors: {
+    selector: {
         innerEl: '.auth_inner',
         authBtn: '.auth_submit__button'
     },
@@ -21999,7 +21999,7 @@ SwaggerUi.Views.AuthView = Backbone.View.extend({
             isLogout: this.authsCollectionView.collection.isAuthorized(),
             isAuthorized: this.authsCollectionView.collection.isPartiallyAuthorized()
         }));
-        this.$innerEl = this.$(this.selectors.innerEl);
+        this.$innerEl = this.$(this.selector.innerEl);
         this.isLogout = this.authsCollectionView.collection.isPartiallyAuthorized();
     },
 
@@ -22175,7 +22175,7 @@ SwaggerUi.Views.BasicAuthView = Backbone.View.extend({
         'change .auth_input': 'inputChange'
     },
 
-    selectors: {
+    selector: {
         usernameInput: '.basic_auth__username',
         passwordInput: '.basic_auth__password'
     },
@@ -22210,7 +22210,7 @@ SwaggerUi.Views.BasicAuthView = Backbone.View.extend({
 
     highlightInvalid: function () {
         if (!this.model.get('username')) {
-            this.$(this.selectors.usernameInput).addClass(this.cls.error);
+            this.$(this.selector.usernameInput).addClass(this.cls.error);
         }
     }
 });
@@ -24526,7 +24526,7 @@ SwaggerUi.Views.PopupView = Backbone.View.extend({
     template: Handlebars.templates.popup,
     className: 'api-popup-dialog',
 
-    selectors: {
+    selector: {
         content: '.api-popup-content',
         main   : '#swagger-ui-container'
     },
@@ -24536,8 +24536,8 @@ SwaggerUi.Views.PopupView = Backbone.View.extend({
     },
 
     render: function () {
-        this.$(this.selectors.content).append(this.model.content);
-        $(this.selectors.main).first().append(this.el);
+        this.$(this.selector.content).append(this.model.content);
+        $(this.selector.main).first().append(this.el);
         this.showPopup();
 
         return this;

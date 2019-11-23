@@ -10,7 +10,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/partes/crud"
-	"github.com/pavlo67/partes/crud/selectors"
+	"github.com/pavlo67/partes/crud/selector"
 	"github.com/pavlo67/partes/libs/mysqllib"
 	"github.com/pavlo67/punctum/basis"
 	"github.com/pavlo67/punctum/confidenter/groups"
@@ -172,7 +172,7 @@ func (srcOp *sourcesMySQL) ReadList(userIS common.ID, options *content.ListOptio
 	var orderAndLimit, condition, conditionCompleted string
 
 	if options != nil {
-		condition, values, err = selectors.Mysql(userIS, options.Selector)
+		condition, values, err = selector.Mysql(userIS, options.Selector)
 		if err != nil {
 			return nil, 0, errors.Wrapf(err, ": bad selector ('%#v')", options.Selector)
 		}

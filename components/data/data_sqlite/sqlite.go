@@ -1,4 +1,4 @@
-package crud_sqlite
+package data_sqlite
 
 import (
 	"database/sql"
@@ -11,7 +11,7 @@ import (
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/crud"
 
-	"github.com/pavlo67/workshop/common/selectors"
+	"github.com/pavlo67/workshop/components/selector"
 	"github.com/pavlo67/workshop/libraries/sqllib"
 
 	"github.com/pavlo67/workshop/components/data"
@@ -180,13 +180,13 @@ func (dataOp *dataSQLite) Save(items []data.Item, marksOp marks.Operator, indexe
 
 const onRemove = "on dataSQLite.Remove()"
 
-func (dataOp *dataSQLite) Remove(*selectors.Term, marks.Operator, indexer.Operator, *crud.RemoveOptions) error {
+func (dataOp *dataSQLite) Remove(*selector.Term, marks.Operator, indexer.Operator, *crud.RemoveOptions) error {
 	//		var err error
 	//		var values []interface{}
 	//		var orderAndLimit, condition, conditionCompleted string
 	//
 	//		if options != nil {
-	//			condition, values, err = selectors.Mysql("", options.Selector)
+	//			condition, values, err = selector.Mysql("", options.Selector)
 	//			if err != nil {
 	//				return crud.Result{}, errors.Wrapf(err, onDelete+"bad selector ('%#v')", options.Selector)
 	//			}
@@ -220,7 +220,7 @@ func (dataOp *dataSQLite) Remove(*selectors.Term, marks.Operator, indexer.Operat
 
 const onList = "on dataSQLite.List()"
 
-func (dataOp *dataSQLite) List(selector *selectors.Term, indexerOp indexer.Operator, options *crud.GetOptions) ([]data.Brief, error) {
+func (dataOp *dataSQLite) List(selector *selector.Term, indexerOp indexer.Operator, options *crud.GetOptions) ([]data.Brief, error) {
 	var values []interface{}
 
 	rows, err := dataOp.stmList.Query(values...)
@@ -256,13 +256,13 @@ func (dataOp *dataSQLite) List(selector *selectors.Term, indexerOp indexer.Opera
 
 const onCount = "on dataSQLite.Count()"
 
-func (dataOp *dataSQLite) Count(*selectors.Term, indexer.Operator, *crud.GetOptions) ([]crud.Part, error) {
+func (dataOp *dataSQLite) Count(*selector.Term, indexer.Operator, *crud.GetOptions) ([]crud.Part, error) {
 	return nil, common.ErrNotImplemented
 }
 
 const onReindex = "on dataSQLite.Reindex()"
 
-func (dataOp *dataSQLite) Reindex(*selectors.Term, indexer.Operator, *crud.GetOptions) error {
+func (dataOp *dataSQLite) Reindex(*selector.Term, indexer.Operator, *crud.GetOptions) error {
 	return common.ErrNotImplemented
 }
 

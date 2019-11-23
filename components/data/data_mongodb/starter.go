@@ -1,4 +1,4 @@
-package crud_mongodb
+package data_mongodb
 
 import (
 	"time"
@@ -10,28 +10,28 @@ import (
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/starter"
-	"github.com/pavlo67/workshop/components/crud"
+	"github.com/pavlo67/workshop/components/data"
 )
 
-const Name = "crud_mongodb"
+const Name = "data_mongodb"
 
 func Starter() starter.Operator {
-	return &crudMongoDBStarter{}
+	return &dataMongoDBStarter{}
 }
 
 var l logger.Operator
-var _ starter.Operator = &crudMongoDBStarter{}
+var _ starter.Operator = &dataMongoDBStarter{}
 
-type crudMongoDBStarter struct {
+type dataMongoDBStarter struct {
 	config       config.Access
 	interfaceKey joiner.InterfaceKey
 }
 
-func (cm *crudMongoDBStarter) Name() string {
+func (cm *dataMongoDBStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (cm *crudMongoDBStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Options) ([]common.Options, error) {
+func (cm *dataMongoDBStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Options) ([]common.Options, error) {
 	l = lCommon
 
 	cfgMongoDB := config.Access{}
@@ -41,21 +41,21 @@ func (cm *crudMongoDBStarter) Init(cfg *config.Config, lCommon logger.Operator, 
 	}
 
 	cm.config = cfgMongoDB
-	cm.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(crud.InterfaceKey)))
+	cm.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(data.InterfaceKey)))
 
 	return nil, nil
 }
 
-func (cm *crudMongoDBStarter) Setup() error {
+func (cm *dataMongoDBStarter) Setup() error {
 	return nil
 }
 
-func (cm *crudMongoDBStarter) Run(joinerOp joiner.Operator) error {
+func (cm *dataMongoDBStarter) Run(joinerOp joiner.Operator) error {
 
 	// TODO!!!
-	crudOp, _, _, err := NewCRUD(&cm.config, 5*time.Second, cm.config.Path, "crud", crud.Item{})
+	dataOp, _, _, err := NewData(&cm.config, 5*time.Second, cm.config.Path, "data", data.Item{})
 
-	err = joinerOp.Join(crudOp, cm.interfaceKey)
+	err = joinerOp.Join(dataOp, cm.interfaceKey)
 	if err != nil {
 		return errors.Wrapf(err, "can't join *flowSQLite as flow.Operator with key '%s'", cm.interfaceKey)
 	}

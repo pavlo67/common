@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/pavlo67/partes/crud/selectors"
+	"github.com/pavlo67/partes/crud/selector"
 	"github.com/pavlo67/workshop/common"
 
 	"github.com/pavlo67/workshop/confidenter/auth"
@@ -41,7 +41,7 @@ func ImportTo(userIS common.ID, objectsOp Operator, id, status string) error {
 	return nil
 }
 
-func Export(user *auth.User, objectsOp Operator, credentialsOp users.Operator, ctrl groups.Operator, filesOp files.Operator, selector selectors.Selector) (string, error) {
+func Export(user *auth.User, objectsOp Operator, credentialsOp users.Operator, ctrl groups.Operator, filesOp files.Operator, selector selector.Selector) (string, error) {
 	return "", common.ErrNotImplemented
 
 	//options := content.ListOptions{Selector: selector, ForExport: true}

@@ -7,7 +7,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/partes/crud/selectors"
+	"github.com/pavlo67/partes/crud/selector"
 	"github.com/pavlo67/partes/libs/mysqllib"
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
@@ -128,7 +128,7 @@ func New(mysqlConfig config.ServerAccess, linkTable string, ctrlOp groups.Operat
 
 const onClear = "on links_mysql.Clean()"
 
-func (linksOp *linksMySQL) Clear(selectors.Selector) error {
+func (linksOp *linksMySQL) Clear(selector.Selector) error {
 	if linksOp == nil {
 		return nil
 	}
@@ -240,14 +240,14 @@ func (linksOp *linksMySQL) SetLinks(userIS common.ID, linkedType, linkedID strin
 
 const onQuery = "on linksMySQL.Query"
 
-func (linksOp *linksMySQL) Query(userIS common.ID, selector selectors.Selector) (linked []links.Linked, err error) {
+func (linksOp *linksMySQL) Query(userIS common.ID, selector selector.Selector) (linked []links.Linked, err error) {
 	if linksOp == nil {
 		return nil, nil
 	}
 
-	condition, values, err := selectors.Mysql(userIS, selector)
+	condition, values, err := selector.Mysql(userIS, selector)
 	if err != nil {
-		return nil, errors.Wrapf(err, onQuery+": on selectors.Mysql(%#v)", selector)
+		return nil, errors.Wrapf(err, onQuery+": on selector.Mysql(%#v)", selector)
 	}
 
 	if strings.TrimSpace(condition) != "" {
@@ -335,14 +335,14 @@ func (linksOp *linksMySQL) QueryByObjectID(userIS common.ID, id string) (linked 
 const onQueryTags = "on linksMySQL.QueryTags"
 
 // QueryTags selects all tags.comp with selector accordingly to user's rights.
-func (linksOp *linksMySQL) QueryTags(userIS common.ID, selector selectors.Selector) ([]links.TagInfo, error) {
+func (linksOp *linksMySQL) QueryTags(userIS common.ID, selector selector.Selector) ([]links.TagInfo, error) {
 	if linksOp == nil {
 		return nil, nil
 	}
 
-	condition, values, err := selectors.Mysql(userIS, selector)
+	condition, values, err := selector.Mysql(userIS, selector)
 	if err != nil {
-		return nil, errors.Wrapf(err, "on selectors.Mysql(%#v)", selector)
+		return nil, errors.Wrapf(err, "on selector.Mysql(%#v)", selector)
 	}
 
 	sqlQueryTags := linksOp.tplQueryTags + "::" + condition + "::" + linksOp.tplQueryTagsFin

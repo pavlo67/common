@@ -17,7 +17,7 @@ package records_mysql
 //	"github.com/pavlo67/workshop/starter/joiner"
 //
 //	"github.com/pavlo67/partes/crud"
-//	"github.com/pavlo67/partes/crud/selectors"
+//	"github.com/pavlo67/partes/crud/selector"
 //	"github.com/pavlo67/workshop/confidenter/groups"
 //	"github.com/pavlo67/workshop/confidenter/rights"
 //	"github.com/pavlo67/workshop/notebook/links"
@@ -278,7 +278,7 @@ package records_mysql
 //	var forAdmin, addGlobalIS bool
 //	if options != nil {
 //
-//		condition, values, err = selectors.Mysql(userIS, options.Selector)
+//		condition, values, err = selector.Mysql(userIS, options.Selector)
 //		if err != nil {
 //			return nil, 0, errors.Wrapf(err, ": bad selector ('%#v')", options.Selector)
 //		}
@@ -488,7 +488,7 @@ package records_mysql
 //
 ////const onClear = "on notesMySQL.Clean()"
 ////
-////func (objOp *notesMySQL) Clean(selector selectors.Selector) error {
+////func (objOp *notesMySQL) Clean(selector selector.Selector) error {
 ////	if !basis.CheckEnvs("ADMIN_MODE") {
 ////		return errors.NewCRUDOperator(onClear + ": insufficient environment")
 ////	}
@@ -500,7 +500,7 @@ package records_mysql
 ////	if selector == nil {
 ////		_, err = objOp.dbh.Exec("truncate `" + objOp.table + "`")
 ////	} else {
-////		condition, values, err := selectors.Mysql("", selector)
+////		condition, values, err := selector.Mysql("", selector)
 ////		if err != nil {
 ////			return errors.Wrap(err, onClear)
 ////		}
@@ -534,13 +534,13 @@ package records_mysql
 //		}
 //	}
 //
-//	selectorSearched := selectors.Match("name,content,tags", searched, "IN BOOLEAN MODE")
+//	selectorSearched := selector.Match("name,content,tags", searched, "IN BOOLEAN MODE")
 //	if options == nil {
 //		options = &content.ListOptions{Selector: selectorSearched}
 //	} else if options.Selector == nil {
 //		options.Selector = selectorSearched
 //	} else {
-//		options.Selector = selectors.And(options.Selector, selectorSearched)
+//		options.Selector = selector.And(options.Selector, selectorSearched)
 //	}
 //	return objOp.ReadList(userIS, options)
 //}
@@ -576,13 +576,13 @@ package records_mysql
 //
 //	// sort.Strings(linkedIDs)
 //
-//	selectorTagged := selectors.FieldStr("id", linkedIDs...)
+//	selectorTagged := selector.FieldStr("id", linkedIDs...)
 //	if options == nil {
 //		options = &content.ListOptions{Selector: selectorTagged}
 //	} else if options.Selector == nil {
 //		options.Selector = selectorTagged
 //	} else {
-//		options.Selector = selectors.And(options.Selector, selectorTagged)
+//		options.Selector = selector.And(options.Selector, selectorTagged)
 //	}
 //
 //	for _, l := range linked {
@@ -689,9 +689,9 @@ package records_mysql
 //
 ////const ondeleteAll = "on ObjectsMysql.deleteAll"
 ////
-////func (objOp *notesMySQL) deleteAll(userIS basis.UserIS, selector selectors.Selector) error {
+////func (objOp *notesMySQL) deleteAll(userIS basis.UserIS, selector selector.Selector) error {
 ////
-////	condition, values, err := selectors.Mysql(userIS, selector)
+////	condition, values, err := selector.Mysql(userIS, selector)
 ////	if err != nil {
 ////		return nil.Wrapf(err, ": bad selector (%#v)", selector)
 ////	}
@@ -710,7 +710,7 @@ package records_mysql
 //
 ////const onloadFixture = "on notesMySQL.loadFixture"
 ////
-////func (objOp *notesMySQL) loadFixture(userIS common.ID, selector selectors.Selector, fixture fixturer.Fixture) error {
+////func (objOp *notesMySQL) loadFixture(userIS common.ID, selector selector.Selector, fixture fixturer.Fixture) error {
 ////	var numDeleted, numLoaded int
 ////
 ////	options := &content.ListOptions{Selector: selector}

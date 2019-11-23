@@ -8,12 +8,9 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common/config"
-	"github.com/pavlo67/workshop/libraries/sqllib"
 )
 
-var _ sqllib.Operator = &SQLite{}
-
-func New(cfg config.ServerAccess) (sqllib.Operator, error) {
+func Connect(cfg config.Access) (*sql.DB, error) {
 	if strings.TrimSpace(cfg.Path) == "" {
 		return nil, errors.New("no path to SQLite database is defined")
 	}
@@ -28,17 +25,5 @@ func New(cfg config.ServerAccess) (sqllib.Operator, error) {
 		return nil, errors.Wrapf(err, "wrong .Ping on db connect (cfg = %#v)", cfg)
 	}
 
-	return &SQLite{db}, nil
-}
-
-type SQLite struct {
-	db *sql.DB
-}
-
-func (sqlOp *SQLite) DB() *sql.DB {
-	if sqlOp == nil {
-		return nil
-	}
-
-	return sqlOp.db
+	return db, nil
 }

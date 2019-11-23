@@ -1,4 +1,4 @@
-package crud_files
+package data_files
 
 import (
 	"io/ioutil"
@@ -12,7 +12,7 @@ import (
 	"github.com/pavlo67/lingua/structura"
 	"github.com/pavlo67/workshop/common"
 
-	"github.com/pavlo67/workshop/common/selectors"
+	"github.com/pavlo67/workshop/components/selector"
 )
 
 var _ structura.Operator = &contentFiles{}
@@ -86,7 +86,7 @@ func (cfOp contentFiles) Read(id common.ID, options *structura.GetOptions) (*str
 
 const onList = "on contentFiles.List()"
 
-func (cfOp contentFiles) List(selector *selectors.Term, options *structura.GetOptions) ([]structura.Brief, error) {
+func (cfOp contentFiles) List(selector *selector.Term, options *structura.GetOptions) ([]structura.Brief, error) {
 	files, err := ioutil.ReadDir(cfOp.path)
 	if err != nil {
 		return nil, errors.Wrapf(err, onList+" with path (%s)", cfOp.path)

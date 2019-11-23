@@ -7,7 +7,7 @@ import (
 
 	"strconv"
 
-	"github.com/pavlo67/partes/crud/selectors"
+	"github.com/pavlo67/partes/crud/selector"
 	"github.com/pavlo67/workshop/common"
 
 	"github.com/pavlo67/workshop/notebook/links"
@@ -44,7 +44,7 @@ func FillFilesIDs(linksList []links.Item) ([]links.Item, bool) {
 	return linksList, needUpdate
 }
 
-func GetUnique(userIS common.ID, objectsOp Operator, selector selectors.Selector) (*Item, error) {
+func GetUnique(userIS common.ID, objectsOp Operator, selector selector.Selector) (*Item, error) {
 	options := &content.ListOptions{Selector: selector}
 	objs, _, err := objectsOp.ReadList(userIS, options)
 	if err != nil {
@@ -60,7 +60,7 @@ func GetUnique(userIS common.ID, objectsOp Operator, selector selectors.Selector
 	return &objs[0], nil
 }
 
-func PutUnique(userIS common.ID, o Item, objectsOp Operator, selector selectors.Selector) (string, error) {
+func PutUnique(userIS common.ID, o Item, objectsOp Operator, selector selector.Selector) (string, error) {
 	o0, err := GetUnique(userIS, objectsOp, selector)
 	if err != nil {
 		return "", err

@@ -3,7 +3,7 @@ package links
 import (
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/joiner"
-	"github.com/pavlo67/workshop/common/selectors"
+	"github.com/pavlo67/workshop/components/selector"
 )
 
 const InterfaceKey joiner.InterfaceKey = "links"
@@ -50,7 +50,7 @@ type Operator interface {
 	SetLinks(userIS common.ID, linkedType, linkedID string, newLinks Links) ([]LinkedInfo, error)
 
 	// Query selects all tagged entities with selector and without rights check (it should be done later).
-	Query(userIS common.ID, selector *selectors.Term) ([]Linked, error)
+	Query(userIS common.ID, selector *selector.Term) ([]Linked, error)
 
 	// QueryByTag selects all tagged entities without rights check (it should be done later).
 	QueryByTag(userIS common.ID, tag string) ([]Linked, error)
@@ -59,7 +59,7 @@ type Operator interface {
 	QueryByObjectID(userIS common.ID, id string) ([]Linked, error)
 
 	// QueryTags selects all tags.comp with selector accordingly to user's rights.
-	QueryTags(userIS common.ID, selector *selectors.Term) ([]TagInfo, error)
+	QueryTags(userIS common.ID, selector *selector.Term) ([]TagInfo, error)
 
 	// QueryTagsByOwner selects all tags.comp accordingly to rOwner and user's rights.
 	QueryTagsByOwner(userIS common.ID, rOwner common.ID) ([]TagInfo, error)

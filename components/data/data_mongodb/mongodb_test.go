@@ -1,18 +1,18 @@
-package crud_mongodb
+package data_mongodb
 
 import (
 	"testing"
 	"time"
+	"os"
 
 	"github.com/stretchr/testify/require"
 
-	"os"
 
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/libraries/encodelib"
 	"github.com/pavlo67/workshop/common/libraries/filelib"
 	"github.com/pavlo67/workshop/common/logger"
-	"github.com/pavlo67/workshop/components/crud"
+	"github.com/pavlo67/workshop/components/data"
 )
 
 type Test struct {
@@ -38,14 +38,14 @@ func TestCRUD(t *testing.T) {
 	err = cfg.Value("mongodb", &cfgMongoDB)
 	require.NoError(t, err)
 
-	crudOp, cleanerOp, mgoClient, err := NewCRUD(&cfgMongoDB, 5*time.Second, "test", "crud", crud.Item{Details: Test{}})
+	crudOp, cleanerOp, mgoClient, err := NewCRUD(&cfgMongoDB, 5*time.Second, "test", "crud", data.Item{Details: Test{}})
 	require.NoError(t, err)
 
-	testCases := []crud.OperatorTestCase{{
+	testCases := []data.OperatorTestCase{{
 		Operator:      crudOp,
 		Cleaner:       cleanerOp,
 		DetailsToRead: &Test{},
-		ToSave: crud.Item{
+		ToSave: data.Item{
 			Title:   "345456",
 			Summary: "6578gj",
 			URL:     "",
@@ -54,10 +54,10 @@ func TestCRUD(t *testing.T) {
 				BBB: 222,
 			},
 		},
-		ToUpdate: crud.Item{},
+		ToUpdate: data.Item{},
 	}}
 
-	crud.OperatorTestScenario(t, testCases, l)
+	data.OperatorTestScenario(t, testCases, l)
 
 	mgoClient.Disconnect(nil)
 }
