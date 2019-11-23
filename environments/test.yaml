@@ -6,6 +6,10 @@ server_http:
   tls_key_file:  "/etc/certificate/server.key"
   testers: ["127.0.0.1"]
 
+mongodb:
+  host: "localhost"
+  port: 27017
+
 smtp:
   host: "smtp.mailtrap.io"
   port: 2525

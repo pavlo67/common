@@ -1,17 +1,19 @@
 package crud
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
 	"github.com/pavlo67/workshop/common"
+	"github.com/pavlo67/workshop/common/logger"
 	"github.com/stretchr/testify/require"
 )
 
 type OperatorTestCase struct {
 	Operator
 	Cleaner
+
+	DetailsToRead interface{}
 
 	ToSave          Item
 	ExpectedSaveErr error
@@ -37,14 +39,14 @@ const toReadI = 0   // must be < numRepeats
 const toUpdateI = 1 // must be < numRepeats
 const toDeleteI = 2 // must be < numRepeats
 
-func OperatorTest(t *testing.T, testCases []OperatorTestCase) {
+func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.Operator) {
 
 	if env, ok := os.LookupEnv("ENV"); !ok || env != "test" {
 		t.Fatal("No test environment!!!")
 	}
 
 	for i, tc := range testCases {
-		fmt.Println(i)
+		l.Debug(i)
 
 		var id [numRepeats]common.ID
 		var toSave [numRepeats]Item
@@ -109,12 +111,21 @@ func OperatorTest(t *testing.T, testCases []OperatorTestCase) {
 
 		if tc.ExpectedReadErr != nil {
 			_, err = tc.Read(id[toReadI], nil)
-			require.Error(t, err, "where is an error on .Read()?")
+			require.Error(t, err)
 			continue
 		}
 
-		_, err = tc.Read(id[toReadI], nil)
-		require.NoError(t, err, "what is the error on .Read()?")
+		l.Infof("saved: %#v", tc.ToSave)
+
+		doc, err := tc.Read(id[toReadI], nil)
+		require.NoError(t, err)
+
+		l.Infof("readed: %#v", doc)
+
+		err = tc.Details(doc, tc.DetailsToRead)
+		require.NoError(t, err)
+
+		l.Infof("readed details: %#v", tc.DetailsToRead)
 
 		// TODO!!!
 		// testData(t, nil, []string{string(id[toReadI])}, toSave[toReadI], data, true, "on .Read()")

@@ -10,22 +10,26 @@ import (
 
 const InterfaceKey joiner.InterfaceKey = "crud"
 
-type Type string
+type Item struct {
+	ID       common.ID `bson:"_id,omitempty"`
+	Title    string
+	Summary  string
+	URL      string
+	Embedded []Item
+	Tags     []string
 
-type Brief struct {
-	ID       common.ID `bson:"_id,omitempty"      json:"id,omitempty"`
-	Type     Type      `bson:"type"               json:"type"`
-	Title    string    `bson:"title"              json:"title"`
-	Summary  string    `bson:"summary,omitempty"  json:"summary,omitempty"`
-	URL      string    `bson:"url,omitempty"      json:"url,omitempty"`
-	Embedded []Brief   `bson:"embedded,omitempty" json:"embedded,omitempty"`
-	Tags     []string  `bson:"tags,omitempty"     json:"tags,omitempty"`
-	SavedAt  time.Time `bson:"saved_at,omitempty" json:"saved_at,omitempty"`
+	Status
+
+	// Details should be used with Operator.Save only (and use Operator.Details to get .Details value)
+	Details interface{} `bson:"-" json:"-"`
+
+	// DetailsRaw shouldn't be used directly
+	DetailsRaw []byte `bson:"Details" json:"Details"`
 }
 
-type Item struct {
-	Brief   `            bson:",inline"           json:",inline"`
-	Details interface{} `bson:"details,omitempty" json:"details,omitempty"`
+type Status struct {
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 type Part struct {
@@ -34,13 +38,12 @@ type Part struct {
 }
 
 type Operator interface {
-	Exemplar() interface{}
-
 	Save(Item, *SaveOptions) (*common.ID, error)
 	Read(common.ID, *GetOptions) (*Item, error)
+	Details(item *Item, exemplar interface{}) error
 
 	Exists(*selector.Term, *GetOptions) ([]Part, error)
-	List(*selector.Term, *GetOptions) ([]Brief, error)
+	List(*selector.Term, *GetOptions) ([]Item, error)
 	Remove(*selector.Term, *RemoveOptions) error
 }
 
@@ -73,7 +76,7 @@ type RemoveOptions struct {
 //	UpdatedAt *time.Time   `bson:"updated_at,omitempty" json:"updated_at,omitempty"`
 //
 //	Title   string       `bson:"title"             json:"title"`
-//	Brief   string       `bson:"brief,omitempty"   json:"brief,omitempty"`
+//	Item   string       `bson:"brief,omitempty"   json:"brief,omitempty"`
 //	Author  string       `bson:"author,omitempty"  json:"author,omitempty"`
 //	Item content.Item `bson:"content,omitempty" json:"content,omitempty"`
 //	Links   links.Links  `bson:"links,omitempty"   json:"links,omitempty"`

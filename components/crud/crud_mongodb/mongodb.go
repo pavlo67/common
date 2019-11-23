@@ -7,8 +7,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"reflect"
-
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/libraries/mgolib"
@@ -26,25 +24,23 @@ var _ crud.Operator = &crudMongoDB{}
 type crudMongoDB struct {
 	client     *mongo.Client
 	collection *mongo.Collection
-	exemplar   interface{}
 }
 
 const onNewCRUD = "on crud_mongodb.NewCRUD()"
 
-func NewCRUD(dbAccess *config.Access, timeout time.Duration, collectionName string, exemplar interface{}) (crud.Operator, crud.Cleaner, *mongo.Client, error) {
-	if exemplar == nil {
-		return nil, nil, nil, errors.New("no exemplar")
+func NewCRUD(access *config.Access, timeout time.Duration, dbName, collectionName string, exemplar crud.Item) (crud.Operator, crud.Cleaner, *mongo.Client, error) {
+	if exemplar.Details == nil {
+		return nil, nil, nil, errors.New("no exemplar.Details")
 	}
 
-	client, err := mgolib.Connect(dbAccess, timeout)
+	client, err := mgolib.Connect(access, timeout)
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	database := client.Database(dbAccess.Path)
+	database := client.Database(dbName)
 	mgoOp := &crudMongoDB{
 		client:     client,
 		collection: database.Collection(collectionName),
-		exemplar:   exemplar,
 	}
 
 	return mgoOp, mgoOp, client, nil
@@ -52,17 +48,17 @@ func NewCRUD(dbAccess *config.Access, timeout time.Duration, collectionName stri
 
 // operator ----------------------------------------------------------------------------------------------------------------
 
-const onExemplar = "on crudMongoDB.Exemplar()"
-
-func (mgoOp crudMongoDB) Exemplar() interface{} {
-	if reflect.TypeOf(mgoOp.exemplar).Kind() == reflect.Ptr {
-		// Pointer:
-		return reflect.New(reflect.ValueOf(mgoOp.exemplar).Elem().Type()).Interface()
-	}
-
-	// Not pointer:
-	return reflect.New(reflect.TypeOf(mgoOp.exemplar)).Elem().Interface()
-}
+//const onExemplar = "on crudMongoDB.Exemplar()"
+//
+//func (mgoOp crudMongoDB) Exemplar() crud.Item {
+//	if reflect.TypeOf(mgoOp.exemplar.Details).Kind() == reflect.Ptr {
+//		// Pointer:
+//		return crud.Item{Details: reflect.New(reflect.ValueOf(mgoOp.exemplar.Details).Elem().Type()).Interface()}
+//	}
+//
+//	// Not pointer:
+//	return crud.Item{Details: reflect.New(reflect.TypeOf(mgoOp.exemplar.Details)).Elem().Interface()}
+//}
 
 const onSave = "on crudMongoDB.Save()"
 
@@ -83,8 +79,14 @@ func (mgoOp crudMongoDB) Save(item crud.Item, options *crud.SaveOptions) (*commo
 
 	}
 
-	res, err := mgoOp.collection.InsertOne(nil, &item)
+	var err error
 
+	item.DetailsRaw, err = bson.Marshal(item.Details)
+	if err != nil {
+		return nil, errors.Wrapf(err, onSave+": can't bson.Marshal(%#v)", item.Details)
+	}
+
+	res, err := mgoOp.collection.InsertOne(nil, &item)
 	if err != nil {
 		return nil, errors.Wrapf(err, onSave+": can't .InsertOne(nil, %#v)", item)
 	}
@@ -120,7 +122,7 @@ func (mgoOp crudMongoDB) Read(id common.ID, options *crud.GetOptions) (*crud.Ite
 		return nil, nil
 	}
 
-	item := crud.Item{Details: mgoOp.Exemplar()}
+	item := crud.Item{}
 
 	err = res.Decode(&item)
 	if err != nil {
@@ -134,6 +136,24 @@ func (mgoOp crudMongoDB) Read(id common.ID, options *crud.GetOptions) (*crud.Ite
 	return &item, nil
 }
 
+const onDetails = "on crudMongoDB.Details()"
+
+func (mgoOp crudMongoDB) Details(item *crud.Item, exemplar interface{}) error {
+	if item == nil {
+		return errors.Wrap(common.ErrNull, onDetails+": item == nil")
+	}
+	if len(item.DetailsRaw) < 1 {
+		return errors.Wrap(common.ErrEmpty, onDetails+": len(item.DetailsRaw) < 1")
+	}
+
+	err := bson.Unmarshal(item.DetailsRaw, exemplar)
+	if err != nil {
+		return errors.Wrapf(err, onDetails+": on bson.Unmarshal(%#v, %#v)", item.DetailsRaw, exemplar)
+	}
+
+	return nil
+}
+
 const onExists = "on crudMongoDB.Exists()"
 
 func (mgoOp crudMongoDB) Exists(*selector.Term, *crud.GetOptions) ([]crud.Part, error) {
@@ -142,7 +162,7 @@ func (mgoOp crudMongoDB) Exists(*selector.Term, *crud.GetOptions) ([]crud.Part, 
 
 const onList = "on crudMongoDB.List()"
 
-func (mgoOp crudMongoDB) List(*selector.Term, *crud.GetOptions) ([]crud.Brief, error) {
+func (mgoOp crudMongoDB) List(*selector.Term, *crud.GetOptions) ([]crud.Item, error) {
 
 	// TODO!!!
 	filter := bson.M{}
@@ -156,10 +176,10 @@ func (mgoOp crudMongoDB) List(*selector.Term, *crud.GetOptions) ([]crud.Brief, e
 		return nil, errors.Errorf(onList+": no error and no cursor are returned with collection.Find(nil, %#v)", filter)
 	}
 
-	var briefs []crud.Brief
+	var briefs []crud.Item
 
 	for res.Next(nil) {
-		var brief crud.Brief
+		var brief crud.Item
 		err := res.Decode(&brief)
 		if err != nil {
 			var getID mgolib.GetID
@@ -205,9 +225,21 @@ const onClean = "on crudMongoDB.Clean()"
 func (mgoOp crudMongoDB) Clean() error {
 	//filter := bson.M{"user_id": string(userID)}
 
-	_, err := mgoOp.collection.DeleteMany(nil, nil)
+	filter := bson.D{}
+
+	num, err := mgoOp.collection.CountDocuments(nil, filter)
 	if err != nil {
-		return errors.Wrapf(err, onClean+": can't .DeleteMany(nil, %#v, nil)", nil)
+		return errors.Wrapf(err, onClean+": can't .CountDocuments(nil, %#v)", filter)
+	}
+
+	if num > 0 {
+
+		l.Infof("documents to clean from collection: %d", num)
+
+		_, err := mgoOp.collection.DeleteMany(nil, filter)
+		if err != nil {
+			return errors.Wrapf(err, onClean+": can't .DeleteMany(nil, %#v)", filter)
+		}
 	}
 
 	return nil

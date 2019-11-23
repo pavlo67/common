@@ -53,7 +53,7 @@ func (cm *crudMongoDBStarter) Setup() error {
 func (cm *crudMongoDBStarter) Run(joinerOp joiner.Operator) error {
 
 	// TODO!!!
-	crudOp, _, _, err := NewCRUD(&cm.config, 5*time.Second, "crud", crud.Item{})
+	crudOp, _, _, err := NewCRUD(&cm.config, 5*time.Second, cm.config.Path, "crud", crud.Item{})
 
 	err = joinerOp.Join(crudOp, cm.interfaceKey)
 	if err != nil {

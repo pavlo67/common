@@ -10,6 +10,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
+	"log"
+
 	"github.com/pavlo67/workshop/common/config"
 )
 
@@ -57,11 +59,12 @@ func Connect(access *config.Access, timeout time.Duration) (*mongo.Client, error
 		return nil, errors.Wrapf(err, "can't client.Connect(%#v)", access)
 	}
 
-	// Check the connection
-	//err = client.Ping(context.TODO(), nil)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
+	err = client.Ping(ctx, nil)
+	if err != nil {
+		return nil, errors.Wrapf(err, "can't client.Ping(%#v)", access)
+	}
+
+	log.Printf("connected to %#v", access)
 
 	return client, nil
 }
