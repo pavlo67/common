@@ -2,7 +2,6 @@ package tagger_sqlite
 
 import (
 	"database/sql"
-	"strconv"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -53,12 +52,12 @@ func NewTagger(access config.Access, table string, limit int) (tagger.Operator, 
 		limit: limit,
 		table: table,
 
-		sqlSave:   "INSERT INTO " + table + " (" + fieldsToSaveStr + ") VALUES (" + strings.Repeat(",? ", len(fieldsToSave))[1:] + ")",
+		sqlSave:   "INSERT OR IGNORE INTO " + table + " (" + fieldsToSaveStr + ") VALUES (" + strings.Repeat(",? ", len(fieldsToSave))[1:] + ")",
 		sqlRemove: "DELETE FROM " + table + " where key = ? AND id = ? and tag = ?",
 		sqlReset:  "DELETE FROM " + table + " where key = ? AND id = ?",
 
-		sqlTags:       "SELECT tag FROM " + table + " ORDER BY tag WHERE key = ? AND id = ?",
-		sqlListTagged: "SELECT key, id FROM " + table + " ORDER BY key, id where tag = ?",
+		sqlTags:       "SELECT tag     FROM " + table + " WHERE key = ? AND id = ? ORDER BY tag",
+		sqlListTagged: "SELECT key, id FROM " + table + " WHERE tag = ?            ORDER BY key, id",
 	}
 
 	sqlStmts := []sqllib.SqlStmt{
@@ -82,20 +81,13 @@ func NewTagger(access config.Access, table string, limit int) (tagger.Operator, 
 const onTags = "on taggerSQLite.Tags(): "
 
 func (taggerOp *taggerSQLite) Tags(key joiner.InterfaceKey, id common.ID, _ *crud.GetOptions) ([]tagger.Tag, error) {
-	if len(id) < 1 {
-		return nil, errors.New(onTags + "empty ID")
-	}
+	values := []interface{}{key, id}
 
-	idNum, err := strconv.ParseUint(string(id), 10, 64)
-	if err != nil {
-		return nil, errors.Errorf(onTags+"wrong ID (%s)", id)
-	}
-
-	rows, err := taggerOp.stmTags.Query(idNum)
+	rows, err := taggerOp.stmTags.Query(values...)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	} else if err != nil {
-		return nil, errors.Wrapf(err, onTags+sqllib.CantQuery, taggerOp.sqlTags, idNum)
+		return nil, errors.Wrapf(err, onTags+sqllib.CantQuery, taggerOp.sqlTags, values)
 	}
 	defer rows.Close()
 
@@ -106,14 +98,14 @@ func (taggerOp *taggerSQLite) Tags(key joiner.InterfaceKey, id common.ID, _ *cru
 
 		err = rows.Scan(&tag)
 		if err != nil {
-			return tags, errors.Wrapf(err, onTags+sqllib.CantScanQueryRow, taggerOp.sqlTags, idNum)
+			return tags, errors.Wrapf(err, onTags+sqllib.CantScanQueryRow, taggerOp.sqlTags, values)
 		}
 
 		tags = append(tags, tagger.Tag(tag))
 	}
 	err = rows.Err()
 	if err != nil {
-		return tags, errors.Wrapf(err, onTags+": "+sqllib.RowsError, taggerOp.sqlTags, idNum)
+		return tags, errors.Wrapf(err, onTags+": "+sqllib.RowsError, taggerOp.sqlTags, values)
 	}
 
 	return tags, nil
@@ -207,7 +199,7 @@ func (taggerOp *taggerSQLite) Close() error {
 }
 
 func (taggerOp *taggerSQLite) Clean() error {
-	_, err := taggerOp.db.Exec("TRUNCATE " + taggerOp.table)
+	_, err := taggerOp.db.Exec("DELETE FROM " + taggerOp.table)
 
 	return err
 }

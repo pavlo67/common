@@ -106,7 +106,7 @@ func ContentByID(userIS common.ID, objectsOp Operator, genusKey string, content 
 //		return o, err
 //	}
 //
-//	for _, f := range o.Links {
+//	for _, f := range o.Tags {
 //		if f.Type != files.LinkType {
 //			continue
 //		}

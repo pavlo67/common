@@ -6,12 +6,13 @@ import (
 
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/logger"
+	"github.com/pavlo67/workshop/components/crud"
 	"github.com/stretchr/testify/require"
 )
 
 type OperatorTestCase struct {
 	Operator
-	Cleaner
+	crud.Cleaner
 
 	DetailsToRead interface{}
 

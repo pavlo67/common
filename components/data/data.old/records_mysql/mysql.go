@@ -1,3 +1,4 @@
+
 package records_mysql
 
 //import (
@@ -173,7 +174,7 @@ package records_mysql
 //		}
 //	}
 //
-//	linksList := notes.PrepareLinks(userIS, objOp.grpsOp, o.ROwner, nil, o.Links, objOp.jointLinks)
+//	linksList := notes.PrepareLinks(userIS, objOp.grpsOp, o.ROwner, nil, o.Tags, objOp.jointLinks)
 //	linksListCopy := linksList
 //	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //
@@ -181,7 +182,7 @@ package records_mysql
 //	if len(linksList) > 0 {
 //		jsonLinks, err = json.Marshal(linksList)
 //		if err != nil {
-//			return "", errors.Wrapf(err, onCreate+": can't marshal .Links(%#v)", linksList)
+//			return "", errors.Wrapf(err, onCreate+": can't marshal .Tags(%#v)", linksList)
 //		}
 //	}
 //
@@ -257,12 +258,12 @@ package records_mysql
 //	}
 //
 //	if len(jsonLinks) > 0 {
-//		err = json.Unmarshal(jsonLinks, &o.Links)
+//		err = json.Unmarshal(jsonLinks, &o.Tags)
 //		if err != nil {
-//			return nil, errors.Wrapf(err, onRead+": can't unmarshal .Links: '%s'", string(jsonLinks))
+//			return nil, errors.Wrapf(err, onRead+": can't unmarshal .Tags: '%s'", string(jsonLinks))
 //		}
 //
-//		o.Links = links.Filter(userIS, objOp.grpsOp, o.Links)
+//		o.Tags = links.Filter(userIS, objOp.grpsOp, o.Tags)
 //	}
 //
 //	return &o, nil
@@ -327,11 +328,11 @@ package records_mysql
 //			}
 //		}
 //		if len(jsonLinks) > 0 {
-//			err = json.Unmarshal(jsonLinks, &o.Links)
+//			err = json.Unmarshal(jsonLinks, &o.Tags)
 //			if err != nil {
 //				return nil, 0, errors.Wrapf(err, onReadList+": can't unmarshal jsonLinks: %s", jsonLinks)
 //			}
-//			o.Links = links.Filter(userIS, objOp.grpsOp, o.Links)
+//			o.Tags = links.Filter(userIS, objOp.grpsOp, o.Tags)
 //		}
 //		if addGlobalIS {
 //			var needUpdate = false
@@ -340,7 +341,7 @@ package records_mysql
 //				o.GlobalIS = joiner.SystemDomain() + "/object/" + o.ID
 //			}
 //			var fillID = false
-//			o.Links, fillID = notes.FillFilesIDs(o.Links)
+//			o.Tags, fillID = notes.FillFilesIDs(o.Tags)
 //			if fillID {
 //				needUpdate = true
 //			}
@@ -417,7 +418,7 @@ package records_mysql
 //		}
 //	}
 //
-//	linksList := notes.PrepareLinks(userIS, objOp.grpsOp, rOwner, linksListOld, o.Links, objOp.jointLinks)
+//	linksList := notes.PrepareLinks(userIS, objOp.grpsOp, rOwner, linksListOld, o.Tags, objOp.jointLinks)
 //	linksListCopy := linksList
 //	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //
@@ -425,7 +426,7 @@ package records_mysql
 //	if len(linksList) > 0 {
 //		jsonLinks, err = json.Marshal(linksList)
 //		if err != nil {
-//			return crud.Result{}, errors.Wrapf(err, onUpdate+": can't marshal .Links(%#v)", linksList)
+//			return crud.Result{}, errors.Wrapf(err, onUpdate+": can't marshal .Tags(%#v)", linksList)
 //		}
 //	}
 //
@@ -644,7 +645,7 @@ package records_mysql
 //		return errors.Wrap(err, onUpdateLinks)
 //	}
 //
-//	linksList := notes.PrepareLinks(userIS, objOp.grpsOp, o.ROwner, o.Links, linksListNew, objOp.jointLinks, linkType)
+//	linksList := notes.PrepareLinks(userIS, objOp.grpsOp, o.ROwner, o.Tags, linksListNew, objOp.jointLinks, linkType)
 //	linksListCopy := linksList
 //	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //
@@ -652,7 +653,7 @@ package records_mysql
 //	if len(linksList) > 0 {
 //		jsonLinks, err = json.Marshal(linksList)
 //		if err != nil {
-//			return errors.Wrapf(err, onUpdateLinks+": can't marshal .Links(%#v)", linksList)
+//			return errors.Wrapf(err, onUpdateLinks+": can't marshal .Tags(%#v)", linksList)
 //		}
 //	}
 //

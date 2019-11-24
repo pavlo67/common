@@ -1,5 +1,5 @@
 sqlite:
-  path: '/home/pavlo/0/_datastore/flow_sqlite/test.sqlite'
+  path: './test.sqlite'
 
 server_http:
   tls_cert_file: "/etc/certificate/server.crt"

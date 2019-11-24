@@ -15,8 +15,6 @@ build
 dist
 coverage
 *.test
-/tests/e2e/videos/
-/tests/e2e/screenshots/
 
 
 # Log files & reports

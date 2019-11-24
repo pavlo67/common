@@ -307,12 +307,12 @@ func ObjectsToJSON(user *auth.User, filesOp files.Operator, credentialsOpOp user
 	//	identityGlobalIS = getAllIdentitiesFromObject(user, identityGlobalIS, credentialsOpOp, ctrl, o.RView, o.ROwner, o.Managers)
 	//	// change identities to global_is
 	//	setGlobalISRights(&o, identityGlobalIS)
-	//	//TODO: need change all identities in o.Links on globalIS before write to json ???
+	//	//TODO: need change all identities in o.Tags on globalIS before write to json ???
 	//
 	//	//  make json && temporary filer.comp for archive
 	//	var objPath, objDir string
 	//	isObjDir := false
-	//	for i, f := range o.Links {
+	//	for i, f := range o.Tags {
 	//		if f.Type == files.LinkType {
 	//			if !isObjDir {
 	//				objDir = str_json.ReCorrectPath.ReplaceAllString(o.GlobalIS, "_")
@@ -347,7 +347,7 @@ func ObjectsToJSON(user *auth.User, filesOp files.Operator, credentialsOpOp user
 	//			}
 	//
 	//			filesForZip = append(filesForZip, filelib.FileForZip{Label: to, Temporary: true, Dir: filepath.Join123(objDir, filepath.Dir(f.Label))})
-	//			o.Links[i].Label = "/" + filepath.Join123(objDir, f.Label)
+	//			o.Tags[i].Label = "/" + filepath.Join123(objDir, f.Label)
 	//		}
 	//	}
 	//	buf, err := json.marshal(o)

@@ -60,7 +60,7 @@ type Operator interface {
 //	Item   string       `bson:"brief,omitempty"   json:"brief,omitempty"`
 //	Author  string       `bson:"author,omitempty"  json:"author,omitempty"`
 //	Item content.Item `bson:"content,omitempty" json:"content,omitempty"`
-//	Links   links.Links  `bson:"links,omitempty"   json:"links,omitempty"`
+//	Tags   links.Tags  `bson:"links,omitempty"   json:"links,omitempty"`
 //
 //	RView  common.ID `bson:"r_view,omitempty"  json:"r_view,omitempty"`
 //	ROwner common.ID `bson:"r_owner,omitempty" json:"r_owner,omitempty"`

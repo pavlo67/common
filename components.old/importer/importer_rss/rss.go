@@ -187,7 +187,7 @@ func (r *RSS) Get(feedURL string, minKey *string) (*importer.Series, error) {
 //		//Summary: []items.Text{{Text: item.Description, Language: language}},
 //		Title:    item.Title,
 //		Contentus: item.Description + " " + item.Contentus,
-//		Links:   createdLinks,
+//		Tags:   createdLinks,
 //	}, nil
 //
 // }
