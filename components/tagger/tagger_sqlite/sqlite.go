@@ -15,18 +15,19 @@ import (
 	"github.com/pavlo67/workshop/components/tagger"
 )
 
-const limitDefault = 200
 const tableDefault = "tags"
+const limitDefault = 200
 
 var fieldsToSave = []string{"key", "id", "tag"}
 var fieldsToSaveStr = strings.Join(fieldsToSave, ", ")
 
 var _ tagger.Operator = &taggerSQLite{}
+var _ crud.Cleaner = &taggerSQLite{}
 
 type taggerSQLite struct {
-	limit int
-	table string
 	db    *sql.DB
+	table string
+	limit int
 
 	sqlSave, sqlRemove, sqlReset, sqlTags, sqlListTagged string
 	stmSave, stmRemove, stmReset, stmTags, stmListTagged *sql.Stmt

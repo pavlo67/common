@@ -63,43 +63,52 @@ func NewData(access *config.Access, timeout time.Duration, dbName, collectionNam
 
 const onSave = "on dataMongoDB.Save()"
 
-func (mgoOp dataMongoDB) Save(item data.Item, options *crud.SaveOptions) (*common.ID, error) {
+func (mgoOp dataMongoDB) Save(items []data.Item, options *crud.SaveOptions) ([]common.ID, error) {
 	// TODO: use Upsert
 
-	if item.ID != "" {
-		id, err := primitive.ObjectIDFromHex(string(item.ID))
-		if err != nil {
-			return nil, errors.Wrapf(err, onSave+": can't primitive.ObjectIDFromHex(string(%s))", item.ID)
-		}
-
-		filter := bson.M{"_id": id}
-		_, err = mgoOp.collection.DeleteMany(nil, filter)
-		if err != nil {
-			return nil, errors.Wrapf(err, onSave+": can't .DeleteMany(nil, %#v, nil)", filter)
-		}
-
-	}
-
 	var err error
+	var ids []common.ID
 
-	item.DetailsRaw, err = bson.Marshal(item.Details)
-	if err != nil {
-		return nil, errors.Wrapf(err, onSave+": can't bson.Marshal(%#v)", item.Details)
+	for i, item := range items {
+		if item.ID != "" {
+			id, err := primitive.ObjectIDFromHex(string(item.ID))
+			if err != nil {
+				return nil, errors.Wrapf(err, onSave+": can't primitive.ObjectIDFromHex(string(%s))", item.ID)
+			}
+
+			filter := bson.M{"_id": id}
+			_, err = mgoOp.collection.DeleteMany(nil, filter)
+			if err != nil {
+				return nil, errors.Wrapf(err, onSave+": can't .DeleteMany(nil, %#v, nil)", filter)
+			}
+
+		}
+
+		items[i].DetailsRaw, err = bson.Marshal(item.Details)
+		if err != nil {
+			return nil, errors.Wrapf(err, onSave+": can't bson.Marshal(item.Details = %#v)", item.Details)
+		}
+
+		res, err := mgoOp.collection.InsertOne(nil, &item)
+		if err != nil {
+			return nil, errors.Wrapf(err, onSave+": can't .InsertOne(nil, %#v)", item)
+		}
+
+		var id common.ID
+		if objectID, ok := res.InsertedID.(primitive.ObjectID); ok {
+			id = common.ID(objectID.Hex())
+
+			// TODO!!! save tags
+
+		} else {
+			return ids, errors.Errorf("??? res.InsertedID = %#v", res.InsertedID)
+		}
+
+		ids = append(ids, id)
+
 	}
 
-	res, err := mgoOp.collection.InsertOne(nil, &item)
-	if err != nil {
-		return nil, errors.Wrapf(err, onSave+": can't .InsertOne(nil, %#v)", item)
-	}
-
-	var id common.ID
-	if objectID, ok := res.InsertedID.(primitive.ObjectID); ok {
-		id = common.ID(objectID.Hex())
-	} else {
-		l.Debugf("res.InsertedID = %#v", res.InsertedID)
-	}
-
-	return &id, nil
+	return ids, nil
 }
 
 const onRead = "on dataMongoDB.Read()"
@@ -155,9 +164,9 @@ func (mgoOp dataMongoDB) Details(item *data.Item, exemplar interface{}) error {
 	return nil
 }
 
-const onExists = "on dataMongoDB.Exists()"
+const onCount = "on dataMongoDB.Count()"
 
-func (mgoOp dataMongoDB) Exists(*selector.Term, *crud.GetOptions) ([]data.Part, error) {
+func (mgoOp dataMongoDB) Count(*selector.Term, *crud.GetOptions) ([]crud.Part, error) {
 	return nil, common.ErrNotImplemented
 }
 

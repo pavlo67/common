@@ -31,6 +31,31 @@ type OperatorTestCase struct {
 	ExcludeRemoveTest bool
 }
 
+type Test struct {
+	AAA string
+	BBB int
+}
+
+func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
+	return []OperatorTestCase{
+		{
+			Operator:      dataOp,
+			Cleaner:       cleanerOp,
+			DetailsToRead: &Test{},
+			ToSave: Item{
+				Title:   "345456",
+				Summary: "6578gj",
+				URL:     "",
+				Details: Test{
+					AAA: "aaa",
+					BBB: 222,
+				},
+			},
+			ToUpdate: Item{},
+		},
+	}
+}
+
 // TODO: тест чистки бази
 // TODO: test created_at, updated_at
 // TODO: test GetOptions
@@ -93,7 +118,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		//require.NoError(t, err)
 
 		if tc.ExpectedSaveErr != nil {
-			_, err = tc.Save(tc.ToSave, nil)
+			_, err = tc.Save([]Item{tc.ToSave}, nil)
 			require.Error(t, err, "where is an error on .Save()?")
 			continue
 		}
@@ -101,11 +126,11 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		for i := 0; i < numRepeats; i++ {
 			toSave[i] = tc.ToSave
 
-			idI, err := tc.Save(toSave[i], nil)
+			idsI, err := tc.Save([]Item{toSave[i]}, nil)
 			require.NoError(t, err, "what is the error on .Create()?")
-			require.NotEmpty(t, idI)
+			require.True(t, len(idsI) > 0)
 
-			id[i] = *idI
+			id[i] = idsI[0]
 		}
 
 		// test Read ----------------------------------------------------------------------------------------

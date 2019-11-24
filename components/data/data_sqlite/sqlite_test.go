@@ -1,9 +1,8 @@
-package data_mongodb
+package data_sqlite
 
 import (
 	"os"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -28,16 +27,18 @@ func TestCRUD(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, cfg)
 
-	cfgMongoDB := config.Access{}
-	err = cfg.Value("mongodb", &cfgMongoDB)
+	cfgSQLite := config.Access{}
+	err = cfg.Value("sqlite", &cfgSQLite)
 	require.NoError(t, err)
 
-	dataOp, cleanerOp, mgoClient, err := NewData(&cfgMongoDB, 5*time.Second, "test", "crud", data.Item{Details: data.Test{}})
+	l.Debugf("%#v", cfgSQLite)
+
+	dataOp, cleanerOp, err := NewData(cfgSQLite, "", 0)
 	require.NoError(t, err)
+
+	l.Debugf("%#v", dataOp)
 
 	testCases := data.TestCases(dataOp, cleanerOp)
 
 	data.OperatorTestScenario(t, testCases, l)
-
-	mgoClient.Disconnect(nil)
 }
