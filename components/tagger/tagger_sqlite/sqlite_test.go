@@ -38,12 +38,12 @@ func TestCRUD(t *testing.T) {
 
 	l.Debugf("%#v", cfgSQLite)
 
-	taggerOp, err := NewTagger(cfgSQLite, "", 0)
+	taggerOp, cleanerOp, err := NewTagger(cfgSQLite, "", 0)
 	require.NoError(t, err)
 
 	l.Debugf("%#v", taggerOp)
 
 	testCases := tagger.QueryTagsTestCases(taggerOp)
 
-	tagger.OperatorTestScenario(t, testCases, l)
+	tagger.OperatorTestScenario(t, testCases, cleanerOp, l)
 }

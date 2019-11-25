@@ -15,10 +15,7 @@ type TagInfo struct {
 	Count uint64
 }
 
-type Tagged struct {
-	joiner.InterfaceKey
-	common.ID
-}
+type Tagged map[joiner.InterfaceKey][]common.ID
 
 type Operator interface {
 	Save(joiner.InterfaceKey, common.ID, []Tag, *crud.SaveOptions) error
@@ -26,5 +23,5 @@ type Operator interface {
 	Replace(joiner.InterfaceKey, common.ID, []Tag, *crud.SaveOptions) error
 
 	Tags(joiner.InterfaceKey, common.ID, *crud.GetOptions) ([]Tag, error)
-	ListTagged(Tag, *crud.GetOptions) ([]Tagged, error)
+	ListTagged(Tag, *crud.GetOptions) (Tagged, error)
 }

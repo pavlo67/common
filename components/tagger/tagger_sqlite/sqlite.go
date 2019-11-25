@@ -35,10 +35,10 @@ type taggerSQLite struct {
 
 const onNew = "on taggerSQLite.New(): "
 
-func NewTagger(access config.Access, table string, limit int) (tagger.Operator, error) {
+func NewTagger(access config.Access, table string, limit int) (tagger.Operator, crud.Cleaner, error) {
 	db, err := sqllib_sqlite.Connect(access)
 	if err != nil {
-		return nil, errors.Wrap(err, onNew)
+		return nil, nil, errors.Wrap(err, onNew)
 	}
 
 	if table == "" {
@@ -72,11 +72,11 @@ func NewTagger(access config.Access, table string, limit int) (tagger.Operator, 
 
 	for _, sqlStmt := range sqlStmts {
 		if err := sqllib.Prepare(db, sqlStmt.Sql, sqlStmt.Stmt); err != nil {
-			return nil, errors.Wrap(err, onNew)
+			return nil, nil, errors.Wrap(err, onNew)
 		}
 	}
 
-	return &taggerOp, nil
+	return &taggerOp, &taggerOp, nil
 }
 
 const onTags = "on taggerSQLite.Tags(): "
@@ -162,7 +162,7 @@ func (taggerOp *taggerSQLite) Remove(key joiner.InterfaceKey, id common.ID, tags
 
 const onListTagged = "on taggerSQLite.ListTagged()"
 
-func (taggerOp *taggerSQLite) ListTagged(tag tagger.Tag, _ *crud.GetOptions) ([]tagger.Tagged, error) {
+func (taggerOp *taggerSQLite) ListTagged(tag tagger.Tag, _ *crud.GetOptions) (tagger.Tagged, error) {
 	values := []interface{}{tag}
 
 	rows, err := taggerOp.stmListTagged.Query(values...)
@@ -173,26 +173,23 @@ func (taggerOp *taggerSQLite) ListTagged(tag tagger.Tag, _ *crud.GetOptions) ([]
 	}
 	defer rows.Close()
 
-	var taggedAll []tagger.Tagged
+	tagged := tagger.Tagged{}
 
 	for rows.Next() {
 		var key, id string
 		err = rows.Scan(&key, &id)
 		if err != nil {
-			return taggedAll, errors.Wrapf(err, onListTagged+sqllib.CantScanQueryRow, taggerOp.sqlListTagged, values)
+			return tagged, errors.Wrapf(err, onListTagged+sqllib.CantScanQueryRow, taggerOp.sqlListTagged, values)
 		}
 
-		taggedAll = append(taggedAll, tagger.Tagged{
-			InterfaceKey: joiner.InterfaceKey(key),
-			ID:           common.ID(id),
-		})
+		tagged[joiner.InterfaceKey(key)] = append(tagged[joiner.InterfaceKey(key)], common.ID(id))
 	}
 	err = rows.Err()
 	if err != nil {
-		return taggedAll, errors.Wrapf(err, onListTagged+": "+sqllib.RowsError, taggerOp.sqlListTagged, values)
+		return tagged, errors.Wrapf(err, onListTagged+": "+sqllib.RowsError, taggerOp.sqlListTagged, values)
 	}
 
-	return taggedAll, nil
+	return tagged, nil
 }
 
 func (taggerOp *taggerSQLite) Close() error {

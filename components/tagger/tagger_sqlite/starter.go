@@ -55,7 +55,7 @@ func (ts *taggerSQLiteStarter) Setup() error {
 }
 
 func (ts *taggerSQLiteStarter) Run(joinerOp joiner.Operator) error {
-	taggerOp, err := NewTagger(ts.config, "", 0)
+	taggerOp, _, err := NewTagger(ts.config, "", 0)
 	if err != nil {
 		return errors.Wrap(err, "can't init tagger.Operator")
 	}

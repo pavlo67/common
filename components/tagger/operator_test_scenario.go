@@ -9,6 +9,7 @@ import (
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/logger"
+	"github.com/pavlo67/workshop/components/crud"
 )
 
 type TagsToChange struct {
@@ -21,7 +22,7 @@ type TagsToChange struct {
 
 type TagToCheck struct {
 	Tag             Tag
-	Tagged          []Tagged
+	Tagged          Tagged
 	IsErrorExpected bool
 }
 
@@ -55,12 +56,12 @@ func QueryTagsTestCases(taggerOp Operator) []TestCase {
 						Tags:   tags1,
 					},
 					TagsToCheck: []TagToCheck{
-						{Tag: "1", Tagged: []Tagged{{InterfaceKey: InterfaceKey, ID: id1}}},
-						{Tag: "2", Tagged: []Tagged{{InterfaceKey: InterfaceKey, ID: id1}}},
-						{Tag: "3", Tagged: []Tagged{{InterfaceKey: InterfaceKey, ID: id1}}},
-						{Tag: "4", Tagged: nil},
-						{Tag: "5", Tagged: nil},
-						{Tag: "6", Tagged: nil},
+						{Tag: "1", Tagged: Tagged{InterfaceKey: []common.ID{id1}}},
+						{Tag: "2", Tagged: Tagged{InterfaceKey: []common.ID{id1}}},
+						{Tag: "3", Tagged: Tagged{InterfaceKey: []common.ID{id1}}},
+						{Tag: "4", Tagged: Tagged{}},
+						{Tag: "5", Tagged: Tagged{}},
+						{Tag: "6", Tagged: Tagged{}},
 					},
 				},
 				{
@@ -71,12 +72,12 @@ func QueryTagsTestCases(taggerOp Operator) []TestCase {
 						Tags:   tags2,
 					},
 					TagsToCheck: []TagToCheck{
-						{Tag: "1", Tagged: []Tagged{{InterfaceKey: InterfaceKey, ID: id1}}},
-						{Tag: "2", Tagged: []Tagged{{InterfaceKey: InterfaceKey, ID: id1}}},
-						{Tag: "3", Tagged: []Tagged{{InterfaceKey: InterfaceKey, ID: id1}, {InterfaceKey: InterfaceKey, ID: id2}}},
-						{Tag: "4", Tagged: nil},
-						{Tag: "5", Tagged: []Tagged{{InterfaceKey: InterfaceKey, ID: id2}}},
-						{Tag: "6", Tagged: []Tagged{{InterfaceKey: InterfaceKey, ID: id2}}},
+						{Tag: "1", Tagged: Tagged{InterfaceKey: []common.ID{id1}}},
+						{Tag: "2", Tagged: Tagged{InterfaceKey: []common.ID{id1}}},
+						{Tag: "3", Tagged: Tagged{InterfaceKey: []common.ID{id1, id2}}},
+						{Tag: "4", Tagged: Tagged{}},
+						{Tag: "5", Tagged: Tagged{InterfaceKey: []common.ID{id2}}},
+						{Tag: "6", Tagged: Tagged{InterfaceKey: []common.ID{id2}}},
 					},
 				},
 				{
@@ -87,12 +88,12 @@ func QueryTagsTestCases(taggerOp Operator) []TestCase {
 						Tags:   nil,
 					},
 					TagsToCheck: []TagToCheck{
-						{Tag: "1", Tagged: nil},
-						{Tag: "2", Tagged: nil},
-						{Tag: "3", Tagged: []Tagged{{InterfaceKey: InterfaceKey, ID: id2}}},
-						{Tag: "4", Tagged: nil},
-						{Tag: "5", Tagged: []Tagged{{InterfaceKey: InterfaceKey, ID: id2}}},
-						{Tag: "6", Tagged: []Tagged{{InterfaceKey: InterfaceKey, ID: id2}}},
+						{Tag: "1", Tagged: Tagged{}},
+						{Tag: "2", Tagged: Tagged{}},
+						{Tag: "3", Tagged: Tagged{InterfaceKey: []common.ID{id2}}},
+						{Tag: "4", Tagged: Tagged{}},
+						{Tag: "5", Tagged: Tagged{InterfaceKey: []common.ID{id2}}},
+						{Tag: "6", Tagged: Tagged{InterfaceKey: []common.ID{id2}}},
 					},
 				},
 			},
@@ -100,13 +101,16 @@ func QueryTagsTestCases(taggerOp Operator) []TestCase {
 	}
 }
 
-func OperatorTestScenario(t *testing.T, testCases []TestCase, l logger.Operator) {
+func OperatorTestScenario(t *testing.T, testCases []TestCase, cleanerOp crud.Cleaner, l logger.Operator) {
 	if env, ok := os.LookupEnv("ENV"); !ok || env != "test" {
 		t.Fatal("No test environment!!!")
 	}
 
 	for i, tc := range testCases {
 		l.Infof("test #%d", i)
+
+		err := cleanerOp.Clean()
+		require.NoError(t, err)
 
 		for j, step := range tc.Steps {
 			l.Infof("\tstep #%d", j)
