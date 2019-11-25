@@ -141,7 +141,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 			continue
 		}
 
-		l.Infof("saved: %#v", tc.ToSave)
+		l.Infof("to save: %#v", tc.ToSave)
 
 		doc, err := tc.Read(id[toReadI], nil)
 		require.NoError(t, err)
@@ -151,7 +151,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		err = tc.Details(doc, tc.DetailsToRead)
 		require.NoError(t, err)
 
-		l.Infof("readed details: %#v", tc.DetailsToRead)
+		l.Infof("readed details: %#v", doc.Details)
 
 		// TODO!!!
 		// testData(t, nil, []string{string(id[toReadI])}, toSave[toReadI], data, true, "on .Read()")

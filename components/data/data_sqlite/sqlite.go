@@ -20,10 +20,10 @@ import (
 const tableDefault = "data"
 const limitDefault = 200
 
-var fieldsToSave = []string{"title", "summary", "url", "embedded", "tags", "details", "source", "key", "origin_time", "origin_data"}
-var fieldsToSaveStr = strings.Join(fieldsToSave, ", ")
+var fieldsToInsert = []string{"title", "summary", "url", "embedded", "tags", "details", "source", "source_key", "source_time", "source_data"}
+var fieldsToInsertStr = strings.Join(fieldsToInsert, ", ")
 
-var fieldsToRead = append(fieldsToSave, "created_at", "updated_at")
+var fieldsToRead = append(fieldsToInsert, "created_at", "updated_at")
 var fieldsToReadStr = strings.Join(fieldsToRead, ", ")
 
 var fieldsToList = append([]string{"id"}, fieldsToRead...)
@@ -37,8 +37,8 @@ type dataSQLite struct {
 	db    *sql.DB
 	table string
 
-	stmSave, stmRead, stmRemove, stmList, stmCount *sql.Stmt
-	sqlSave, sqlRead, sqlRemove, sqlList, sqlCount string
+	stmInsert, stmRead, stmRemove, stmList, stmCount *sql.Stmt
+	sqlInsert, sqlRead, sqlRemove, sqlList, sqlCount string
 }
 
 const onNew = "on dataSQLite.New(): "
@@ -63,15 +63,15 @@ func NewData(access config.Access, table string, limit int) (data.Operator, crud
 
 		sqlRead: "SELECT " + fieldsToReadStr + " FROM " + table + " WHERE id = ?",
 
-		sqlSave:   "INSERT INTO " + table + " (" + fieldsToSaveStr + ") VALUES (" + strings.Repeat(",? ", len(fieldsToSave))[1:] + ")",
+		sqlInsert: "INSERT INTO " + table + " (" + fieldsToInsertStr + ") VALUES (" + strings.Repeat(",? ", len(fieldsToInsert))[1:] + ")",
 		sqlRemove: "DELETE FROM " + table + " where ID = ?",
 
-		sqlList:  "SELECT " + fieldsToListStr + " FROM " + table + " ORDER BY saved_at DESC LIMIT " + strconv.Itoa(limit),
-		sqlCount: "SELECT count(*) FROM " + table + " WHERE source_id = ? AND source_key = ?",
+		sqlList:  "SELECT " + fieldsToListStr + " FROM " + table + " ORDER BY created_at DESC LIMIT " + strconv.Itoa(limit),
+		sqlCount: "SELECT count(*) FROM " + table + " WHERE source = ? AND source_key = ?",
 	}
 
 	sqlStmts := []sqllib.SqlStmt{
-		{&dataOp.stmSave, dataOp.sqlSave},
+		{&dataOp.stmInsert, dataOp.sqlInsert},
 		{&dataOp.stmRead, dataOp.sqlRead},
 		{&dataOp.stmRemove, dataOp.sqlRemove},
 
@@ -120,14 +120,14 @@ func (dataOp *dataSQLite) Save(items []data.Item, _ *crud.SaveOptions) ([]common
 			// values = append(values, item.ID)
 
 		} else {
-			res, err := dataOp.stmSave.Exec(values...)
+			res, err := dataOp.stmInsert.Exec(values...)
 			if err != nil {
-				return ids, errors.Wrapf(err, onSave+sqllib.CantExec, dataOp.sqlSave, values)
+				return ids, errors.Wrapf(err, onSave+sqllib.CantExec, dataOp.sqlInsert, values)
 			}
 
 			idSQLite, err := res.LastInsertId()
 			if err != nil {
-				return ids, errors.Wrapf(err, onSave+sqllib.CantGetLastInsertId, dataOp.sqlSave, values)
+				return ids, errors.Wrapf(err, onSave+sqllib.CantGetLastInsertId, dataOp.sqlInsert, values)
 			}
 			id := common.ID(strconv.FormatInt(idSQLite, 10))
 
@@ -186,10 +186,12 @@ func (dataOp *dataSQLite) Read(id common.ID, _ *crud.GetOptions) (*data.Item, er
 const onDetails = "on dataSQLite.Details()"
 
 func (dataOp *dataSQLite) Details(item *data.Item, exemplar interface{}) error {
-	err := json.Unmarshal(item.DetailsRaw, &item.Details)
+	err := json.Unmarshal(item.DetailsRaw, exemplar)
 	if err != nil {
 		return errors.Wrapf(err, onDetails+"can't .Unmarshal(%#v)", item.DetailsRaw)
 	}
+
+	item.Details = exemplar
 
 	return nil
 }
