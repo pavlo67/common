@@ -10,15 +10,16 @@ import (
 
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
+	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/libraries/sqllib"
 	"github.com/pavlo67/workshop/common/libraries/sqllib/sqllib_sqlite"
 	"github.com/pavlo67/workshop/components/crud"
 	"github.com/pavlo67/workshop/components/data"
-	"github.com/pavlo67/workshop/components/selector"
+	"github.com/pavlo67/workshop/components/selectors"
+	"github.com/pavlo67/workshop/components/tagger"
 )
 
 const tableDefault = "data"
-const limitDefault = 200
 
 var fieldsToInsert = []string{"title", "summary", "url", "embedded", "tags", "details", "source", "source_key", "source_time", "source_data"}
 var fieldsToInsertStr = strings.Join(fieldsToInsert, ", ")
@@ -33,17 +34,19 @@ var _ data.Operator = &dataSQLite{}
 var _ crud.Cleaner = &dataSQLite{}
 
 type dataSQLite struct {
-	limit int
 	db    *sql.DB
 	table string
 
 	stmInsert, stmRead, stmRemove, stmList, stmCount *sql.Stmt
 	sqlInsert, sqlRead, sqlRemove, sqlList, sqlCount string
+
+	taggerOp     tagger.Operator
+	interfaceKey joiner.InterfaceKey
 }
 
 const onNew = "on dataSQLite.New(): "
 
-func NewData(access config.Access, table string, limit int) (data.Operator, crud.Cleaner, error) {
+func NewData(access config.Access, table string, taggerOp tagger.Operator, interfaceKey joiner.InterfaceKey) (data.Operator, crud.Cleaner, error) {
 	db, err := sqllib_sqlite.Connect(access)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, onNew)
@@ -52,22 +55,21 @@ func NewData(access config.Access, table string, limit int) (data.Operator, crud
 	if table == "" {
 		table = tableDefault
 	}
-	if limit <= 0 {
-		limit = limitDefault
-	}
 
 	dataOp := dataSQLite{
 		db:    db,
 		table: table,
-		limit: limit,
 
 		sqlRead: "SELECT " + fieldsToReadStr + " FROM " + table + " WHERE id = ?",
 
 		sqlInsert: "INSERT INTO " + table + " (" + fieldsToInsertStr + ") VALUES (" + strings.Repeat(",? ", len(fieldsToInsert))[1:] + ")",
 		sqlRemove: "DELETE FROM " + table + " where ID = ?",
 
-		sqlList:  "SELECT " + fieldsToListStr + " FROM " + table + " ORDER BY created_at DESC LIMIT " + strconv.Itoa(limit),
+		sqlList:  "SELECT " + fieldsToListStr + " FROM " + table + " ORDER BY created_at DESC",
 		sqlCount: "SELECT count(*) FROM " + table + " WHERE source = ? AND source_key = ?",
+
+		taggerOp:     taggerOp,
+		interfaceKey: interfaceKey,
 	}
 
 	sqlStmts := []sqllib.SqlStmt{
@@ -119,6 +121,10 @@ func (dataOp *dataSQLite) Save(items []data.Item, _ *crud.SaveOptions) ([]common
 			// dataOp.Remove()
 			// values = append(values, item.ID)
 
+			if dataOp.taggerOp != nil {
+				// dataOp.taggerOp.Replace()
+			}
+
 		} else {
 			res, err := dataOp.stmInsert.Exec(values...)
 			if err != nil {
@@ -131,12 +137,12 @@ func (dataOp *dataSQLite) Save(items []data.Item, _ *crud.SaveOptions) ([]common
 			}
 			id := common.ID(strconv.FormatInt(idSQLite, 10))
 
-			// TODO!!! save tags
-
-			//var tagItems []tagItem
-			//for _, tag := range item.Tags {
-			//	tagItems = append(tagItems, tagItem{tag, &id})
-			//}
+			if dataOp.taggerOp != nil && len(item.Tags) > 0 {
+				err = dataOp.taggerOp.SaveTags(dataOp.interfaceKey, id, item.Tags, nil)
+				if err != nil {
+					return ids, errors.Wrapf(err, onSave+": can't save .Tags(%#v)", item.Tags)
+				}
+			}
 
 			ids = append(ids, id)
 		}
@@ -198,7 +204,7 @@ func (dataOp *dataSQLite) Details(item *data.Item, exemplar interface{}) error {
 
 const onRemove = "on dataSQLite.Remove()"
 
-func (dataOp *dataSQLite) Remove(*selector.Term, *crud.RemoveOptions) error {
+func (dataOp *dataSQLite) Remove(*selectors.Term, *crud.RemoveOptions) error {
 	//		var err error
 	//		var values []interface{}
 	//		var orderAndLimit, condition, conditionCompleted string
@@ -238,7 +244,7 @@ func (dataOp *dataSQLite) Remove(*selector.Term, *crud.RemoveOptions) error {
 
 const onList = "on dataSQLite.List()"
 
-func (dataOp *dataSQLite) List(*selector.Term, *crud.GetOptions) ([]data.Item, error) {
+func (dataOp *dataSQLite) List(*selectors.Term, *crud.GetOptions) ([]data.Item, error) {
 	var values []interface{}
 
 	rows, err := dataOp.stmList.Query(values...)
@@ -291,7 +297,7 @@ func (dataOp *dataSQLite) List(*selector.Term, *crud.GetOptions) ([]data.Item, e
 
 const onCount = "on dataSQLite.Has(): "
 
-func (dataOp *dataSQLite) Count(*selector.Term, *crud.GetOptions) ([]crud.Part, error) {
+func (dataOp *dataSQLite) Count(*selectors.Term, *crud.GetOptions) ([]crud.Counter, error) {
 	//if len(originKey.Key) < 1 { // || len(originKey.ID) < 1
 	//	return 0, errors.New(onCount + "empty ID")
 	//}

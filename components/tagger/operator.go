@@ -10,18 +10,12 @@ const InterfaceKey joiner.InterfaceKey = "tagger"
 
 type Tag string
 
-type TagInfo struct {
-	Tag
-	Count uint64
-}
-
-type Tagged map[joiner.InterfaceKey][]common.ID
-
 type Operator interface {
-	Save(joiner.InterfaceKey, common.ID, []Tag, *crud.SaveOptions) error
-	Remove(joiner.InterfaceKey, common.ID, []Tag, *crud.SaveOptions) error
-	Replace(joiner.InterfaceKey, common.ID, []Tag, *crud.SaveOptions) error
+	SaveTags(joiner.InterfaceKey, common.ID, []Tag, *crud.SaveOptions) error
+	RemoveTags(joiner.InterfaceKey, common.ID, []Tag, *crud.SaveOptions) error
+	ReplaceTags(joiner.InterfaceKey, common.ID, []Tag, *crud.SaveOptions) error
+	ListTags(joiner.InterfaceKey, common.ID, *crud.GetOptions) ([]Tag, error)
 
-	Tags(joiner.InterfaceKey, common.ID, *crud.GetOptions) ([]Tag, error)
-	ListTagged(Tag, *crud.GetOptions) (Tagged, error)
+	CountTagged(*joiner.InterfaceKey, *crud.GetOptions) (crud.Counter, error)
+	IndexWithTag(Tag, *crud.GetOptions) (crud.Index, error)
 }

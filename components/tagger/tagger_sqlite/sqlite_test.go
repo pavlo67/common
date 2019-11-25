@@ -38,7 +38,7 @@ func TestCRUD(t *testing.T) {
 
 	l.Debugf("%#v", cfgSQLite)
 
-	taggerOp, cleanerOp, err := NewTagger(cfgSQLite, "", 0)
+	taggerOp, cleanerOp, err := NewTagger(cfgSQLite, "")
 	require.NoError(t, err)
 
 	l.Debugf("%#v", taggerOp)

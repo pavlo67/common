@@ -13,7 +13,7 @@ import (
 	"github.com/pavlo67/workshop/common/libraries/mgolib"
 	"github.com/pavlo67/workshop/components/crud"
 	"github.com/pavlo67/workshop/components/data"
-	"github.com/pavlo67/workshop/components/selector"
+	"github.com/pavlo67/workshop/components/selectors"
 )
 
 // TODO: use common context.Session!!!
@@ -166,13 +166,13 @@ func (mgoOp dataMongoDB) Details(item *data.Item, exemplar interface{}) error {
 
 const onCount = "on dataMongoDB.Count()"
 
-func (mgoOp dataMongoDB) Count(*selector.Term, *crud.GetOptions) ([]crud.Part, error) {
+func (mgoOp dataMongoDB) Count(*selectors.Term, *crud.GetOptions) ([]crud.Counter, error) {
 	return nil, common.ErrNotImplemented
 }
 
 const onList = "on dataMongoDB.List()"
 
-func (mgoOp dataMongoDB) List(*selector.Term, *crud.GetOptions) ([]data.Item, error) {
+func (mgoOp dataMongoDB) List(*selectors.Term, *crud.GetOptions) ([]data.Item, error) {
 
 	// TODO!!!
 	filter := bson.M{}
@@ -211,7 +211,7 @@ func (mgoOp dataMongoDB) List(*selector.Term, *crud.GetOptions) ([]data.Item, er
 
 const onRemove = "on dataMongoDB.Remove()"
 
-func (mgoOp dataMongoDB) Remove(*selector.Term, *crud.RemoveOptions) error {
+func (mgoOp dataMongoDB) Remove(*selectors.Term, *crud.RemoveOptions) error {
 	return common.ErrNotImplemented
 }
 

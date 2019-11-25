@@ -9,6 +9,7 @@ import (
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/starter"
 	"github.com/pavlo67/workshop/components/data"
+	"github.com/pavlo67/workshop/components/tagger"
 )
 
 func Starter() starter.Operator {
@@ -55,7 +56,12 @@ func (ts *dataSQLiteStarter) Setup() error {
 }
 
 func (ts *dataSQLiteStarter) Run(joinerOp joiner.Operator) error {
-	dataOp, _, err := NewData(ts.config, "", 0)
+	taggerOp, ok := joinerOp.Interface(tagger.InterfaceKey).(tagger.Operator)
+	if !ok {
+		return errors.Errorf("no tagger.Operator with key %s", tagger.InterfaceKey)
+	}
+
+	dataOp, _, err := NewData(ts.config, "", taggerOp, ts.interfaceKey)
 	if err != nil {
 		return errors.Wrap(err, "can't init data.Operator")
 	}

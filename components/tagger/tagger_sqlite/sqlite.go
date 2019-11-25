@@ -16,7 +16,6 @@ import (
 )
 
 const tableDefault = "tags"
-const limitDefault = 200
 
 var fieldsToSave = []string{"key", "id", "tag"}
 var fieldsToSaveStr = strings.Join(fieldsToSave, ", ")
@@ -27,15 +26,14 @@ var _ crud.Cleaner = &taggerSQLite{}
 type taggerSQLite struct {
 	db    *sql.DB
 	table string
-	limit int
 
-	sqlSave, sqlRemove, sqlReset, sqlTags, sqlListTagged string
-	stmSave, stmRemove, stmReset, stmTags, stmListTagged *sql.Stmt
+	sqlSaveTags, sqlRemoveTags, sqlRemoveAllTags, sqlListTags, sqlListTagged, sqlCountTagged, sqlCountTaggedAll string
+	stmSaveTags, stmRemoveTags, stmRemoveAllTags, stmListTags, stmListTagged, stmCountTagged, stmCountTaggedAll *sql.Stmt
 }
 
 const onNew = "on taggerSQLite.New(): "
 
-func NewTagger(access config.Access, table string, limit int) (tagger.Operator, crud.Cleaner, error) {
+func NewTagger(access config.Access, table string) (tagger.Operator, crud.Cleaner, error) {
 	db, err := sqllib_sqlite.Connect(access)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, onNew)
@@ -44,30 +42,30 @@ func NewTagger(access config.Access, table string, limit int) (tagger.Operator, 
 	if table == "" {
 		table = tableDefault
 	}
-	if limit <= 0 {
-		limit = limitDefault
-	}
 
 	taggerOp := taggerSQLite{
 		db:    db,
-		limit: limit,
 		table: table,
 
-		sqlSave:   "INSERT OR IGNORE INTO " + table + " (" + fieldsToSaveStr + ") VALUES (" + strings.Repeat(",? ", len(fieldsToSave))[1:] + ")",
-		sqlRemove: "DELETE FROM " + table + " where key = ? AND id = ? and tag = ?",
-		sqlReset:  "DELETE FROM " + table + " where key = ? AND id = ?",
+		sqlSaveTags:      "INSERT OR IGNORE INTO " + table + " (" + fieldsToSaveStr + ") VALUES (" + strings.Repeat(",? ", len(fieldsToSave))[1:] + ")",
+		sqlRemoveTags:    "DELETE FROM " + table + " where key = ? AND id = ? and tag = ?",
+		sqlRemoveAllTags: "DELETE FROM " + table + " where key = ? AND id = ?",
 
-		sqlTags:       "SELECT tag     FROM " + table + " WHERE key = ? AND id = ? ORDER BY tag",
-		sqlListTagged: "SELECT key, id FROM " + table + " WHERE tag = ?            ORDER BY key, id",
+		sqlListTags:       "SELECT tag, count(*) FROM " + table + " WHERE key = ? AND id = ? ORDER BY tag",
+		sqlCountTagged:    "SELECT tag, count(*) FROM " + table + " WHERE key = ?            GROUP BY tag ORDER BY tag",
+		sqlCountTaggedAll: "SELECT tag, count(*) FROM " + table + "            GROUP BY tag ORDER BY tag",
+		sqlListTagged:     "SELECT key, id FROM       " + table + " WHERE tag = ?            ORDER BY key, id",
 	}
 
 	sqlStmts := []sqllib.SqlStmt{
-		{&taggerOp.stmSave, taggerOp.sqlSave},
-		{&taggerOp.stmRemove, taggerOp.sqlRemove},
-		{&taggerOp.stmReset, taggerOp.sqlReset},
+		{&taggerOp.stmSaveTags, taggerOp.sqlSaveTags},
+		{&taggerOp.stmRemoveTags, taggerOp.sqlRemoveTags},
+		{&taggerOp.stmRemoveAllTags, taggerOp.sqlRemoveAllTags},
 
-		{&taggerOp.stmTags, taggerOp.sqlTags},
+		{&taggerOp.stmListTags, taggerOp.sqlListTags},
 		{&taggerOp.stmListTagged, taggerOp.sqlListTagged},
+		{&taggerOp.stmCountTagged, taggerOp.sqlCountTagged},
+		{&taggerOp.stmCountTaggedAll, taggerOp.sqlCountTaggedAll},
 	}
 
 	for _, sqlStmt := range sqlStmts {
@@ -79,16 +77,16 @@ func NewTagger(access config.Access, table string, limit int) (tagger.Operator, 
 	return &taggerOp, &taggerOp, nil
 }
 
-const onTags = "on taggerSQLite.Tags(): "
+const onListTags = "on taggerSQLite.ListTags(): "
 
-func (taggerOp *taggerSQLite) Tags(key joiner.InterfaceKey, id common.ID, _ *crud.GetOptions) ([]tagger.Tag, error) {
+func (taggerOp *taggerSQLite) ListTags(key joiner.InterfaceKey, id common.ID, _ *crud.GetOptions) ([]tagger.Tag, error) {
 	values := []interface{}{key, id}
 
-	rows, err := taggerOp.stmTags.Query(values...)
+	rows, err := taggerOp.stmListTags.Query(values...)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	} else if err != nil {
-		return nil, errors.Wrapf(err, onTags+sqllib.CantQuery, taggerOp.sqlTags, values)
+		return nil, errors.Wrapf(err, onListTags+sqllib.CantQuery, taggerOp.sqlListTags, values)
 	}
 	defer rows.Close()
 
@@ -99,14 +97,14 @@ func (taggerOp *taggerSQLite) Tags(key joiner.InterfaceKey, id common.ID, _ *cru
 
 		err = rows.Scan(&tag)
 		if err != nil {
-			return tags, errors.Wrapf(err, onTags+sqllib.CantScanQueryRow, taggerOp.sqlTags, values)
+			return tags, errors.Wrapf(err, onListTags+sqllib.CantScanQueryRow, taggerOp.sqlListTags, values)
 		}
 
 		tags = append(tags, tagger.Tag(tag))
 	}
 	err = rows.Err()
 	if err != nil {
-		return tags, errors.Wrapf(err, onTags+": "+sqllib.RowsError, taggerOp.sqlTags, values)
+		return tags, errors.Wrapf(err, onListTags+": "+sqllib.RowsError, taggerOp.sqlListTags, values)
 	}
 
 	return tags, nil
@@ -114,13 +112,13 @@ func (taggerOp *taggerSQLite) Tags(key joiner.InterfaceKey, id common.ID, _ *cru
 
 const onSave = "on taggerSQLite.Save(): "
 
-func (taggerOp *taggerSQLite) Save(key joiner.InterfaceKey, id common.ID, tags []tagger.Tag, _ *crud.SaveOptions) error {
+func (taggerOp *taggerSQLite) SaveTags(key joiner.InterfaceKey, id common.ID, tags []tagger.Tag, _ *crud.SaveOptions) error {
 	for _, tag := range tags {
 		values := []interface{}{key, id, tag}
 
-		_, err := taggerOp.stmSave.Exec(values...)
+		_, err := taggerOp.stmSaveTags.Exec(values...)
 		if err != nil {
-			return errors.Wrapf(err, onSave+sqllib.CantExec, taggerOp.sqlSave, values)
+			return errors.Wrapf(err, onSave+sqllib.CantExec, taggerOp.sqlSaveTags, values)
 		}
 	}
 
@@ -129,15 +127,15 @@ func (taggerOp *taggerSQLite) Save(key joiner.InterfaceKey, id common.ID, tags [
 
 const onReplace = "on taggerSQLite.Replace(): "
 
-func (taggerOp *taggerSQLite) Replace(key joiner.InterfaceKey, id common.ID, tags []tagger.Tag, options *crud.SaveOptions) error {
+func (taggerOp *taggerSQLite) ReplaceTags(key joiner.InterfaceKey, id common.ID, tags []tagger.Tag, options *crud.SaveOptions) error {
 	values := []interface{}{key, id}
 
-	_, err := taggerOp.stmReset.Exec(values...)
+	_, err := taggerOp.stmRemoveAllTags.Exec(values...)
 	if err != nil {
-		return errors.Wrapf(err, onSave+sqllib.CantExec, taggerOp.sqlReset, values)
+		return errors.Wrapf(err, onSave+sqllib.CantExec, taggerOp.sqlRemoveAllTags, values)
 	}
 
-	err = taggerOp.Save(key, id, tags, options)
+	err = taggerOp.SaveTags(key, id, tags, options)
 	if err != nil {
 		return errors.Wrap(err, onReplace)
 	}
@@ -147,22 +145,67 @@ func (taggerOp *taggerSQLite) Replace(key joiner.InterfaceKey, id common.ID, tag
 
 const onRemove = "on taggerSQLite.Remove()"
 
-func (taggerOp *taggerSQLite) Remove(key joiner.InterfaceKey, id common.ID, tags []tagger.Tag, _ *crud.SaveOptions) error {
+func (taggerOp *taggerSQLite) RemoveTags(key joiner.InterfaceKey, id common.ID, tags []tagger.Tag, _ *crud.SaveOptions) error {
 	for _, tag := range tags {
 		values := []interface{}{key, id, tag}
 
-		_, err := taggerOp.stmRemove.Exec(values...)
+		_, err := taggerOp.stmRemoveTags.Exec(values...)
 		if err != nil {
-			return errors.Wrapf(err, onRemove+sqllib.CantExec, taggerOp.sqlRemove, values)
+			return errors.Wrapf(err, onRemove+sqllib.CantExec, taggerOp.sqlRemoveTags, values)
 		}
 	}
 
 	return nil
 }
 
+const onCountTagged = "on taggerSQLite.CountTagged(): "
+
+func (taggerOp *taggerSQLite) CountTagged(key *joiner.InterfaceKey, _ *crud.GetOptions) (crud.Counter, error) {
+	var values []interface{}
+	var query string
+	var stm *sql.Stmt
+
+	if key == nil {
+		query = taggerOp.sqlCountTaggedAll
+		stm = taggerOp.stmCountTaggedAll
+	} else {
+		values = []interface{}{*key}
+		query = taggerOp.sqlCountTagged
+		stm = taggerOp.stmCountTagged
+	}
+
+	rows, err := stm.Query(values...)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	} else if err != nil {
+		return nil, errors.Wrapf(err, onCountTagged+sqllib.CantQuery, query, values)
+	}
+	defer rows.Close()
+
+	counter := crud.Counter{}
+
+	for rows.Next() {
+		var key string
+		var count uint64
+
+		err = rows.Scan(&key, &count)
+		if err != nil {
+			return counter, errors.Wrapf(err, onCountTagged+sqllib.CantScanQueryRow, query, values)
+		}
+
+		counter[key] = count
+	}
+	err = rows.Err()
+	if err != nil {
+		return counter, errors.Wrapf(err, onCountTagged+": "+sqllib.RowsError, query, values)
+	}
+
+	return counter, nil
+}
+
 const onListTagged = "on taggerSQLite.ListTagged()"
 
-func (taggerOp *taggerSQLite) ListTagged(tag tagger.Tag, _ *crud.GetOptions) (tagger.Tagged, error) {
+func (taggerOp *taggerSQLite) IndexWithTag(tag tagger.Tag, _ *crud.GetOptions) (crud.Index, error) {
 	values := []interface{}{tag}
 
 	rows, err := taggerOp.stmListTagged.Query(values...)
@@ -173,23 +216,23 @@ func (taggerOp *taggerSQLite) ListTagged(tag tagger.Tag, _ *crud.GetOptions) (ta
 	}
 	defer rows.Close()
 
-	tagged := tagger.Tagged{}
+	index := crud.Index{}
 
 	for rows.Next() {
 		var key, id string
 		err = rows.Scan(&key, &id)
 		if err != nil {
-			return tagged, errors.Wrapf(err, onListTagged+sqllib.CantScanQueryRow, taggerOp.sqlListTagged, values)
+			return index, errors.Wrapf(err, onListTagged+sqllib.CantScanQueryRow, taggerOp.sqlListTagged, values)
 		}
 
-		tagged[joiner.InterfaceKey(key)] = append(tagged[joiner.InterfaceKey(key)], common.ID(id))
+		index[key] = append(index[key], common.ID(id))
 	}
 	err = rows.Err()
 	if err != nil {
-		return tagged, errors.Wrapf(err, onListTagged+": "+sqllib.RowsError, taggerOp.sqlListTagged, values)
+		return index, errors.Wrapf(err, onListTagged+": "+sqllib.RowsError, taggerOp.sqlListTagged, values)
 	}
 
-	return tagged, nil
+	return index, nil
 }
 
 func (taggerOp *taggerSQLite) Close() error {

@@ -22,7 +22,7 @@ type TagsToChange struct {
 
 type TagToCheck struct {
 	Tag             Tag
-	Tagged          Tagged
+	Tagged          crud.Index
 	IsErrorExpected bool
 }
 
@@ -43,6 +43,8 @@ func QueryTagsTestCases(taggerOp Operator) []TestCase {
 	tags1 := []Tag{"1", "2", "3"}
 	tags2 := []Tag{"5", "6", "3"}
 
+	key := string(InterfaceKey)
+
 	return []TestCase{
 		// 0 all ok
 		{
@@ -56,12 +58,12 @@ func QueryTagsTestCases(taggerOp Operator) []TestCase {
 						Tags:   tags1,
 					},
 					TagsToCheck: []TagToCheck{
-						{Tag: "1", Tagged: Tagged{InterfaceKey: []common.ID{id1}}},
-						{Tag: "2", Tagged: Tagged{InterfaceKey: []common.ID{id1}}},
-						{Tag: "3", Tagged: Tagged{InterfaceKey: []common.ID{id1}}},
-						{Tag: "4", Tagged: Tagged{}},
-						{Tag: "5", Tagged: Tagged{}},
-						{Tag: "6", Tagged: Tagged{}},
+						{Tag: "1", Tagged: crud.Index{key: []common.ID{id1}}},
+						{Tag: "2", Tagged: crud.Index{key: []common.ID{id1}}},
+						{Tag: "3", Tagged: crud.Index{key: []common.ID{id1}}},
+						{Tag: "4", Tagged: crud.Index{}},
+						{Tag: "5", Tagged: crud.Index{}},
+						{Tag: "6", Tagged: crud.Index{}},
 					},
 				},
 				{
@@ -72,12 +74,12 @@ func QueryTagsTestCases(taggerOp Operator) []TestCase {
 						Tags:   tags2,
 					},
 					TagsToCheck: []TagToCheck{
-						{Tag: "1", Tagged: Tagged{InterfaceKey: []common.ID{id1}}},
-						{Tag: "2", Tagged: Tagged{InterfaceKey: []common.ID{id1}}},
-						{Tag: "3", Tagged: Tagged{InterfaceKey: []common.ID{id1, id2}}},
-						{Tag: "4", Tagged: Tagged{}},
-						{Tag: "5", Tagged: Tagged{InterfaceKey: []common.ID{id2}}},
-						{Tag: "6", Tagged: Tagged{InterfaceKey: []common.ID{id2}}},
+						{Tag: "1", Tagged: crud.Index{key: []common.ID{id1}}},
+						{Tag: "2", Tagged: crud.Index{key: []common.ID{id1}}},
+						{Tag: "3", Tagged: crud.Index{key: []common.ID{id1, id2}}},
+						{Tag: "4", Tagged: crud.Index{}},
+						{Tag: "5", Tagged: crud.Index{key: []common.ID{id2}}},
+						{Tag: "6", Tagged: crud.Index{key: []common.ID{id2}}},
 					},
 				},
 				{
@@ -88,12 +90,12 @@ func QueryTagsTestCases(taggerOp Operator) []TestCase {
 						Tags:   nil,
 					},
 					TagsToCheck: []TagToCheck{
-						{Tag: "1", Tagged: Tagged{}},
-						{Tag: "2", Tagged: Tagged{}},
-						{Tag: "3", Tagged: Tagged{InterfaceKey: []common.ID{id2}}},
-						{Tag: "4", Tagged: Tagged{}},
-						{Tag: "5", Tagged: Tagged{InterfaceKey: []common.ID{id2}}},
-						{Tag: "6", Tagged: Tagged{InterfaceKey: []common.ID{id2}}},
+						{Tag: "1", Tagged: crud.Index{}},
+						{Tag: "2", Tagged: crud.Index{}},
+						{Tag: "3", Tagged: crud.Index{key: []common.ID{id2}}},
+						{Tag: "4", Tagged: crud.Index{}},
+						{Tag: "5", Tagged: crud.Index{key: []common.ID{id2}}},
+						{Tag: "6", Tagged: crud.Index{key: []common.ID{id2}}},
 					},
 				},
 			},
@@ -118,14 +120,14 @@ func OperatorTestScenario(t *testing.T, testCases []TestCase, cleanerOp crud.Cle
 			var err error
 			switch step.Action {
 			case "save":
-				err = tc.Operator.Save(step.Key, step.ID, step.Tags, nil)
+				err = tc.Operator.SaveTags(step.Key, step.ID, step.Tags, nil)
 			case "remove":
-				err = tc.Operator.Remove(step.Key, step.ID, step.Tags, nil)
+				err = tc.Operator.RemoveTags(step.Key, step.ID, step.Tags, nil)
 			case "replace":
-				err = tc.Operator.Replace(step.Key, step.ID, step.Tags, nil)
+				err = tc.Operator.ReplaceTags(step.Key, step.ID, step.Tags, nil)
 			case "tags":
 				var tags []Tag
-				tags, err = tc.Operator.Tags(step.Key, step.ID, nil)
+				tags, err = tc.Operator.ListTags(step.Key, step.ID, nil)
 				if !step.TagsToChange.IsErrorExpected {
 					require.Equal(t, step.Tags, tags)
 				}

@@ -5,7 +5,7 @@ import (
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/components/crud"
 	"github.com/pavlo67/workshop/components/flow"
-	"github.com/pavlo67/workshop/components/selector"
+	"github.com/pavlo67/workshop/components/selectors"
 	"github.com/pavlo67/workshop/components/tagger"
 )
 
@@ -34,9 +34,9 @@ type Operator interface {
 	Read(common.ID, *crud.GetOptions) (*Item, error)
 	Details(item *Item, exemplar interface{}) error
 
-	Count(*selector.Term, *crud.GetOptions) ([]crud.Part, error)
-	List(*selector.Term, *crud.GetOptions) ([]Item, error)
-	Remove(*selector.Term, *crud.RemoveOptions) error
+	Count(*selectors.Term, *crud.GetOptions) ([]crud.Counter, error)
+	List(*selectors.Term, *crud.GetOptions) ([]Item, error)
+	Remove(*selectors.Term, *crud.RemoveOptions) error
 }
 
 // TODO: .History, etc...
