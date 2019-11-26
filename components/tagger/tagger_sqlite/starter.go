@@ -8,7 +8,7 @@ import (
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/starter"
-	"github.com/pavlo67/workshop/components/data"
+	"github.com/pavlo67/workshop/components/tagger"
 )
 
 func Starter() starter.Operator {
@@ -37,7 +37,7 @@ func (ts *taggerSQLiteStarter) Init(cfg *config.Config, lCommon logger.Operator,
 	}
 
 	ts.config = cfgSQLite
-	ts.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(data.InterfaceKey)))
+	ts.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(tagger.InterfaceKey)))
 
 	// sqllib.CheckTables
 

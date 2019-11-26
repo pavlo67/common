@@ -6,23 +6,40 @@ import (
 	"github.com/pavlo67/workshop/common/libraries/filelib"
 	"github.com/pavlo67/workshop/common/server"
 	"github.com/pavlo67/workshop/common/server/server_http"
-	"github.com/pavlo67/workshop/components/auth"
-	"github.com/pavlo67/workshop/components/data"
 
-	r "github.com/pavlo67/workshop/apps/flow/flow_routes"
+	"github.com/pavlo67/workshop/components/auth"
+
+	"github.com/pavlo67/workshop/apps/workspace/workspace_routes"
 )
 
-var _ = server_http.InitEndpoint(&r.Endpoints, "GET", filelib.RelativePath(filelib.CurrentFile(true), r.PathBase, r.Prefix), nil, workerList, "")
+var _ = server_http.InitEndpoint(&endpoints, "GET", filelib.RelativePath(filelib.CurrentFile(true), workspace_routes.PathBase, workspace_routes.Prefix), nil, workerList, "", l)
 
 var _ server_http.WorkerHTTP = workerList
 
 func workerList(user *auth.User, _ server_http.Params, req *http.Request) (server.Response, error) {
-	//items, err := flow_routes.DataOp.List(nil, nil, nil)
-	//if err != nil {
-	//	return server.ResponseRESTError(http.StatusInternalServerError, err)
+	items, err := workspaceOp.List(nil, nil)
+
+	l.Infof("%#v", items)
+
+	if err != nil {
+		return server.ResponseRESTError(http.StatusInternalServerError, err)
+	}
+
+	//items = []data.Item{
+	//	{
+	//		ID:         "1",
+	//		Title:      "2",
+	//		Summary:    "3",
+	//		URL:        "4",
+	//		Embedded:   nil,
+	//		Tags:       nil,
+	//		Details:    nil,
+	//		DetailsRaw: nil,
+	//		Status:     crud.Status{},
+	//		Origin:     flow.Origin{},
+	//	},
 	//}
 
-	var items []data.Item
 	//items = append(items,
 	//	data.Brief{
 	//		Brief: crud.Brief{

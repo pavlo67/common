@@ -4,6 +4,6 @@ CREATE TABLE tags (
   tag TEXT NOT NULL
 );
 
-CREATE UNIQUE INDEX idx_data_source ON tags(key, id, tag);
+CREATE UNIQUE INDEX idx_tags ON tags(key, id, tag);
 
 

@@ -31,7 +31,7 @@ func (ts *dataSQLiteStarter) Name() string {
 func (ts *dataSQLiteStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Options) ([]common.Options, error) {
 	l = lCommon
 
-	cfgSQLite := config.Access{}
+	var cfgSQLite config.Access
 	err := cfg.Value("sqlite", &cfgSQLite)
 	if err != nil {
 		return nil, err

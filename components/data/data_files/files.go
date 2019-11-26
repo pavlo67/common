@@ -12,7 +12,7 @@ import (
 	"github.com/pavlo67/lingua/structura"
 	"github.com/pavlo67/workshop/common"
 
-	"github.com/pavlo67/workshop/components/selectors"
+	"github.com/pavlo67/workshop/common/selectors"
 )
 
 var _ structura.Operator = &contentFiles{}

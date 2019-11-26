@@ -5,7 +5,7 @@
 //
 //	return []textus.Pars{
 //		{
-//			Fons:            item.OriginData,
+//			Fons:            item.Data,
 //			Origo:           item.Original,
 //			ClavisContentus: item.ContentKey,
 //			Contentus: &textus.Contentus{
@@ -19,7 +19,7 @@
 //
 //}
 
-//func (src *OriginData) Key(keyAdd string) string {
+//func (src *Data) Key(keyAdd string) string {
 //	if src == nil {
 //		return ""
 //	}

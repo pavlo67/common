@@ -1,13 +1,12 @@
 package server_http
 
 import (
-	"fmt"
 	"net/url"
-	"os"
 	"regexp"
 	"strings"
 
-	"github.com/pavlo67/workshop/libraries/filelib"
+	"github.com/pavlo67/workshop/common/libraries/filelib"
+	"github.com/pavlo67/workshop/common/logger"
 )
 
 type Endpoint struct {
@@ -23,10 +22,10 @@ type Endpoint struct {
 	SwaggerDescription string
 }
 
-func InitEndpoint(epPtrs *[]Endpoint, method, path string, paramNames []string, workerHTTP WorkerHTTP, swaggerDescription string) int {
+func InitEndpoint(epPtrs *[]Endpoint, method, path string, paramNames []string, workerHTTP WorkerHTTP, swaggerDescription string, l logger.Operator) int {
 	if epPtrs == nil {
-		fmt.Errorf("no epPtrs for InitEndpoint() in %s", filelib.CurrentPath())
-		os.Exit(1)
+		l.Errorf("no epPtrs for InitEndpoint() in %s", filelib.CurrentPath())
+		return 1
 	}
 
 	*epPtrs = append(*epPtrs, Endpoint{

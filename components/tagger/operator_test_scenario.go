@@ -7,9 +7,9 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/pavlo67/workshop/common"
+	"github.com/pavlo67/workshop/common/crud"
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/logger"
-	"github.com/pavlo67/workshop/components/crud"
 )
 
 type TagsToChange struct {
@@ -144,7 +144,7 @@ func OperatorTestScenario(t *testing.T, testCases []TestCase, cleanerOp crud.Cle
 			}
 
 			for _, tagToCheck := range step.TagsToCheck {
-				tagged, err := tc.Operator.ListTagged(tagToCheck.Tag, nil)
+				tagged, err := tc.Operator.IndexWithTag(tagToCheck.Tag, nil)
 
 				if tagToCheck.IsErrorExpected {
 					require.Error(t, err)

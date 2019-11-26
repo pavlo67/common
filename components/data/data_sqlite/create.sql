@@ -1,15 +1,15 @@
 CREATE TABLE data (
   id           INTEGER             PRIMARY KEY AUTOINCREMENT,
   title        TEXT       NOT NULL,
-  summary      TEXT,
-  url          TEXT,
-  embedded     TEXT,
-  tags         TEXT,
-  details      TEXT,
-  source       TEXT,
-  source_key   TEXT,
+  summary      TEXT       NOT NULL,
+  url          TEXT       NOT NULL,
+  embedded     TEXT       NOT NULL,
+  tags         TEXT       NOT NULL,
+  details      TEXT       NOT NULL,
+  source       TEXT       NOT NULL,
+  source_key   TEXT       NOT NULL,
   source_time  TIMESTAMP,
-  source_data  TEXT,
+  source_data  TEXT       NOT NULL,
   created_at   TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at   TIMESTAMP
 );

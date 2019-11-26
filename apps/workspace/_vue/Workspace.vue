@@ -1,10 +1,14 @@
 <template>
-  <div class="workspace">
-    This is a workspace page
+  <div>
+    This is the workspace page!
 
-    <div v-for="item in workspaceItems">  <!--  v-bind:key="item.path" :to="item.path" -->
-      {{ JSON.stringify(item) }}<br>
+    <div v-for="item in dataItems">
+      {{ item }}
     </div>
+
+    <br>
+
+    !!!
 
 
   </div>
@@ -17,16 +21,16 @@
     export default {
         name: 'Workspace',
         created () {
-            this.getFlowItems();
+            this.getDataItems();
         },
         data: () => {
             return {
-                workspaceItems: [],
+                dataItems: [],
             };
         },
         methods: {
-            getFlowItems() {
-                fetch('http://localhost:3333/workspace/v1/list', {
+            getDataItems() {
+                fetch('http://localhost:3003/workspace/v1/list', {
                     method: 'GET', // *GET, POST, PUT, DELETE, etc.
                     headers: {
                         'Content-Type': 'application/json',
@@ -41,8 +45,8 @@
                 .then(response => {
                     return response.json();
                 }).then(data => {
-                    this.workspaceItems = data;
-                    console.log(this.workspaceItems);
+                    this.dataItems = data;
+                    console.log(this.dataItems);
                 });
             }
         },

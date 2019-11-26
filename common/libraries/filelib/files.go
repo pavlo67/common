@@ -11,6 +11,8 @@ import (
 
 	"strings"
 
+	"log"
+
 	"github.com/pkg/errors"
 )
 
@@ -20,7 +22,7 @@ func RelativePath(pathFull, pathBase, pathPrefix string) string {
 	if pathFull[:len(pathBase)] == pathBase {
 		path = pathFull[len(pathBase):]
 	} else {
-		// TODO? error?
+		log.Printf(".RelativePath(%s, %s, %s)????", pathFull, pathBase, pathPrefix)
 	}
 
 	return pathPrefix + path

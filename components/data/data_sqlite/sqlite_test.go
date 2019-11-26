@@ -33,7 +33,7 @@ func TestCRUD(t *testing.T) {
 
 	l.Debugf("%#v", cfgSQLite)
 
-	dataOp, cleanerOp, err := NewData(cfgSQLite, "", 0)
+	dataOp, cleanerOp, err := NewData(cfgSQLite, "", nil, "")
 	require.NoError(t, err)
 
 	l.Debugf("%#v", dataOp)

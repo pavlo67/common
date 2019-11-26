@@ -2,8 +2,8 @@ package tagger
 
 import (
 	"github.com/pavlo67/workshop/common"
+	"github.com/pavlo67/workshop/common/crud"
 	"github.com/pavlo67/workshop/common/joiner"
-	"github.com/pavlo67/workshop/components/crud"
 )
 
 const InterfaceKey joiner.InterfaceKey = "tagger"

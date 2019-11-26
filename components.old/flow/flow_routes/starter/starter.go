@@ -3,11 +3,11 @@ package flow_starter
 import (
 	"fmt"
 
-	"github.com/pavlo67/workshop/apps/flow/flow_routes"
 	"github.com/pavlo67/workshop/apps/flow/flow_routes/v1"
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/joiner"
+	"github.com/pavlo67/workshop/components.old/flow/flow_routes"
 
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/server/server_http"

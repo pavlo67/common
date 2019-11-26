@@ -21,12 +21,18 @@ var _ server_http.Operator = &serverHTTPJschmhr{}
 type serverHTTPJschmhr struct {
 	httpServer   *http.Server
 	httpServeMux *httprouter.Router
-	certFileTLS  string
-	keyFileTLS   string
-	authOps      []auth.Operator
+
+	port        int
+	certFileTLS string
+	keyFileTLS  string
+	authOps     []auth.Operator
 }
 
-func New(certFileTLS, keyFileTLS string, authOps []auth.Operator) (server_http.Operator, error) {
+func New(port int, certFileTLS, keyFileTLS string, authOps []auth.Operator) (server_http.Operator, error) {
+	if port <= 0 {
+		return nil, errors.Errorf("on server_http_jschmhr.New(): wrong port = %d", port)
+	}
+
 	router := httprouter.New()
 
 	return &serverHTTPJschmhr{
@@ -38,6 +44,8 @@ func New(certFileTLS, keyFileTLS string, authOps []auth.Operator) (server_http.O
 		},
 		httpServeMux: router,
 
+		port: port,
+
 		certFileTLS: certFileTLS,
 		keyFileTLS:  keyFileTLS,
 
@@ -46,16 +54,12 @@ func New(certFileTLS, keyFileTLS string, authOps []auth.Operator) (server_http.O
 }
 
 // start wraps and verbalizes http.Server.ListenAndServe method.
-func (s *serverHTTPJschmhr) Start(port int) error {
+func (s *serverHTTPJschmhr) Start() error {
 	if s == nil {
 		return errors.Errorf("no serverOp to start")
 	}
 
-	if port <= 0 {
-		return errors.Errorf("serverOp can't start: no correct data for http port: %d", port)
-	}
-
-	s.httpServer.Addr = ":" + strconv.Itoa(port)
+	s.httpServer.Addr = ":" + strconv.Itoa(s.port)
 
 	l.Info("Server is starting on address ", s.httpServer.Addr)
 

@@ -1,6 +1,6 @@
 package auth
 
-import "github.com/pavlo67/workshop/libraries/encrlib"
+import "github.com/pavlo67/workshop/common/libraries/encrlib"
 
 type CredsType string
 

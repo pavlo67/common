@@ -1,10 +1,10 @@
 package workspace
 
 import (
+	"github.com/pavlo67/workshop/common/crud"
 	"github.com/pavlo67/workshop/common/joiner"
-	"github.com/pavlo67/workshop/components/crud"
+	"github.com/pavlo67/workshop/common/selectors"
 	"github.com/pavlo67/workshop/components/data"
-	"github.com/pavlo67/workshop/components/selectors"
 	"github.com/pavlo67/workshop/components/tagger"
 	"github.com/pavlo67/workshop/components/text"
 )

@@ -38,9 +38,10 @@ var signalChan = make(chan os.Signal, 1000)
 
 func (ws *controlStarter) Run(joinerOp joiner.Operator) error {
 
-	signal.Notify(signalChan, os.Interrupt)
-	signal.Notify(signalChan, syscall.SIGTERM)
-	signal.Notify(signalChan, syscall.SIGQUIT)
+	// signal.Notify(signalChan, os.Interrupt)
+	// signal.Notify(signalChan, syscall.SIGTERM)
+	// signal.Notify(signalChan, syscall.SIGQUIT)
+
 	signal.Notify(signalChan, syscall.SIGPIPE)
 
 	go processSignal()

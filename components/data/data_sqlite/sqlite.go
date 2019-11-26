@@ -8,14 +8,16 @@ import (
 
 	"github.com/pkg/errors"
 
+	"time"
+
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
+	"github.com/pavlo67/workshop/common/crud"
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/libraries/sqllib"
 	"github.com/pavlo67/workshop/common/libraries/sqllib/sqllib_sqlite"
-	"github.com/pavlo67/workshop/components/crud"
+	"github.com/pavlo67/workshop/common/selectors"
 	"github.com/pavlo67/workshop/components/data"
-	"github.com/pavlo67/workshop/components/selectors"
 	"github.com/pavlo67/workshop/components/tagger"
 )
 
@@ -24,7 +26,7 @@ const tableDefault = "data"
 var fieldsToInsert = []string{"title", "summary", "url", "embedded", "tags", "details", "source", "source_key", "source_time", "source_data"}
 var fieldsToInsertStr = strings.Join(fieldsToInsert, ", ")
 
-var fieldsToRead = append(fieldsToInsert, "created_at", "updated_at")
+var fieldsToRead = []string{"title", "summary", "url", "embedded", "tags", "details", "source", "source_key", "source_time", "source_data", "created_at", "updated_at"}
 var fieldsToReadStr = strings.Join(fieldsToRead, ", ")
 
 var fieldsToList = append([]string{"id"}, fieldsToRead...)
@@ -113,7 +115,7 @@ func (dataOp *dataSQLite) Save(items []data.Item, _ *crud.SaveOptions) ([]common
 
 		values := []interface{}{
 			item.Title, item.Summary, item.URL, embedded, tags, details,
-			item.Source, item.Key, item.OriginTime, item.OriginData,
+			item.Origin.Source, item.Origin.Key, item.Origin.Time, item.Origin.Data,
 		}
 
 		if item.ID != "" {
@@ -164,11 +166,12 @@ func (dataOp *dataSQLite) Read(id common.ID, _ *crud.GetOptions) (*data.Item, er
 	}
 
 	item := data.Item{ID: id}
-	var embedded, tags string
+	var embedded, tags, createdAt string
+	var sourceTimePtr, updatedAtPtr *string
 
 	err = dataOp.stmRead.QueryRow(idNum).Scan(
 		&item.Title, &item.Summary, &item.URL, &embedded, &tags, &item.DetailsRaw,
-		&item.Source, &item.Key, &item.OriginTime, &item.OriginData, &item.CreatedAt, &item.UpdatedAt)
+		&item.Source, &item.Key, &sourceTimePtr, &item.Data, &createdAt, &updatedAtPtr)
 	if err == sql.ErrNoRows {
 		return nil, common.ErrNotFound
 	}
@@ -176,14 +179,39 @@ func (dataOp *dataSQLite) Read(id common.ID, _ *crud.GetOptions) (*data.Item, er
 		return nil, errors.Wrapf(err, onRead+sqllib.CantScanQueryRow, dataOp.sqlRead, idNum)
 	}
 
-	err = json.Unmarshal([]byte(tags), &item.Tags)
+	item.CreatedAt, err = time.Parse(time.RFC3339, createdAt)
 	if err != nil {
-		return &item, errors.Wrapf(err, onRead+"can't unmarshal .Tags (%s)", tags)
+		return &item, errors.Wrapf(err, onRead+"can't parse .CreatedAt (%s)", createdAt)
 	}
 
-	err = json.Unmarshal([]byte(embedded), &item.Embedded)
-	if err != nil {
-		return &item, errors.Wrapf(err, onRead+"can't unmarshal .Embedded (%s)", embedded)
+	if updatedAtPtr != nil {
+		updatedAt, err := time.Parse(time.RFC3339, *updatedAtPtr)
+		if err != nil {
+			return &item, errors.Wrapf(err, onRead+"can't parse .UpdatedAt (%s)", *updatedAtPtr)
+		}
+		item.UpdatedAt = &updatedAt
+	}
+
+	if sourceTimePtr != nil {
+		sourceTime, err := time.Parse(time.RFC3339, *sourceTimePtr)
+		if err != nil {
+			return &item, errors.Wrapf(err, onRead+"can't parse .SourceTime (%s)", *sourceTimePtr)
+		}
+		item.Origin.Time = &sourceTime
+	}
+
+	if len(tags) > 0 {
+		err = json.Unmarshal([]byte(tags), &item.Tags)
+		if err != nil {
+			return &item, errors.Wrapf(err, onRead+"can't unmarshal .Tags (%s)", tags)
+		}
+	}
+
+	if len(embedded) > 0 {
+		err = json.Unmarshal([]byte(embedded), &item.Embedded)
+		if err != nil {
+			return &item, errors.Wrapf(err, onRead+"can't unmarshal .Embedded (%s)", embedded)
+		}
 	}
 
 	return &item, nil
@@ -260,24 +288,50 @@ func (dataOp *dataSQLite) List(*selectors.Term, *crud.GetOptions) ([]data.Item, 
 	for rows.Next() {
 		var idNum int64
 		var item data.Item
-		var embedded, tags string
+		var embedded, tags, createdAt string
+		var sourceTimePtr, updatedAtPtr *string
 
 		err := rows.Scan(
 			&idNum, &item.Title, &item.Summary, &item.URL, &embedded, &tags, &item.DetailsRaw,
-			&item.Source, &item.Key, &item.OriginTime, &item.OriginData, &item.CreatedAt, &item.UpdatedAt,
+			&item.Origin.Source, &item.Origin.Key, &sourceTimePtr, &item.Origin.Data, &createdAt, &updatedAtPtr,
 		)
 		if err != nil {
 			return items, errors.Wrapf(err, onList+sqllib.CantScanQueryRow, dataOp.sqlList, values)
 		}
 
-		err = json.Unmarshal([]byte(tags), &item.Tags)
+		item.CreatedAt, err = time.Parse(time.RFC3339, createdAt)
 		if err != nil {
-			return items, errors.Wrapf(err, onList+"can't unmarshal .Tags (%s)", tags)
+			return items, errors.Wrapf(err, onList+"can't parse .CreatedAt (%s)", createdAt)
 		}
 
-		err = json.Unmarshal([]byte(embedded), &item.Embedded)
-		if err != nil {
-			return items, errors.Wrapf(err, onList+"can't unmarshal .Embedded (%s)", embedded)
+		if updatedAtPtr != nil {
+			updatedAt, err := time.Parse(time.RFC3339, *updatedAtPtr)
+			if err != nil {
+				return items, errors.Wrapf(err, onList+"can't parse .UpdatedAt (%s)", *updatedAtPtr)
+			}
+			item.UpdatedAt = &updatedAt
+		}
+
+		if sourceTimePtr != nil {
+			sourceTime, err := time.Parse(time.RFC3339, *sourceTimePtr)
+			if err != nil {
+				return items, errors.Wrapf(err, onList+"can't parse .SourceTime (%s)", *sourceTimePtr)
+			}
+			item.Origin.Time = &sourceTime
+		}
+
+		if len(tags) > 0 {
+			err = json.Unmarshal([]byte(tags), &item.Tags)
+			if err != nil {
+				return items, errors.Wrapf(err, onList+"can't unmarshal .Tags (%s)", tags)
+			}
+		}
+
+		if len(embedded) > 0 {
+			err = json.Unmarshal([]byte(embedded), &item.Embedded)
+			if err != nil {
+				return items, errors.Wrapf(err, onList+"can't unmarshal .Embedded (%s)", embedded)
+			}
 		}
 
 		if err != nil {

@@ -5,10 +5,9 @@ import (
 	"log"
 	"math/rand"
 	"os"
-	"strconv"
 	"time"
 
-	"github.com/pavlo67/workshop/apps/flow/flow_routes/starter"
+	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/control"
 	"github.com/pavlo67/workshop/common/libraries/encodelib"
@@ -17,8 +16,12 @@ import (
 	"github.com/pavlo67/workshop/common/server/server_http"
 	"github.com/pavlo67/workshop/common/server/server_http/server_http_jschmhr"
 	"github.com/pavlo67/workshop/common/starter"
+
+	"github.com/pavlo67/workshop/apps/workspace/workspace_routes/starter"
 	"github.com/pavlo67/workshop/components/auth/auth_ecdsa"
 	"github.com/pavlo67/workshop/components/data/data_sqlite"
+	"github.com/pavlo67/workshop/components/tagger/tagger_sqlite"
+	"github.com/pavlo67/workshop/components/workspace"
 )
 
 var (
@@ -62,19 +65,34 @@ func main() {
 	if !ok {
 		configEnv = "local"
 	}
-	configPath := currentPath + "../../environments" + configEnv + ".yaml"
+	configPath := currentPath + "../../environments/" + configEnv + ".yaml"
 
 	cfg, err := config.Get(configPath, encodelib.MarshalerYAML)
 	if err != nil {
 		l.Fatal(err)
 	}
 
+	var cfgEnvs map[string]string
+	err = cfg.Value("envs", &cfgEnvs)
+	if err != nil {
+		l.Fatal(err)
+	}
+
+	// TODO: synchronize with manifest.json
+	//portStr := os.Getenv("workspace_port")
+	//port, err := strconv.Atoi(portStr)
+	//if err != nil {
+	//	l.Fatalf("can't read port: '%s'", portStr)
+	//}
+
 	starters := []starter.Starter{
 		{control.Starter(), nil},
 		{auth_ecdsa.Starter(), nil},
-		{server_http_jschmhr.Starter(), nil},
+		{tagger_sqlite.Starter(), nil},
 		{data_sqlite.Starter(), nil},
-		{flow_starter.Starter(), nil},
+		{workspace.Starter(), nil},
+		{server_http_jschmhr.Starter(), common.Options{"port": cfgEnvs["workspace_port"]}},
+		{workspace_routes_starter.Starter(), nil},
 	}
 
 	label := "WORKSPACE REST BUILD"
@@ -85,17 +103,10 @@ func main() {
 	}
 	defer joiner.CloseAll()
 
-	// TODO: synchronize with manifest.json
-	portStr := os.Getenv("workspace_port")
-	port, err := strconv.Atoi(portStr)
-	if err != nil {
-		l.Fatalf("can't read port: '%s'", portStr)
-	}
-
 	srvOp, ok := joiner.Interface(server_http.InterfaceKey).(server_http.Operator)
 	if !ok {
 		l.Fatalf("no server_http.Operator with key %s", server_http.InterfaceKey)
 	}
 
-	srvOp.Start(port)
+	srvOp.Start()
 }
