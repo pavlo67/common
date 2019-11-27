@@ -1,8 +1,8 @@
 CREATE TABLE data (
   id           INTEGER             PRIMARY KEY AUTOINCREMENT,
+  url          TEXT       NOT NULL,
   title        TEXT       NOT NULL,
   summary      TEXT       NOT NULL,
-  url          TEXT       NOT NULL,
   embedded     TEXT       NOT NULL,
   tags         TEXT       NOT NULL,
   details      TEXT       NOT NULL,

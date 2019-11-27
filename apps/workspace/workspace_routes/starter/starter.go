@@ -36,7 +36,7 @@ func (ss *workspaceStarter) Name() string {
 	return logger.GetCallInfo().PackageName + "/" + Name
 }
 
-func (ss *workspaceStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Options) ([]common.Options, error) {
+func (ss *workspaceStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	var errs common.Errors
 
 	l = lCommon

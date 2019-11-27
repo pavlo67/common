@@ -12,7 +12,7 @@ type Operator interface {
 	// Title returns started component name
 	Name() string
 
-	Init(conf *config.Config, l logger.Operator, options common.Options) (info []common.Options, err error)
+	Init(conf *config.Config, l logger.Operator, options common.Map) (info []common.Map, err error)
 
 	// Setup sets up the component
 	Setup() error
@@ -23,11 +23,11 @@ type Operator interface {
 
 type Starter struct {
 	Operator
-	Options common.Options
+	Options common.Map
 }
 
-func (starter Starter) CorrectedOptions(options common.Options) common.Options {
-	newOptions := common.Options{}
+func (starter Starter) CorrectedOptions(options common.Map) common.Map {
+	newOptions := common.Map{}
 
 	for k, v := range starter.Options {
 		newOptions[k] = v

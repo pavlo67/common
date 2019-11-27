@@ -36,7 +36,7 @@ func (ss *flowStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *flowStarter) Init(cfg *config.Config, options common.Options) (info []common.Options, err error) {
+func (ss *flowStarter) Init(cfg *config.Config, options common.Map) (info []common.Map, err error) {
 	var errs common.Errors
 
 	L = cfg.Logger

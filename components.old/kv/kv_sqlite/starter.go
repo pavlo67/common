@@ -28,7 +28,7 @@ func (kvs *kv_sqliteStarter) Name() string {
 	return InterfaceName
 }
 
-func (kvs *kv_sqliteStarter) Init(conf *config.Config, params common.Options) (info []common.Options, err error) {
+func (kvs *kv_sqliteStarter) Init(conf *config.Config, params common.Map) (info []common.Map, err error) {
 
 	kvs.interfaceKey = joiner.InterfaceKey(params.StringDefault("interface_key", string(kv.InterfaceKey)))
 

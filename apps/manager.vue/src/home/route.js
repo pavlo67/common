@@ -4,5 +4,5 @@ export default {
   path: '/',
   name: 'home',
   component: Home,
-  title: 'home',
+  title: 'ой, мамо, де я?',
 };

@@ -31,7 +31,7 @@ func (cm *dataMongoDBStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (cm *dataMongoDBStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Options) ([]common.Options, error) {
+func (cm *dataMongoDBStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	l = lCommon
 
 	cfgMongoDB := config.Access{}

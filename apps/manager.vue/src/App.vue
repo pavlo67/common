@@ -11,7 +11,9 @@
 
     </div>
 
-    <router-view/>
+    <div id="view">
+      <router-view/>
+    </div>
   </div>
 </template>
 
@@ -25,8 +27,8 @@
 }
 #nav {
   padding: 10px;
-  float: left;
   width: 300px;
+  float: left;
   min-height: 100vh;
   text-align: left;
   background-color: #f2dede;
@@ -38,6 +40,11 @@
     }
   }
 }
+
+#view {
+  margin-left: 320px;
+}
+
 </style>
 
 

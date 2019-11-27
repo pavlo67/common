@@ -4,9 +4,9 @@ import (
 	"strconv"
 )
 
-type Options map[string]interface{}
+type Map map[string]interface{}
 
-func (p Options) StringDefault(key, defaultStr string) string {
+func (p Map) StringDefault(key, defaultStr string) string {
 	switch value := p[key].(type) {
 	case string:
 		return value
@@ -39,7 +39,7 @@ func (p Options) StringDefault(key, defaultStr string) string {
 	return defaultStr
 }
 
-func (p Options) String(key string) (string, bool) {
+func (p Map) String(key string) (string, bool) {
 	switch value := p[key].(type) {
 	case string:
 		return value, true
@@ -72,7 +72,7 @@ func (p Options) String(key string) (string, bool) {
 	return "", false
 }
 
-func (p Options) Int(key string) (int, bool) {
+func (p Map) Int(key string) (int, bool) {
 	switch value := p[key].(type) {
 	case string:
 		if i, err := strconv.Atoi(value); err == nil {
@@ -110,8 +110,7 @@ func (p Options) Int(key string) (int, bool) {
 	return 0, false
 }
 
-
-func (p Options) Strings(key string) []string {
+func (p Map) Strings(key string) []string {
 	switch value := p[key].(type) {
 	case string:
 		return []string{value}

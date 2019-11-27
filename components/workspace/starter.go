@@ -27,7 +27,7 @@ func (ws *workspaceStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ws *workspaceStarter) Init(_ *config.Config, lCommon logger.Operator, options common.Options) ([]common.Options, error) {
+func (ws *workspaceStarter) Init(_ *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	l = lCommon
 
 	ws.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))

@@ -19,7 +19,7 @@ type Item struct {
 	Log   []instruments.LogItem `bson:"log,omitempty" json:"log,omitempty"`
 
 	//Type      joiner.InterfaceKey
-	//Params    basis.Options // for Create/Update methods for ex. tags list to set them on each imported item
+	//Params    basis.Map // for Create/Update methods for ex. tags list to set them on each imported item
 	//ParamsRaw string     // for Read/ReadList methods
 
 	SavedAt time.Time `bson:"saved_at"      json:"saved_at"`

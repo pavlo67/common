@@ -91,7 +91,7 @@ func main() {
 		{tagger_sqlite.Starter(), nil},
 		{data_sqlite.Starter(), nil},
 		{workspace.Starter(), nil},
-		{server_http_jschmhr.Starter(), common.Options{"port": cfgEnvs["workspace_port"]}},
+		{server_http_jschmhr.Starter(), common.Map{"port": cfgEnvs["workspace_port"]}},
 		{workspace_routes_starter.Starter(), nil},
 	}
 

@@ -28,7 +28,7 @@ func (ss *identity_ecdsa) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *identity_ecdsa) Init(conf *config.Config, lCommon logger.Operator, options common.Options) (info []common.Options, err error) {
+func (ss *identity_ecdsa) Init(conf *config.Config, lCommon logger.Operator, options common.Map) (info []common.Map, err error) {
 	l = lCommon
 
 	// var errs basis.Errors

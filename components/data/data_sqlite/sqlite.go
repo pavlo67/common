@@ -23,10 +23,10 @@ import (
 
 const tableDefault = "data"
 
-var fieldsToInsert = []string{"title", "summary", "url", "embedded", "tags", "details", "source", "source_key", "source_time", "source_data"}
+var fieldsToInsert = []string{"url", "title", "summary", "embedded", "tags", "details", "source", "source_key", "source_time", "source_data"}
 var fieldsToInsertStr = strings.Join(fieldsToInsert, ", ")
 
-var fieldsToRead = []string{"title", "summary", "url", "embedded", "tags", "details", "source", "source_key", "source_time", "source_data", "created_at", "updated_at"}
+var fieldsToRead = []string{"url", "title", "summary", "embedded", "tags", "details", "source", "source_key", "source_time", "source_data", "created_at", "updated_at"}
 var fieldsToReadStr = strings.Join(fieldsToRead, ", ")
 
 var fieldsToList = append([]string{"id"}, fieldsToRead...)
@@ -114,7 +114,7 @@ func (dataOp *dataSQLite) Save(items []data.Item, _ *crud.SaveOptions) ([]common
 		}
 
 		values := []interface{}{
-			item.Title, item.Summary, item.URL, embedded, tags, details,
+			item.URL, item.Title, item.Summary, embedded, tags, details,
 			item.Origin.Source, item.Origin.Key, item.Origin.Time, item.Origin.Data,
 		}
 
@@ -170,7 +170,7 @@ func (dataOp *dataSQLite) Read(id common.ID, _ *crud.GetOptions) (*data.Item, er
 	var sourceTimePtr, updatedAtPtr *string
 
 	err = dataOp.stmRead.QueryRow(idNum).Scan(
-		&item.Title, &item.Summary, &item.URL, &embedded, &tags, &item.DetailsRaw,
+		&item.URL, &item.Title, &item.Summary, &embedded, &tags, &item.DetailsRaw,
 		&item.Source, &item.Key, &sourceTimePtr, &item.Data, &createdAt, &updatedAtPtr)
 	if err == sql.ErrNoRows {
 		return nil, common.ErrNotFound
@@ -292,7 +292,7 @@ func (dataOp *dataSQLite) List(*selectors.Term, *crud.GetOptions) ([]data.Item, 
 		var sourceTimePtr, updatedAtPtr *string
 
 		err := rows.Scan(
-			&idNum, &item.Title, &item.Summary, &item.URL, &embedded, &tags, &item.DetailsRaw,
+			&idNum, &item.URL, &item.Title, &item.Summary, &embedded, &tags, &item.DetailsRaw,
 			&item.Origin.Source, &item.Origin.Key, &sourceTimePtr, &item.Origin.Data, &createdAt, &updatedAtPtr,
 		)
 		if err != nil {
