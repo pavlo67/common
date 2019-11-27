@@ -14,9 +14,9 @@ const InterfaceKey joiner.InterfaceKey = "data"
 
 type Item struct {
 	ID       common.ID `bson:"_id,omitempty"`
+	URL      string
 	Title    string
 	Summary  string
-	URL      string
 	Embedded []Item
 	Tags     []tagger.Tag
 

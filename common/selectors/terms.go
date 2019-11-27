@@ -1,135 +1,95 @@
 package selectors
 
-import "errors"
-
-//var ErrBadObjectDetails = errors.New("bad object details")
-//var ErrBadObjectManagers = errors.New("bad object managers")
-//var ErrBadDataBuffer = errors.New("bad data buffer")
-//var ErrEmptySelector = errors.New("empty selector")
-
-var ErrBadSelector = errors.New("bad selector")
-
-type Term struct {
-	First TermUnary
-	Next  []TermNext
-}
-
-type TermNext struct {
-	TermUnary
-	Operation
-}
-
-type Operation rune
-
-const ADD Operation = '+'
-const SUB Operation = '-'
-const MULT Operation = '*'
-const DIV Operation = '/'
-
-const GT Operation = '>'
-const GE Operation = 'g'
-const EQ Operation = '='
-const NE Operation = 'n'
-const LT Operation = '<'
-const LE Operation = 'l'
-
-const AND Operation = 'A'
-const OR Operation = 'O'
-
 // unary terms -----------------------------------------------------------------------------------------
 
 type TermUnary struct {
 	Value interface{}
-	*OperationUnary
+	OperationUnary
 }
 
 type OperationUnary rune
 
 const NOT OperationUnary = '!'
-const MIN OperationUnary = '-'
-const INV OperationUnary = '/'
+const INV OperationUnary = '-'
 
-// one-of terms ----------------------------------------------------------------------------------------
+// general terms --------------------------------------------------------------------------------------
 
-type TermOneOfStr struct {
-	Key    string
-	Values []string
+type Term struct {
+	Value interface{}
+	Next  []TermNext
 }
 
-// helpers ---------------------------------------------------------------------------------------------
-
-func Unary(term *Term) *TermUnary {
-	return &TermUnary{term, nil}
+type TermNext struct {
+	Value interface{}
+	OperationBinary
 }
 
-func InStrUnary(key string, values ...string) *TermUnary {
-	return &TermUnary{TermOneOfStr{key, values}, nil}
-}
+type OperationBinary rune
 
-func InStr(key string, values ...string) *Term {
-	return &Term{First: TermUnary{TermOneOfStr{key, values}, nil}}
-}
+const ADD OperationBinary = '+'
+const SUB OperationBinary = '-'
+const MULT OperationBinary = '*'
+const DIV OperationBinary = '/'
 
-func Le(key, value interface{}) *Term {
-	return &Term{
-		TermUnary{key, nil},
-		[]TermNext{{TermUnary{value, nil}, LE}},
-	}
-}
+const GT OperationBinary = '>'
+const GE OperationBinary = 'g'
+const EQ OperationBinary = '='
+const NE OperationBinary = 'n'
+const LT OperationBinary = '<'
+const LE OperationBinary = 'l'
 
-func Lt(key, value interface{}) *Term {
-	return &Term{
-		TermUnary{key, nil},
-		[]TermNext{{TermUnary{value, nil}, LE}},
-	}
-}
+const AND OperationBinary = 'A'
+const OR OperationBinary = 'O'
 
-func Eq(key, value interface{}) *Term {
-	return &Term{
-		TermUnary{key, nil},
-		[]TermNext{{TermUnary{value, nil}, LE}},
-	}
-}
-
-func Ne(key, value interface{}) *Term {
-	return &Term{
-		TermUnary{key, nil},
-		[]TermNext{{TermUnary{value, nil}, LE}},
-	}
-}
-
-func Ge(key, value interface{}) *Term {
-	return &Term{
-		TermUnary{key, nil},
-		[]TermNext{{TermUnary{value, nil}, LE}},
-	}
-}
-
-func Gt(key, value interface{}) *Term {
-	return &Term{
-		TermUnary{key, nil},
-		[]TermNext{{TermUnary{value, nil}, LE}},
-	}
-}
-
-func And(termsUnary0 ...*TermUnary) *Term {
-	var termsUnary []*TermUnary
-	for _, termUnary0 := range termsUnary0 {
-		if termUnary0 != nil {
-			termsUnary = append(termsUnary, termUnary0)
-		}
+func TermBinary(operationBinary OperationBinary, value0, value1 interface{}) *Term {
+	var term0 *TermUnary
+	switch v := value0.(type) {
+	case *TermUnary:
+		term0 = v
+	case TermUnary:
+		term0 = &v
+	default:
+		term0 = &TermUnary{Value: value0}
 	}
 
-	if len(termsUnary) < 1 {
+	var term1 *TermUnary
+	switch v := value1.(type) {
+	case *TermUnary:
+		term1 = v
+	case TermUnary:
+		term1 = &v
+	default:
+		term1 = &TermUnary{Value: value1}
+	}
+
+	return &Term{*term0, []TermNext{{*term1, operationBinary}}}
+}
+
+func TermMultiple(operationBinary OperationBinary, values ...interface{}) *Term {
+	if len(values) < 1 {
 		return nil
 	}
 
-	term := Term{
-		First: *termsUnary[0],
-	}
-	for _, termUnary := range termsUnary[1:] {
-		term.Next = append(term.Next, TermNext{*termUnary, AND})
+	var term *Term
+	switch v := values[0].(type) {
+	case *TermUnary:
+		term = &Term{Value: *v}
+	case TermUnary:
+		term = &Term{Value: v}
+	default:
+		term = &Term{Value: TermUnary{Value: values[0]}}
 	}
 
-	return &term
+	for _, value := range values[1:] {
+		switch v := value.(type) {
+		case *TermUnary:
+			term.Next = append(term.Next, TermNext{*v, operationBinary})
+		case TermUnary:
+			term.Next = append(term.Next, TermNext{v, operationBinary})
+		default:
+			term.Next = append(term.Next, TermNext{TermUnary{Value: value}, operationBinary})
+		}
+	}
+
+	return term
 }
