@@ -6,5 +6,5 @@ type Origin struct {
 	Source string
 	Key    string
 	Time   *time.Time
-	Data   []byte
+	Data   interface{}
 }

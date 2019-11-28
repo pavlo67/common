@@ -36,8 +36,9 @@ type Operator interface {
 
 	Read(common.ID, *crud.GetOptions) (*Item, error)
 	Details(item *Item, exemplar interface{}) error
+
 	List(*selectors.Term, *crud.GetOptions) ([]Item, error)
-	Count(*selectors.Term, *crud.GetOptions) ([]crud.Counter, error)
+	Count(*selectors.Term, *crud.GetOptions) (uint64, error)
 }
 
 // TODO: .History, etc...

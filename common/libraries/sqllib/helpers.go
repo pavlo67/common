@@ -31,7 +31,7 @@ func OrderAndLimit(sortBy []string, limits []uint64) string {
 			desc := ""
 			if s[len(s)-1:] == "-" {
 				s = s[:len(s)-1]
-				desc = " desc"
+				desc = " DESC"
 			} else if s[len(s)-1:] == "+" {
 				s = s[:len(s)-1]
 			}
@@ -41,7 +41,7 @@ func OrderAndLimit(sortBy []string, limits []uint64) string {
 			sortStr += "`" + s + "`" + desc
 		}
 		if sortStr != "" {
-			sortStr = " order by " + sortStr
+			sortStr = " ORDER BY " + sortStr
 		}
 	}
 	if len(limits) > 1 {
@@ -52,12 +52,12 @@ func OrderAndLimit(sortBy []string, limits []uint64) string {
 		} else {
 			pageLengthStr = defaultPageLengthStr
 		}
-		limitsStr = " limit " + strconv.FormatUint(limits[0], 10) + ", " + pageLengthStr
+		limitsStr = " LIMIT " + strconv.FormatUint(limits[0], 10) + ", " + pageLengthStr
 	} else if len(limits) > 0 {
 		if limits[0] > 0 {
-			limitsStr = " limit " + strconv.FormatUint(limits[0], 10)
+			limitsStr = " LIMIT " + strconv.FormatUint(limits[0], 10)
 		} else {
-			limitsStr = " limit " + defaultPageLengthStr
+			limitsStr = " LIMIT " + defaultPageLengthStr
 		}
 	}
 	return sortStr + limitsStr

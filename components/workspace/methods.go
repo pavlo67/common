@@ -7,8 +7,8 @@ import (
 	"github.com/pavlo67/workshop/common/crud"
 	"github.com/pavlo67/workshop/common/selectors"
 	"github.com/pavlo67/workshop/components/data"
+	"github.com/pavlo67/workshop/components/hypertext"
 	"github.com/pavlo67/workshop/components/tagger"
-	"github.com/pavlo67/workshop/components/text"
 )
 
 var _ Operator = &ws{}
@@ -81,7 +81,7 @@ func (wsOp *ws) ListWithTag(selector *selectors.Term, tag tagger.Tag, options *c
 
 const onListWithText = "on ws.ListWithText(): "
 
-func (wsOp *ws) ListWithText(*selectors.Term, text.ToSearch, *crud.GetOptions) ([]data.Item, error) {
+func (wsOp *ws) ListWithText(*selectors.Term, hypertext.ToSearch, *crud.GetOptions) ([]data.Item, error) {
 	return nil, common.ErrNotImplemented
 }
 

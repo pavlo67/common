@@ -16,8 +16,8 @@ import (
 	"github.com/pavlo67/workshop/common/libraries/sqllib"
 	"github.com/pavlo67/workshop/common/libraries/sqllib/sqllib_sqlite"
 	"github.com/pavlo67/workshop/common/selectors"
-
 	"github.com/pavlo67/workshop/common/selectors/selectors_sql"
+
 	"github.com/pavlo67/workshop/components/data"
 	"github.com/pavlo67/workshop/components/tagger"
 )
@@ -43,16 +43,17 @@ type dataSQLite struct {
 	db    *sql.DB
 	table string
 
-	sqlInsert, sqlUpdate, sqlRead, sqlRemove, sqlList, sqlCount string
-	stmInsert, stmUpdate, stmRead, stmRemove, stmList, stmCount *sql.Stmt
+	sqlInsert, sqlUpdate, sqlRead, sqlRemove, sqlList, sqlClean string
+	stmInsert, stmUpdate, stmRead, stmRemove, stmList, stmClean *sql.Stmt
 
-	taggerOp     tagger.Operator
-	interfaceKey joiner.InterfaceKey
+	taggerOp      tagger.Operator
+	interfaceKey  joiner.InterfaceKey
+	taggerCleaner crud.Cleaner
 }
 
 const onNew = "on dataSQLite.New(): "
 
-func NewData(access config.Access, table string, taggerOp tagger.Operator, interfaceKey joiner.InterfaceKey) (data.Operator, crud.Cleaner, error) {
+func NewData(access config.Access, table string, taggerOp tagger.Operator, interfaceKey joiner.InterfaceKey, taggerCleaner crud.Cleaner) (data.Operator, crud.Cleaner, error) {
 	db, err := sqllib_sqlite.Connect(access)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, onNew)
@@ -71,11 +72,13 @@ func NewData(access config.Access, table string, taggerOp tagger.Operator, inter
 		sqlRemove: "DELETE FROM " + table + " where ID = ?",
 
 		sqlRead: "SELECT " + fieldsToReadStr + " FROM " + table + " WHERE id = ?",
-		// sqlCount: "SELECT count(*) FROM " + table + " WHERE source = ? AND source_key = ?",
-		sqlList: sqlList(table, ""),
+		sqlList: sqlList(table, "", nil),
 
-		taggerOp:     taggerOp,
-		interfaceKey: interfaceKey,
+		sqlClean: "DELETE FROM " + table,
+
+		taggerOp:      taggerOp,
+		interfaceKey:  interfaceKey,
+		taggerCleaner: taggerCleaner,
 	}
 
 	sqlStmts := []sqllib.SqlStmt{
@@ -85,7 +88,7 @@ func NewData(access config.Access, table string, taggerOp tagger.Operator, inter
 
 		{&dataOp.stmRead, dataOp.sqlRead},
 		{&dataOp.stmList, dataOp.sqlList},
-		{&dataOp.stmCount, dataOp.sqlCount},
+		{&dataOp.stmClean, dataOp.sqlClean},
 	}
 
 	for _, sqlStmt := range sqlStmts {
@@ -97,11 +100,21 @@ func NewData(access config.Access, table string, taggerOp tagger.Operator, inter
 	return &dataOp, &dataOp, nil
 }
 
-func sqlList(table, condition string) string {
+func sqlList(table, condition string, _ *crud.GetOptions) string {
 	if strings.TrimSpace(condition) != "" {
 		condition = " WHERE " + condition
 	}
 	return "SELECT " + fieldsToListStr + " FROM " + table + condition + " ORDER BY created_at DESC"
+}
+
+func sqlCount(table, condition string, _ *crud.GetOptions) string {
+	query := "SELECT COUNT(*) FROM " + table
+
+	if strings.TrimSpace(condition) != "" {
+		return query + " WHERE " + condition
+	}
+
+	return query
 }
 
 const onSave = "on dataSQLite.Save(): "
@@ -283,14 +296,14 @@ func (dataOp *dataSQLite) Remove(id common.ID, _ *crud.RemoveOptions) error {
 
 const onList = "on dataSQLite.List()"
 
-func (dataOp *dataSQLite) List(term *selectors.Term, _ *crud.GetOptions) ([]data.Item, error) {
+func (dataOp *dataSQLite) List(term *selectors.Term, options *crud.GetOptions) ([]data.Item, error) {
 	condition, values, err := selectors_sql.Use(term)
 
 	query := dataOp.sqlList
 	stm := dataOp.stmList
 
 	if condition != "" {
-		query = sqlList(dataOp.table, condition)
+		query = sqlList(dataOp.table, condition, options)
 		stm, err = dataOp.db.Prepare(query)
 		if err != nil {
 			return nil, errors.Wrapf(err, onList+": can't db.Prepare(%s)", query)
@@ -323,8 +336,7 @@ func (dataOp *dataSQLite) List(term *selectors.Term, _ *crud.GetOptions) ([]data
 			return items, errors.Wrapf(err, onList+sqllib.CantScanQueryRow, query, values)
 		}
 
-		item.CreatedAt, err = time.Parse(time.RFC3339, createdAt)
-		if err != nil {
+		if item.CreatedAt, err = time.Parse(time.RFC3339, createdAt); err != nil {
 			return items, errors.Wrapf(err, onList+"can't parse .CreatedAt (%s)", createdAt)
 		}
 
@@ -345,21 +357,15 @@ func (dataOp *dataSQLite) List(term *selectors.Term, _ *crud.GetOptions) ([]data
 		}
 
 		if len(tags) > 0 {
-			err = json.Unmarshal([]byte(tags), &item.Tags)
-			if err != nil {
+			if err = json.Unmarshal([]byte(tags), &item.Tags); err != nil {
 				return items, errors.Wrapf(err, onList+"can't unmarshal .Tags (%s)", tags)
 			}
 		}
 
 		if len(embedded) > 0 {
-			err = json.Unmarshal([]byte(embedded), &item.Embedded)
-			if err != nil {
+			if err = json.Unmarshal([]byte(embedded), &item.Embedded); err != nil {
 				return items, errors.Wrapf(err, onList+"can't unmarshal .Embedded (%s)", embedded)
 			}
-		}
-
-		if err != nil {
-			return items, errors.Wrapf(err, onList+sqllib.CantScanQueryRow, query, values)
 		}
 
 		item.ID = common.ID(strconv.FormatInt(idNum, 10))
@@ -373,63 +379,108 @@ func (dataOp *dataSQLite) List(term *selectors.Term, _ *crud.GetOptions) ([]data
 	return items, nil
 }
 
-const onCount = "on dataSQLite.Has(): "
+const onCount = "on dataSQLite.Count(): "
 
-func (dataOp *dataSQLite) Count(*selectors.Term, *crud.GetOptions) ([]crud.Counter, error) {
-	//if len(originKey.Key) < 1 { // || len(originKey.ID) < 1
-	//	return 0, errors.New(onCount + "empty ID")
-	//}
-	//
-	//values := []interface{}{originKey.ID, originKey.Key}
-	//
-	//var cnt uint
-	//err := dataOp.stmHas.QueryRow(values...).Scan(&cnt)
-	//if err != nil {
-	//	return cnt, errors.Wrapf(err, onCount+sqllib.CantScanQueryRow, dataOp.sqlHas, values)
-	//}
-	//
-	return nil, common.ErrNotImplemented
+func (dataOp *dataSQLite) Count(term *selectors.Term, options *crud.GetOptions) (uint64, error) {
+	condition, values, err := selectors_sql.Use(term)
+
+	query := sqlCount(dataOp.table, condition, options)
+	stm, err := dataOp.db.Prepare(query)
+	if err != nil {
+		return 0, errors.Wrapf(err, onCount+": can't db.Prepare(%s)", query)
+	}
+
+	var num uint64
+
+	err = stm.QueryRow(values...).Scan(&num)
+	if err != nil {
+		return 0, errors.Wrapf(err, onCount+sqllib.CantScanQueryRow, query, values)
+	}
+
+	return num, nil
 }
-
-//const onLastKey = "on datastoreMySQL.LastKey()"
-//
-//func (dsOp *datastoreMySQL) LastKey(class data.Type, options *crud.ReadOptions) (string, error) {
-//
-//	// TODO: use options!!!
-//
-//	values := []interface{}{string(class)}
-//	rows, err := dsOp.stmLastKey.Query(values...)
-//	if err == sql.ErrNoRows {
-//		return "", nil
-//	} else if err != nil {
-//		return "", errors.Wrapf(err, onLastKey+"can't query (sql='%s', values='%#v')", dsOp.sqlLastKey, values)
-//	}
-//	defer rows.Close()
-//	if rows.Next() {
-//		var lastKey string
-//		err = rows.Scan(&lastKey)
-//		if err != nil {
-//			return "", errors.Wrapf(err, onLastKey+"can't scan query row (sql='%s', values='%#v')", dsOp.sqlLastKey, values)
-//		}
-//		return lastKey, nil
-//	}
-//	err = rows.Err()
-//	if err != nil {
-//		return "", errors.Wrapf(err, onLastKey+"on rows.Err() (sql='%s', values='%#v')", dsOp.sqlLastKey, values)
-//	}
-//
-//	return "", nil
-//}
 
 func (dataOp *dataSQLite) Close() error {
 	return errors.Wrap(dataOp.db.Close(), "on dataSQLite.Close()")
 }
 
-func (dataOp *dataSQLite) Clean(*selectors.Term) error {
-	_, err := dataOp.db.Exec("DELETE FROM " + dataOp.table)
+const onIDs = "on dataSQLite.IDs()"
 
-	if dataOp.taggerOp != nil {
-		// TODO!!!
+func (dataOp *dataSQLite) ids(condition string, values []interface{}) ([]interface{}, error) {
+	if strings.TrimSpace(condition) != "" {
+		condition = " WHERE " + condition
+	}
+
+	query := "SELECT id FROM " + dataOp.table + condition
+	stm, err := dataOp.db.Prepare(query)
+	if err != nil {
+		return nil, errors.Wrapf(err, onIDs+": can't db.Prepare(%s)", query)
+	}
+
+	rows, err := stm.Query(values...)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	} else if err != nil {
+		return nil, errors.Wrapf(err, onIDs+sqllib.CantQuery, query, values)
+	}
+	defer rows.Close()
+
+	var ids []interface{}
+
+	for rows.Next() {
+		var id common.ID
+
+		err := rows.Scan(&id)
+		if err != nil {
+			return ids, errors.Wrapf(err, onIDs+sqllib.CantScanQueryRow, query, values)
+		}
+
+		ids = append(ids, id)
+	}
+	err = rows.Err()
+	if err != nil {
+		return ids, errors.Wrapf(err, onIDs+": "+sqllib.RowsError, query, values)
+	}
+
+	return ids, nil
+}
+
+const onClean = "on dataSQLite.Clean(): "
+
+func (dataOp *dataSQLite) Clean(term *selectors.Term) error {
+	var termTags *selectors.Term
+
+	condition, values, err := selectors_sql.Use(term)
+
+	if strings.TrimSpace(condition) != "" {
+		ids, err := dataOp.ids(condition, values)
+
+		query := dataOp.sqlClean + " WHERE " + condition
+		_, err = dataOp.db.Exec(query, values...)
+		if err != nil {
+			return errors.Wrapf(err, onClean+sqllib.CantExec, query, values)
+		}
+
+		termTags = selectors.TermBinary(
+			selectors.AND,
+			selectors.In("key", dataOp.interfaceKey), // TODO!!! correct field key
+			selectors.In("id", ids...),
+		)
+
+	} else {
+		_, err = dataOp.stmClean.Exec()
+		if err != nil {
+			return errors.Wrapf(err, onClean+sqllib.CantExec, dataOp.sqlClean, nil)
+		}
+
+		termTags = selectors.In("key", dataOp.interfaceKey) // TODO!!! correct field key
+	}
+
+	if dataOp.taggerCleaner != nil {
+		err = dataOp.taggerCleaner.Clean(termTags)
+		if err != nil {
+			return errors.Wrap(err, onClean)
+		}
 	}
 
 	return err

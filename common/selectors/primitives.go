@@ -5,6 +5,6 @@ type TermOneOf struct {
 	Values []interface{}
 }
 
-func In(key string, values ...interface{}) *TermUnary {
-	return &TermUnary{TermOneOf{key, values}, nil}
+func In(key string, values ...interface{}) *Term {
+	return &Term{TermOneOf{key, values}, nil}
 }

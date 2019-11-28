@@ -3,6 +3,8 @@ package importer
 import (
 	"github.com/pavlo67/workshop/common/joiner"
 
+	"time"
+
 	"github.com/pavlo67/workshop/components/data"
 )
 
@@ -15,8 +17,9 @@ const InterfaceKey joiner.InterfaceKey = "importer"
 //var ErrNilItem = errors.New("item is nil")
 
 type Series struct {
-	URL string
-	// MinKey *string
+	URL       string
+	CreatedAt time.Time
+
 	Items []data.Item
 }
 
@@ -24,5 +27,5 @@ type Operator interface {
 	// Prepare opens import session with selected data source
 	// Init() error
 
-	Get(url string, minKey *string) (*Series, error)
+	Get(url string) (*Series, error)
 }
