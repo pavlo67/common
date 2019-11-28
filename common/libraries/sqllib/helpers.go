@@ -7,15 +7,15 @@ import (
 	"github.com/pkg/errors"
 )
 
-const CantPrepare = "can't prepare (sql='%s')"
-const CantQuery = "can't .Query (sql='%s', values='%#v')"
-const CantExec = "can't .Exec (sql='%s', values='%#v')"
+const CantPrepare = "can't .Prepare(%s)"
+const CantQuery = "can't .Query('%s', %#v)"
+const CantExec = "can't .Exec('%s', %#v)"
 
-const CantGetLastInsertId = "can't .LastInsertId (sql='%s', values='%#v')"
-const CantGetRowsAffected = "can't .RowsAffected (sql='%s', values='%#v')"
-const NoRowOnQuery = "no row on query(sql='%s', values='%#v'"
-const CantScanQueryRow = "can't scan query row (sql='%s', values='%#v')"
-const RowsError = "error on .Rows (sql='%s', values='%#v')"
+const CantGetLastInsertId = "can't .LastInsertId('%s', %#v)"
+const CantGetRowsAffected = "can't .RowsAffected('%s', %#v)"
+const NoRowOnQuery = "no row on query('%s', %#v)"
+const CantScanQueryRow = "can't scan query row ('%s', %#v)"
+const RowsError = "error on .Rows ('%s', %#v)"
 
 var ErrNoTable = errors.New("table doesn't exist")
 
@@ -73,7 +73,7 @@ func Prepare(dbh *sql.DB, sqlQuery string, stmt **sql.Stmt) error {
 
 	*stmt, err = dbh.Prepare(sqlQuery)
 	if err != nil {
-		return errors.Wrapf(err, "can't prepare (sqlQuery: %v)", sqlQuery)
+		return errors.Wrapf(err, "can't dbh.Prepare(%s)", sqlQuery)
 	}
 
 	return nil

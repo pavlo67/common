@@ -32,12 +32,12 @@ type Item struct {
 
 type Operator interface {
 	Save([]Item, *crud.SaveOptions) ([]common.ID, error)
+	Remove(common.ID, *crud.RemoveOptions) error
+
 	Read(common.ID, *crud.GetOptions) (*Item, error)
 	Details(item *Item, exemplar interface{}) error
-
-	Count(*selectors.Term, *crud.GetOptions) ([]crud.Counter, error)
 	List(*selectors.Term, *crud.GetOptions) ([]Item, error)
-	Remove(*selectors.Term, *crud.RemoveOptions) error
+	Count(*selectors.Term, *crud.GetOptions) ([]crud.Counter, error)
 }
 
 // TODO: .History, etc...
