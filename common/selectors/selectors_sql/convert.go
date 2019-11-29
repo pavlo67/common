@@ -25,30 +25,30 @@ func Use(term *selectors.Term) (sqlCondition string, values []interface{}, err e
 		sqlConditionNext = "(" + sqlConditionNext + ")"
 
 		switch t.OperationBinary {
-		case selectors.ADD:
+		case selectors.Add:
 			sqlCondition = sqlCondition + " + " + sqlConditionNext
-		case selectors.SUB:
+		case selectors.Sub:
 			sqlCondition = sqlCondition + " - " + sqlConditionNext
-		case selectors.MULT:
+		case selectors.Mult:
 			sqlCondition = sqlCondition + " * " + sqlConditionNext
-		case selectors.DIV:
+		case selectors.Div:
 			sqlCondition = sqlCondition + " / " + sqlConditionNext
-		case selectors.GT:
+		case selectors.Gt:
 			sqlCondition = sqlCondition + " > " + sqlConditionNext
-		case selectors.GE:
+		case selectors.Ge:
 			sqlCondition = sqlCondition + " >= " + sqlConditionNext
-		case selectors.EQ:
+		case selectors.Eq:
 			sqlCondition = sqlCondition + " = " + sqlConditionNext
-		case selectors.NE:
+		case selectors.Ne:
 			sqlCondition = sqlCondition + " <> " + sqlConditionNext // !=
-		case selectors.LT:
+		case selectors.Lt:
 			sqlCondition = sqlCondition + " < " + sqlConditionNext
-		case selectors.LE:
+		case selectors.Le:
 			sqlCondition = sqlCondition + " <= " + sqlConditionNext
-		case selectors.AND:
-			sqlCondition = sqlCondition + " AND " + sqlConditionNext
-		case selectors.OR:
-			sqlCondition = sqlCondition + " OR " + sqlConditionNext
+		case selectors.And:
+			sqlCondition = sqlCondition + " And " + sqlConditionNext
+		case selectors.Or:
+			sqlCondition = sqlCondition + " Or " + sqlConditionNext
 		default:
 			return "", nil, errors.Errorf("wrong .OperationBinary on selectors_sql.use(%#v)", t)
 		}
@@ -71,9 +71,12 @@ func use(value interface{}) (sqlCondition string, values []interface{}, err erro
 		termUnary = &v
 	case *selectors.TermUnary:
 		termUnary = v
+	case selectors.Literal:
+		return string(v), nil, nil
+	case selectors.Value:
+		return "?", []interface{}{v.V}, nil
 	default:
-		// TODO: check if value is suitable for SQL
-		return "?", []interface{}{value}, nil
+		return "", nil, errors.Errorf("wrong value for selectors_sql.use(%#v)", value)
 	}
 
 	sqlCondition, values, err = use(termUnary.Value)
@@ -83,9 +86,9 @@ func use(value interface{}) (sqlCondition string, values []interface{}, err erro
 	sqlCondition = "(" + sqlCondition + ")"
 
 	switch termUnary.OperationUnary {
-	case selectors.NOT:
+	case selectors.Not:
 		return "NOT " + sqlCondition, values, nil
-	case selectors.INV:
+	case selectors.Inv:
 		return "-" + sqlCondition, values, nil
 	}
 

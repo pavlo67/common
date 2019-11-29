@@ -16,6 +16,7 @@ import (
 	"github.com/pavlo67/workshop/common/libraries/sqllib"
 	"github.com/pavlo67/workshop/common/libraries/sqllib/sqllib_sqlite"
 	"github.com/pavlo67/workshop/common/selectors"
+	"github.com/pavlo67/workshop/common/selectors/logic"
 	"github.com/pavlo67/workshop/common/selectors/selectors_sql"
 
 	"github.com/pavlo67/workshop/components/data"
@@ -461,11 +462,7 @@ func (dataOp *dataSQLite) Clean(term *selectors.Term) error {
 			return errors.Wrapf(err, onClean+sqllib.CantExec, query, values)
 		}
 
-		termTags = selectors.TermBinary(
-			selectors.AND,
-			selectors.In("key", dataOp.interfaceKey), // TODO!!! correct field key
-			selectors.In("id", ids...),
-		)
+		termTags = logic.AND(selectors.In("key", dataOp.interfaceKey), selectors.In("id", ids...))
 
 	} else {
 		_, err = dataOp.stmClean.Exec()

@@ -1,5 +1,8 @@
 package selectors
 
+type Literal string
+type Value struct{ V interface{} }
+
 // unary terms -----------------------------------------------------------------------------------------
 
 type TermUnary struct {
@@ -9,8 +12,8 @@ type TermUnary struct {
 
 type OperationUnary rune
 
-const NOT OperationUnary = '!'
-const INV OperationUnary = '-'
+const Not OperationUnary = '!'
+const Inv OperationUnary = '-'
 
 // general terms --------------------------------------------------------------------------------------
 
@@ -26,20 +29,20 @@ type TermNext struct {
 
 type OperationBinary rune
 
-const ADD OperationBinary = '+'
-const SUB OperationBinary = '-'
-const MULT OperationBinary = '*'
-const DIV OperationBinary = '/'
+const Add OperationBinary = '+'
+const Sub OperationBinary = '-'
+const Mult OperationBinary = '*'
+const Div OperationBinary = '/'
 
-const GT OperationBinary = '>'
-const GE OperationBinary = 'g'
-const EQ OperationBinary = '='
-const NE OperationBinary = 'n'
-const LT OperationBinary = '<'
-const LE OperationBinary = 'l'
+const Gt OperationBinary = '>'
+const Ge OperationBinary = 'g'
+const Eq OperationBinary = '='
+const Ne OperationBinary = 'n'
+const Lt OperationBinary = '<'
+const Le OperationBinary = 'l'
 
-const AND OperationBinary = 'A'
-const OR OperationBinary = 'O'
+const And OperationBinary = 'A'
+const Or OperationBinary = 'O'
 
 func TermBinary(operationBinary OperationBinary, value0, value1 interface{}) *Term {
 	var term0 *TermUnary

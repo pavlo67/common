@@ -48,11 +48,11 @@ func NewTagger(access config.Access, table string) (tagger.Operator, crud.Cleane
 		db:    db,
 		table: table,
 
-		sqlSaveTags:      "INSERT OR IGNORE INTO " + table + " (" + fieldsToSaveStr + ") VALUES (" + strings.Repeat(",? ", len(fieldsToSave))[1:] + ")",
-		sqlRemoveTags:    "DELETE FROM " + table + " where key = ? AND id = ? and tag = ?",
-		sqlRemoveAllTags: "DELETE FROM " + table + " where key = ? AND id = ?",
+		sqlSaveTags:      "INSERT Or IGNORE INTO " + table + " (" + fieldsToSaveStr + ") VALUES (" + strings.Repeat(",? ", len(fieldsToSave))[1:] + ")",
+		sqlRemoveTags:    "DELETE FROM " + table + " where key = ? And id = ? and tag = ?",
+		sqlRemoveAllTags: "DELETE FROM " + table + " where key = ? And id = ?",
 
-		sqlListTags:       "SELECT tag, count(*) FROM " + table + " WHERE key = ? AND id = ? ORDER BY tag",
+		sqlListTags:       "SELECT tag, count(*) FROM " + table + " WHERE key = ? And id = ? ORDER BY tag",
 		sqlCountTagged:    "SELECT tag, count(*) FROM " + table + " WHERE key = ?            GROUP BY tag ORDER BY tag",
 		sqlCountTaggedAll: "SELECT tag, count(*) FROM " + table + "            GROUP BY tag ORDER BY tag",
 		sqlListTagged:     "SELECT key, id FROM       " + table + " WHERE tag = ?            ORDER BY key, id",

@@ -28,9 +28,9 @@ func Load(url string, impOp importer.Operator, dataOp data.Operator, l logger.Op
 
 		// TODO!!!
 		term := selectors.TermBinary(
-			selectors.AND,
-			selectors.TermBinary(selectors.EQ, "source", url),
-			selectors.TermBinary(selectors.EQ, "source_key", item.Key),
+			selectors.And,
+			selectors.TermBinary(selectors.Eq, "source", url),
+			selectors.TermBinary(selectors.Eq, "source_key", item.Key),
 		)
 
 		cnt, err := dataOp.Count(term, nil)

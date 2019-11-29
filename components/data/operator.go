@@ -41,6 +41,11 @@ type Operator interface {
 	Count(*selectors.Term, *crud.GetOptions) (uint64, error)
 }
 
+type Convertor interface {
+	GetData() (*Item, error)
+	SaveData(Item) error
+}
+
 // TODO: .History, etc...
 
 //	ID        dataspace.ID `bson:"id"                   json:"id"`
