@@ -7,10 +7,10 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/pavlo67/workshop/common/auth"
 	"github.com/pavlo67/workshop/common/libraries/filelib"
 	"github.com/pavlo67/workshop/common/server"
 	"github.com/pavlo67/workshop/common/server/server_http"
-	"github.com/pavlo67/workshop/components/auth"
 )
 
 var _ = server_http.InitEndpoint(&endpoints, "POST", filelib.RelativePath(filelib.CurrentFile(true), pathBase, prefix, l),

@@ -7,12 +7,12 @@ import (
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/joiner"
 
+	"github.com/pavlo67/workshop/common/auth"
+	"github.com/pavlo67/workshop/common/auth/auth_jwt"
+	"github.com/pavlo67/workshop/common/auth/auth_users_sqlite"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/server/server_http"
 	"github.com/pavlo67/workshop/common/starter"
-	"github.com/pavlo67/workshop/components/auth"
-	"github.com/pavlo67/workshop/components/auth/auth_jwt"
-	"github.com/pavlo67/workshop/components/auth/auth_users_sqlite"
 	"github.com/pavlo67/workshop/libraries/filelib"
 	"github.com/pkg/errors"
 )

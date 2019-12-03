@@ -5,6 +5,7 @@ import (
 
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
+	"github.com/pavlo67/workshop/common/crud"
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/starter"
@@ -61,7 +62,12 @@ func (ts *dataSQLiteStarter) Run(joinerOp joiner.Operator) error {
 		return errors.Errorf("no tagger.Operator with key %s", tagger.InterfaceKey)
 	}
 
-	dataOp, _, err := NewData(ts.config, "", taggerOp, ts.interfaceKey)
+	cleanerOp, ok := joinerOp.Interface(tagger.CleanerInterfaceKey).(crud.Cleaner)
+	if !ok {
+		return errors.Errorf("no tagger.Cleaner with key %s", tagger.InterfaceKey)
+	}
+
+	dataOp, _, err := NewData(ts.config, "", ts.interfaceKey, taggerOp, cleanerOp)
 	if err != nil {
 		return errors.Wrap(err, "can't init data.Operator")
 	}

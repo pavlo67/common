@@ -19,8 +19,9 @@ var l logger.Operator
 var _ starter.Operator = &taggerSQLiteStarter{}
 
 type taggerSQLiteStarter struct {
-	config       config.Access
-	interfaceKey joiner.InterfaceKey
+	config              config.Access
+	interfaceKey        joiner.InterfaceKey
+	cleanerInterfaceKey joiner.InterfaceKey
 }
 
 func (ts *taggerSQLiteStarter) Name() string {
@@ -38,6 +39,7 @@ func (ts *taggerSQLiteStarter) Init(cfg *config.Config, lCommon logger.Operator,
 
 	ts.config = cfgSQLite
 	ts.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(tagger.InterfaceKey)))
+	ts.cleanerInterfaceKey = joiner.InterfaceKey(options.StringDefault("cleaner_interface_key", string(tagger.CleanerInterfaceKey)))
 
 	// sqllib.CheckTables
 
@@ -55,7 +57,7 @@ func (ts *taggerSQLiteStarter) Setup() error {
 }
 
 func (ts *taggerSQLiteStarter) Run(joinerOp joiner.Operator) error {
-	taggerOp, _, err := NewTagger(ts.config, "")
+	taggerOp, taggerCleanerOp, err := NewTagger(ts.config, "")
 	if err != nil {
 		return errors.Wrap(err, "can't init tagger.Operator")
 	}
@@ -63,6 +65,11 @@ func (ts *taggerSQLiteStarter) Run(joinerOp joiner.Operator) error {
 	err = joinerOp.Join(taggerOp, ts.interfaceKey)
 	if err != nil {
 		return errors.Wrapf(err, "can't join *taggerSQLite as tagger.Operator with key '%s'", ts.interfaceKey)
+	}
+
+	err = joinerOp.Join(taggerCleanerOp, ts.cleanerInterfaceKey)
+	if err != nil {
+		return errors.Wrapf(err, "can't join *taggerSQLite as tagger.Cleaner with key '%s'", ts.cleanerInterfaceKey)
 	}
 
 	return nil

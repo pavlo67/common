@@ -54,7 +54,7 @@ type dataSQLite struct {
 
 const onNew = "on dataSQLite.New(): "
 
-func NewData(access config.Access, table string, taggerOp tagger.Operator, interfaceKey joiner.InterfaceKey, taggerCleaner crud.Cleaner) (data.Operator, crud.Cleaner, error) {
+func NewData(access config.Access, table string, interfaceKey joiner.InterfaceKey, taggerOp tagger.Operator, taggerCleaner crud.Cleaner) (data.Operator, crud.Cleaner, error) {
 	db, err := sqllib_sqlite.Connect(access)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, onNew)
@@ -124,6 +124,9 @@ func (dataOp *dataSQLite) Save(items []data.Item, _ *crud.SaveOptions) ([]common
 	var ids []common.ID
 
 	for _, item := range items {
+
+		//l.Info(item.CreatedAt.Format(time.RFC3339))
+
 		embedded, err := json.Marshal(item.Embedded)
 		if err != nil {
 			return ids, errors.Wrapf(err, onSave+"can't .Marshal(%#v)", item.Embedded)
@@ -222,6 +225,9 @@ func (dataOp *dataSQLite) Read(id common.ID, _ *crud.GetOptions) (*data.Item, er
 		return &item, errors.Wrapf(err, onRead+"can't parse .CreatedAt (%s)", createdAt)
 	}
 
+	//l.Info(createdAt)
+	//l.Info(item.CreatedAt.Format(time.RFC3339))
+
 	if updatedAtPtr != nil {
 		updatedAt, err := time.Parse(time.RFC3339, *updatedAtPtr)
 		if err != nil {
@@ -255,15 +261,19 @@ func (dataOp *dataSQLite) Read(id common.ID, _ *crud.GetOptions) (*data.Item, er
 	return &item, nil
 }
 
-const onDetails = "on dataSQLite.Details()"
+const onDetails = "on dataSQLite.Details(): "
 
 func (dataOp *dataSQLite) Details(item *data.Item, exemplar interface{}) error {
+	if item == nil {
+		return errors.New(onDetails + "nil item")
+	}
+
+	item.Details = exemplar
+
 	err := json.Unmarshal(item.DetailsRaw, exemplar)
 	if err != nil {
 		return errors.Wrapf(err, onDetails+"can't .Unmarshal(%#v)", item.DetailsRaw)
 	}
-
-	item.Details = exemplar
 
 	return nil
 }

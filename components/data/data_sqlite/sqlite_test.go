@@ -11,6 +11,7 @@ import (
 	"github.com/pavlo67/workshop/common/libraries/filelib"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/components/data"
+	"github.com/pavlo67/workshop/components/tagger/tagger_sqlite"
 )
 
 func TestCRUD(t *testing.T) {
@@ -33,7 +34,10 @@ func TestCRUD(t *testing.T) {
 
 	l.Debugf("%#v", cfgSQLite)
 
-	dataOp, cleanerOp, err := NewData(cfgSQLite, "", nil, "")
+	taggerOp, taggerCleanerOp, err := tagger_sqlite.NewTagger(cfgSQLite, "")
+	require.NoError(t, err)
+
+	dataOp, cleanerOp, err := NewData(cfgSQLite, "", "", taggerOp, taggerCleanerOp)
 	require.NoError(t, err)
 
 	l.Debugf("%#v", dataOp)

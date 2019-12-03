@@ -12,8 +12,8 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/pkg/errors"
 
+	"github.com/pavlo67/workshop/common/auth"
 	"github.com/pavlo67/workshop/common/server/server_http"
-	"github.com/pavlo67/workshop/components/auth"
 )
 
 var _ server_http.Operator = &serverHTTPJschmhr{}
@@ -73,15 +73,15 @@ func (s *serverHTTPJschmhr) Start() error {
 
 var reHTMLExt = regexp.MustCompile(`\.html?$`)
 
-func (s *serverHTTPJschmhr) HandleFiles(serverRoute, localPath string, mimeType *string) error {
-	l.Infof("FILES : %s <-- %s", serverRoute, localPath)
+func (s *serverHTTPJschmhr) HandleFiles(serverRoute string, staticPath server_http.StaticPath) error {
+	l.Infof("FILES : %s <-- %s", serverRoute, staticPath.LocalPath)
 
 	// TODO: check localPath
 
-	if mimeType == nil {
+	if staticPath.MIMEType == nil {
 		// TODO!!! CORS
 
-		s.httpServeMux.ServeFiles(serverRoute, http.Dir(localPath))
+		s.httpServeMux.ServeFiles(serverRoute, http.Dir(staticPath.LocalPath))
 		return nil
 	}
 
@@ -92,7 +92,7 @@ func (s *serverHTTPJschmhr) HandleFiles(serverRoute, localPath string, mimeType 
 		w.Header().Set("Access-Control-Allow-Headers", server_http.CORSAllowHeaders)
 		w.Header().Set("Access-Control-Allow-Methods", server_http.CORSAllowMethods)
 		w.Header().Set("Access-Control-Allow-Credentials", server_http.CORSAllowCredentials)
-		w.Header().Set("Content-Type", *mimeType)
+		w.Header().Set("Content-Type", *staticPath.MIMEType)
 	})
 
 	//fileServer := http.FileServer(http.Dir(localPath))
@@ -101,8 +101,8 @@ func (s *serverHTTPJschmhr) HandleFiles(serverRoute, localPath string, mimeType 
 		w.Header().Set("Access-Control-Allow-Headers", server_http.CORSAllowHeaders)
 		w.Header().Set("Access-Control-Allow-Methods", server_http.CORSAllowMethods)
 		w.Header().Set("Access-Control-Allow-Credentials", server_http.CORSAllowCredentials)
-		w.Header().Set("Content-Type", *mimeType)
-		OpenFile, err := os.Open(localPath + "/" + p.ByName("filepath"))
+		w.Header().Set("Content-Type", *staticPath.MIMEType)
+		OpenFile, err := os.Open(staticPath.LocalPath + "/" + p.ByName("filepath"))
 		defer OpenFile.Close()
 		if err != nil {
 			l.Error(err)
@@ -133,10 +133,10 @@ func (s *serverHTTPJschmhr) HandleFiles(serverRoute, localPath string, mimeType 
 //	})
 //}
 
-func (s *serverHTTPJschmhr) HandleEndpoint(endpoint server_http.Endpoint) error {
+func (s *serverHTTPJschmhr) HandleEndpoint(serverPath string, endpoint server_http.Endpoint) error {
 
 	method := strings.ToUpper(endpoint.Method)
-	path := endpoint.PathTemplate()
+	path := endpoint.PathTemplate(serverPath)
 
 	if endpoint.WorkerHTTP == nil {
 		return errors.New(method + ": " + path + "\t!!! NULL workerHTTP ISN'T DISPATCHED !!!")
@@ -216,6 +216,10 @@ func (s *serverHTTPJschmhr) HandleEndpoint(endpoint server_http.Endpoint) error 
 		s.httpServeMux.GET(path, handler)
 	case "POST":
 		s.httpServeMux.POST(path, handler)
+	case "PUT":
+		s.httpServeMux.PUT(path, handler)
+	case "DELETE":
+		s.httpServeMux.DELETE(path, handler)
 	default:
 		l.Error(method, " isn't supported!")
 	}

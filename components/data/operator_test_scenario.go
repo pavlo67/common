@@ -4,9 +4,13 @@ import (
 	"os"
 	"testing"
 
+	"time"
+
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/crud"
 	"github.com/pavlo67/workshop/common/logger"
+	"github.com/pavlo67/workshop/components/flow"
+	"github.com/pavlo67/workshop/components/tagger"
 	"github.com/stretchr/testify/require"
 )
 
@@ -14,21 +18,14 @@ type OperatorTestCase struct {
 	Operator
 	crud.Cleaner
 
-	DetailsToRead interface{}
+	ToSave   Item
+	ToUpdate Item
 
-	ToSave          Item
-	ExpectedSaveErr error
-	ExpectedReadErr error
+	DetailsToSave      Test
+	DetailsToReadSaved Test
 
-	ExpectedListErr error
-	ExcludeListTest bool
-
-	ToUpdate          Item
-	ExpectedUpdateErr error
-	ExcludeUpdateTest bool
-
-	ExpectedRemoveErr error
-	ExcludeRemoveTest bool
+	DetailsToUpdate      Test
+	DetailsToReadUpdated Test
 }
 
 type Test struct {
@@ -39,19 +36,42 @@ type Test struct {
 func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 	return []OperatorTestCase{
 		{
-			Operator:      dataOp,
-			Cleaner:       cleanerOp,
-			DetailsToRead: &Test{},
+			Operator: dataOp,
+			Cleaner:  cleanerOp,
 			ToSave: Item{
+				ID:      "",
+				URL:     "rtuy",
 				Title:   "345456",
 				Summary: "6578gj",
-				URL:     "",
-				Details: Test{
-					AAA: "aaa",
-					BBB: 222,
+				Embedded: []Item{{
+					URL:     "wq3r",
+					Title:   "56567",
+					Summary: "3333333",
+					Tags:    []tagger.Tag{"1", "332343"},
+				}},
+				Tags: []tagger.Tag{"1", "333"},
+				Status: crud.Status{
+					CreatedAt: time.Now(),
+				},
+				Origin: flow.Origin{},
+			},
+			DetailsToSave: Test{
+				AAA: "aaa",
+				BBB: 222,
+			},
+
+			ToUpdate: Item{
+				Title:   "345456rt",
+				Summary: "6578eegj",
+				Tags:    []tagger.Tag{"1", "333"},
+				Status: crud.Status{
+					CreatedAt: time.Now().Add(time.Minute),
 				},
 			},
-			ToUpdate: Item{},
+			DetailsToUpdate: Test{
+				AAA: "awraa",
+				BBB: 22552,
+			},
 		},
 	}
 }
@@ -60,10 +80,37 @@ func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 // TODO: test created_at, updated_at
 // TODO: test GetOptions
 
-const numRepeats = 3
-const toReadI = 0   // must be < numRepeats
-const toUpdateI = 1 // must be < numRepeats
-const toDeleteI = 2 // must be < numRepeats
+const numRepeats1 = 2
+const numRepeats2 = 3
+const toReadI = 0   // must be < numRepeats1 + numRepeats2
+const toUpdateI = 1 // must be < numRepeats1 + numRepeats2
+const toDeleteI = 2 // must be < numRepeats1 + numRepeats2
+
+func Compare(t *testing.T, dataOp Operator, readed *Item, expectedItem Item, expectedDetails, detailsToRead Test, l logger.Operator) {
+	require.NotNil(t, readed)
+
+	err := dataOp.Details(readed, &detailsToRead)
+	require.NoError(t, err)
+
+	l.Infof("to be saved: %#v", expectedItem)
+	l.Infof("readed: %#v", readed)
+	l.Infof("readed details: %#v", detailsToRead)
+
+	expectedItem.CreatedAt = expectedItem.CreatedAt.UTC()
+	expectedItem.Details = nil
+	expectedItem.DetailsRaw = nil
+
+	readed.Details = nil
+	readed.DetailsRaw = nil
+
+	// kostyl!!!
+	require.Equal(t, expectedItem.CreatedAt.Format(time.RFC3339), readed.CreatedAt.Format(time.RFC3339))
+	readed.CreatedAt = expectedItem.CreatedAt
+
+	require.Equal(t, &expectedItem, readed)
+	require.Equal(t, expectedDetails, detailsToRead)
+
+}
 
 func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.Operator) {
 
@@ -74,13 +121,13 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 	for i, tc := range testCases {
 		l.Debug(i)
 
-		var id [numRepeats]common.ID
-		var toSave [numRepeats]Item
+		var id [numRepeats1 + numRepeats2]common.ID
+		var toSave [numRepeats1 + numRepeats2]Item
 		// var data Item
 
 		// ClearDatabase ------------------------------------------------------------------------------------
 
-		err := tc.Cleaner.Clean()
+		err := tc.Cleaner.Clean(nil)
 		require.NoError(t, err, "what is the error on .Cleaner()?")
 
 		// test Describe ------------------------------------------------------------------------------------
@@ -117,82 +164,72 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		//nativeToCreate, err := tc.ItemToNative(tc.ToSave)
 		//require.NoError(t, err)
 
-		if tc.ExpectedSaveErr != nil {
-			_, err = tc.Save([]Item{tc.ToSave}, nil)
-			require.Error(t, err, "where is an error on .Save()?")
-			continue
-		}
+		//if !tc.ExpectedSaveOk {
+		//	_, err = tc.Save([]Item{tc.ToSave}, nil)
+		//	require.Error(t, err, "where is an error on .Save()?")
+		//	continue
+		//}
 
-		for i := 0; i < numRepeats; i++ {
+		for i := 0; i < numRepeats1; i++ {
 			toSave[i] = tc.ToSave
-
+			toSave[i].Details = &tc.DetailsToSave
 			idsI, err := tc.Save([]Item{toSave[i]}, nil)
-			require.NoError(t, err, "what is the error on .Create()?")
-			require.True(t, len(idsI) > 0)
-
+			require.NoError(t, err)
+			require.True(t, len(idsI) == 1)
 			id[i] = idsI[0]
 		}
 
-		// test Read ----------------------------------------------------------------------------------------
-
-		if tc.ExpectedReadErr != nil {
-			_, err = tc.Read(id[toReadI], nil)
-			require.Error(t, err)
-			continue
+		var toSavePack []Item
+		tc.ToSave.Details = &tc.DetailsToSave
+		for j := 0; j < numRepeats2; j++ {
+			toSavePack = append(toSavePack, tc.ToSave)
+		}
+		idsI, err := tc.Save(toSavePack, nil)
+		require.NoError(t, err)
+		require.True(t, len(idsI) == numRepeats2)
+		for j := 0; j < numRepeats2; j++ {
+			id[numRepeats1+i] = idsI[i]
 		}
 
-		l.Infof("to save: %#v", tc.ToSave)
+		// test .Read ----------------------------------------------------------------------------------------
 
-		doc, err := tc.Read(id[toReadI], nil)
+		// if !tc.ExpectedReadOk {
+		// 	 _, err = tc.Read(id[toReadI], nil)
+		//	 require.Error(t, err)
+		//	 continue
+		// }
+
+		readedSaved, err := tc.Read(id[toReadI], nil)
 		require.NoError(t, err)
 
-		l.Infof("readed: %#v", doc)
+		tc.ToSave.ID = id[toReadI]
 
-		err = tc.Details(doc, tc.DetailsToRead)
+		Compare(t, tc, readedSaved, tc.ToSave, tc.DetailsToSave, tc.DetailsToReadSaved, l)
+
+		// test .Update & .Read -----------------------------------------------------------------------------------
+
+		// if !tc.ExpectedUpdateOk {
+		//	 err = tc.Update(tc.ISToUpdate, id[toUpdateI], nativeToUpdate)
+		//	 require.Error(t, err, "where is an error on .Update()?")
+		//	 continue
+		// }
+
+		tc.ToUpdate.ID = id[toUpdateI]
+		tc.ToUpdate.Details = &tc.DetailsToUpdate
+
+		_, err = tc.Save([]Item{tc.ToUpdate}, nil)
 		require.NoError(t, err)
 
-		l.Infof("readed details: %#v", doc.Details)
+		readedUpdated, err := tc.Read(id[toUpdateI], nil)
+		require.NoError(t, err)
+
+		tc.ToUpdate.URL = tc.ToSave.URL             // unchanged!!!
+		tc.ToUpdate.Origin = tc.ToSave.Origin       // unchanged!!!
+		tc.ToUpdate.CreatedAt = tc.ToSave.CreatedAt // unchanged!!!
+
+		Compare(t, tc, readedUpdated, tc.ToUpdate, tc.DetailsToUpdate, tc.DetailsToReadUpdated, l)
 
 		// TODO!!!
-		// testData(t, nil, []string{string(id[toReadI])}, toSave[toReadI], data, true, "on .Read()")
-
-		//toUpdateResult := tc.ToUpdate
-		//for _, f := range description.FieldsArr {
-		//	if !f.Creatable {
-		//		toUpdateResult[f.Key] = data[f.Key]
-		//	}
-		//}
-
-		// test List -------------------------------------------------------------------------------------
-
-		if !tc.ExcludeListTest {
-			var ids []common.ID
-			for _, idi := range id {
-				ids = append(ids, idi)
-			}
-
-			if tc.ExpectedReadErr != nil {
-				// TODO: selector.InStr(keyFields[0], ids...)
-				briefsAll, err := tc.List(nil, nil)
-
-				require.Equal(t, 0, len(briefsAll), "why len(dataAll) is not zero after .List()?")
-				require.Error(t, err)
-				continue
-			}
-
-			// TODO: selector.InStr(keyFields[0], ids...)
-			briefsAll, err := tc.List(nil, nil)
-			require.NoError(t, err, "what is the error on .ReadList()?")
-			require.True(t, len(briefsAll) >= numRepeats, "must be len(dataAll) (%d) >= numRepeats (%d)", len(briefsAll), numRepeats)
-
-			// TODO!!!
-			//for i, native := range nativeAll {
-			//	testData(t, keyFields, []string{id[i]}, toSave[i], data, true, description, "on .ReadList()")
-			//}
-		}
-
-		//	// test Update --------------------------------------------------------------------------------------
-		//
 		//	if !tc.ExcludeUpdateTest {
 		//		var uniquesUpdatable []string
 		//		for _, field := range description.FieldsArr {
@@ -206,11 +243,6 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		//		nativeToUpdate, err := tc.ItemToNative(tc.ToUpdate)
 		//		require.NoError(t, err)
 		//
-		//		if tc.ExpectedUpdateErr != nil {
-		//			err = tc.Update(tc.ISToUpdate, id[toUpdateI], nativeToUpdate)
-		//			require.Error(t, err, "where is an error on .Update()?")
-		//			continue
-		//		}
 		//
 		//		if tc.ISToUpdateBad != nil {
 		//			err = tc.Update(*tc.ISToUpdateBad, id[toUpdateI], nativeToUpdate)
@@ -267,8 +299,53 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		//		require.Error(t, err)
 		//	}
 		//
-		//	// test DeleteList --------------------------------------------------------------------------------------
+
+		//toUpdateResult := tc.ToUpdate
+		//for _, f := range description.FieldsArr {
+		//	if !f.Creatable {
+		//		toUpdateResult[f.Key] = data[f.Key]
+		//	}
+		//}
+
+		// test List -------------------------------------------------------------------------------------
+
+		//if !tc.ExcludeListTest {
+		//	var ids []common.ID
+		//	for _, idi := range id {
+		//		ids = append(ids, idi)
+		//	}
 		//
+		//	if !tc.ExpectedReadOk {
+		//		// TODO: selector.InStr(keyFields[0], ids...)
+		//		briefsAll, err := tc.List(nil, nil)
+		//
+		//		require.Equal(t, 0, len(briefsAll), "why len(dataAll) is not zero after .List()?")
+		//		require.Error(t, err)
+		//		continue
+		//	}
+		//
+		//	// TODO: selector.InStr(keyFields[0], ids...)
+
+		briefsAll, err := tc.List(nil, nil)
+		require.NoError(t, err)
+		require.True(t, len(briefsAll) == numRepeats1+numRepeats2)
+
+		Compare(t, tc, &briefsAll[toReadI], tc.ToSave, tc.DetailsToSave, tc.DetailsToReadSaved, l)
+		Compare(t, tc, &briefsAll[toUpdateI], tc.ToUpdate, tc.DetailsToUpdate, tc.DetailsToReadUpdated, l)
+
+		// test .Delete --------------------------------------------------------------------------------------
+
+		err = tc.Remove(id[toDeleteI], nil)
+		require.NoError(t, err)
+
+		readDeleted, err := tc.Read(id[toDeleteI], nil)
+		require.Error(t, err)
+		require.Nil(t, readDeleted)
+
+		briefsAll, err = tc.List(nil, nil)
+		require.NoError(t, err)
+		require.True(t, len(briefsAll) == numRepeats1+numRepeats2-1)
+
 		//	if !tc.ExcludeRemoveTest {
 		//		nativeToRead, err = tc.Read(tc.ISToRead, id[toDeleteI])
 		//		require.NoError(t, err, "what is the error on .Read() after Update()?")

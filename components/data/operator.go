@@ -21,7 +21,7 @@ type Item struct {
 	Tags     []tagger.Tag
 
 	// Details should be used with Operator.Save only (and use Operator.Details to get .Details value)
-	Details interface{} `bson:"-" json:"-"`
+	Details interface{} `bson:"-"`
 
 	// DetailsRaw shouldn't be used directly
 	DetailsRaw []byte

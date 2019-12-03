@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/pavlo67/workshop/common"
+	"github.com/pavlo67/workshop/common/auth/auth_ecdsa"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/control"
 	"github.com/pavlo67/workshop/common/libraries/encodelib"
@@ -17,11 +18,12 @@ import (
 	"github.com/pavlo67/workshop/common/server/server_http/server_http_jschmhr"
 	"github.com/pavlo67/workshop/common/starter"
 
-	"github.com/pavlo67/workshop/apps/workspace/workspace_routes/starter"
-	"github.com/pavlo67/workshop/components/auth/auth_ecdsa"
 	"github.com/pavlo67/workshop/components/data/data_sqlite"
 	"github.com/pavlo67/workshop/components/tagger/tagger_sqlite"
 	"github.com/pavlo67/workshop/components/workspace"
+	"github.com/pavlo67/workshop/components/workspace/workspace_server_http"
+
+	"github.com/pavlo67/workshop/apps/workspace/routes"
 )
 
 var (
@@ -88,11 +90,14 @@ func main() {
 	starters := []starter.Starter{
 		{control.Starter(), nil},
 		{auth_ecdsa.Starter(), nil},
+		{server_http_jschmhr.Starter(), common.Map{"port": cfgEnvs["workspace_port"]}},
+
 		{tagger_sqlite.Starter(), nil},
 		{data_sqlite.Starter(), nil},
 		{workspace.Starter(), nil},
-		{server_http_jschmhr.Starter(), common.Map{"port": cfgEnvs["workspace_port"]}},
-		{workspace_routes_starter.Starter(), nil},
+
+		{workspace_server_http.Starter(), nil},
+		{routes.Starter(), nil},
 	}
 
 	label := "WORKSPACE REST BUILD"

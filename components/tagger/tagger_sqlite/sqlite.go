@@ -48,7 +48,7 @@ func NewTagger(access config.Access, table string) (tagger.Operator, crud.Cleane
 		db:    db,
 		table: table,
 
-		sqlSaveTags:      "INSERT Or IGNORE INTO " + table + " (" + fieldsToSaveStr + ") VALUES (" + strings.Repeat(",? ", len(fieldsToSave))[1:] + ")",
+		sqlSaveTags:      "INSERT OR IGNORE INTO " + table + " (" + fieldsToSaveStr + ") VALUES (" + strings.Repeat(",? ", len(fieldsToSave))[1:] + ")",
 		sqlRemoveTags:    "DELETE FROM " + table + " where key = ? And id = ? and tag = ?",
 		sqlRemoveAllTags: "DELETE FROM " + table + " where key = ? And id = ?",
 

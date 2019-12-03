@@ -111,7 +111,7 @@ func OperatorTestScenario(t *testing.T, testCases []TestCase, cleanerOp crud.Cle
 	for i, tc := range testCases {
 		l.Infof("test #%d", i)
 
-		err := cleanerOp.Clean()
+		err := cleanerOp.Clean(nil)
 		require.NoError(t, err)
 
 		for j, step := range tc.Steps {

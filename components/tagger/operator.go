@@ -8,6 +8,7 @@ import (
 )
 
 const InterfaceKey joiner.InterfaceKey = "tagger"
+const CleanerInterfaceKey joiner.InterfaceKey = "tagger_cleaner"
 
 type Tag string
 

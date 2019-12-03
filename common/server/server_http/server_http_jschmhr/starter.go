@@ -7,11 +7,11 @@ import (
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/joiner"
 
+	"github.com/pavlo67/workshop/common/auth"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/server"
 	"github.com/pavlo67/workshop/common/server/server_http"
 	"github.com/pavlo67/workshop/common/starter"
-	"github.com/pavlo67/workshop/components/auth"
 )
 
 func Starter() starter.Operator {
@@ -25,8 +25,6 @@ type server_http_jschmhrStarter struct {
 	interfaceKey joiner.InterfaceKey
 	config       server.Config
 	port         int
-
-	staticPaths map[string]string
 }
 
 func (ss *server_http_jschmhrStarter) Name() string {
@@ -48,11 +46,6 @@ func (ss *server_http_jschmhrStarter) Init(cfg *config.Config, lCommon logger.Op
 
 	ss.config = cfgServerHTTP
 	ss.port, _ = options.Int("port")
-
-	// TODO: use more then one static path
-	if staticPath, ok := options.String("static_path"); ok {
-		ss.staticPaths = map[string]string{"static": staticPath}
-	}
 
 	return nil, errs.Err()
 }
@@ -76,10 +69,6 @@ func (ss *server_http_jschmhrStarter) Run(joinerOp joiner.Operator) error {
 	srvOp, err := New(ss.port, ss.config.TLSCertFile, ss.config.TLSKeyFile, authOps)
 	if err != nil {
 		return errors.Wrap(err, "can't init serverHTTPJschmhr.Operator")
-	}
-
-	for path, staticPath := range ss.staticPaths {
-		srvOp.HandleFiles("/"+path+"/*filepath", staticPath, nil)
 	}
 
 	err = joinerOp.Join(srvOp, ss.interfaceKey)

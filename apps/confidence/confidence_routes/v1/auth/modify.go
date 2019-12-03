@@ -8,9 +8,9 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/apps/confidence/confidence_routes"
+	"github.com/pavlo67/workshop/common/auth"
 	"github.com/pavlo67/workshop/common/server"
 	"github.com/pavlo67/workshop/common/server/server_http"
-	"github.com/pavlo67/workshop/components/auth"
 	"github.com/pavlo67/workshop/libraries/filelib"
 )
 
