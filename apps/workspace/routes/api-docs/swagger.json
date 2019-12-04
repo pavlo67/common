@@ -1,0 +1,79 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "",
+        "version": "0.0.1",
+        "title": "Pavlo's Workshop Data API"
+    },
+    "basePath": "",
+    "schemes": ["http", "https"],
+
+    "paths": {
+      "/workspace/v1/save/{type}": {
+        "post": {
+          "tags": ["data"],
+          "produces": ["application/json"],
+          "operationId": "data_save",
+          "parameters": [
+            {
+              "in": "path",
+              "name": "type",
+              "type": "string",
+              "description": "data item type"
+            },
+            {
+              "in": "body",
+              "required": true,
+              "name": "item",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "/workspace/v1/read/{type}": {
+        "get": {
+          "tags": ["data"],
+          "produces": ["application/json"],
+          "operationId": "data_read",
+          "parameters": [
+            {
+              "in": "path",
+              "name": "type",
+              "type": "string",
+              "description": "data item type"
+            },
+            {
+              "in": "query",
+              "name": "id",
+              "type": "string",
+              "description": "data item id"
+            }
+          ]
+        }
+      },
+
+      "/workspace/v1/list": {
+        "get": {
+          "tags": ["data"],
+          "produces": ["application/json"],
+            "operationId": "data_list"
+        }
+      },
+
+      "/workspace/v1/remove": {
+        "delete": {
+          "tags": ["data"],
+          "produces": ["application/json"],
+          "operationId": "data_remove",
+          "parameters": [
+            {
+              "in": "query",
+              "name": "id",
+              "type": "string",
+              "description": "data item id"
+            }
+          ]
+        }
+      }
+    }
+}

@@ -1,105 +1,70 @@
 package data
 
 import (
-	"time"
+	"github.com/pavlo67/workshop/common"
+	"github.com/pavlo67/workshop/common/crud"
+	"github.com/pavlo67/workshop/common/joiner"
+	"github.com/pavlo67/workshop/common/selectors"
 
-	"github.com/pavlo67/workshop/basis/common"
-	"github.com/pavlo67/workshop/basis/crud"
-	"github.com/pavlo67/workshop/basis/joiner"
-	"github.com/pavlo67/workshop/basis/selectors"
-	"github.com/pavlo67/workshop/components/instruments/indexer"
-	"github.com/pavlo67/workshop/components/marks"
+	"github.com/pavlo67/workshop/components/flow"
+	"github.com/pavlo67/workshop/components/tagger"
 )
 
 const InterfaceKey joiner.InterfaceKey = "data"
+const CollectionDefault = "data"
+
+type TypeKey string
+
+type Type struct {
+	Key      TypeKey
+	Exemplar interface{}
+}
 
 type Item struct {
-	ID      common.ID  `bson:"_id,omitempty"      json:"id,omitempty"`
-	SavedAt *time.Time `bson:"saved_at,omitempty" json:"saved_at,omitempty"`
+	ID       common.ID    `bson:"_id,omitempty" json:",omitempty"`
+	URL      string       `bson:",omitempty"    json:",omitempty"`
+	TypeKey  TypeKey      `bson:",omitempty"    json:",omitempty"`
+	Title    string       `bson:",omitempty"    json:",omitempty"`
+	Summary  string       `bson:",omitempty"    json:",omitempty"`
+	Embedded []Item       `bson:",omitempty"    json:",omitempty"`
+	Tags     []tagger.Tag `bson:",omitempty"    json:",omitempty"`
 
-	OriginKey `       bson:",inline"          json:",inline"`
-	Origin    string `bson:"origin,omitempty" json:"origin,omitempty"`
+	// Details should be used with Operator.Save only (and use Operator.Details to get .Details value)
+	Details interface{} `bson:"-" json:",omitempty"`
 
-	SourceURL  string     `bson:"source_url,omitempty"  json:"source_url,omitempty"`
-	SourceTime *time.Time `bson:"source_time,omitempty" json:"source_time,omitempty"`
+	// DetailsRaw shouldn't be used directly
+	DetailsRaw []byte `bson:",omitempty"    json:",omitempty"`
 
-	Content  `          bson:"content"            json:"content"`
-	Embedded []Content `bson:"embedded,omitempty" json:"embedded,omitempty"`
-
-	Tags  []string       `bson:"tags,omitempty"  json:"tags,omitempty"`
-	Index map[string]int `bson:"index,omitempty" json:"index,omitempty"`
-}
-
-type OriginKey struct {
-	SourceID  common.ID `bson:"source_id,omitempty"  json:"source_id,omitempty"`
-	SourceKey string    `bson:"source_key,omitempty" json:"source_key,omitempty"`
-}
-
-type Content struct {
-	Type    crud.Type `bson:"type"              json:"type"`
-	Title   string    `bson:"title"             json:"title"`
-	Summary string    `bson:"summary,omitempty" json:"summary,omitempty"`
-	Details string    `bson:"details,omitempty" json:"details,omitempty"`
-	Href    string    `bson:"href,omitempty"    json:"href,omitempty"`
+	crud.Status `bson:",omitempty"    json:",omitempty"`
+	flow.Origin `bson:",omitempty"    json:",omitempty"`
 }
 
 type Operator interface {
-	Has(OriginKey, *crud.GetOptions) (uint, error)
+	Save([]Item, *crud.SaveOptions) ([]common.ID, error)
+	Remove(common.ID, *crud.RemoveOptions) error
+
 	Read(common.ID, *crud.GetOptions) (*Item, error)
+	Details(item *Item, exemplar interface{}) error
 
-	Save([]Item, marks.Operator, indexer.Operator, *crud.SaveOptions) ([]common.ID, error)
-	Remove(*selectors.Term, marks.Operator, indexer.Operator, *crud.RemoveOptions) error
-
-	List(*selectors.Term, indexer.Operator, *crud.GetOptions) ([]crud.Brief, error)
-	Count(*selectors.Term, indexer.Operator, *crud.GetOptions) ([]crud.Part, error)
-	Reindex(*selectors.Term, indexer.Operator, *crud.GetOptions) error
+	List(*selectors.Term, *crud.GetOptions) ([]Item, error)
+	Count(*selectors.Term, *crud.GetOptions) (uint64, error)
 }
 
-//func (item *Item) PartesTexti() ([]textus.Pars, error) {
-//	if item == nil || item.Content == nil {
-//		return nil, basis.ErrNull
-//	}
-//
-//	return []textus.Pars{
-//		{
-//			Fons:            item.Origin,
-//			Origo:           item.Original,
-//			ClavisContentus: item.ContentKey,
-//			Contentus: &textus.Contentus{
-//				Titulus:    item.Content.Title,
-//				Index:      item.Content.Summary,
-//				Textus:     item.Content.Text,
-//				Appendices: map[string][]string{"tags": item.Content.Tags},
-//			},
-//		},
-//	}, nil
-//
-//}
+type Convertor interface {
+	GetData() (*Item, error)
+	SaveData(Item) error
+}
 
-//func (src *Origin) Key(keyAdd string) string {
-//	if src == nil {
-//		return ""
-//	}
+// TODO: .History, etc...
+
+//	ID        dataspace.ID `bson:"id"                   json:"id"`
+//	Version   vcs.Version  `bson:"version,omitempty"    json:"version,omitempty"`
 //
-//	url := strings.TrimSpace(src.URL)
+//	Title   string       `bson:"title"             json:"title"`
+//	Item   string       `bson:"brief,omitempty"   json:"brief,omitempty"`
+//	Author  string       `bson:"author,omitempty"  json:"author,omitempty"`
+//	Item content.Item `bson:"content,omitempty" json:"content,omitempty"`
+//	Tags   links.Tags  `bson:"links,omitempty"   json:"links,omitempty"`
 //
-//	pos := strings.Index(url, "#")
-//	if pos >= 0 {
-//		url = url[:pos]
-//	}
-//
-//	if url == "" {
-//		return ""
-//	}
-//
-//	if len(keyAdd) > 0 {
-//		url += "#" + keyAdd
-//	}
-//
-//	sourceID := strings.TrimSpace(src.SourceID)
-//	if sourceID == "" {
-//		return url
-//	}
-//
-//	return url + "#" + sourceID
-//}
+//	RView  common.ID `bson:"r_view,omitempty"  json:"r_view,omitempty"`
+//	ROwner common.ID `bson:"r_owner,omitempty" json:"r_owner,omitempty"`

@@ -1,0 +1,22 @@
+sqlite:
+  path: './test.sqlite'
+
+server_http:
+  tls_cert_file: "/etc/certificate/server.crt"
+  tls_key_file:  "/etc/certificate/server.key"
+  testers: ["127.0.0.1"]
+
+mongodb:
+  host: "localhost"
+  port: 27017
+
+smtp:
+  host: "smtp.mailtrap.io"
+  port: 2525
+  user: "c889a7509fd7e7"
+  pass: "117335db87915f"
+
+pop3:
+  host: "pop.zoho.com:995"
+  user: "pavlo67@zoho.com"
+  pass: "p@dzfsamuZ1"
