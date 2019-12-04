@@ -1,98 +1,79 @@
 package selectors
 
-type Literal string
-type Value struct{ V interface{} }
+// type Key string
+type Value struct {
+	V interface{} `bson:",omitempty"    json:",omitempty"`
+}
 
 // unary terms -----------------------------------------------------------------------------------------
 
 type TermUnary struct {
-	Value interface{}
-	OperationUnary
+	ValueUnary     interface{} `bson:",omitempty"    json:",omitempty"`
+	OperationUnary `            bson:",omitempty"    json:",omitempty"`
 }
 
 type OperationUnary rune
 
+const NopUn OperationUnary = 0
 const Not OperationUnary = '!'
 const Inv OperationUnary = '-'
 
 // general terms --------------------------------------------------------------------------------------
 
 type Term struct {
-	Value interface{}
-	Next  []TermNext
+	Left      interface{} `bson:",omitempty"    json:",omitempty"`
+	Right     interface{} `bson:",omitempty"    json:",omitempty"`
+	Operation `            bson:",omitempty"    json:",omitempty"`
 }
 
-type TermNext struct {
-	Value interface{}
-	OperationBinary
-}
+type Operation rune
 
-type OperationBinary rune
+const Add Operation = '+'
+const Sub Operation = '-'
+const Mult Operation = '*'
+const Div Operation = '/'
 
-const Add OperationBinary = '+'
-const Sub OperationBinary = '-'
-const Mult OperationBinary = '*'
-const Div OperationBinary = '/'
+const Gt Operation = '>'
+const Ge Operation = 'g'
+const Eq Operation = '='
+const Ne Operation = 'n'
+const Lt Operation = '<'
+const Le Operation = 'l'
 
-const Gt OperationBinary = '>'
-const Ge OperationBinary = 'g'
-const Eq OperationBinary = '='
-const Ne OperationBinary = 'n'
-const Lt OperationBinary = '<'
-const Le OperationBinary = 'l'
+const And Operation = 'A'
+const Or Operation = 'O'
 
-const And OperationBinary = 'A'
-const Or OperationBinary = 'O'
+const Nop Operation = 0
 
-func TermBinary(operationBinary OperationBinary, value0, value1 interface{}) *Term {
-	var term0 *TermUnary
-	switch v := value0.(type) {
+func Operand(value interface{}) interface{} {
+	switch v := value.(type) {
 	case *TermUnary:
-		term0 = v
-	case TermUnary:
-		term0 = &v
-	default:
-		term0 = &TermUnary{Value: value0}
-	}
-
-	var term1 *TermUnary
-	switch v := value1.(type) {
-	case *TermUnary:
-		term1 = v
-	case TermUnary:
-		term1 = &v
-	default:
-		term1 = &TermUnary{Value: value1}
-	}
-
-	return &Term{*term0, []TermNext{{*term1, operationBinary}}}
-}
-
-func TermMultiple(operationBinary OperationBinary, values ...interface{}) *Term {
-	if len(values) < 1 {
-		return nil
-	}
-
-	var term *Term
-	switch v := values[0].(type) {
-	case *TermUnary:
-		term = &Term{Value: *v}
-	case TermUnary:
-		term = &Term{Value: v}
-	default:
-		term = &Term{Value: TermUnary{Value: values[0]}}
-	}
-
-	for _, value := range values[1:] {
-		switch v := value.(type) {
-		case *TermUnary:
-			term.Next = append(term.Next, TermNext{*v, operationBinary})
-		case TermUnary:
-			term.Next = append(term.Next, TermNext{v, operationBinary})
-		default:
-			term.Next = append(term.Next, TermNext{TermUnary{Value: value}, operationBinary})
+		if v != nil && v.OperationUnary == NopUn {
+			return v.ValueUnary
 		}
+	case TermUnary:
+		if v.OperationUnary == NopUn {
+			return v.ValueUnary
+		}
+		return &v
 	}
-
-	return term
+	return value
 }
+
+func Binary(operationBinary Operation, value0, value1 interface{}) *Term {
+	return &Term{Operand(value0), Operand(value1), operationBinary}
+}
+
+//func Multiple(operationBinary Operation, values ...interface{}) *Term {
+//	if len(values) < 1 {
+//		return nil
+//	}
+//
+//	term := &Term{Left: Operand(values[0])}
+//
+//	for _, value := range values[1:] {
+//		term.Right = append(term.Right, TermRight{Operand(value), operationBinary})
+//	}
+//
+//	return term
+//}

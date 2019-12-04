@@ -23,9 +23,7 @@ import (
 	"github.com/pavlo67/workshop/components/tagger"
 )
 
-const tableDefault = "data"
-
-var fieldsToUpdate = []string{"title", "summary", "embedded", "tags", "details"}
+var fieldsToUpdate = []string{"type", "title", "summary", "embedded", "tags", "details"}
 var fieldsToUpdateStr = strings.Join(fieldsToUpdate, " = ?, ") + " = ?"
 
 var fieldsToInsert = append(fieldsToUpdate, "source", "source_key", "source_time", "source_data", "url")
@@ -61,7 +59,7 @@ func NewData(access config.Access, table string, interfaceKey joiner.InterfaceKe
 	}
 
 	if table == "" {
-		table = tableDefault
+		table = data.CollectionDefault
 	}
 
 	dataOp := dataSQLite{
@@ -144,7 +142,7 @@ func (dataOp *dataSQLite) Save(items []data.Item, _ *crud.SaveOptions) ([]common
 
 		if item.ID != "" {
 			values := []interface{}{
-				item.Title, item.Summary, embedded, tags, details, item.ID,
+				item.TypeKey, item.Title, item.Summary, embedded, tags, details, item.ID,
 			}
 
 			_, err := dataOp.stmUpdate.Exec(values...)
@@ -163,7 +161,7 @@ func (dataOp *dataSQLite) Save(items []data.Item, _ *crud.SaveOptions) ([]common
 
 		} else {
 			values := []interface{}{
-				item.Title, item.Summary, embedded, tags, details,
+				item.TypeKey, item.Title, item.Summary, embedded, tags, details,
 				item.Origin.Source, item.Origin.Key, item.Origin.Time, item.Origin.Data, item.URL,
 			}
 
@@ -209,7 +207,7 @@ func (dataOp *dataSQLite) Read(id common.ID, _ *crud.GetOptions) (*data.Item, er
 	var sourceTimePtr, updatedAtPtr *string
 
 	err = dataOp.stmRead.QueryRow(idNum).Scan(
-		&item.Title, &item.Summary, &embedded, &tags, &item.DetailsRaw,
+		&item.TypeKey, &item.Title, &item.Summary, &embedded, &tags, &item.DetailsRaw,
 		&item.Source, &item.Key, &sourceTimePtr, &item.Data, &item.URL,
 		&createdAt, &updatedAtPtr,
 	)
@@ -264,6 +262,8 @@ func (dataOp *dataSQLite) Read(id common.ID, _ *crud.GetOptions) (*data.Item, er
 const onDetails = "on dataSQLite.Details(): "
 
 func (dataOp *dataSQLite) Details(item *data.Item, exemplar interface{}) error {
+	// TODO: check .TypeKey
+
 	if item == nil {
 		return errors.New(onDetails + "nil item")
 	}
@@ -339,7 +339,7 @@ func (dataOp *dataSQLite) List(term *selectors.Term, options *crud.GetOptions) (
 		var sourceTimePtr, updatedAtPtr *string
 
 		err := rows.Scan(
-			&idNum, &item.Title, &item.Summary, &embedded, &tags, &item.DetailsRaw,
+			&idNum, &item.TypeKey, &item.Title, &item.Summary, &embedded, &tags, &item.DetailsRaw,
 			&item.Origin.Source, &item.Origin.Key, &sourceTimePtr, &item.Origin.Data, &item.URL,
 			&createdAt, &updatedAtPtr,
 		)
@@ -394,6 +394,12 @@ const onCount = "on dataSQLite.Count(): "
 
 func (dataOp *dataSQLite) Count(term *selectors.Term, options *crud.GetOptions) (uint64, error) {
 	condition, values, err := selectors_sql.Use(term)
+	if err != nil {
+		termStr, _ := json.Marshal(term)
+		return 0, errors.Wrapf(err, onCount+": can't selectors_sql.Use(%s)", termStr)
+	}
+
+	l.Infof("%s / %#v", condition, values)
 
 	query := sqlCount(dataOp.table, condition, options)
 	stm, err := dataOp.db.Prepare(query)

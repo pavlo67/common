@@ -7,8 +7,8 @@ import (
 )
 
 type Status struct {
-	CreatedAt time.Time
-	UpdatedAt *time.Time
+	CreatedAt time.Time  `bson:",omitempty"    json:",omitempty"`
+	UpdatedAt *time.Time `bson:",omitempty"    json:",omitempty"`
 }
 
 type Counter map[string]uint64

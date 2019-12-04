@@ -14,11 +14,12 @@ type ImporterTestCase struct {
 
 func TestImporterWithCases(t *testing.T, testCases []ImporterTestCase) {
 	for _, tc := range testCases {
-		items, err := tc.Operator.Get(tc.Source, nil)
+		series, err := tc.Operator.Get(tc.Source)
 		require.NoError(t, err)
-		require.True(t, len(items) > 0)
+		require.NotNil(t, series)
+		require.True(t, len(series.Items) > 0)
 
-		for _, item := range items {
+		for _, item := range series.Items {
 			log.Printf("%#v", item)
 		}
 	}

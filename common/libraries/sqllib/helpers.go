@@ -138,7 +138,7 @@ func QueryStrings(stmt *sql.Stmt, sql string, values ...interface{}) (results []
 //	}
 //	defer rows.Close()
 //
-//	for rows.Next() {
+//	for rows.Right() {
 //		var id uint64
 //		if err := rows.Scan(&id); err != nil {
 //			return ids, errors.Wrapf(err, CantScanQueryRow, sql, values)

@@ -21,7 +21,7 @@ var reVersion = regexp.MustCompile("^\\d+\\.\\d+")
 //	}
 //
 //	var v []byte
-//	for rows.Next() {
+//	for rows.Right() {
 //		err = rows.Scan(&v)
 //		if err != nil {
 //			return "", errors.Wrapf(err, "can't scan SQL: %s", sqlQuery)

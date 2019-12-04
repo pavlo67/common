@@ -54,7 +54,7 @@ func TestDesc(t *testing.T) {
 	//	var a, b, c, d, f string
 	//	var e []byte
 	//
-	//	for rows.Next() {
+	//	for rows.Right() {
 	//		err = rows.Scan(&a, &b, &c, &d, &e, &f)
 	//		log.Println("a:", a, "b:", b, "c:", c, "d:", d, "e:", string(e), "f:", f, err)
 	//	}

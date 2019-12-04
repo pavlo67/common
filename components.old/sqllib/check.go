@@ -113,7 +113,7 @@ func CheckTables(sqlOp Operator, tablesConfig map[string]config.SQLTable) ([]com
 //	var null, key string
 //	var rDefault []byte
 //	var fields []sqllib.SQLField
-//	for rows.Next() {
+//	for rows.Right() {
 //		r := sqllib.SQLField{}
 //		if err = rows.Scan(&r.Title, &r.Type, &null, &key, &rDefault, &r.Extra); err != nil {
 //			return nil, errors.Wrapf(err, "can't scan query (sql='%v')", sqlQuery)
@@ -151,7 +151,7 @@ func CheckTables(sqlOp Operator, tablesConfig map[string]config.SQLTable) ([]com
 //	var coll, card, sub, pack, iType, com, iCom, visible []byte
 //	var indexes []sqllib.SQLIndex
 //
-//	for rows.Next() {
+//	for rows.Right() {
 //		if version < MySQLVersionLimit {
 //			err = rows.Scan(&t, &notUnique, &name, &sec, &column, &coll, &card, &sub, &pack, &null, &iType, &com)
 //		} else if version < MySQLVersionLimit2 {

@@ -22,6 +22,7 @@ var _ starter.Operator = &dataSQLiteStarter{}
 
 type dataSQLiteStarter struct {
 	config       config.Access
+	table        string
 	interfaceKey joiner.InterfaceKey
 }
 
@@ -39,6 +40,7 @@ func (ts *dataSQLiteStarter) Init(cfg *config.Config, lCommon logger.Operator, o
 	}
 
 	ts.config = cfgSQLite
+	ts.table, _ = options.String("table")
 	ts.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(data.InterfaceKey)))
 
 	// sqllib.CheckTables
@@ -67,7 +69,7 @@ func (ts *dataSQLiteStarter) Run(joinerOp joiner.Operator) error {
 		return errors.Errorf("no tagger.Cleaner with key %s", tagger.InterfaceKey)
 	}
 
-	dataOp, _, err := NewData(ts.config, "", ts.interfaceKey, taggerOp, cleanerOp)
+	dataOp, _, err := NewData(ts.config, ts.table, ts.interfaceKey, taggerOp, cleanerOp)
 	if err != nil {
 		return errors.Wrap(err, "can't init data.Operator")
 	}

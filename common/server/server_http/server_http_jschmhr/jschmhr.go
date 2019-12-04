@@ -168,7 +168,7 @@ func (s *serverHTTPJschmhr) HandleEndpoint(serverPath string, endpoint server_ht
 		//var params server_http.Params
 		//if len(paramsHR) > 0 {
 		//	for _, p := range paramsHR {
-		//		params = append(params, server_http.Param{Name: p.Key, Value: p.Value})
+		//		params = append(params, server_http.Param{Name: p.Key, Left: p.Left})
 		//	}
 		//}
 

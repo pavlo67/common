@@ -6,6 +6,8 @@ import (
 
 	"github.com/mmcdole/gofeed"
 
+	"encoding/json"
+
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/crud"
 	"github.com/pavlo67/workshop/components/data"
@@ -67,6 +69,8 @@ func (item *Item) GetData() (*data.Item, error) {
 		tags = append(tags, tagger.Tag(c))
 	}
 
+	origin, _ := json.Marshal(feedItem)
+
 	return &data.Item{
 		Title:    feedItem.Title,
 		Summary:  feedItem.Description,
@@ -78,7 +82,7 @@ func (item *Item) GetData() (*data.Item, error) {
 			Source: item.sourceURL,
 			Key:    originalID,
 			Time:   &sourceTime,
-			Data:   &item,
+			Data:   string(origin),
 		},
 	}, nil
 

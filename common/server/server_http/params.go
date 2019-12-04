@@ -4,7 +4,7 @@ type Params map[string]string
 
 //type Param struct {
 //	Name  string
-//	Value string
+//	Left string
 //}
 //
 //type Params []Param
@@ -12,7 +12,7 @@ type Params map[string]string
 //func (p Params) ByName(name string) string {
 //	for i := range p {
 //		if p[i].Name == name {
-//			return p[i].Value
+//			return p[i].Left
 //		}
 //	}
 //	return ""
@@ -23,7 +23,7 @@ type Params map[string]string
 //		return ""
 //	}
 //
-//	return p[num].Value
+//	return p[num].Left
 //}
 
 //func (p Info) AllExcept(names ...string) []string {
@@ -35,7 +35,7 @@ type Params map[string]string
 //			if param.Title == name {
 //				continue PARAM
 //			}
-//			values = append(values, param.Value)
+//			values = append(values, param.Left)
 //		}
 //	}
 //	return values

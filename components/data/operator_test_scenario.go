@@ -33,6 +33,11 @@ type Test struct {
 	BBB int
 }
 
+var TypeTest = Type{
+	Key:      "test",
+	Exemplar: Test{},
+}
+
 func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 	return []OperatorTestCase{
 		{
@@ -40,6 +45,7 @@ func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 			Cleaner:  cleanerOp,
 			ToSave: Item{
 				ID:      "",
+				TypeKey: "test",
 				URL:     "rtuy",
 				Title:   "345456",
 				Summary: "6578gj",

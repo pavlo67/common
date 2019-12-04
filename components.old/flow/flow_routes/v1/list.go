@@ -11,7 +11,7 @@ import (
 	"github.com/pavlo67/workshop/components/data"
 	"github.com/pavlo67/workshop/libraries/filelib"
 
-	r "github.com/pavlo67/workshop/apps/flow/flow_routes"
+	r "github.com/pavlo67/workshop/apps/gatherer/flow_routes"
 )
 
 var _ = server_http.InitEndpoint(&r.Endpoints, "GET", filelib.RelativePath(filelib.CurrentFile(true), r.PathBase, r.Prefix), nil, workerList, "")

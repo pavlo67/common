@@ -8,23 +8,18 @@ import (
 	"time"
 
 	"github.com/pavlo67/workshop/common"
-	"github.com/pavlo67/workshop/common/auth/auth_ecdsa"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/control"
 	"github.com/pavlo67/workshop/common/libraries/encodelib"
 	"github.com/pavlo67/workshop/common/libraries/filelib"
 	"github.com/pavlo67/workshop/common/logger"
-	"github.com/pavlo67/workshop/common/server/server_http"
-	"github.com/pavlo67/workshop/common/server/server_http/server_http_jschmhr"
 	"github.com/pavlo67/workshop/common/starter"
 
+	"github.com/pavlo67/workshop/components/data"
 	"github.com/pavlo67/workshop/components/data/data_sqlite"
 	"github.com/pavlo67/workshop/components/flow"
+	"github.com/pavlo67/workshop/components/importer/importer_actor"
 	"github.com/pavlo67/workshop/components/tagger/tagger_sqlite"
-	"github.com/pavlo67/workshop/components/workspace"
-	"github.com/pavlo67/workshop/components/workspace/workspace_server_http"
-
-	"github.com/pavlo67/workshop/apps/workspace/routes"
 )
 
 var (
@@ -81,28 +76,14 @@ func main() {
 		l.Fatal(err)
 	}
 
-	// TODO: synchronize with manifest.json
-	//portStr := os.Getenv("workspace_port")
-	//port, err := strconv.Atoi(portStr)
-	//if err != nil {
-	//	l.Fatalf("can't read port: '%s'", portStr)
-	//}
-
 	starters := []starter.Starter{
 		{control.Starter(), nil},
-		{auth_ecdsa.Starter(), nil},
-		{server_http_jschmhr.Starter(), common.Map{"port": cfgEnvs["workspace_port"]}},
 
 		{tagger_sqlite.Starter(), nil},
-		{data_sqlite.Starter(), nil},
 		{data_sqlite.Starter(), common.Map{"interface_key": flow.InterfaceKey, "table": flow.CollectionDefault}},
-		{workspace.Starter(), nil},
-
-		{workspace_server_http.Starter(), nil},
-		{routes.Starter(), nil},
 	}
 
-	label := "WORKSPACE REST BUILD"
+	label := "GATHERER CLI BUILD"
 
 	joiner, err := starter.Run(starters, cfg, os.Args[1:], label)
 	if err != nil {
@@ -110,10 +91,13 @@ func main() {
 	}
 	defer joiner.CloseAll()
 
-	srvOp, ok := joiner.Interface(server_http.InterfaceKey).(server_http.Operator)
+	dataOp, ok := joiner.Interface(data.InterfaceKey).(data.Operator)
 	if !ok {
-		l.Fatalf("no server_http.Operator with key %s", server_http.InterfaceKey)
+		l.Fatalf("no data.Operator with key %s", data.InterfaceKey)
 	}
 
-	srvOp.Start()
+	err = importer_actor.Load(dataOp, l)
+	if err != nil {
+		l.Error(err)
+	}
 }

@@ -18,7 +18,7 @@ import (
 	"github.com/pavlo67/workshop/components/data/data_sqlite"
 	"github.com/pavlo67/workshop/libraries/filelib"
 
-	"github.com/pavlo67/workshop/apps/flow/flow_routes/starter"
+	"github.com/pavlo67/workshop/apps/gatherer/flow_routes/starter"
 )
 
 var (

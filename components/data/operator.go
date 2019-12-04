@@ -11,23 +11,32 @@ import (
 )
 
 const InterfaceKey joiner.InterfaceKey = "data"
+const CollectionDefault = "data"
+
+type TypeKey string
+
+type Type struct {
+	Key      TypeKey
+	Exemplar interface{}
+}
 
 type Item struct {
-	ID       common.ID `bson:"_id,omitempty"`
-	URL      string
-	Title    string
-	Summary  string
-	Embedded []Item
-	Tags     []tagger.Tag
+	ID       common.ID    `bson:"_id,omitempty" json:",omitempty"`
+	URL      string       `bson:",omitempty"    json:",omitempty"`
+	TypeKey  TypeKey      `bson:",omitempty"    json:",omitempty"`
+	Title    string       `bson:",omitempty"    json:",omitempty"`
+	Summary  string       `bson:",omitempty"    json:",omitempty"`
+	Embedded []Item       `bson:",omitempty"    json:",omitempty"`
+	Tags     []tagger.Tag `bson:",omitempty"    json:",omitempty"`
 
 	// Details should be used with Operator.Save only (and use Operator.Details to get .Details value)
-	Details interface{} `bson:"-"`
+	Details interface{} `bson:"-" json:",omitempty"`
 
 	// DetailsRaw shouldn't be used directly
-	DetailsRaw []byte
+	DetailsRaw []byte `bson:",omitempty"    json:",omitempty"`
 
-	crud.Status
-	flow.Origin
+	crud.Status `bson:",omitempty"    json:",omitempty"`
+	flow.Origin `bson:",omitempty"    json:",omitempty"`
 }
 
 type Operator interface {
