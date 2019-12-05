@@ -15,10 +15,11 @@ import (
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/starter"
 
+	"github.com/pavlo67/workshop/common/scheduler"
 	"github.com/pavlo67/workshop/components/data"
 	"github.com/pavlo67/workshop/components/data/data_sqlite"
 	"github.com/pavlo67/workshop/components/flow"
-	"github.com/pavlo67/workshop/components/importer/importer_actor"
+	"github.com/pavlo67/workshop/components/importer/importer_task"
 	"github.com/pavlo67/workshop/components/tagger/tagger_sqlite"
 )
 
@@ -78,9 +79,12 @@ func main() {
 
 	starters := []starter.Starter{
 		{control.Starter(), nil},
+		{scheduler.Starter(), nil},
 
 		{tagger_sqlite.Starter(), nil},
 		{data_sqlite.Starter(), common.Map{"interface_key": flow.InterfaceKey, "table": flow.CollectionDefault}},
+
+		{importer_task.Starter(), nil},
 	}
 
 	label := "GATHERER CLI BUILD"
@@ -96,8 +100,10 @@ func main() {
 		l.Fatalf("no data.Operator with key %s", data.InterfaceKey)
 	}
 
-	err = importer_actor.Load(dataOp, l)
+	task, err := importer_task.New(dataOp)
 	if err != nil {
-		l.Error(err)
+		l.Fatal(err)
 	}
+
+	scheduler.Run(time.Hour, false, task)
 }

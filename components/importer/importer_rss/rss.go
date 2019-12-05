@@ -6,22 +6,58 @@ import (
 	"github.com/mmcdole/gofeed"
 	"github.com/pkg/errors"
 
+	"io/ioutil"
+	"net/http"
+
+	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/components/importer"
 )
 
-var _ importer.Operator = &RSS{}
+func NewRSS(l logger.Operator) (importer.Operator, error) {
+	if l == nil {
+		return nil, errors.New("on NewRSS(): nil logger")
+	}
 
-type RSS struct{}
+	return &rss{l}, nil
+}
+
+var _ importer.Operator = &rss{}
+
+type rss struct {
+	l logger.Operator
+}
 
 //var reHTTP = regexp.MustCompile("(?i)^https?://")
 
 const onGet = "on rss.Get(): "
 
-func (r *RSS) Get(feedURL string) (*importer.Series, error) {
+func (r *rss) Get(feedURL string) (*importer.Series, error) {
 	fp := gofeed.NewParser()
 	feed, err := fp.ParseURL(feedURL)
+
 	if err != nil {
-		return nil, errors.Wrapf(err, onGet+"can't .ParseURL(%s)", feedURL)
+		// return nil, errors.Wrapf(err, onGet+"can't fp.ParseURL(%s)", feedURL)
+
+		r.l.Warn(errors.Wrapf(err, onGet+"can't fp.ParseURL(%s)", feedURL))
+
+		resp, err := http.Get(feedURL)
+		if err != nil {
+			return nil, errors.Wrapf(err, onGet+"can't http.Get(%s)", feedURL)
+		}
+		defer resp.Body.Close()
+
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil, errors.Wrapf(err, onGet+"can't ioutil.ReadAll(%#v)", resp.Body)
+		}
+
+		feed, err = fp.ParseString(string(body))
+		if err != nil {
+			return nil, errors.Wrapf(err, onGet+"can't .ParseString(%s)", body)
+		} else if feed == nil {
+			return nil, errors.Errorf(onGet+"no feed obtained with .ParseString(%s)", body)
+		}
+
 	} else if feed == nil {
 		return nil, errors.Errorf(onGet+"no feed obtained with .ParseURL(%s)", feedURL)
 	}

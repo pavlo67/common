@@ -8,7 +8,7 @@ import (
 
 var testCases = []importer.ImporterTestCase{
 	{
-		Operator: &RSS{},
+		Operator: &rss{},
 		Source:   "https://rss.unian.net/site/news_ukr.rss",
 	},
 }

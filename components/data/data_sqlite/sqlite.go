@@ -399,7 +399,7 @@ func (dataOp *dataSQLite) Count(term *selectors.Term, options *crud.GetOptions) 
 		return 0, errors.Wrapf(err, onCount+": can't selectors_sql.Use(%s)", termStr)
 	}
 
-	l.Infof("%s / %#v", condition, values)
+	// l.Infof("%s / %#v", condition, values)
 
 	query := sqlCount(dataOp.table, condition, options)
 	stm, err := dataOp.db.Prepare(query)
