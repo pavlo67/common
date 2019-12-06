@@ -1,79 +1,109 @@
 {
-    "swagger": "2.0",
-    "info": {
-        "description": "",
-        "version": "0.0.1",
-        "title": "Pavlo's Workshop Data API"
-    },
-    "basePath": "",
-    "schemes": ["http", "https"],
-
-    "paths": {
-      "/workspace/v1/save/{type}": {
-        "post": {
-          "tags": ["data"],
-          "produces": ["application/json"],
-          "operationId": "data_save",
-          "parameters": [
-            {
-              "in": "path",
-              "name": "type",
-              "type": "string",
-              "description": "data item type"
-            },
-            {
-              "in": "body",
-              "required": true,
-              "name": "item",
-              "type": "string"
-            }
-          ]
-        }
-      },
-      "/workspace/v1/read/{type}": {
-        "get": {
-          "tags": ["data"],
-          "produces": ["application/json"],
-          "operationId": "data_read",
-          "parameters": [
-            {
-              "in": "path",
-              "name": "type",
-              "type": "string",
-              "description": "data item type"
-            },
-            {
-              "in": "query",
-              "name": "id",
-              "type": "string",
-              "description": "data item id"
-            }
-          ]
-        }
-      },
-
-      "/workspace/v1/list": {
-        "get": {
-          "tags": ["data"],
-          "produces": ["application/json"],
-            "operationId": "data_list"
-        }
-      },
-
-      "/workspace/v1/remove": {
-        "delete": {
-          "tags": ["data"],
-          "produces": ["application/json"],
-          "operationId": "data_remove",
-          "parameters": [
-            {
-              "in": "query",
-              "name": "id",
-              "type": "string",
-              "description": "data item id"
-            }
-          ]
-        }
-      }
-    }
+ "host": ":3003",
+ "info": {
+  "title": "Pavlo's Workshop REST API",
+  "version": "0.0.1"
+ },
+ "paths": {
+  "/v1/flow": {
+   "get": {
+    "operationId": "flow",
+    "produces": [
+     "application/json"
+    ],
+    "tags": [
+     "flow"
+    ]
+   }
+  },
+  "/v1/list": {
+   "get": {
+    "operationId": "list",
+    "produces": [
+     "application/json"
+    ],
+    "tags": [
+     "data"
+    ]
+   }
+  },
+  "/v1/read/{type}": {
+   "get": {
+    "operationId": "read",
+    "parameters": [
+     {
+      "description": "",
+      "in": "path",
+      "name": "type",
+      "required": true,
+      "type": "string"
+     },
+     {
+      "description": "",
+      "in": "query",
+      "name": "id",
+      "required": false,
+      "type": "string"
+     }
+    ],
+    "produces": [
+     "application/json"
+    ],
+    "tags": [
+     "data"
+    ]
+   }
+  },
+  "/v1/remove": {
+   "delete": {
+    "operationId": "remove",
+    "parameters": [
+     {
+      "description": "",
+      "in": "query",
+      "name": "id",
+      "required": false,
+      "type": "string"
+     }
+    ],
+    "produces": [
+     "application/json"
+    ],
+    "tags": [
+     "data"
+    ]
+   }
+  },
+  "/v1/save/{type}": {
+   "post": {
+    "operationId": "save",
+    "parameters": [
+     {
+      "description": "",
+      "in": "path",
+      "name": "type",
+      "required": true,
+      "type": "string"
+     },
+     {
+      "in": "body",
+      "name": "body_item",
+      "required": true,
+      "type": "string"
+     }
+    ],
+    "produces": [
+     "application/json"
+    ],
+    "tags": [
+     "data"
+    ]
+   }
+  }
+ },
+ "schemes": [
+  "http",
+  "https"
+ ],
+ "swagger": "2.0"
 }

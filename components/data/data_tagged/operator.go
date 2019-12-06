@@ -1,4 +1,4 @@
-package workspace
+package data_tagged
 
 import (
 	"github.com/pavlo67/workshop/common/crud"
@@ -9,9 +9,9 @@ import (
 	"github.com/pavlo67/workshop/components/tagger"
 )
 
-const InterfaceKey joiner.InterfaceKey = "workspace"
+const InterfaceKey joiner.InterfaceKey = "data_tagged"
 
-type Tagger = tagger.Operator
+type Tagger = tagger.Operator // to use data.Operator and tagger.Operator simultaneously in Operator interface
 
 type Operator interface {
 	data.Operator

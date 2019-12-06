@@ -13,6 +13,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common/auth"
+	"github.com/pavlo67/workshop/common/libraries/strlib"
 	"github.com/pavlo67/workshop/common/server/server_http"
 )
 
@@ -26,6 +27,8 @@ type serverHTTPJschmhr struct {
 	certFileTLS string
 	keyFileTLS  string
 	authOps     []auth.Operator
+
+	handledOptions []string
 }
 
 func New(port int, certFileTLS, keyFileTLS string, authOps []auth.Operator) (server_http.Operator, error) {
@@ -71,32 +74,40 @@ func (s *serverHTTPJschmhr) Start() error {
 	return s.httpServer.ListenAndServe()
 }
 
+func (s *serverHTTPJschmhr) HandleOptions(key, serverPath string) {
+	if strlib.In(s.handledOptions, serverPath) {
+		return
+	}
+
+	s.httpServeMux.OPTIONS(serverPath, func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		l.Infof("%-10s: OPTIONS %s", key, serverPath)
+		w.Header().Set("Access-Control-Allow-Origin", server_http.CORSAllowOrigin)
+		w.Header().Set("Access-Control-Allow-Headers", server_http.CORSAllowHeaders)
+		w.Header().Set("Access-Control-Allow-Methods", server_http.CORSAllowMethods)
+		w.Header().Set("Access-Control-Allow-Credentials", server_http.CORSAllowCredentials)
+	})
+
+	s.handledOptions = append(s.handledOptions, serverPath)
+}
+
 var reHTMLExt = regexp.MustCompile(`\.html?$`)
 
-func (s *serverHTTPJschmhr) HandleFiles(serverRoute string, staticPath server_http.StaticPath) error {
-	l.Infof("FILES : %s <-- %s", serverRoute, staticPath.LocalPath)
+func (s *serverHTTPJschmhr) HandleFiles(key, serverPath string, staticPath server_http.StaticPath) error {
+	l.Infof("%-10s: FILES %s <-- %s", key, serverPath, staticPath.LocalPath)
 
 	// TODO: check localPath
 
 	if staticPath.MIMEType == nil {
 		// TODO!!! CORS
 
-		s.httpServeMux.ServeFiles(serverRoute, http.Dir(staticPath.LocalPath))
+		s.httpServeMux.ServeFiles(serverPath, http.Dir(staticPath.LocalPath))
 		return nil
 	}
 
-	s.httpServeMux.OPTIONS(serverRoute, func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		l.Infof("OPTIONS: %s", serverRoute)
-
-		w.Header().Set("Access-Control-Allow-Origin", server_http.CORSAllowOrigin)
-		w.Header().Set("Access-Control-Allow-Headers", server_http.CORSAllowHeaders)
-		w.Header().Set("Access-Control-Allow-Methods", server_http.CORSAllowMethods)
-		w.Header().Set("Access-Control-Allow-Credentials", server_http.CORSAllowCredentials)
-		w.Header().Set("Content-Type", *staticPath.MIMEType)
-	})
+	s.HandleOptions(key, serverPath)
 
 	//fileServer := http.FileServer(http.Dir(localPath))
-	s.httpServeMux.GET(serverRoute, func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	s.httpServeMux.GET(serverPath, func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		w.Header().Set("Access-Control-Allow-Origin", server_http.CORSAllowOrigin)
 		w.Header().Set("Access-Control-Allow-Headers", server_http.CORSAllowHeaders)
 		w.Header().Set("Access-Control-Allow-Methods", server_http.CORSAllowMethods)
@@ -133,7 +144,7 @@ func (s *serverHTTPJschmhr) HandleFiles(serverRoute string, staticPath server_ht
 //	})
 //}
 
-func (s *serverHTTPJschmhr) HandleEndpoint(serverPath string, endpoint server_http.Endpoint) error {
+func (s *serverHTTPJschmhr) HandleEndpoint(key, serverPath string, endpoint server_http.Endpoint) error {
 
 	method := strings.ToUpper(endpoint.Method)
 	path := endpoint.PathTemplate(serverPath)
@@ -200,17 +211,9 @@ func (s *serverHTTPJschmhr) HandleEndpoint(serverPath string, endpoint server_ht
 		}
 	}
 
-	s.httpServeMux.OPTIONS(path, func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		// l.Infof("OPTIONS: %s", path)
+	s.HandleOptions(key, path)
 
-		w.Header().Set("Access-Control-Allow-Origin", server_http.CORSAllowOrigin)
-		w.Header().Set("Access-Control-Allow-Headers", server_http.CORSAllowHeaders)
-		w.Header().Set("Access-Control-Allow-Methods", server_http.CORSAllowMethods)
-		w.Header().Set("Access-Control-Allow-Credentials", server_http.CORSAllowCredentials)
-		// w.Header().Set("Content-Type", *mimeType)
-	})
-
-	l.Infof("%-6s: %s", method, path)
+	l.Infof("%-10s: %s %s", key, method, path)
 	switch method {
 	case "GET":
 		s.httpServeMux.GET(path, handler)

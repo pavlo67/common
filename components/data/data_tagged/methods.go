@@ -1,4 +1,4 @@
-package workspace
+package data_tagged
 
 import (
 	"github.com/pkg/errors"
@@ -20,9 +20,9 @@ type ws struct {
 	Tagger
 }
 
-const onNewWorkspace = "on NewWorkspace(): "
+const onNewWorkspace = "on New(): "
 
-func NewWorkspace(dataOp data.Operator, taggerOp tagger.Operator) (Operator, crud.Cleaner, error) {
+func New(dataOp data.Operator, taggerOp tagger.Operator) (Operator, crud.Cleaner, error) {
 	if dataOp == nil {
 		return nil, nil, errors.New(onNewWorkspace + ": no data.Operatoe")
 	}

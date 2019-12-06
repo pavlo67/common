@@ -49,7 +49,7 @@ func (sc *auth_stubStarter) Name() string {
 func (sc *auth_stubStarter) Init(conf *config.Config, params common.Map) (info []common.Map, err error) {
 	l = logger.Get()
 
-	sc.interfaceKey = joiner.InterfaceKey(params.StringDefault("interface_key", string(auth.InterfaceKey)))
+	sc.interfaceKey = joiner.InterfaceKey(params.StringDefault(joiner.InterfaceKeyFld, string(auth.InterfaceKey)))
 
 	// var ok bool
 	var errs common.Errors

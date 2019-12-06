@@ -44,7 +44,7 @@ func (ss *flowStarter) Init(cfg *config.Config, options common.Map) (info []comm
 		errs = append(errs, fmt.Errorf("no logger for %s:-(", Name))
 	}
 
-	// interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(server_http.InterfaceKey)))
+	// interfaceKey = joiner.InterfaceKey(options.StringDefault(joiner.InterfaceKeyFld, string(server_http.InterfaceKey)))
 
 	return nil, errs.Err()
 }

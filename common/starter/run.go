@@ -17,7 +17,13 @@ import (
 func StartComponent(c Starter, cfg *config.Config, args []string, joinerOp joiner.Operator) error {
 	l := logger.Get()
 
-	l.Info("checking component: ", c.Name())
+	name := c.Name()
+
+	if key, ok := c.Options.String(joiner.InterfaceKeyFld); ok {
+		name += " / " + key
+	}
+
+	l.Info("checking component: ", name)
 
 	startOptions := c.CorrectedOptions(ReadOptions(args))
 
@@ -26,12 +32,12 @@ func StartComponent(c Starter, cfg *config.Config, args []string, joinerOp joine
 		log.Println(i)
 	}
 	if err != nil {
-		return fmt.Errorf("error calling .Init() for component (%s): %s", c.Name(), err)
+		return fmt.Errorf("error calling .Init() for component (%s): %s", name, err)
 	}
 
 	err = c.Run(joinerOp)
 	if err != nil {
-		return fmt.Errorf("error calling .Prepare() for component (%s): %s", c.Name(), err)
+		return fmt.Errorf("error calling .Prepare() for component (%s): %s", name, err)
 	}
 
 	return nil

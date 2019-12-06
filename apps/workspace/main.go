@@ -11,20 +11,22 @@ import (
 	"github.com/pavlo67/workshop/common/auth/auth_ecdsa"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/control"
+	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/libraries/encodelib"
 	"github.com/pavlo67/workshop/common/libraries/filelib"
 	"github.com/pavlo67/workshop/common/logger"
-	"github.com/pavlo67/workshop/common/server/server_http"
 	"github.com/pavlo67/workshop/common/server/server_http/server_http_jschmhr"
 	"github.com/pavlo67/workshop/common/starter"
 
 	"github.com/pavlo67/workshop/components/data/data_sqlite"
 	"github.com/pavlo67/workshop/components/flow"
 	"github.com/pavlo67/workshop/components/tagger/tagger_sqlite"
-	"github.com/pavlo67/workshop/components/workspace"
-	"github.com/pavlo67/workshop/components/workspace/workspace_server_http"
 
 	"github.com/pavlo67/workshop/apps/workspace/routes"
+	"github.com/pavlo67/workshop/common/server/server_http"
+	"github.com/pavlo67/workshop/components/data/data_tagged"
+	"github.com/pavlo67/workshop/components/data/data_tagged/data_tagged_server_http"
+	"github.com/pavlo67/workshop/components/flow/flow_tagged/flow_tagged_server_http"
 )
 
 var (
@@ -94,11 +96,15 @@ func main() {
 		{server_http_jschmhr.Starter(), common.Map{"port": cfgEnvs["workspace_port"]}},
 
 		{tagger_sqlite.Starter(), nil},
-		{data_sqlite.Starter(), nil},
-		{data_sqlite.Starter(), common.Map{"interface_key": flow.InterfaceKey, "table": flow.CollectionDefault}},
-		{workspace.Starter(), nil},
 
-		{workspace_server_http.Starter(), nil},
+		{data_sqlite.Starter(), nil},
+		{data_tagged.Starter(), nil},
+		{data_tagged_server_http.Starter(), nil},
+
+		{data_sqlite.Starter(), common.Map{joiner.InterfaceKeyFld: flow.InterfaceKey, "table": flow.CollectionDefault}},
+		{data_tagged.Starter(), common.Map{joiner.InterfaceKeyFld: flow.TaggedInterfaceKey, "data_key": flow.InterfaceKey}},
+		{flow_tagged_server_http.Starter(), nil},
+
 		{routes.Starter(), nil},
 	}
 
@@ -115,5 +121,8 @@ func main() {
 		l.Fatalf("no server_http.Operator with key %s", server_http.InterfaceKey)
 	}
 
-	srvOp.Start()
+	err = srvOp.Start()
+	if err != nil {
+		l.Error(err)
+	}
 }

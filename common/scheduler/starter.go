@@ -29,7 +29,7 @@ func (ss *schedulerStarter) Name() string {
 
 func (ss *schedulerStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	l = lCommon
-	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(server_http.InterfaceKey)))
+	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault(joiner.InterfaceKeyFld, string(server_http.InterfaceKey)))
 	return nil, nil
 }
 

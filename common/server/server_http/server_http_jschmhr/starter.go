@@ -22,9 +22,11 @@ var l logger.Operator
 var _ starter.Operator = &server_http_jschmhrStarter{}
 
 type server_http_jschmhrStarter struct {
-	interfaceKey joiner.InterfaceKey
-	config       server.Config
-	port         int
+	config server.Config
+	port   int
+
+	interfaceKey     joiner.InterfaceKey
+	portInterfaceKey joiner.InterfaceKey
 }
 
 func (ss *server_http_jschmhrStarter) Name() string {
@@ -35,8 +37,8 @@ func (ss *server_http_jschmhrStarter) Init(cfg *config.Config, lCommon logger.Op
 	var errs common.Errors
 	l = lCommon
 
-	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(server_http.InterfaceKey)))
-	// ss.interfaceKeyRouter = joiner.InterfaceKey(options.StringDefault("interface_key_router", string(controller.InterfaceKey)))
+	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault(joiner.InterfaceKeyFld, string(server_http.InterfaceKey)))
+	ss.portInterfaceKey = joiner.InterfaceKey(options.StringDefault("port_interface_key", string(server_http.PortInterfaceKey)))
 
 	var cfgServerHTTP server.Config
 	err := cfg.Value("server_http", &cfgServerHTTP)
@@ -76,5 +78,12 @@ func (ss *server_http_jschmhrStarter) Run(joinerOp joiner.Operator) error {
 		return errors.Wrapf(err, "can't join serverHTTPJschmhr srvOp as server.Operator with key '%s'", ss.interfaceKey)
 	}
 
+	err = joinerOp.Join(ss.port, ss.portInterfaceKey)
+	if err != nil {
+		return errors.Wrapf(err, "can't join serverHTTPJschmhr srvOp as server.Operator with key '%s'", ss.interfaceKey)
+	}
+
 	return nil
+	// return srvOp.Start()
+
 }

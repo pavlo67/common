@@ -46,7 +46,7 @@ func (ss *sources_mysqlStarter) Prepare(conf *config.Config, params basis.Info) 
 
 	l = logger.zapGet()
 
-	ss.interfaceKey = joiner.InterfaceKey(params.StringDefault("interface_key", string(sources.InterfaceKey)))
+	ss.interfaceKey = joiner.InterfaceKey(params.StringDefault(joiner.InterfaceKeyFld, string(sources.InterfaceKey)))
 
 	if ss.addCRUD {
 		ss.interfaceKeyCRUD = joiner.InterfaceKey(params.StringDefault("interface_key_crud", string(sources.InterfaceKeyCRUD)))

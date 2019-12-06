@@ -10,6 +10,7 @@ import (
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/control"
+	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/libraries/encodelib"
 	"github.com/pavlo67/workshop/common/libraries/filelib"
 	"github.com/pavlo67/workshop/common/logger"
@@ -82,7 +83,7 @@ func main() {
 		{scheduler.Starter(), nil},
 
 		{tagger_sqlite.Starter(), nil},
-		{data_sqlite.Starter(), common.Map{"interface_key": flow.InterfaceKey, "table": flow.CollectionDefault}},
+		{data_sqlite.Starter(), common.Map{joiner.InterfaceKeyFld: flow.InterfaceKey, "table": flow.CollectionDefault}},
 
 		{importer_task.Starter(), nil},
 	}

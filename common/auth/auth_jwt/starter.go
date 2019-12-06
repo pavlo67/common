@@ -33,7 +33,7 @@ func (ss *identity_jwtStarter) Init(conf *config.Config, options common.Map) (in
 
 	// var errs basis.Errors
 
-	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(auth.InterfaceKey)))
+	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault(joiner.InterfaceKeyFld, string(auth.InterfaceKey)))
 
 	return nil, nil
 }

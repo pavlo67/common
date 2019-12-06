@@ -1,4 +1,4 @@
-package workspace
+package data_tagged
 
 import (
 	"github.com/pkg/errors"
@@ -20,6 +20,7 @@ var l logger.Operator
 var _ starter.Operator = &workspaceStarter{}
 
 type workspaceStarter struct {
+	dataKey      joiner.InterfaceKey
 	interfaceKey joiner.InterfaceKey
 }
 
@@ -30,7 +31,8 @@ func (ws *workspaceStarter) Name() string {
 func (ws *workspaceStarter) Init(_ *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	l = lCommon
 
-	ws.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
+	ws.dataKey = joiner.InterfaceKey(options.StringDefault("data_key", string(data.InterfaceKey)))
+	ws.interfaceKey = joiner.InterfaceKey(options.StringDefault(joiner.InterfaceKeyFld, string(InterfaceKey)))
 
 	return nil, nil
 }
@@ -40,9 +42,9 @@ func (ws *workspaceStarter) Setup() error {
 }
 
 func (ws *workspaceStarter) Run(joinerOp joiner.Operator) error {
-	dataOp, ok := joinerOp.Interface(data.InterfaceKey).(data.Operator)
+	dataOp, ok := joinerOp.Interface(ws.dataKey).(data.Operator)
 	if !ok {
-		return errors.Errorf("no data.Operator with key %s", data.InterfaceKey)
+		return errors.Errorf("no data.Operator with key %s", ws.dataKey)
 	}
 
 	taggerOp, ok := joinerOp.Interface(tagger.InterfaceKey).(tagger.Operator)
@@ -50,7 +52,7 @@ func (ws *workspaceStarter) Run(joinerOp joiner.Operator) error {
 		return errors.Errorf("no tagger.Operator with key %s", tagger.InterfaceKey)
 	}
 
-	wsOp, _, err := NewWorkspace(dataOp, taggerOp)
+	wsOp, _, err := New(dataOp, taggerOp)
 	if err != nil {
 		return errors.Wrap(err, "can't init workspace.Operator")
 	}

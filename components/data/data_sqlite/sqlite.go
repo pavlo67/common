@@ -103,7 +103,10 @@ func sqlList(table, condition string, _ *crud.GetOptions) string {
 	if strings.TrimSpace(condition) != "" {
 		condition = " WHERE " + condition
 	}
-	return "SELECT " + fieldsToListStr + " FROM " + table + condition + " ORDER BY created_at DESC"
+
+	limit := " LIMIT 200"
+
+	return "SELECT " + fieldsToListStr + " FROM " + table + condition + " ORDER BY created_at DESC" + limit
 }
 
 func sqlCount(table, condition string, _ *crud.GetOptions) string {

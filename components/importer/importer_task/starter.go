@@ -36,7 +36,7 @@ func (ts *importerTaskStarter) Init(cfg *config.Config, lCommon logger.Operator,
 	//
 	//ts.config = cfgSQLite
 	//ts.table, _ = options.String("table")
-	//ts.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(data.InterfaceKey)))
+	//ts.interfaceKey = joiner.InterfaceKey(options.StringDefault(joiner.InterfaceKeyFld, string(data.InterfaceKey)))
 
 	return nil, nil
 }

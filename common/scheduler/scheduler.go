@@ -19,7 +19,7 @@ func Run(interval time.Duration, startImmediately bool, task Task) {
 	for {
 		rest := timeScheduled.Sub(time.Now())
 		if rest > 0 {
-			l.Infof("%s: next scheduled task run.", timeScheduled.Format(time.RFC3339))
+			l.Infof("next task run scheduled on %s", timeScheduled.Format(time.RFC3339))
 			time.Sleep(rest)
 			continue
 		}

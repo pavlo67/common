@@ -16,6 +16,7 @@ import (
 	"github.com/pavlo67/workshop/common/auth/auth_stub"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/control"
+	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/kv/kv_sqlite"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/server/server_http"
@@ -86,10 +87,10 @@ func main() {
 	//}
 
 	starters := []starter.Starter{
-		{auth_stub.Starter(), common.Map{"interface_key": string(auth_stub.InterfaceKey)}},
-		// {auth_users_sqlite.Starter(), common.Map{"interface_key": string(auth_users_sqlite.InterfaceKey)}},
-		{auth_ecdsa.Starter(), common.Map{"interface_key": string(auth_ecdsa.InterfaceKey)}},
-		{auth_jwt.Starter(), common.Map{"interface_key": string(auth_jwt.InterfaceKey)}},
+		{auth_stub.Starter(), common.Map{joiner.InterfaceKeyFld: string(auth_stub.InterfaceKey)}},
+		// {auth_users_sqlite.Starter(), common.Map{joiner.InterfaceKeyFld: string(auth_users_sqlite.InterfaceKey)}},
+		{auth_ecdsa.Starter(), common.Map{joiner.InterfaceKeyFld: string(auth_ecdsa.InterfaceKey)}},
+		{auth_jwt.Starter(), common.Map{joiner.InterfaceKeyFld: string(auth_jwt.InterfaceKey)}},
 		{kv_sqlite.Starter(), nil},
 		{server_http_jschmhr.Starter(), nil},
 		{confidence_routes.Starter(), nil},

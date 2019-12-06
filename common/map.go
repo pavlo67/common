@@ -1,15 +1,22 @@
 package common
 
 import (
+	"reflect"
 	"strconv"
 )
 
 type Map map[string]interface{}
 
 func (p Map) StringDefault(key, defaultStr string) string {
+	if reflect.TypeOf(p[key]) != nil && reflect.TypeOf(p[key]).Kind() == reflect.String {
+		return reflect.ValueOf(p[key]).String()
+	}
+
 	switch value := p[key].(type) {
-	case string:
-		return value
+	//case string:
+	//	return value
+	case *string:
+		return *value
 	case int:
 		return strconv.Itoa(value)
 	case int64:
@@ -40,9 +47,15 @@ func (p Map) StringDefault(key, defaultStr string) string {
 }
 
 func (p Map) String(key string) (string, bool) {
+	if reflect.TypeOf(p[key]) != nil && reflect.TypeOf(p[key]).Kind() == reflect.String {
+		return reflect.ValueOf(p[key]).String(), true
+	}
+
 	switch value := p[key].(type) {
-	case string:
-		return value, true
+	//case string:
+	//	return value, true
+	case *string:
+		return *value, true
 	case int:
 		return strconv.Itoa(value), true
 	case int64:

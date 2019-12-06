@@ -1,4 +1,4 @@
-package workspace_server_http
+package data_tagged_server_http
 
 import (
 	"encoding/json"
@@ -19,7 +19,7 @@ import (
 
 // Save --------------------------------------------------------------------------------------
 
-var SaveEndpoint = server_http.Endpoint{Method: "POST", ParamNames: []string{"type"}, WorkerHTTP: Save}
+var SaveEndpoint = server_http.Endpoint{Method: "POST", PathParams: []string{"type"}, WorkerHTTP: Save}
 
 func Save(user *auth.User, params server_http.Params, req *http.Request) (server.Response, error) {
 	var item data.Item
@@ -44,7 +44,7 @@ func Save(user *auth.User, params server_http.Params, req *http.Request) (server
 		return server.ResponseRESTError(http.StatusBadRequest, errors.Errorf("ERROR on POST workspace/...Save: can't json.Unmarshal(%s): %s", itemJSON, err))
 	}
 
-	ids, err := workspaceOp.Save([]data.Item{item}, nil)
+	ids, err := dataTaggedOp.Save([]data.Item{item}, nil)
 	if err != nil {
 		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on POST workspace/...Save: %s", err))
 	}
@@ -58,7 +58,7 @@ func Save(user *auth.User, params server_http.Params, req *http.Request) (server
 
 // Read --------------------------------------------------------------------------------------
 
-var ReadEndpoint = server_http.Endpoint{Method: "GET", ParamNames: []string{"type"}, WorkerHTTP: Read}
+var ReadEndpoint = server_http.Endpoint{Method: "GET", PathParams: []string{"type"}, QueryParams: []string{"id"}, WorkerHTTP: Read}
 
 func Read(user *auth.User, params server_http.Params, req *http.Request) (server.Response, error) {
 	var details interface{}
@@ -74,7 +74,7 @@ func Read(user *auth.User, params server_http.Params, req *http.Request) (server
 	queryParams := req.URL.Query()
 	id := common.ID(queryParams.Get("id"))
 
-	item, err := workspaceOp.Read(id, nil)
+	item, err := dataTaggedOp.Read(id, nil)
 	if err == common.ErrNotFound {
 		return server.ResponseRESTError(http.StatusNotFound, errors.Errorf("ERROR on GET workspace/...Read: not found item with id = %s", id))
 	} else if err != nil {
@@ -82,7 +82,7 @@ func Read(user *auth.User, params server_http.Params, req *http.Request) (server
 	}
 
 	item.Details = details
-	err = workspaceOp.Details(item, item.Details)
+	err = dataTaggedOp.Details(item, item.Details)
 	if err != nil {
 		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on GET workspace/...Read: ", err))
 	}
@@ -93,17 +93,17 @@ func Read(user *auth.User, params server_http.Params, req *http.Request) (server
 // l.Infof("item: %#v", item)
 // l.Infof("details!!!: %#v", item.Details)
 
-// List --------------------------------------------------------------------------------------
+// ListFlow --------------------------------------------------------------------------------------
 
-var ListEndpoint = server_http.Endpoint{Method: "GET", ParamNames: nil, WorkerHTTP: List}
+var ListEndpoint = server_http.Endpoint{Method: "GET", PathParams: nil, WorkerHTTP: List}
 
 func List(user *auth.User, _ server_http.Params, req *http.Request) (server.Response, error) {
-	items, err := workspaceOp.List(nil, nil)
+	items, err := dataTaggedOp.List(nil, nil)
 
 	l.Infof("%#v", items)
 
 	if err != nil {
-		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on GET workspace/...List: ", err))
+		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on GET workspace/...ListFlow: ", err))
 	}
 
 	return server.ResponseRESTOk(items)
@@ -111,13 +111,13 @@ func List(user *auth.User, _ server_http.Params, req *http.Request) (server.Resp
 
 // Read --------------------------------------------------------------------------------------
 
-var RemoveEndpoint = server_http.Endpoint{Method: "DELETE", ParamNames: nil, WorkerHTTP: Remove}
+var RemoveEndpoint = server_http.Endpoint{Method: "DELETE", PathParams: nil, QueryParams: []string{"id"}, WorkerHTTP: Remove}
 
 func Remove(user *auth.User, params server_http.Params, req *http.Request) (server.Response, error) {
 	queryParams := req.URL.Query()
 	id := common.ID(queryParams.Get("id"))
 
-	err := workspaceOp.Remove(id, nil)
+	err := dataTaggedOp.Remove(id, nil)
 	if err != nil {
 		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on DELETE workspace/...Remove: ", err))
 	}

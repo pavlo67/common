@@ -5,6 +5,8 @@ import (
 
 	"github.com/pkg/errors"
 
+	"strconv"
+
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/joiner"
@@ -39,7 +41,7 @@ func (ss *workspaceStarter) Init(cfg *config.Config, lCommon logger.Operator, op
 		errs = append(errs, fmt.Errorf("no logger for %s:-(", Name))
 	}
 
-	// interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(server_http.InterfaceKey)))
+	// interfaceKey = joiner.InterfaceKey(options.StringDefault(joiner.InterfaceKeyFld, string(server_http.InterfaceKey)))
 
 	return nil, errs.Err()
 }
@@ -59,7 +61,10 @@ func (ss *workspaceStarter) Run(joinerOp joiner.Operator) error {
 	//	return errors.Errorf("no workspace.Operator with key %s", workspace.InterfaceKey)
 	//}
 
-	InitEndpoints(srvOp)
+	srvPort, ok := joinerOp.Interface(server_http.PortInterfaceKey).(int)
+	if !ok {
+		return errors.Errorf("no server_http.Port with key %s", server_http.PortInterfaceKey)
+	}
 
-	return nil
+	return InitEndpoints(":"+strconv.Itoa(srvPort), srvOp)
 }
