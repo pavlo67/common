@@ -12,7 +12,6 @@ import (
 	"github.com/pavlo67/workshop/common/crud"
 	"github.com/pavlo67/workshop/components/data"
 	"github.com/pavlo67/workshop/components/flow"
-	"github.com/pavlo67/workshop/components/importer"
 	"github.com/pavlo67/workshop/components/tagger"
 )
 
@@ -41,25 +40,30 @@ func (item *Item) GetData() (*data.Item, error) {
 		sourceTime = *feedItem.PublishedParsed
 	}
 
+	status := crud.Status{CreatedAt: sourceTime}
+
 	var embedded []data.Item
 	if strings.TrimSpace(feedItem.Link) != "" {
 		embedded = append(embedded, data.Item{
-			URL: importer.ImportedHREF + feedItem.Link,
+			URL:    feedItem.Link,
+			Status: status,
 		})
 	}
 
 	if feedItem.Image != nil {
 		embedded = append(embedded, data.Item{
-			URL:   importer.ImportedHREF + feedItem.Image.URL,
-			Title: feedItem.Image.Title,
+			URL:    feedItem.Image.URL,
+			Title:  feedItem.Image.Title,
+			Status: status,
 		})
 	}
 
 	if len(feedItem.Enclosures) > 0 {
 		for _, p := range feedItem.Enclosures {
 			embedded = append(embedded, data.Item{
-				URL:   importer.ImportedHREF + p.URL,
-				Title: p.Type + ": " + p.Length,
+				URL:    p.URL,
+				Title:  p.Type + ": " + p.Length,
+				Status: status,
 			})
 		}
 	}
@@ -77,7 +81,7 @@ func (item *Item) GetData() (*data.Item, error) {
 		Embedded: embedded,
 		Tags:     tags,
 		Details:  feedItem.Content,
-		Status:   crud.Status{CreatedAt: item.sourceTime},
+		Status:   status,
 		Origin: flow.Origin{
 			Source: item.sourceURL,
 			Key:    originalID,

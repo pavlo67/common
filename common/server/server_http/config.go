@@ -30,7 +30,7 @@ func (c Config) Swagger2(host string) ([]byte, error) {
 	paths := map[string]map[string]map[string]interface{}{}
 
 	for _, ep := range c.Endpoints {
-		path := ep.PathTemplateBraced(ep.Path)
+		path := c.Prefix + ep.PathTemplateBraced(ep.Path)
 		method := strings.ToLower(ep.Method)
 
 		epDescr := map[string]interface{}{

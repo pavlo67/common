@@ -1,5 +1,5 @@
 import home      from './home/route';
-import workspace from '../../workspace/_vue/route';
+import workspace from '../../workspace/data_vue/route';
 import flow      from '../../workspace/flow_vue/route';
 
 let routes = [

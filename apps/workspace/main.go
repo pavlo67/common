@@ -15,18 +15,18 @@ import (
 	"github.com/pavlo67/workshop/common/libraries/encodelib"
 	"github.com/pavlo67/workshop/common/libraries/filelib"
 	"github.com/pavlo67/workshop/common/logger"
+	"github.com/pavlo67/workshop/common/server/server_http"
 	"github.com/pavlo67/workshop/common/server/server_http/server_http_jschmhr"
 	"github.com/pavlo67/workshop/common/starter"
 
 	"github.com/pavlo67/workshop/components/data/data_sqlite"
+	"github.com/pavlo67/workshop/components/data/data_tagged"
+	"github.com/pavlo67/workshop/components/data/data_tagged/data_tagged_server_http"
 	"github.com/pavlo67/workshop/components/flow"
+	"github.com/pavlo67/workshop/components/flow/flow_tagged/flow_tagged_server_http"
 	"github.com/pavlo67/workshop/components/tagger/tagger_sqlite"
 
 	"github.com/pavlo67/workshop/apps/workspace/routes"
-	"github.com/pavlo67/workshop/common/server/server_http"
-	"github.com/pavlo67/workshop/components/data/data_tagged"
-	"github.com/pavlo67/workshop/components/data/data_tagged/data_tagged_server_http"
-	"github.com/pavlo67/workshop/components/flow/flow_tagged/flow_tagged_server_http"
 )
 
 var (

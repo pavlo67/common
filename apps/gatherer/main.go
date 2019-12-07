@@ -96,9 +96,9 @@ func main() {
 	}
 	defer joiner.CloseAll()
 
-	dataOp, ok := joiner.Interface(data.InterfaceKey).(data.Operator)
+	dataOp, ok := joiner.Interface(flow.InterfaceKey).(data.Operator)
 	if !ok {
-		l.Fatalf("no data.Operator with key %s", data.InterfaceKey)
+		l.Fatalf("no data.Operator with key %s", flow.InterfaceKey)
 	}
 
 	task, err := importer_task.New(dataOp)

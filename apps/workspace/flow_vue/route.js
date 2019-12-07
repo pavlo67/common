@@ -1,3 +1,5 @@
+import {init} from './Flow.vue';
+
 export default {
   path: '/flow',
   name: 'flow',
@@ -5,5 +7,6 @@ export default {
   // this generates a separate chunk (about.[hash].js) for this route
   // which is lazy-loaded when the route is visited.
   component: () => import(/* webpackChunkName: "flow" */ './Flow.vue'),
-  title: 'новини'
+  title: 'новини',
+  init,
 };

@@ -1,11 +1,6 @@
 <template>
-    <div id="workspace">
-
-        <div>
-            <b>Мій каталог</b>
-        </div>
-
-        &nbsp;
+    <div id="data">
+        <b>Мій каталог</b>
 
         <div v-for="item in dataItems">
             <span v-html="announce(item)" class="announce"></span><br>&nbsp;
@@ -75,7 +70,7 @@
         color: blue;
         font-size: xx-small;
     }
-    #workspace {
+    #data {
         padding: 0px 10px 10px 10px;
         text-align: left;
     }

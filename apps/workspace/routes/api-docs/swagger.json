@@ -5,7 +5,7 @@
   "version": "0.0.1"
  },
  "paths": {
-  "/v1/flow": {
+  "/workspace/v1/flow": {
    "get": {
     "operationId": "flow",
     "produces": [
@@ -16,7 +16,7 @@
     ]
    }
   },
-  "/v1/list": {
+  "/workspace/v1/list": {
    "get": {
     "operationId": "list",
     "produces": [
@@ -27,7 +27,7 @@
     ]
    }
   },
-  "/v1/read/{type}": {
+  "/workspace/v1/read/{type}": {
    "get": {
     "operationId": "read",
     "parameters": [
@@ -54,7 +54,7 @@
     ]
    }
   },
-  "/v1/remove": {
+  "/workspace/v1/remove": {
    "delete": {
     "operationId": "remove",
     "parameters": [
@@ -74,7 +74,7 @@
     ]
    }
   },
-  "/v1/save/{type}": {
+  "/workspace/v1/save/{type}": {
    "post": {
     "operationId": "save",
     "parameters": [
