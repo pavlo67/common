@@ -12,7 +12,7 @@
 
 
 <script>
-  import b from '../../libraries.js/basis';
+  import b from '../../components.js/basis';
 
   export default {
     name: 'Workspace',

@@ -26,7 +26,7 @@ type Swagger map[string]interface{}
 
 // type SwaggerEndpoint struct {}
 
-func (c Config) Swagger2(host string) ([]byte, error) {
+func (c Config) Swagger2(port string) ([]byte, error) {
 	paths := map[string]map[string]map[string]interface{}{}
 
 	for _, ep := range c.Endpoints {
@@ -105,7 +105,7 @@ func (c Config) Swagger2(host string) ([]byte, error) {
 		},
 		// "basePath": c.Prefix,
 		"schemes": []string{"http", "https"},
-		"host":    host,
+		"port":    port,
 		"paths":   paths,
 	}
 

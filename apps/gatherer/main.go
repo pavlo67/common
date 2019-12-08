@@ -16,10 +16,16 @@ import (
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/starter"
 
+	"github.com/pavlo67/workshop/apps/gatherer/fl_routes"
+	"github.com/pavlo67/workshop/common/auth/auth_ecdsa"
 	"github.com/pavlo67/workshop/common/scheduler"
+	"github.com/pavlo67/workshop/common/server/server_http"
+	"github.com/pavlo67/workshop/common/server/server_http/server_http_jschmhr"
 	"github.com/pavlo67/workshop/components/data"
 	"github.com/pavlo67/workshop/components/data/data_sqlite"
+	"github.com/pavlo67/workshop/components/data/data_tagged"
 	"github.com/pavlo67/workshop/components/flow"
+	"github.com/pavlo67/workshop/components/flow/flow_tagged/flow_tagged_server_http"
 	"github.com/pavlo67/workshop/components/importer/importer_task"
 	"github.com/pavlo67/workshop/components/tagger/tagger_sqlite"
 )
@@ -81,14 +87,21 @@ func main() {
 	starters := []starter.Starter{
 		{control.Starter(), nil},
 		{scheduler.Starter(), nil},
+		{auth_ecdsa.Starter(), nil},
+		{server_http_jschmhr.Starter(), common.Map{"port": cfgEnvs["gatherer_port"]}},
 
 		{tagger_sqlite.Starter(), nil},
+
 		{data_sqlite.Starter(), common.Map{joiner.InterfaceKeyFld: flow.InterfaceKey, "table": flow.CollectionDefault}},
+		{data_tagged.Starter(), common.Map{joiner.InterfaceKeyFld: flow.TaggedInterfaceKey, "data_key": flow.InterfaceKey}},
+		{flow_tagged_server_http.Starter(), nil},
+
+		{fl_routes.Starter(), nil},
 
 		{importer_task.Starter(), nil},
 	}
 
-	label := "GATHERER CLI BUILD"
+	label := "GATHERER/SQLITE CLI BUILD"
 
 	joiner, err := starter.Run(starters, cfg, os.Args[1:], label)
 	if err != nil {
@@ -106,5 +119,16 @@ func main() {
 		l.Fatal(err)
 	}
 
-	scheduler.Run(time.Hour, false, task)
+	go scheduler.Run(time.Hour, false, task)
+
+	srvOp, ok := joiner.Interface(server_http.InterfaceKey).(server_http.Operator)
+	if !ok {
+		l.Fatalf("no server_http.Operator with key %s", server_http.InterfaceKey)
+	}
+
+	err = srvOp.Start()
+	if err != nil {
+		l.Error(err)
+	}
+
 }

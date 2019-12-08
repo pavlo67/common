@@ -5,8 +5,8 @@ import './ecosystem/registerServiceWorker';  // import store from './ecosystem/s
 
 import routes from './parts';
 
-import swagger from '../../workspace/routes/api-docs/swagger';
-import swaggerConvertor from './lib/swagger_convertor';
+import swagger from '../../workspace/ws_routes/api-docs/swagger';
+import swaggerConvertor from '../../components.js/swagger_convertor';
 
 let endpoints = swaggerConvertor(swagger);
 

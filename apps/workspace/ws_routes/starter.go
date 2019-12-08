@@ -1,4 +1,4 @@
-package routes
+package ws_routes
 
 import (
 	"fmt"

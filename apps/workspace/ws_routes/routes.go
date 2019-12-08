@@ -1,4 +1,4 @@
-package routes
+package ws_routes
 
 import (
 	"github.com/pavlo67/workshop/common/server/server_http"
@@ -43,5 +43,5 @@ func InitEndpoints(host string, srvOp server_http.Operator) error {
 	if err != nil {
 		return err
 	}
-	return srvOp.HandleFiles("swagger", srvCfg.Prefix+"api-docs/*filepath", server_http.StaticPath{LocalPath: swaggerPath, MIMEType: nil})
+	return srvOp.HandleFiles("swagger", srvCfg.Prefix+"/api-docs/*filepath", server_http.StaticPath{LocalPath: swaggerPath, MIMEType: nil})
 }

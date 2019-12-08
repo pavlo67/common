@@ -20,7 +20,7 @@
 
 
 <script>
-    import b from '../../libraries.js/basis';
+    import b from '../../components.js/basis';
 
     let cfg = {};
 

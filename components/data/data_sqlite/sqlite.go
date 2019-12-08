@@ -99,14 +99,19 @@ func NewData(access config.Access, table string, interfaceKey joiner.InterfaceKe
 	return &dataOp, &dataOp, nil
 }
 
-func sqlList(table, condition string, _ *crud.GetOptions) string {
+func sqlList(table, condition string, options *crud.GetOptions) string {
 	if strings.TrimSpace(condition) != "" {
 		condition = " WHERE " + condition
 	}
 
 	limit := " LIMIT 200"
 
-	return "SELECT " + fieldsToListStr + " FROM " + table + condition + " ORDER BY created_at DESC" + limit
+	order := "created_at DESC"
+	if options != nil && len(options.OrderBy) > 0 {
+		order = strings.Join(options.OrderBy, ", ")
+	}
+
+	return "SELECT " + fieldsToListStr + " FROM " + table + condition + " ORDER BY " + order + limit
 }
 
 func sqlCount(table, condition string, _ *crud.GetOptions) string {
@@ -312,6 +317,9 @@ const onList = "on dataSQLite.List()"
 
 func (dataOp *dataSQLite) List(term *selectors.Term, options *crud.GetOptions) ([]data.Item, error) {
 	condition, values, err := selectors_sql.Use(term)
+	if err != nil {
+		return nil, errors.Errorf(onList+"wrong selector (%#v): %s", term, err)
+	}
 
 	query := dataOp.sqlList
 	stm := dataOp.stmList
@@ -323,6 +331,8 @@ func (dataOp *dataSQLite) List(term *selectors.Term, options *crud.GetOptions) (
 			return nil, errors.Wrapf(err, onList+": can't db.Prepare(%s)", query)
 		}
 	}
+
+	l.Infof("%s / %#v\n%s", condition, values, query)
 
 	rows, err := stm.Query(values...)
 

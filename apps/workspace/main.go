@@ -26,7 +26,7 @@ import (
 	"github.com/pavlo67/workshop/components/flow/flow_tagged/flow_tagged_server_http"
 	"github.com/pavlo67/workshop/components/tagger/tagger_sqlite"
 
-	"github.com/pavlo67/workshop/apps/workspace/routes"
+	"github.com/pavlo67/workshop/apps/workspace/ws_routes"
 )
 
 var (
@@ -105,7 +105,7 @@ func main() {
 		{data_tagged.Starter(), common.Map{joiner.InterfaceKeyFld: flow.TaggedInterfaceKey, "data_key": flow.InterfaceKey}},
 		{flow_tagged_server_http.Starter(), nil},
 
-		{routes.Starter(), nil},
+		{ws_routes.Starter(), nil},
 	}
 
 	label := "WORKSPACE REST BUILD"
