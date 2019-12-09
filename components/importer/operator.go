@@ -2,6 +2,7 @@ package importer
 
 import (
 	"github.com/pavlo67/workshop/common/joiner"
+	"github.com/pavlo67/workshop/common/transport"
 
 	"time"
 
@@ -16,16 +17,18 @@ const InterfaceKey joiner.InterfaceKey = "importer"
 //var ErrBadItem = errors.New("bad item")
 //var ErrNilItem = errors.New("item is nil")
 
-type Series struct {
+type DataSeries struct {
 	URL       string
 	CreatedAt time.Time
 
-	Items []data.Item
+	Type  transport.DataType
+	Data  []data.Item
+	MaxID uint64
 }
 
 type Operator interface {
 	// Prepare opens import session with selected data source
 	// Init() error
 
-	Get(url string) (*Series, error)
+	Get(url string) (*DataSeries, error)
 }

@@ -54,10 +54,10 @@ func Load(url string, dataOp data.Operator) (int, int, int, error) {
 		return 0, 0, 0, errors.Errorf("no series from impOp.Get('%s', nil)", url)
 	}
 
-	numAll := len(series.Items)
+	numAll := len(series.Data)
 	var numProcessed, numNew int
 
-	for _, item := range series.Items {
+	for _, item := range series.Data {
 		var cnt uint64
 
 		numProcessed++
