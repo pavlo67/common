@@ -13,8 +13,8 @@ import (
 	"github.com/pavlo67/workshop/common/logger"
 )
 
-func Setup(conf *config.Config, starters []Starter, components []string, label string) error {
-	if conf == nil {
+func Setup(cfg *config.Config, starters []Starter, components []string, label string) error {
+	if cfg == nil {
 		return errors.New("no config data for starter.Setup()")
 	}
 
@@ -45,7 +45,7 @@ func Setup(conf *config.Config, starters []Starter, components []string, label s
 
 		log.Println("  ---------- setup component: ", c.Name(), "   -----------")
 
-		_, err := c.Init(conf, logger.Get(), c.Options)
+		_, err := c.Init(nil, cfg, logger.Get(), c.Options)
 		if err != nil {
 			return fmt.Errorf("error calling .Init() for component (%s): %s", c.Name(), err)
 		}

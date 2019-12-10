@@ -14,12 +14,12 @@ import (
 	"github.com/pavlo67/workshop/common/logger"
 )
 
-func StartComponent(c Starter, cfg *config.Config, args []string, joinerOp joiner.Operator) error {
+func StartComponent(c Starter, cfgCommon, cfg *config.Config, args []string, joinerOp joiner.Operator) error {
 	l := logger.Get()
 
 	name := c.Name()
 
-	if key, ok := c.Options.String(joiner.InterfaceKeyFld); ok {
+	if key, ok := c.Options.String("interface_key"); ok {
 		name += " / " + key
 	}
 
@@ -27,7 +27,7 @@ func StartComponent(c Starter, cfg *config.Config, args []string, joinerOp joine
 
 	startOptions := c.CorrectedOptions(ReadOptions(args))
 
-	info, err := c.Init(cfg, l, startOptions)
+	info, err := c.Init(cfgCommon, cfg, l, startOptions)
 	for _, i := range info {
 		log.Println(i)
 	}
@@ -49,7 +49,7 @@ func ReadOptions(args []string) common.Map {
 	return nil
 }
 
-func Run(starters []Starter, cfg *config.Config, args []string, label string) (joiner.Operator, error) {
+func Run(starters []Starter, cfgCommon, cfg *config.Config, args []string, label string) (joiner.Operator, error) {
 
 	if cfg == nil {
 		return nil, errors.New("no config data for starter.Prepare()")
@@ -59,7 +59,7 @@ func Run(starters []Starter, cfg *config.Config, args []string, label string) (j
 
 	joinerOp := joiner.New()
 	for _, c := range starters {
-		err := StartComponent(c, cfg, args, joinerOp)
+		err := StartComponent(c, cfgCommon, cfg, args, joinerOp)
 		if err != nil {
 			return joinerOp, err
 		}

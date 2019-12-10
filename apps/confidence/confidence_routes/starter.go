@@ -45,7 +45,7 @@ func (ss *confidenceStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *confidenceStarter) Init(cfg *config.Config, options common.Map) (info []common.Map, err error) {
+func (ss *confidenceStarter) Init(cfgCommon, cfg *config.Config, options common.Map) (info []common.Map, err error) {
 	Cfg = cfg
 
 	var errs common.Errors
@@ -55,7 +55,7 @@ func (ss *confidenceStarter) Init(cfg *config.Config, options common.Map) (info 
 		errs = append(errs, fmt.Errorf("no logger for %s:-(", Name))
 	}
 
-	// interfaceKey = joiner.InterfaceKey(options.StringDefault(joiner.InterfaceKeyFld, string(server_http.InterfaceKey)))
+	// interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(server_http.InterfaceKey)))
 
 	return nil, errs.Err()
 }

@@ -1,4 +1,4 @@
-package fl_routes
+package gatherer_routes
 
 import (
 	"github.com/pavlo67/workshop/common/server/server_http"

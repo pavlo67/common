@@ -33,11 +33,11 @@ func (ss *server_http_jschmhrStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *server_http_jschmhrStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
+func (ss *server_http_jschmhrStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	var errs common.Errors
 	l = lCommon
 
-	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault(joiner.InterfaceKeyFld, string(server_http.InterfaceKey)))
+	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(server_http.InterfaceKey)))
 	ss.portInterfaceKey = joiner.InterfaceKey(options.StringDefault("port_interface_key", string(server_http.PortInterfaceKey)))
 
 	var cfgServerHTTP server.Config

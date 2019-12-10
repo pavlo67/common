@@ -28,7 +28,7 @@ func (ts *taggerSQLiteStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ts *taggerSQLiteStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
+func (ts *taggerSQLiteStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	l = lCommon
 
 	cfgSQLite := config.Access{}
@@ -38,7 +38,7 @@ func (ts *taggerSQLiteStarter) Init(cfg *config.Config, lCommon logger.Operator,
 	}
 
 	ts.config = cfgSQLite
-	ts.interfaceKey = joiner.InterfaceKey(options.StringDefault(joiner.InterfaceKeyFld, string(tagger.InterfaceKey)))
+	ts.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(tagger.InterfaceKey)))
 	ts.cleanerInterfaceKey = joiner.InterfaceKey(options.StringDefault("cleaner_interface_key", string(tagger.CleanerInterfaceKey)))
 
 	// sqllib.CheckTables

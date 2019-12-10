@@ -72,6 +72,7 @@ func (st *schedulerTimeout) Run(taskID common.ID, interval time.Duration, startI
 
 	task.nextInterval, task.nextStartImmediately = interval, startImmediately
 	if !task.isRunning {
+		task.isRunning = true
 		go st.run(task)
 	}
 
@@ -83,7 +84,11 @@ func (st *schedulerTimeout) run(task *taskWithSignals) {
 		return
 	}
 
-	defer func() { task.isRunning = false }()
+	defer func() {
+		task.mutex.Lock()
+		task.isRunning = false
+		task.mutex.Unlock()
+	}()
 
 	var interval, prevInterval time.Duration
 	var timeScheduled time.Time
@@ -98,7 +103,6 @@ func (st *schedulerTimeout) run(task *taskWithSignals) {
 		task.mutex.Lock()
 		interval = task.nextInterval
 		startImmediately = task.nextStartImmediately
-		task.isRunning = true
 		task.nextStartImmediately = false
 		task.mutex.Unlock()
 
@@ -158,7 +162,7 @@ func (st *schedulerTimeout) run(task *taskWithSignals) {
 			showSheduledTime = true
 		}
 
-		// moving the sgeduled time
+		// moving the scheduled time
 
 		timeScheduled = timeScheduled.Add(interval)
 	}

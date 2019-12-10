@@ -32,7 +32,7 @@ func (ss *dataTaggedServerHTTPStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *dataTaggedServerHTTPStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
+func (ss *dataTaggedServerHTTPStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	var errs common.Errors
 
 	l = lCommon
@@ -40,7 +40,7 @@ func (ss *dataTaggedServerHTTPStarter) Init(cfg *config.Config, lCommon logger.O
 		errs = append(errs, fmt.Errorf("no logger for %s:-(", Name))
 	}
 
-	// interfaceKey = joiner.InterfaceKey(options.StringDefault(joiner.InterfaceKeyFld, string(server_http.InterfaceKey)))
+	// interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(server_http.InterfaceKey)))
 
 	return nil, errs.Err()
 }

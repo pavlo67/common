@@ -1,4 +1,4 @@
-package importer_task
+package gatherer_task
 
 import (
 	"github.com/pavlo67/workshop/common"
@@ -25,7 +25,7 @@ func (ts *importerTaskStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ts *importerTaskStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
+func (ts *importerTaskStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	l = lCommon
 
 	//var cfgSQLite config.Access
@@ -36,7 +36,7 @@ func (ts *importerTaskStarter) Init(cfg *config.Config, lCommon logger.Operator,
 	//
 	//ts.config = cfgSQLite
 	//ts.table, _ = options.String("table")
-	//ts.interfaceKey = joiner.InterfaceKey(options.StringDefault(joiner.InterfaceKeyFld, string(data.InterfaceKey)))
+	//ts.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(data.InterfaceKey)))
 
 	return nil, nil
 }

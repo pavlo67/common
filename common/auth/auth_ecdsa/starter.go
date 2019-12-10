@@ -28,12 +28,12 @@ func (ss *identity_ecdsa) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *identity_ecdsa) Init(conf *config.Config, lCommon logger.Operator, options common.Map) (info []common.Map, err error) {
+func (ss *identity_ecdsa) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) (info []common.Map, err error) {
 	l = lCommon
 
 	// var errs basis.Errors
 
-	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault(joiner.InterfaceKeyFld, string(auth.InterfaceKey)))
+	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(auth.InterfaceKey)))
 
 	return nil, nil
 }

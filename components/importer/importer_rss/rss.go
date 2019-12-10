@@ -31,7 +31,7 @@ type rss struct {
 
 const onGet = "on rss.Get(): "
 
-func (r *rss) Get(feedURL string) (*importer.Series, error) {
+func (r *rss) Get(feedURL string) (*importer.DataSeries, error) {
 	fp := gofeed.NewParser()
 	feed, err := fp.ParseURL(feedURL)
 
@@ -64,7 +64,7 @@ func (r *rss) Get(feedURL string) (*importer.Series, error) {
 
 	now := time.Now()
 
-	series := importer.Series{URL: feedURL, CreatedAt: now}
+	series := importer.DataSeries{URL: feedURL, CreatedAt: now}
 
 	for _, feedItem := range feed.Items {
 		item := &Item{
@@ -82,7 +82,7 @@ func (r *rss) Get(feedURL string) (*importer.Series, error) {
 			continue
 		}
 
-		series.Items = append(series.Items, *dataItem)
+		series.Data = append(series.Data, *dataItem)
 	}
 
 	return &series, nil

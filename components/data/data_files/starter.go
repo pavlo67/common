@@ -31,7 +31,7 @@ func (nms *contentFilesStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (nms *contentFilesStarter) Init(conf *config.Config, options common.Map) (info []common.Map, err error) {
+func (nms *contentFilesStarter) Init(cfgCommon, cfg *config.Config, options common.Map) (info []common.Map, err error) {
 	l = logger.Get()
 
 	var ok bool
@@ -53,7 +53,7 @@ func (nms *contentFilesStarter) Init(conf *config.Config, options common.Map) (i
 		return nil, errors.New("no marshaler for contentFilesStarter.Init()")
 	}
 
-	nms.interfaceKey = joiner.InterfaceKey(options.StringDefault(joiner.InterfaceKeyFld, string(structura.InterfaceKey)))
+	nms.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(structura.InterfaceKey)))
 
 	return nil, nil
 }

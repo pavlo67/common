@@ -10,15 +10,15 @@ import (
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/control"
-	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/libraries/encodelib"
 	"github.com/pavlo67/workshop/common/libraries/filelib"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/starter"
 
-	"github.com/pavlo67/workshop/apps/gatherer/fl_routes"
+	"github.com/pavlo67/workshop/apps/gatherer/gatherer_routes"
 	"github.com/pavlo67/workshop/common/auth/auth_ecdsa"
 	"github.com/pavlo67/workshop/common/scheduler"
+	"github.com/pavlo67/workshop/common/scheduler/sheduler_timeout"
 	"github.com/pavlo67/workshop/common/server/server_http"
 	"github.com/pavlo67/workshop/common/server/server_http/server_http_jschmhr"
 	"github.com/pavlo67/workshop/components/data"
@@ -26,8 +26,7 @@ import (
 	"github.com/pavlo67/workshop/components/data/data_tagged"
 	"github.com/pavlo67/workshop/components/flow"
 	"github.com/pavlo67/workshop/components/flow/flow_tagged/flow_tagged_server_http"
-	"github.com/pavlo67/workshop/components/importer/importer_task"
-	"github.com/pavlo67/workshop/components/tagger/tagger_sqlite"
+	"github.com/pavlo67/workshop/components/importer/gatherer_task"
 )
 
 var (
@@ -47,79 +46,101 @@ func main() {
 		return
 	}
 
-	currentPath := filelib.CurrentPath()
-
-	//manifest, err := manager.ReadManifest(currentPath)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//if manifest == nil {
-	//	log.Fatalf("can't load manifest, no data!")
-	//}
-	//for _, key := range manifest.Requested {
-	//	if os.Getenv(key) == "" {
-	//		log.Fatalf("no environment value for key '%s'", key)
-	//	}
-	//}
+	// logger
 
 	l, err := logger.Init(logger.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// getting config environments
+
+	currentPath := filelib.CurrentPath()
 	configEnv, ok := os.LookupEnv("ENV")
 	if !ok {
 		configEnv = "local"
 	}
-	configPath := currentPath + "../../environments/" + configEnv + ".yaml"
 
-	cfg, err := config.Get(configPath, encodelib.MarshalerYAML)
+	// common config
+
+	configCommonPath := currentPath + "../../environments/common." + configEnv + ".yaml"
+	cfgCommon, err := config.Get(configCommonPath, encodelib.MarshalerYAML)
 	if err != nil {
 		l.Fatal(err)
 	}
-
 	var cfgEnvs map[string]string
-	err = cfg.Value("envs", &cfgEnvs)
+	err = cfgCommon.Value("envs", &cfgEnvs)
 	if err != nil {
 		l.Fatal(err)
 	}
 
-	starters := []starter.Starter{
-		{control.Starter(), nil},
-		{scheduler.Starter(), nil},
-		{auth_ecdsa.Starter(), nil},
-		{server_http_jschmhr.Starter(), common.Map{"port": cfgEnvs["gatherer_port"]}},
+	// gatherer config
 
-		{tagger_sqlite.Starter(), nil},
-
-		{data_sqlite.Starter(), common.Map{joiner.InterfaceKeyFld: flow.InterfaceKey, "table": flow.CollectionDefault}},
-		{data_tagged.Starter(), common.Map{joiner.InterfaceKeyFld: flow.TaggedInterfaceKey, "data_key": flow.InterfaceKey}},
-		{flow_tagged_server_http.Starter(), nil},
-
-		{fl_routes.Starter(), nil},
-
-		{importer_task.Starter(), nil},
+	configGathererPath := currentPath + "../../environments/gatherer." + configEnv + ".yaml"
+	cfgGatherer, err := config.Get(configGathererPath, encodelib.MarshalerYAML)
+	if err != nil {
+		l.Fatal(err)
 	}
+
+	var cfgSQLite config.Access
+	err = cfgGatherer.Value("sqlite", &cfgSQLite)
+	if err != nil {
+		l.Fatal(err)
+	}
+
+	// running starters
 
 	label := "GATHERER/SQLITE CLI BUILD"
 
-	joiner, err := starter.Run(starters, cfg, os.Args[1:], label)
+	starters := []starter.Starter{
+		{control.Starter(), nil},
+
+		{data_sqlite.Starter(), common.Map{"table": flow.CollectionDefault, "interface_key": flow.InterfaceKey, "no_tagger": true}},
+		{data_tagged.Starter(), common.Map{"data_key": flow.InterfaceKey, "interface_key": flow.TaggedInterfaceKey, "no_tagger": true}},
+		{flow_tagged_server_http.Starter(), nil},
+
+		{auth_ecdsa.Starter(), nil},
+		{server_http_jschmhr.Starter(), common.Map{"port": cfgEnvs["gatherer_port"]}},
+		{gatherer_routes.Starter(), nil},
+
+		{scheduler_timeout.Starter(), nil},
+		{gatherer_task.Starter(), nil},
+	}
+
+	joiner, err := starter.Run(starters, cfgCommon, cfgGatherer, os.Args[1:], label)
 	if err != nil {
 		l.Fatal(err)
 	}
 	defer joiner.CloseAll()
+
+	// scheduling importer task
 
 	dataOp, ok := joiner.Interface(flow.InterfaceKey).(data.Operator)
 	if !ok {
 		l.Fatalf("no data.Operator with key %s", flow.InterfaceKey)
 	}
 
-	task, err := importer_task.New(dataOp)
+	task, err := gatherer_task.New(dataOp)
 	if err != nil {
 		l.Fatal(err)
 	}
 
-	go scheduler.Run(time.Hour, false, task)
+	schOp, ok := joiner.Interface(scheduler.InterfaceKey).(scheduler.Operator)
+	if !ok {
+		l.Fatalf("no scheduler.Operator with key %s", scheduler.InterfaceKey)
+	}
+
+	taskID, err := schOp.Init(task)
+	if err != nil {
+		l.Fatalf("can't schOp.Init(%#v): %s", task, err)
+	}
+
+	err = schOp.Run(taskID, time.Hour, false)
+	if err != nil {
+		l.Fatalf("can't schOp.Run(%s, time.Hour, false): %s", taskID, err)
+	}
+
+	// http_server
 
 	srvOp, ok := joiner.Interface(server_http.InterfaceKey).(server_http.Operator)
 	if !ok {
@@ -132,3 +153,16 @@ func main() {
 	}
 
 }
+
+//manifest, err := manager.ReadManifest(currentPath)
+//if err != nil {
+//	log.Fatal(err)
+//}
+//if manifest == nil {
+//	log.Fatalf("can't load manifest, no data!")
+//}
+//for _, key := range manifest.Requested {
+//	if os.Getenv(key) == "" {
+//		log.Fatalf("no environment value for key '%s'", key)
+//	}
+//}

@@ -31,7 +31,7 @@ func (cm *dataMongoDBStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (cm *dataMongoDBStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
+func (cm *dataMongoDBStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	l = lCommon
 
 	cfgMongoDB := config.Access{}
@@ -41,7 +41,7 @@ func (cm *dataMongoDBStarter) Init(cfg *config.Config, lCommon logger.Operator, 
 	}
 
 	cm.config = cfgMongoDB
-	cm.interfaceKey = joiner.InterfaceKey(options.StringDefault(joiner.InterfaceKeyFld, string(data.InterfaceKey)))
+	cm.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(data.InterfaceKey)))
 
 	return nil, nil
 }

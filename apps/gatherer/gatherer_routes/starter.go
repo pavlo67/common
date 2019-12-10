@@ -1,4 +1,4 @@
-package fl_routes
+package gatherer_routes
 
 import (
 	"fmt"
@@ -33,7 +33,7 @@ func (ss *workspaceStarter) Name() string {
 	return logger.GetCallInfo().PackageName + "/" + Name
 }
 
-func (ss *workspaceStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
+func (ss *workspaceStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	var errs common.Errors
 
 	l = lCommon
@@ -41,7 +41,7 @@ func (ss *workspaceStarter) Init(cfg *config.Config, lCommon logger.Operator, op
 		errs = append(errs, fmt.Errorf("no logger for %s:-(", Name))
 	}
 
-	// interfaceKey = joiner.InterfaceKey(options.StringDefault(joiner.InterfaceKeyFld, string(server_http.InterfaceKey)))
+	// interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(server_http.InterfaceKey)))
 
 	return nil, errs.Err()
 }

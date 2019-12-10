@@ -11,7 +11,6 @@ import (
 	"github.com/pavlo67/workshop/common/auth/auth_ecdsa"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/control"
-	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/libraries/encodelib"
 	"github.com/pavlo67/workshop/common/libraries/filelib"
 	"github.com/pavlo67/workshop/common/logger"
@@ -101,8 +100,8 @@ func main() {
 		{data_tagged.Starter(), nil},
 		{data_tagged_server_http.Starter(), nil},
 
-		{data_sqlite.Starter(), common.Map{joiner.InterfaceKeyFld: flow.InterfaceKey, "table": flow.CollectionDefault}},
-		{data_tagged.Starter(), common.Map{joiner.InterfaceKeyFld: flow.TaggedInterfaceKey, "data_key": flow.InterfaceKey}},
+		{data_sqlite.Starter(), common.Map{"interface_key": flow.InterfaceKey, "table": flow.CollectionDefault}},
+		{data_tagged.Starter(), common.Map{"interface_key": flow.TaggedInterfaceKey, "data_key": flow.InterfaceKey}},
 		{flow_tagged_server_http.Starter(), nil},
 
 		{ws_routes.Starter(), nil},

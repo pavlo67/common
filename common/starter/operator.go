@@ -12,7 +12,7 @@ type Operator interface {
 	// Title returns started component name
 	Name() string
 
-	Init(conf *config.Config, l logger.Operator, options common.Map) (info []common.Map, err error)
+	Init(cfgCommon, cfg *config.Config, l logger.Operator, options common.Map) (info []common.Map, err error)
 
 	// Setup sets up the component
 	Setup() error

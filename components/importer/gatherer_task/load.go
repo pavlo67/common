@@ -1,4 +1,4 @@
-package importer_task
+package gatherer_task
 
 import (
 	"github.com/pkg/errors"

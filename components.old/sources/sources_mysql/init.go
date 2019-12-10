@@ -42,11 +42,11 @@ func (ss *sources_mysqlStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *sources_mysqlStarter) Prepare(conf *config.Config, params basis.Info) error {
+func (ss *sources_mysqlStarter) Prepare(cfgCommon, cfg *config.Config, params basis.Info) error {
 
 	l = logger.zapGet()
 
-	ss.interfaceKey = joiner.InterfaceKey(params.StringDefault(joiner.InterfaceKeyFld, string(sources.InterfaceKey)))
+	ss.interfaceKey = joiner.InterfaceKey(params.StringDefault("interface_key", string(sources.InterfaceKey)))
 
 	if ss.addCRUD {
 		ss.interfaceKeyCRUD = joiner.InterfaceKey(params.StringDefault("interface_key_crud", string(sources.InterfaceKeyCRUD)))

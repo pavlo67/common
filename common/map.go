@@ -85,6 +85,45 @@ func (p Map) String(key string) (string, bool) {
 	return "", false
 }
 
+func (p Map) Bool(key string) (bool, bool) {
+	if reflect.TypeOf(p[key]) != nil && reflect.TypeOf(p[key]).Kind() == reflect.Bool {
+		return reflect.ValueOf(p[key]).Bool(), true
+	}
+
+	switch value := p[key].(type) {
+	case string:
+		return value != "", true
+	case *string:
+		return *value != "", true
+	case int:
+		return value != 0, true
+	case int64:
+		return value != 0, true
+	case int32:
+		return value != 0, true
+	case int16:
+		return value != 0, true
+	case int8:
+		return value != 0, true
+	case uint:
+		return value != 0, true
+	case uint64:
+		return value != 0, true
+	case uint32:
+		return value != 0, true
+	case uint16:
+		return value != 0, true
+	case uint8:
+		return value != 0, true
+	case float32:
+		return value != 0, true
+	case float64:
+		return value != 0, true
+	}
+
+	return false, false
+}
+
 func (p Map) Int(key string) (int, bool) {
 	switch value := p[key].(type) {
 	case string:

@@ -8,8 +8,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-const InterfaceKeyFld = "interface_key"
-
 type InterfaceKey string
 
 type Component struct {

@@ -28,12 +28,12 @@ func (ss *identity_jwtStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *identity_jwtStarter) Init(conf *config.Config, options common.Map) (info []common.Map, err error) {
+func (ss *identity_jwtStarter) Init(cfgCommon, cfg *config.Config, options common.Map) (info []common.Map, err error) {
 	l = logger.Get()
 
 	// var errs basis.Errors
 
-	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault(joiner.InterfaceKeyFld, string(auth.InterfaceKey)))
+	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(auth.InterfaceKey)))
 
 	return nil, nil
 }

@@ -33,7 +33,7 @@ func (ss *flowTaggedServerHTTPStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *flowTaggedServerHTTPStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
+func (ss *flowTaggedServerHTTPStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	var errs common.Errors
 
 	l = lCommon

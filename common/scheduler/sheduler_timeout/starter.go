@@ -28,9 +28,9 @@ func (ss *schedulerStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *schedulerStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
+func (ss *schedulerStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	l = lCommon
-	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault(joiner.InterfaceKeyFld, string(scheduler.InterfaceKey)))
+	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(scheduler.InterfaceKey)))
 	return nil, nil
 }
 

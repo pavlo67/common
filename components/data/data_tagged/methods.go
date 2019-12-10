@@ -26,9 +26,6 @@ func New(dataOp data.Operator, taggerOp tagger.Operator) (Operator, crud.Cleaner
 	if dataOp == nil {
 		return nil, nil, errors.New(onNewWorkspace + ": no data.Operatoe")
 	}
-	if taggerOp == nil {
-		return nil, nil, errors.New(onNewWorkspace + ": no tagger.Operatoe")
-	}
 
 	wsOp := ws{
 		Operator: dataOp,
@@ -40,6 +37,10 @@ func New(dataOp data.Operator, taggerOp tagger.Operator) (Operator, crud.Cleaner
 const onListWithTag = "on ws.ListWithTag(): "
 
 func (wsOp *ws) ListWithTag(selector *selectors.Term, tag tagger.Tag, options *crud.GetOptions) ([]data.Item, error) {
+	if wsOp.Tagger == nil {
+		return nil, errors.New(onListWithTag + ": no tagger.Operator")
+	}
+
 	_, err := wsOp.IndexWithTag(tag, options)
 	if err != nil {
 		return nil, errors.Wrap(err, onListWithTag)

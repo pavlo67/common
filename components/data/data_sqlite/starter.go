@@ -24,13 +24,15 @@ type dataSQLiteStarter struct {
 	config       config.Access
 	table        string
 	interfaceKey joiner.InterfaceKey
+
+	noTagger bool
 }
 
 func (ts *dataSQLiteStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ts *dataSQLiteStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
+func (ts *dataSQLiteStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	l = lCommon
 
 	var cfgSQLite config.Access
@@ -41,7 +43,9 @@ func (ts *dataSQLiteStarter) Init(cfg *config.Config, lCommon logger.Operator, o
 
 	ts.config = cfgSQLite
 	ts.table, _ = options.String("table")
-	ts.interfaceKey = joiner.InterfaceKey(options.StringDefault(joiner.InterfaceKeyFld, string(data.InterfaceKey)))
+	ts.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(data.InterfaceKey)))
+
+	ts.noTagger, _ = options.Bool("no_tagger")
 
 	// sqllib.CheckTables
 
@@ -59,14 +63,20 @@ func (ts *dataSQLiteStarter) Setup() error {
 }
 
 func (ts *dataSQLiteStarter) Run(joinerOp joiner.Operator) error {
-	taggerOp, ok := joinerOp.Interface(tagger.InterfaceKey).(tagger.Operator)
-	if !ok {
-		return errors.Errorf("no tagger.Operator with key %s", tagger.InterfaceKey)
-	}
+	var ok bool
+	var taggerOp tagger.Operator
+	var cleanerOp crud.Cleaner
 
-	cleanerOp, ok := joinerOp.Interface(tagger.CleanerInterfaceKey).(crud.Cleaner)
-	if !ok {
-		return errors.Errorf("no tagger.Cleaner with key %s", tagger.InterfaceKey)
+	if !ts.noTagger {
+		taggerOp, ok = joinerOp.Interface(tagger.InterfaceKey).(tagger.Operator)
+		if !ok {
+			return errors.Errorf("no tagger.Operator with key %s", tagger.InterfaceKey)
+		}
+
+		cleanerOp, ok = joinerOp.Interface(tagger.CleanerInterfaceKey).(crud.Cleaner)
+		if !ok {
+			return errors.Errorf("no tagger.Cleaner with key %s", tagger.InterfaceKey)
+		}
 	}
 
 	dataOp, _, err := NewData(ts.config, ts.table, ts.interfaceKey, taggerOp, cleanerOp)
