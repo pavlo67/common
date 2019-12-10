@@ -2,6 +2,7 @@ package scheduler_timeout
 
 import (
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/pkg/errors"
@@ -12,16 +13,28 @@ import (
 
 func New() scheduler.Operator {
 	return &schedulerTimeout{
-		tasks: map[common.ID]scheduler.Task{},
+		tasks: map[common.ID]*taskWithSignals{},
+		mutex: &sync.RWMutex{},
 	}
 }
+
+var MaxSleep = time.Second * 3
 
 // implementation --------------------------------------------------------------------------------------
 
 var _ scheduler.Operator = &schedulerTimeout{}
 
+type taskWithSignals struct {
+	scheduler.Task
+	isRunning            bool
+	nextInterval         time.Duration
+	nextStartImmediately bool
+	mutex                *sync.Mutex
+}
+
 type schedulerTimeout struct {
-	tasks map[common.ID]scheduler.Task
+	tasks map[common.ID]*taskWithSignals
+	mutex *sync.RWMutex
 }
 
 func (st *schedulerTimeout) Init(task scheduler.Task) (common.ID, error) {
@@ -30,50 +43,107 @@ func (st *schedulerTimeout) Init(task scheduler.Task) (common.ID, error) {
 	}
 
 	id := common.ID(strconv.Itoa(len(st.tasks) + 1))
-	st.tasks[id] = &task
+
+	st.mutex.Lock()
+	st.tasks[id] = &taskWithSignals{
+		Task:  task,
+		mutex: &sync.Mutex{},
+	}
+	st.mutex.Unlock()
 
 	return id, nil
 }
 
 func (st *schedulerTimeout) Run(taskID common.ID, interval time.Duration, startImmediately bool) error {
+	st.mutex.RLock()
 	task := st.tasks[taskID]
+	st.mutex.RUnlock()
 
 	if task == nil {
 		return errors.Errorf("schedulerTimeout.tasks[%s] == nil", taskID)
 	}
 
-	now := time.Now()
-
-	if interval <= 0 {
-		if !startImmediately {
-			return errors.Errorf("schedulerTimeout: no action because interval = %d and startImmediately == false", interval)
-		}
-
-		err := task.Run(now)
-		if err != nil {
-			return errors.Errorf("on task(%s).Run(): %s", task.Name(), err)
-		}
-
-		return nil
+	if interval <= 0 && !startImmediately {
+		return errors.Errorf("schedulerTimeout: no action because interval = %d and startImmediately == false", interval)
 	}
 
-	delta := time.Duration(now.UnixNano() % int64(interval))
+	task.mutex.Lock()
+	defer task.mutex.Unlock()
 
+	task.nextInterval, task.nextStartImmediately = interval, startImmediately
+	if !task.isRunning {
+		go st.run(task)
+	}
+
+	return nil
+}
+
+func (st *schedulerTimeout) run(task *taskWithSignals) {
+	if task == nil {
+		return
+	}
+
+	defer func() { task.isRunning = false }()
+
+	var interval, prevInterval time.Duration
 	var timeScheduled time.Time
-
-	if startImmediately {
-		timeScheduled = now.Add(-delta)
-	} else {
-		timeScheduled = now.Add(interval - delta)
-	}
+	var startImmediately, showSheduledTime bool
 
 	for {
+
+		// check settings
+
+		prevInterval = interval
+
+		task.mutex.Lock()
+		interval = task.nextInterval
+		startImmediately = task.nextStartImmediately
+		task.isRunning = true
+		task.nextStartImmediately = false
+		task.mutex.Unlock()
+
+		now := time.Now()
+
+		// run immediately if it's necessary
+
+		if startImmediately {
+			err := task.Run(now)
+			if err != nil {
+				l.Errorf("on task(%s).Run(): %s", task.Name(), err)
+			}
+
+			prevInterval = 0 // to prevent double run in the loop
+		}
+
+		// running loop
+
+		if interval <= 0 {
+			return
+		}
+
+		if interval != prevInterval {
+			timeScheduled = now.Add(interval - time.Duration(now.UnixNano()%int64(interval)))
+			showSheduledTime = true
+		}
+
 		rest := timeScheduled.Sub(time.Now())
+
+		// slipping a while
+
 		if rest > 0 {
-			l.Infof("next task run scheduled on %s", timeScheduled.Format(time.RFC3339))
+			if rest > MaxSleep {
+				rest = MaxSleep
+			}
+
+			if showSheduledTime {
+				l.Infof("next task run scheduled on %s", timeScheduled.Format(time.RFC3339))
+				showSheduledTime = false
+			}
 			time.Sleep(rest)
 			continue
 		}
+
+		// running if the current interval isn't finished yet
 
 		if rest > -interval {
 			l.Infof("%s: task (%s) started...", timeScheduled.Format(time.RFC3339), task.Name())
@@ -84,8 +154,30 @@ func (st *schedulerTimeout) Run(taskID common.ID, interval time.Duration, startI
 			}
 
 			l.Infof("%s: task (%s) finished", time.Now().Format(time.RFC3339), task.Name())
+
+			showSheduledTime = true
 		}
+
+		// moving the sgeduled time
 
 		timeScheduled = timeScheduled.Add(interval)
 	}
+
+}
+
+func (st *schedulerTimeout) Stop(taskID common.ID) error {
+	st.mutex.RLock()
+	task := st.tasks[taskID]
+	st.mutex.RUnlock()
+
+	if task == nil {
+		return errors.Errorf("schedulerTimeout.tasks[%s] == nil", taskID)
+	}
+
+	task.mutex.Lock()
+	task.nextInterval = 0
+	task.nextStartImmediately = false
+	task.mutex.Unlock()
+
+	return nil
 }

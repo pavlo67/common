@@ -17,4 +17,5 @@ type Task interface {
 type Operator interface {
 	Init(task Task) (common.ID, error)
 	Run(taskID common.ID, interval time.Duration, startImmediately bool) error
+	Stop(taskID common.ID) error
 }
