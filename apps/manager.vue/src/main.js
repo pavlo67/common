@@ -10,6 +10,8 @@ import swaggerConvertor from '../../components.js/swagger_convertor';
 
 let endpoints = swaggerConvertor(swagger);
 
+console.log(endpoints)
+
 for (let r of routes) {
   if (typeof r.init === "function") r.init(endpoints);
 }

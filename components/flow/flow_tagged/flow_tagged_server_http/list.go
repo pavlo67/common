@@ -20,7 +20,7 @@ var ListFlowEndpoint = server_http.Endpoint{Method: "GET", PathParams: nil, Work
 func ListFlow(user *auth.User, _ server_http.Params, req *http.Request) (server.Response, error) {
 	items, err := flowTaggedOp.List(nil, &crud.GetOptions{Limit1: 200})
 
-	l.Infof("%#v", items)
+	l.Debugf("%#v", items)
 
 	if err != nil {
 		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on GET workspace/...ListFlow: ", err))

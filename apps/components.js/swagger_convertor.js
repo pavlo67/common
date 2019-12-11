@@ -2,7 +2,7 @@ function swaggerConvertor(sw) {
   if (!(sw instanceof Object && sw.paths instanceof Object)) return {};
 
   let swc = {
-    host: sw.host,
+    host: sw.port, // "http://localhost" +
     endpoints: {},
   };
 

@@ -6,12 +6,12 @@
 
             &nbsp;
             <div>
-                {{ sourcePack.url }} &nbsp [{{ dateStr(sourcePack.createdAt) }}]
+                {{ sourcePack.url }} &nbsp [{{ dateStr(sourcePack.Time) }}]
 
-                <div v-for="item in sourcePack.flowItems">  <!--  v-bind:key="item.path" :to="item.path" -->
-                    <span v-html="announce(item)" class="announce"></span><br>&nbsp;
-                </div>
-          </div>
+                <span v-for="item in sourcePack.flowItems">  <!--  v-bind:key="item.path" :to="item.path" -->
+                    <br><span v-html="announce(item)" @mouseover="showSummary" @mouseleave="hideSummary" class="announce" :id=announceId(item)></span>&nbsp;
+                </span>
+            </div>
 
         </div>
 
@@ -20,16 +20,17 @@
 
 
 <script>
-    import b from '../../components.js/basis';
+    import b  from '../../components.js/basis';
+    import sh from '../../components.js/show_hide/show_hide';
 
     let cfg = {};
-
     function init(backend) {
         cfg.backend = backend;
-
         // TODO: do it safely!!!
         cfg.listEp = window.location.protocol + "//" + window.location.hostname + backend.host + backend.endpoints.flow.path;
     }
+
+    let showHide = sh.NewShowHide("_summary");
 
     export {init};
 
@@ -46,26 +47,38 @@
         methods: {
             dateStr: b.dateStr,
 
+            announceId(j) {
+               return "flow_item_" + j.ID;
+            },
+
             announce(j) {
                 if (typeof j !== "object" || !j) return j;
 
-                let href = "";
+                // let href = "";
+                // if (j.Embedded instanceof Array) {
+                //     for (let embedded of j.Embedded) {
+                //         href = ' &nbsp; <a href="' + embedded.URL + '" target="_blank">>>></a>';
+                //         break;
+                //     }
+                // }
 
-                if (j.Embedded instanceof Array) {
-                    for (let embedded of j.Embedded) {
-                        href = ' &nbsp; <a href="' + embedded.URL + '" target="_blank">>>></a>';
-                        break;
-                    }
-                }
+                let href = ' &nbsp; <a href="' + j.URL + '" target="_blank">>>></a>';
 
                 let text =
                     "<span class=\"control\">[" + "імпорт" + "]</span>" +
-                    " &nbsp; " + j.Title +
-                    href;
+                    " &nbsp; " + j.Title + href +
+                    "<div class=\"summary\" id=\"flow_item_" + j.ID + "_summary\">" + j.Summary + "</div>";
 
                 return text;
             },
 
+            showSummary(event) {
+                showHide.showContent(event);
+            },
+
+            hideSummary(event) {
+                showHide.hideContent(event);
+            },
 
             getFlowItems() {
                 fetch(cfg.listEp, {
@@ -87,18 +100,18 @@
                     this.sourcePacks = [];
 
                     let source = "";
-                    let createdAt = "";
+                    let sourceTime = "";
                     let sourcePack = {flowItems: []};
 
                     for (let item of flow) {
-                      if (item.Source+item.CreatedAt !== source+createdAt) {
+                      if (item.Source != source || item.Time != sourceTime) {
                         if (sourcePack.flowItems.length > 0) {
                             this.sourcePacks.push(sourcePack);
                         }
 
-                        source = item.Source;
-                        createdAt = item.CreatedAt;
-                        sourcePack = {url: item.Source, createdAt: item.CreatedAt, flowItems: []};
+                        // console.log(item);
+
+                        sourcePack = {url: (source = item.Source), Time: (sourceTime = item.Time), flowItems: []};
                       }
 
                       sourcePack.flowItems.push(item);
@@ -120,6 +133,13 @@
   .announce {
     color: brown;
     font-size: small;
+  }
+  .summary {
+      color: black;
+      background-color: #97c9be;
+      padding: 10px;
+      position: absolute;
+      display: none;
   }
   .control {
     color: blue;

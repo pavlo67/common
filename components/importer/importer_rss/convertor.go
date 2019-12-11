@@ -35,9 +35,11 @@ func (item *Item) GetData() (*data.Item, error) {
 	}
 
 	sourceTime := item.sourceTime
-	if feedItem.PublishedParsed != nil {
-		sourceTime = *feedItem.PublishedParsed
-	}
+
+	// TODO: save in special field
+	// if feedItem.PublishedParsed != nil {
+	//	sourceTime = *feedItem.PublishedParsed
+	// }
 
 	status := crud.Status{CreatedAt: sourceTime}
 

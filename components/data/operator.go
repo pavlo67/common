@@ -36,8 +36,8 @@ type Item struct {
 	// DetailsRaw shouldn't be used directly
 	DetailsRaw []byte `bson:",omitempty"    json:",omitempty"`
 
-	crud.Status `bson:",omitempty"    json:",omitempty"`
-	flow.Origin `bson:",omitempty"    json:",omitempty"`
+	crud.Status `bson:",omitempty"        json:",omitempty"`
+	flow.Origin `bson:",inline,omitempty" json:",inline,omitempty"`
 }
 
 type Operator interface {

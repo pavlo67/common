@@ -38,7 +38,7 @@ func (sh *seriesHTTP) Get(_ string) (*importer.DataSeries, error) {
 
 	feedURL := sh.exportURL
 	if sh.lastImportedID != "" {
-		feedURL += fmt.Sprintf("?%s=%d", flow_tagged_server_http.AfterIDParam, sh.lastImportedID)
+		feedURL += fmt.Sprintf("?%s=%s", flow_tagged_server_http.AfterIDParam, sh.lastImportedID)
 	}
 
 	resp, err := http.Get(feedURL)
@@ -58,7 +58,9 @@ func (sh *seriesHTTP) Get(_ string) (*importer.DataSeries, error) {
 		return nil, errors.Wrapf(err, onGet+"can't json.Unmarshal(%s, &series)", body)
 	}
 
-	sh.lastImportedID = series.MaxID
+	if strings.TrimSpace(series.MaxID) != "" {
+		sh.lastImportedID = series.MaxID
+	}
 
 	return &series, nil
 }

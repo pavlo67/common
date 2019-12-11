@@ -151,7 +151,7 @@ func main() {
 
 	err = schOp.Run(taskID, time.Minute, true)
 	if err != nil {
-		l.Fatalf("can't schOp.Run(%s, time.Hour, false): %s", taskID, err)
+		l.Fatalf("can't schOp.Run(%s, time.Hour, true): %s", taskID, err)
 	}
 
 	// http_server

@@ -98,6 +98,9 @@ func Copy(url string, impOp importer.Operator, dataOp data.Operator) (int, int, 
 
 		item.ID = ""
 
+		// TODO: remove this kostyl!!!
+		item.Time = &item.CreatedAt
+
 		_, err = dataOp.Save([]data.Item{item}, nil)
 		if err != nil {
 			err = errors.Errorf("can't adminOp.Save(%#v): %s", item, err)
