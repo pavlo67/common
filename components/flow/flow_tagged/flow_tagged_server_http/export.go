@@ -30,6 +30,8 @@ func ExportFlow(user *auth.User, _ server_http.Params, req *http.Request) (serve
 	queryParams := req.URL.Query()
 	afterIDStr := strings.TrimSpace(queryParams.Get(AfterIDParam))
 
+	var selector *selectors.Term
+
 	var afterID int
 	if afterIDStr != "" {
 		var err error
@@ -38,29 +40,20 @@ func ExportFlow(user *auth.User, _ server_http.Params, req *http.Request) (serve
 			return server.ResponseRESTError(http.StatusBadRequest, errors.Errorf("ERROR on GET workspace/...ExportFlow: ",
 				errors.Errorf("can't strconv.Atoi(%s) for after_id parameter", afterIDStr, err)))
 		}
+
+		// TODO!!! selector with item.CreatedAt / UpdatedAt if original .ID isn't autoincrement or isn't integer (for mongoDB, for example)
+		selector = selectors.Binary(selectors.Gt, "id", selectors.Value{afterID})
 	}
 
-	// TODO!!! selector with item.CreatedAt / UpdatedAt if original .ID isn't autoincrement (for mongoDB, for example)
-
-	selector := selectors.Binary(selectors.Gt, "id", selectors.Value{afterID})
-	items, err := flowTaggedOp.List(selector, &crud.GetOptions{OrderBy: []string{"id"}})
-
-	l.Infof("%#v / %#v", items, selector)
-
+	items, err := flowTaggedOp.Export(selector, &crud.GetOptions{OrderBy: []string{"id"}})
 	if err != nil {
 		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on GET workspace/...ExportFlow: ", err))
 	}
 
 	// TODO!!! MaxID with item.CreatedAt / UpdatedAt if original .ID isn't autoincrement (for mongoDB, for example)
-
-	var maxID uint64
+	var maxID string
 	if len(items) > 0 {
-		maxIDParsed, err := strconv.ParseUint(string(items[len(items)-1].ID), 10, 64)
-		if err != nil {
-			l.Errorf("can't strconv.ParseUint(%s) with .ID: %s", string(items[len(items)-1].ID), err)
-		} else {
-			maxID = maxIDParsed
-		}
+		maxID = string(items[len(items)-1].ID)
 	}
 
 	return server.ResponseRESTOk(transport.Packet{

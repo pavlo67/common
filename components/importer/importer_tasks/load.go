@@ -1,14 +1,44 @@
-package gatherer_task
+package importer_tasks
 
 import (
+	"time"
+
 	"github.com/pkg/errors"
 
+	"github.com/pavlo67/workshop/common/scheduler"
 	"github.com/pavlo67/workshop/common/selectors"
-
 	"github.com/pavlo67/workshop/common/selectors/logic"
+
 	"github.com/pavlo67/workshop/components/data"
 	"github.com/pavlo67/workshop/components/importer/importer_rss"
 )
+
+func NewLoader(dataOp data.Operator) (scheduler.Task, error) {
+
+	if dataOp == nil {
+		return nil, errors.New("on importer_task.NewLoader(): data.Operator == nil")
+	}
+
+	return &loadTask{dataOp}, nil
+}
+
+var _ scheduler.Task = &loadTask{}
+
+type loadTask struct {
+	dataOp data.Operator
+}
+
+func (it *loadTask) Name() string {
+	return "loader"
+}
+
+func (it *loadTask) Run(timeSheduled time.Time) error {
+	if it == nil {
+		return errors.New("on importer_task.Run(): loadTask == nil")
+	}
+
+	return LoadAll(it.dataOp)
+}
 
 func LoadAll(dataOp data.Operator) error {
 	urls := []string{
@@ -62,11 +92,8 @@ func Load(url string, dataOp data.Operator) (int, int, int, error) {
 
 		numProcessed++
 
-		// term1 := selectors.Binary(selectors.Eq, "source", selectors.ValueUnary{url})
-
-		// TODO!!!
 		term := logic.AND(
-			selectors.Binary(selectors.Eq, "source", selectors.Value{url}),
+			selectors.Binary(selectors.Eq, "source", selectors.Value{item.Source}),
 			selectors.Binary(selectors.Eq, "source_key", selectors.Value{item.Key}),
 		)
 
@@ -85,6 +112,8 @@ func Load(url string, dataOp data.Operator) (int, int, int, error) {
 			// already exists!
 			continue
 		}
+
+		item.ID = ""
 
 		_, err = dataOp.Save([]data.Item{item}, nil)
 		if err != nil {

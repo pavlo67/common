@@ -1,5 +1,6 @@
 CREATE TABLE data (
   id           INTEGER             PRIMARY KEY AUTOINCREMENT,
+  export_id    TEXT       NOT NULL,
   url          TEXT       NOT NULL,
   type         TEXT       NOT NULL,
   title        TEXT       NOT NULL,
@@ -23,6 +24,7 @@ CREATE INDEX idx_data_title      ON data(`type`, title);
 
 CREATE TABLE flow (
   id           INTEGER             PRIMARY KEY AUTOINCREMENT,
+  export_id    TEXT       NOT NULL,
   url          TEXT       NOT NULL,
   type         TEXT       NOT NULL,
   title        TEXT       NOT NULL,

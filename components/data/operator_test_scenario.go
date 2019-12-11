@@ -44,16 +44,17 @@ func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 			Operator: dataOp,
 			Cleaner:  cleanerOp,
 			ToSave: Item{
-				ID:      "",
-				TypeKey: "test",
-				URL:     "rtuy",
-				Title:   "345456",
-				Summary: "6578gj",
+				ID:       "",
+				TypeKey:  "test",
+				ExportID: "rtuy",
+				URL:      "111111",
+				Title:    "345456",
+				Summary:  "6578gj",
 				Embedded: []Item{{
-					URL:     "wq3r",
-					Title:   "56567",
-					Summary: "3333333",
-					Tags:    []tagger.Tag{"1", "332343"},
+					ExportID: "wq3r",
+					Title:    "56567",
+					Summary:  "3333333",
+					Tags:     []tagger.Tag{"1", "332343"},
 				}},
 				Tags: []tagger.Tag{"1", "333"},
 				Status: crud.Status{
@@ -67,6 +68,7 @@ func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 			},
 
 			ToUpdate: Item{
+				URL:     "22222222",
 				Title:   "345456rt",
 				Summary: "6578eegj",
 				Tags:    []tagger.Tag{"1", "333"},
@@ -229,7 +231,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		readedUpdated, err := tc.Read(id[toUpdateI], nil)
 		require.NoError(t, err)
 
-		tc.ToUpdate.URL = tc.ToSave.URL             // unchanged!!!
+		tc.ToUpdate.ExportID = tc.ToSave.ExportID   // unchanged!!!
 		tc.ToUpdate.Origin = tc.ToSave.Origin       // unchanged!!!
 		tc.ToUpdate.CreatedAt = tc.ToSave.CreatedAt // unchanged!!!
 

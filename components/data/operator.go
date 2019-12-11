@@ -22,6 +22,7 @@ type Type struct {
 
 type Item struct {
 	ID       common.ID    `bson:"_id,omitempty" json:",omitempty"`
+	ExportID string       `bson:",omitempty"    json:",omitempty"`
 	URL      string       `bson:",omitempty"    json:",omitempty"`
 	TypeKey  TypeKey      `bson:",omitempty"    json:",omitempty"`
 	Title    string       `bson:",omitempty"    json:",omitempty"`
@@ -48,6 +49,8 @@ type Operator interface {
 
 	List(*selectors.Term, *crud.GetOptions) ([]Item, error)
 	Count(*selectors.Term, *crud.GetOptions) (uint64, error)
+
+	Export(term *selectors.Term, options *crud.GetOptions) ([]Item, error)
 }
 
 type Convertor interface {

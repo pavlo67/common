@@ -1,5 +1,4 @@
 {
- "host": ":3003",
  "info": {
   "title": "Pavlo's Workshop REST API",
   "version": "0.0.1"
@@ -101,6 +100,7 @@
    }
   }
  },
+ "port": ":3003",
  "schemes": [
   "http",
   "https"

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/pkg/errors"
 
@@ -14,25 +15,29 @@ import (
 	"github.com/pavlo67/workshop/components/importer"
 )
 
-func NewSeriesHTTP(lastImportedID uint64, l logger.Operator) (importer.Operator, error) {
+func NewSeriesHTTP(exportURL, lastImportedID string, l logger.Operator) (importer.Operator, error) {
 	if l == nil {
 		return nil, errors.New("on NewSeriesHTTP(): nil logger")
 	}
 
-	return &seriesHTTP{lastImportedID, l}, nil
+	return &seriesHTTP{exportURL, lastImportedID, l}, nil
 }
 
 var _ importer.Operator = &seriesHTTP{}
 
 type seriesHTTP struct {
-	lastImportedID uint64
+	exportURL      string
+	lastImportedID string
 	l              logger.Operator
 }
 
 const onGet = "on seriesHTTP.Get(): "
 
-func (sh *seriesHTTP) Get(feedURL string) (*importer.DataSeries, error) {
-	if sh.lastImportedID > 0 {
+func (sh *seriesHTTP) Get(_ string) (*importer.DataSeries, error) {
+	sh.lastImportedID = strings.TrimSpace(sh.lastImportedID)
+
+	feedURL := sh.exportURL
+	if sh.lastImportedID != "" {
 		feedURL += fmt.Sprintf("?%s=%d", flow_tagged_server_http.AfterIDParam, sh.lastImportedID)
 	}
 

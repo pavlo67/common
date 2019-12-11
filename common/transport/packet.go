@@ -12,5 +12,5 @@ type Packet struct {
 
 	Type  DataType
 	Data  interface{}
-	MaxID uint64
+	MaxID string
 }

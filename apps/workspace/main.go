@@ -26,12 +26,16 @@ import (
 	"github.com/pavlo67/workshop/components/tagger/tagger_sqlite"
 
 	"github.com/pavlo67/workshop/apps/workspace/ws_routes"
+	"github.com/pavlo67/workshop/common/scheduler"
+	"github.com/pavlo67/workshop/common/scheduler/scheduler_timeout"
+	"github.com/pavlo67/workshop/components/data"
+	"github.com/pavlo67/workshop/components/importer/importer_tasks"
 )
 
 var (
-	BuildDate    = "unknown"
-	BuildRelease = "unknown"
-	BuildCommit  = "unknown"
+	BuildDate   = "unknown"
+	BuildTag    = "unknown"
+	BuildCommit = "unknown"
 )
 
 func main() {
@@ -40,54 +44,58 @@ func main() {
 	var versionOnly bool
 	flag.BoolVar(&versionOnly, "version", false, "show build vars only")
 	flag.Parse()
+
+	log.Printf("builded: %s, tag: %s, commit: %s\n", BuildDate, BuildTag, BuildCommit)
+
 	if versionOnly {
-		log.Printf("builded: %s, revision: %s, commit: %s\n", BuildDate, BuildRelease, BuildCommit)
 		return
 	}
 
-	currentPath := filelib.CurrentPath()
-
-	//manifest, err := manager.ReadManifest(currentPath)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//if manifest == nil {
-	//	log.Fatalf("can't load manifest, no data!")
-	//}
-	//for _, key := range manifest.Requested {
-	//	if os.Getenv(key) == "" {
-	//		log.Fatalf("no environment value for key '%s'", key)
-	//	}
-	//}
+	// logger
 
 	l, err := logger.Init(logger.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// getting config environments
+
+	currentPath := filelib.CurrentPath()
 	configEnv, ok := os.LookupEnv("ENV")
 	if !ok {
 		configEnv = "local"
 	}
-	configPath := currentPath + "../../environments/" + configEnv + ".yaml"
 
-	cfg, err := config.Get(configPath, encodelib.MarshalerYAML)
+	// common config
+
+	configCommonPath := currentPath + "../../environments/common." + configEnv + ".yaml"
+	cfgCommon, err := config.Get(configCommonPath, encodelib.MarshalerYAML)
 	if err != nil {
 		l.Fatal(err)
 	}
-
 	var cfgEnvs map[string]string
-	err = cfg.Value("envs", &cfgEnvs)
+	err = cfgCommon.Value("envs", &cfgEnvs)
 	if err != nil {
 		l.Fatal(err)
 	}
 
-	// TODO: synchronize with manifest.json
-	//portStr := os.Getenv("workspace_port")
-	//port, err := strconv.Atoi(portStr)
-	//if err != nil {
-	//	l.Fatalf("can't read port: '%s'", portStr)
-	//}
+	// workspace config
+
+	configWorkspacePath := currentPath + "../../environments/workspace." + configEnv + ".yaml"
+	cfgWorkspace, err := config.Get(configWorkspacePath, encodelib.MarshalerYAML)
+	if err != nil {
+		l.Fatal(err)
+	}
+
+	var cfgSQLite config.Access
+	err = cfgWorkspace.Value("sqlite", &cfgSQLite)
+	if err != nil {
+		l.Fatal(err)
+	}
+
+	// running starters
+
+	label := "WORKSPACE REST BUILD"
 
 	starters := []starter.Starter{
 		{control.Starter(), nil},
@@ -105,15 +113,48 @@ func main() {
 		{flow_tagged_server_http.Starter(), nil},
 
 		{ws_routes.Starter(), nil},
+
+		{scheduler_timeout.Starter(), nil},
+		{importer_tasks.Starter(), nil},
 	}
 
-	label := "WORKSPACE REST BUILD"
-
-	joiner, err := starter.Run(starters, cfg, os.Args[1:], label)
+	joiner, err := starter.Run(starters, cfgCommon, cfgWorkspace, os.Args[1:], label)
 	if err != nil {
 		l.Fatal(err)
 	}
 	defer joiner.CloseAll()
+
+	// scheduling importer task
+
+	dataOp, ok := joiner.Interface(flow.InterfaceKey).(data.Operator)
+	if !ok {
+		l.Fatalf("no data.Operator with key %s", flow.InterfaceKey)
+	}
+
+	// TODO!!!
+	url := "http://localhost:" + cfgEnvs["gatherer_port"] + "/gatherer/v1/export"
+
+	task, err := importer_tasks.NewCopyTask(url, dataOp)
+	if err != nil {
+		l.Fatal(err)
+	}
+
+	schOp, ok := joiner.Interface(scheduler.InterfaceKey).(scheduler.Operator)
+	if !ok {
+		l.Fatalf("no scheduler.Operator with key %s", scheduler.InterfaceKey)
+	}
+
+	taskID, err := schOp.Init(task)
+	if err != nil {
+		l.Fatalf("can't schOp.Init(%#v): %s", task, err)
+	}
+
+	err = schOp.Run(taskID, time.Minute, true)
+	if err != nil {
+		l.Fatalf("can't schOp.Run(%s, time.Hour, false): %s", taskID, err)
+	}
+
+	// http_server
 
 	srvOp, ok := joiner.Interface(server_http.InterfaceKey).(server_http.Operator)
 	if !ok {
@@ -125,3 +166,16 @@ func main() {
 		l.Error(err)
 	}
 }
+
+//manifest, err := manager.ReadManifest(currentPath)
+//if err != nil {
+//	log.Fatal(err)
+//}
+//if manifest == nil {
+//	log.Fatalf("can't load manifest, no data!")
+//}
+//for _, key := range manifest.Requested {
+//	if os.Getenv(key) == "" {
+//		log.Fatalf("no environment value for key '%s'", key)
+//	}
+//}

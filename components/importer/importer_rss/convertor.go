@@ -1,7 +1,6 @@
 package importer_rss
 
 import (
-	"strings"
 	"time"
 
 	"github.com/mmcdole/gofeed"
@@ -43,12 +42,6 @@ func (item *Item) GetData() (*data.Item, error) {
 	status := crud.Status{CreatedAt: sourceTime}
 
 	var embedded []data.Item
-	if strings.TrimSpace(feedItem.Link) != "" {
-		embedded = append(embedded, data.Item{
-			URL:    feedItem.Link,
-			Status: status,
-		})
-	}
 
 	if feedItem.Image != nil {
 		embedded = append(embedded, data.Item{
@@ -76,6 +69,7 @@ func (item *Item) GetData() (*data.Item, error) {
 	origin, _ := json.Marshal(feedItem)
 
 	return &data.Item{
+		URL:      feedItem.Link,
 		Title:    feedItem.Title,
 		Summary:  feedItem.Description,
 		Embedded: embedded,

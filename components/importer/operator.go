@@ -23,7 +23,7 @@ type DataSeries struct {
 
 	Type  transport.DataType
 	Data  []data.Item
-	MaxID uint64
+	MaxID string
 }
 
 type Operator interface {

@@ -8,31 +8,32 @@ import (
 	"time"
 
 	"github.com/pavlo67/workshop/common"
+	"github.com/pavlo67/workshop/common/auth/auth_ecdsa"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/control"
 	"github.com/pavlo67/workshop/common/libraries/encodelib"
 	"github.com/pavlo67/workshop/common/libraries/filelib"
 	"github.com/pavlo67/workshop/common/logger"
-	"github.com/pavlo67/workshop/common/starter"
-
-	"github.com/pavlo67/workshop/apps/gatherer/gatherer_routes"
-	"github.com/pavlo67/workshop/common/auth/auth_ecdsa"
 	"github.com/pavlo67/workshop/common/scheduler"
-	"github.com/pavlo67/workshop/common/scheduler/sheduler_timeout"
+	"github.com/pavlo67/workshop/common/scheduler/scheduler_timeout"
 	"github.com/pavlo67/workshop/common/server/server_http"
 	"github.com/pavlo67/workshop/common/server/server_http/server_http_jschmhr"
+	"github.com/pavlo67/workshop/common/starter"
+
 	"github.com/pavlo67/workshop/components/data"
 	"github.com/pavlo67/workshop/components/data/data_sqlite"
 	"github.com/pavlo67/workshop/components/data/data_tagged"
 	"github.com/pavlo67/workshop/components/flow"
 	"github.com/pavlo67/workshop/components/flow/flow_tagged/flow_tagged_server_http"
-	"github.com/pavlo67/workshop/components/importer/gatherer_task"
+
+	"github.com/pavlo67/workshop/apps/gatherer/gatherer_routes"
+	"github.com/pavlo67/workshop/components/importer/importer_tasks"
 )
 
 var (
-	BuildDate    = "unknown"
-	BuildRelease = "unknown"
-	BuildCommit  = "unknown"
+	BuildDate   = "unknown"
+	BuildTag    = "unknown"
+	BuildCommit = "unknown"
 )
 
 func main() {
@@ -41,8 +42,10 @@ func main() {
 	var versionOnly bool
 	flag.BoolVar(&versionOnly, "version", false, "show build vars only")
 	flag.Parse()
+
+	log.Printf("builded: %s, tag: %s, commit: %s\n", BuildDate, BuildTag, BuildCommit)
+
 	if versionOnly {
-		log.Printf("builded: %s, revision: %s, commit: %s\n", BuildDate, BuildRelease, BuildCommit)
 		return
 	}
 
@@ -104,7 +107,7 @@ func main() {
 		{gatherer_routes.Starter(), nil},
 
 		{scheduler_timeout.Starter(), nil},
-		{gatherer_task.Starter(), nil},
+		{importer_tasks.Starter(), nil},
 	}
 
 	joiner, err := starter.Run(starters, cfgCommon, cfgGatherer, os.Args[1:], label)
@@ -120,7 +123,7 @@ func main() {
 		l.Fatalf("no data.Operator with key %s", flow.InterfaceKey)
 	}
 
-	task, err := gatherer_task.New(dataOp)
+	task, err := importer_tasks.NewLoader(dataOp)
 	if err != nil {
 		l.Fatal(err)
 	}

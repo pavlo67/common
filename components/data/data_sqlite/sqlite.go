@@ -23,10 +23,10 @@ import (
 	"github.com/pavlo67/workshop/components/tagger"
 )
 
-var fieldsToUpdate = []string{"type", "title", "summary", "embedded", "tags", "details"}
+var fieldsToUpdate = []string{"url", "type", "title", "summary", "embedded", "tags", "details"}
 var fieldsToUpdateStr = strings.Join(fieldsToUpdate, " = ?, ") + " = ?"
 
-var fieldsToInsert = append(fieldsToUpdate, "source", "source_key", "source_time", "source_data", "url")
+var fieldsToInsert = append(fieldsToUpdate, "source", "source_key", "source_time", "source_data", "export_id")
 var fieldsToInsertStr = strings.Join(fieldsToInsert, ", ")
 
 var fieldsToRead = append(fieldsToInsert, "created_at", "updated_at")
@@ -104,11 +104,20 @@ func sqlList(table, condition string, options *crud.GetOptions) string {
 		condition = " WHERE " + condition
 	}
 
-	limit := " LIMIT 200"
+	var limit string
 
 	order := "created_at DESC"
-	if options != nil && len(options.OrderBy) > 0 {
-		order = strings.Join(options.OrderBy, ", ")
+	if options != nil {
+		if len(options.OrderBy) > 0 {
+			order = strings.Join(options.OrderBy, ", ")
+		}
+
+		if options.Limit0+options.Limit1 > 0 {
+			limit = " LIMIT " + strconv.FormatUint(options.Limit0, 10)
+			if options.Limit1 > 0 {
+				limit += ", " + strconv.FormatUint(options.Limit1, 10)
+			}
+		}
 	}
 
 	return "SELECT " + fieldsToListStr + " FROM " + table + condition + " ORDER BY " + order + limit
@@ -150,7 +159,7 @@ func (dataOp *dataSQLite) Save(items []data.Item, _ *crud.SaveOptions) ([]common
 
 		if item.ID != "" {
 			values := []interface{}{
-				item.TypeKey, item.Title, item.Summary, embedded, tags, details, item.ID,
+				item.URL, item.TypeKey, item.Title, item.Summary, embedded, tags, details, item.ID,
 			}
 
 			_, err := dataOp.stmUpdate.Exec(values...)
@@ -169,8 +178,8 @@ func (dataOp *dataSQLite) Save(items []data.Item, _ *crud.SaveOptions) ([]common
 
 		} else {
 			values := []interface{}{
-				item.TypeKey, item.Title, item.Summary, embedded, tags, details,
-				item.Origin.Source, item.Origin.Key, item.Origin.Time, item.Origin.Data, item.URL,
+				item.URL, item.TypeKey, item.Title, item.Summary, embedded, tags, details,
+				item.Origin.Source, item.Origin.Key, item.Origin.Time, item.Origin.Data, item.ExportID,
 			}
 
 			res, err := dataOp.stmInsert.Exec(values...)
@@ -215,8 +224,8 @@ func (dataOp *dataSQLite) Read(id common.ID, _ *crud.GetOptions) (*data.Item, er
 	var sourceTimePtr, updatedAtPtr *string
 
 	err = dataOp.stmRead.QueryRow(idNum).Scan(
-		&item.TypeKey, &item.Title, &item.Summary, &embedded, &tags, &item.DetailsRaw,
-		&item.Source, &item.Key, &sourceTimePtr, &item.Data, &item.URL,
+		&item.URL, &item.TypeKey, &item.Title, &item.Summary, &embedded, &tags, &item.DetailsRaw,
+		&item.Source, &item.Key, &sourceTimePtr, &item.Data, &item.ExportID,
 		&createdAt, &updatedAtPtr,
 	)
 	if err == sql.ErrNoRows {
@@ -313,6 +322,41 @@ func (dataOp *dataSQLite) Remove(id common.ID, _ *crud.RemoveOptions) error {
 	return nil
 }
 
+const onExport = "on dataSQLite.Export()"
+
+func (dataOp *dataSQLite) Export(term *selectors.Term, options *crud.GetOptions) ([]data.Item, error) {
+	// TODO: remove limits
+	// if options != nil {
+	//	options.Limits = nil
+	// }
+
+	termUpd := selectors.Binary(selectors.Eq, "export_id", selectors.Value{""})
+	if term != nil {
+		termUpd = logic.AND(term, termUpd)
+	}
+
+	condition, values, err := selectors_sql.Use(termUpd)
+	if err != nil {
+		return nil, errors.Errorf(onExport+"wrong selector to update export_id's (%#v): %s", termUpd, err)
+	}
+	condition = " WHERE " + condition
+
+	query := "UPDATE " + dataOp.table + " SET export_id = id " + condition
+	dataOp.db.Exec(query, values...)
+	if err != nil {
+		return nil, errors.Wrapf(err, onExport+sqllib.CantExec, query, values)
+	}
+
+	termEx := selectors.Binary(selectors.Ne, "export_id", selectors.Value{""})
+	if term == nil {
+		term = termEx
+	} else {
+		term = logic.AND(term, termEx)
+	}
+
+	return dataOp.List(term, options)
+}
+
 const onList = "on dataSQLite.List()"
 
 func (dataOp *dataSQLite) List(term *selectors.Term, options *crud.GetOptions) ([]data.Item, error) {
@@ -332,7 +376,7 @@ func (dataOp *dataSQLite) List(term *selectors.Term, options *crud.GetOptions) (
 		}
 	}
 
-	l.Infof("%s / %#v\n%s", condition, values, query)
+	//l.Infof("%s / %#v\n%s", condition, values, query)
 
 	rows, err := stm.Query(values...)
 
@@ -352,8 +396,8 @@ func (dataOp *dataSQLite) List(term *selectors.Term, options *crud.GetOptions) (
 		var sourceTimePtr, updatedAtPtr *string
 
 		err := rows.Scan(
-			&idNum, &item.TypeKey, &item.Title, &item.Summary, &embedded, &tags, &item.DetailsRaw,
-			&item.Origin.Source, &item.Origin.Key, &sourceTimePtr, &item.Origin.Data, &item.URL,
+			&idNum, &item.URL, &item.TypeKey, &item.Title, &item.Summary, &embedded, &tags, &item.DetailsRaw,
+			&item.Origin.Source, &item.Origin.Key, &sourceTimePtr, &item.Origin.Data, &item.ExportID,
 			&createdAt, &updatedAtPtr,
 		)
 		if err != nil {
