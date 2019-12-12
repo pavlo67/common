@@ -31,7 +31,7 @@
         let text =
             "[" +  b.dateStr(j.CreatedAt) + "]" +
             " &nbsp; " + j.Title +
-            "&nbsp;" + "<span class=\"control\">[" +  "ред." + "]</span>" +
+            "&nbsp;" + "<span class=\"control\">[" +  "докладно" + "][" +  "ред." + "]</span>" +
             "<br>" + j.Summary;
 
         return text;

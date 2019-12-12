@@ -5,7 +5,7 @@
       <Confidence/>
       &nbsp;<br>
 
-      <router-link v-for="item in routes" v-bind:key="item.path" :to="item.path">
+      <router-link v-for="item in menuItems" v-bind:key="item.path" :to="item.path">
         {{ item.title }}<br>
       </router-link>
 

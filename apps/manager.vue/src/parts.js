@@ -1,11 +1,11 @@
 import home      from './home/route';
-import workspace from '../../workspace/data_vue/route';
-import flow      from '../../workspace/flow_vue/route';
+import workspace from '../../workspace/data_vue/routes';
+import flow      from '../../workspace/flow_vue/routes';
 
 let routes = [
   home,
-  workspace,
-  flow,
+  ...workspace,
+  ...flow,
 ];
 
 export default routes;

@@ -9,7 +9,8 @@
                 {{ sourcePack.url }} &nbsp [{{ dateStr(sourcePack.Time) }}]
 
                 <span v-for="item in sourcePack.flowItems">  <!--  v-bind:key="item.path" :to="item.path" -->
-                    <br><span v-html="announce(item)" @mouseover="showSummary" @mouseleave="hideSummary" class="announce" :id=announceId(item)></span>&nbsp;
+                    <br><span class="control" v-on:click="importData">[імпорт]</span> &nbsp;
+                    <span v-html="announce(item)" @mouseover="showSummary" @mouseleave="hideSummary" class="announce" :id=announceId(item)></span>&nbsp;
                 </span>
             </div>
 
@@ -23,16 +24,8 @@
     import b  from '../../components.js/basis';
     import sh from '../../components.js/show_hide/show_hide';
 
-    let cfg = {};
-    function init(backend) {
-        cfg.backend = backend;
-        // TODO: do it safely!!!
-        cfg.listEp = window.location.protocol + "//" + window.location.hostname + backend.host + backend.endpoints.flow.path;
-    }
-
     let showHide = sh.NewShowHide("_summary");
-
-    export {init};
+    let listEp, router;
 
     export default {
         name: 'Flow',
@@ -46,6 +39,12 @@
         },
         methods: {
             dateStr: b.dateStr,
+
+            init(data) {
+                router = data.router;
+                // TODO: do it safely!!!
+                listEp = window.location.protocol + "//" + window.location.hostname + data.backend.host + data.backend.endpoints.flow.path;
+            },
 
             announceId(j) {
                return "flow_item_" + j.ID;
@@ -64,24 +63,28 @@
 
                 let href = ' &nbsp; <a href="' + j.URL + '" target="_blank">>>></a>';
 
-                let text =
-                    "<span class=\"control\">[" + "імпорт" + "]</span>" +
-                    " &nbsp; " + j.Title + href +
+                let text = j.Title + href +
                     "<div class=\"summary\" id=\"flow_item_" + j.ID + "_summary\">" + j.Summary + "</div>";
 
                 return text;
             },
 
-            showSummary(event) {
-                showHide.showContent(event);
+            showSummary(ev) {
+                showHide.showContent(ev);
             },
 
-            hideSummary(event) {
-                showHide.hideContent(event);
+            hideSummary(ev) {
+                showHide.hideContent(ev);
             },
 
+            importData(ev) {
+                console.log(555555555, ev);
+                // self.$router ???
+                router.push({ name: 'flow_selector',  params: { id: 777, event: ev } })
+            },
+            
             getFlowItems() {
-                fetch(cfg.listEp, {
+                fetch(listEp, {
                     method: 'GET', // *GET, POST, PUT, DELETE, etc.
                     headers: {
                         'Content-Type': 'application/json',
