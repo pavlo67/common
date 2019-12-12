@@ -16,11 +16,12 @@ var srvCfg = server_http.Config{
 	Version: "0.0.1",
 	Prefix:  "/workspace",
 	Endpoints: []server_http.EndpointConfig{
-		{"save", "/v1/save", []string{"data"}, nil, data_tagged_server_http.SaveEndpoint},
-		{"read", "/v1/read", []string{"data"}, nil, data_tagged_server_http.ReadEndpoint},
-		{"list", "/v1/list", []string{"data"}, nil, data_tagged_server_http.ListEndpoint},
-		{"remove", "/v1/remove", []string{"data"}, nil, data_tagged_server_http.RemoveEndpoint},
-		{"flow", "/v1/flow", []string{"flow"}, nil, flow_tagged_server_http.ListFlowEndpoint},
+		{"save", "/v1/data/save", []string{"data"}, nil, data_tagged_server_http.SaveEndpoint},
+		{"read", "/v1/data/read", []string{"data"}, nil, data_tagged_server_http.ReadEndpoint},
+		{"list", "/v1/data/list", []string{"data"}, nil, data_tagged_server_http.ListEndpoint},
+		{"remove", "/v1/data/remove", []string{"data"}, nil, data_tagged_server_http.RemoveEndpoint},
+		{"flow", "/v1/flow/list", []string{"flow"}, nil, flow_tagged_server_http.FlowEndpoint},
+		{"flow_read", "/v1/flow/read", []string{"flow"}, nil, flow_tagged_server_http.FlowReadEndpoint},
 	},
 }
 

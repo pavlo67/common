@@ -9,8 +9,8 @@
                 {{ sourcePack.url }} &nbsp [{{ dateStr(sourcePack.Time) }}]
 
                 <span v-for="item in sourcePack.flowItems">  <!--  v-bind:key="item.path" :to="item.path" -->
-                    <br><span class="control" v-on:click="importData">[імпорт]</span> &nbsp;
-                    <span v-html="announce(item)" @mouseover="showSummary" @mouseleave="hideSummary" class="announce" :id=announceId(item)></span>&nbsp;
+                    <br><span :id=announceId(item)  class="control" v-on:click="importData">[імпорт]</span> &nbsp;
+                    <span v-html="announce(item)" @mouseover="showSummary" @mouseleave="hideSummary" class="announce" :id=announceId(item,true)></span>&nbsp;
                 </span>
             </div>
 
@@ -21,14 +21,15 @@
 
 
 <script>
-    import b  from '../../components.js/basis';
-    import sh from '../../components.js/show_hide/show_hide';
+    import b       from '../../components.js/basis';
+    import sh      from '../../components.js/show_hide/show_hide';
+    import { cfg } from './init';
 
-    let showHide = sh.NewShowHide("_summary");
-    let listEp, router;
+    let showHide       = sh.NewShowHide("_summary");
+    let flowItemPrefix = "flow_item_";
 
     export default {
-        name: 'Flow',
+        title: 'новини',
         created () {
             this.getFlowItems();
         },
@@ -40,31 +41,16 @@
         methods: {
             dateStr: b.dateStr,
 
-            init(data) {
-                router = data.router;
-                // TODO: do it safely!!!
-                listEp = window.location.protocol + "//" + window.location.hostname + data.backend.host + data.backend.endpoints.flow.path;
-            },
-
-            announceId(j) {
-               return "flow_item_" + j.ID;
+            announceId(j, prefixed) {
+               return (prefixed ? flowItemPrefix : "") + j.ID;
             },
 
             announce(j) {
                 if (typeof j !== "object" || !j) return j;
 
-                // let href = "";
-                // if (j.Embedded instanceof Array) {
-                //     for (let embedded of j.Embedded) {
-                //         href = ' &nbsp; <a href="' + embedded.URL + '" target="_blank">>>></a>';
-                //         break;
-                //     }
-                // }
-
                 let href = ' &nbsp; <a href="' + j.URL + '" target="_blank">>>></a>';
-
                 let text = j.Title + href +
-                    "<div class=\"summary\" id=\"flow_item_" + j.ID + "_summary\">" + j.Summary + "</div>";
+                    "<div class=\"summary\" id=\"" + flowItemPrefix + j.ID + "_summary\">" + j.Summary + "</div>";
 
                 return text;
             },
@@ -78,13 +64,21 @@
             },
 
             importData(ev) {
-                console.log(555555555, ev);
-                // self.$router ???
-                router.push({ name: 'flow_selector',  params: { id: 777, event: ev } })
+                fetch(cfg.readEp + "/" + ev.target.id, {
+                    method: 'GET', // *GET, POST, PUT, DELETE, etc.
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    mode: 'cors', // no-cors, cors, *same-origin
+                }).then(response => {
+                    return response.json();
+                }).then(flowItem => {
+                    cfg.router.push({ name: 'data_item_import',  params: { dataItem: flowItem } })
+                });
             },
             
             getFlowItems() {
-                fetch(listEp, {
+                fetch(cfg.listEp, {
                     method: 'GET', // *GET, POST, PUT, DELETE, etc.
                     headers: {
                         'Content-Type': 'application/json',

@@ -3,7 +3,7 @@ import App from './App.vue';
 import Router from 'vue-router';
 import './ecosystem/registerServiceWorker';  // import store from './ecosystem/store';
 
-import routes from './parts';
+import parts from './parts';
 
 import swagger from '../../workspace/ws_routes/api-docs/swagger';
 import swaggerConvertor from '../../components.js/swagger_convertor';
@@ -11,21 +11,25 @@ import swaggerConvertor from '../../components.js/swagger_convertor';
 Vue.use(Router);
 Vue.config.productionTip = false;
 
-let router = new Router({ routes });  // .map(_ => _.route)
-let menuItems = routes.filter(_ => _.inMenu);
-
-let backend = swaggerConvertor(swagger);
-for (let r of routes) {
-  if (typeof r.init === "function") r.init({router, backend});
+let inits  = [];
+let routes = [];
+let menu   = [];
+for (let p of parts) {
+    if (typeof p === "function") {
+        inits.push(p);
+    } else {
+        routes.push(p);
+        if (p.inMenu) menu.push(p);
+    }
 }
 
+let backend = swaggerConvertor(swagger);
+let router = new Router({ routes });
+for (let i of inits) i({router, backend});
 
-// let appManager =
 new Vue({
-  data: { menuItems },
+  data: { menu },
   router,
-  // store,
-  // render: h => h(App),
   ...App,
 }).$mount('#app');
 

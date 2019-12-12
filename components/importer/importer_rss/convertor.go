@@ -72,6 +72,7 @@ func (item *Item) GetData() (*data.Item, error) {
 
 	return &data.Item{
 		URL:      feedItem.Link,
+		TypeKey:  data.TypeKeyString,
 		Title:    feedItem.Title,
 		Summary:  feedItem.Description,
 		Embedded: embedded,

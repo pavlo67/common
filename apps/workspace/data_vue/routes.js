@@ -1,23 +1,23 @@
-function init(cfg) {
-  // console.log("data: ", cfg)
-}
+import Data     from './Data.vue';
+import { init } from './init';
 
 export default [
+    init,
     {
         inMenu: true,
-        path: '/workspace',
-        name: 'workspace',
-        // route level code-splitting
-        // this generates a separate chunk (about.[hash].js) for this route
-        // which is lazy-loaded when the route is visited.
-        component: () => import(/* webpackChunkName: "workspace" */ './Data.vue'),
-        title: 'мій каталог',
-        init,
+        path: '/data',
+        name: 'data',
+        component: Data,  // component: () => import(/* webpackChunkName: "data" */ './Data.vue'),
+        title: Data.title,
     },
     {
-        path: '/workspace/item/:id',
-        name: 'workspace item',
+        path: '/data/item_import',
+        name: 'data_item_import',
+        component: () => import('./Import.vue'),
+    },
+    {
+        path: '/data/item/:id',
+        name: 'data_item',
         component: () => import('./Item.vue'),
-        title: 'ось!!!',
     },
 ];

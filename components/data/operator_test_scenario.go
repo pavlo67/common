@@ -33,9 +33,16 @@ type Test struct {
 	BBB int
 }
 
+const TypeKeyTest TypeKey = "test"
+
 var TypeTest = Type{
-	Key:      "test",
+	Key:      TypeKeyTest,
 	Exemplar: Test{},
+}
+
+var TypeString = Type{
+	Key:      TypeKeyString,
+	Exemplar: "",
 }
 
 func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
@@ -97,7 +104,7 @@ const toDeleteI = 2 // must be < numRepeats1 + numRepeats2
 func Compare(t *testing.T, dataOp Operator, readed *Item, expectedItem Item, expectedDetails, detailsToRead Test, l logger.Operator) {
 	require.NotNil(t, readed)
 
-	err := dataOp.Details(readed, &detailsToRead)
+	err := dataOp.SetDetails(readed)
 	require.NoError(t, err)
 
 	l.Infof("to be saved: %#v", expectedItem)

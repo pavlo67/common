@@ -15,6 +15,8 @@ const CollectionDefault = "data"
 
 type TypeKey string
 
+const TypeKeyString TypeKey = "string"
+
 type Type struct {
 	Key      TypeKey
 	Exemplar interface{}
@@ -45,7 +47,7 @@ type Operator interface {
 	Remove(common.ID, *crud.RemoveOptions) error
 
 	Read(common.ID, *crud.GetOptions) (*Item, error)
-	Details(item *Item, exemplar interface{}) error
+	SetDetails(item *Item) error
 
 	List(*selectors.Term, *crud.GetOptions) ([]Item, error)
 	Count(*selectors.Term, *crud.GetOptions) (uint64, error)

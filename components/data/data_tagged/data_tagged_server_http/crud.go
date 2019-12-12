@@ -58,21 +58,10 @@ func Save(user *auth.User, params server_http.Params, req *http.Request) (server
 
 // Read --------------------------------------------------------------------------------------
 
-var ReadEndpoint = server_http.Endpoint{Method: "GET", PathParams: []string{"type"}, QueryParams: []string{"id"}, WorkerHTTP: Read}
+var ReadEndpoint = server_http.Endpoint{Method: "GET", PathParams: []string{"id"}, WorkerHTTP: Read}
 
 func Read(user *auth.User, params server_http.Params, req *http.Request) (server.Response, error) {
-	var details interface{}
-
-	itemType := params["type"]
-	switch itemType {
-	case "test":
-		details = &data.Test{}
-	default:
-		return server.ResponseRESTError(http.StatusBadRequest, errors.Errorf("ERROR on GET workspace/...Read: wrong item type: %s", itemType))
-	}
-
-	queryParams := req.URL.Query()
-	id := common.ID(queryParams.Get("id"))
+	id := common.ID(params["id"])
 
 	item, err := dataTaggedOp.Read(id, nil)
 	if err == common.ErrNotFound {
@@ -81,8 +70,7 @@ func Read(user *auth.User, params server_http.Params, req *http.Request) (server
 		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on GET workspace/...Read: ", err))
 	}
 
-	item.Details = details
-	err = dataTaggedOp.Details(item, item.Details)
+	err = dataTaggedOp.SetDetails(item)
 	if err != nil {
 		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on GET workspace/...Read: ", err))
 	}

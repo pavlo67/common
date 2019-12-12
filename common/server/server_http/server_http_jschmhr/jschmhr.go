@@ -75,9 +75,13 @@ func (s *serverHTTPJschmhr) Start() error {
 }
 
 func (s *serverHTTPJschmhr) HandleOptions(key, serverPath string) {
+
 	if strlib.In(s.handledOptions, serverPath) {
+		//l.Infof("- %#v", s.handledOptions)
 		return
 	}
+
+	l.Info("OPTIONS: ", serverPath)
 
 	s.httpServeMux.OPTIONS(serverPath, func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		l.Infof("%-10s: OPTIONS %s", key, serverPath)
@@ -153,6 +157,8 @@ func (s *serverHTTPJschmhr) HandleEndpoint(key, serverPath string, endpoint serv
 		return errors.New(method + ": " + path + "\t!!! NULL workerHTTP ISN'T DISPATCHED !!!")
 	}
 
+	s.HandleOptions(key, path)
+
 	handler := func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
 		user, err := server_http.UserWithRequest(r, s.authOps)
 		if err != nil {
@@ -210,8 +216,6 @@ func (s *serverHTTPJschmhr) HandleEndpoint(key, serverPath string, endpoint serv
 			l.Error("can't write response data", err)
 		}
 	}
-
-	s.HandleOptions(key, path)
 
 	l.Infof("%-10s: %s %s", key, method, path)
 	switch method {

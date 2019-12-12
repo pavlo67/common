@@ -278,18 +278,29 @@ func (dataOp *dataSQLite) Read(id common.ID, _ *crud.GetOptions) (*data.Item, er
 
 const onDetails = "on dataSQLite.Details(): "
 
-func (dataOp *dataSQLite) Details(item *data.Item, exemplar interface{}) error {
-	// TODO: check .TypeKey
-
+func (dataOp *dataSQLite) SetDetails(item *data.Item) error {
 	if item == nil {
 		return errors.New(onDetails + "nil item")
 	}
 
-	item.Details = exemplar
+	switch item.TypeKey {
+	case data.TypeKeyString:
+		item.Details = string(item.DetailsRaw)
 
-	err := json.Unmarshal(item.DetailsRaw, exemplar)
-	if err != nil {
-		return errors.Wrapf(err, onDetails+"can't .Unmarshal(%#v)", item.DetailsRaw)
+	case data.TypeKeyTest:
+		item.Details = &data.Test{}
+		err := json.Unmarshal(item.DetailsRaw, item.Details)
+		if err != nil {
+			return errors.Wrapf(err, onDetails+"can't .Unmarshal(%#v)", item.DetailsRaw)
+		}
+
+	default:
+
+		// TODO: remove this kostyl
+		item.Details = string(item.DetailsRaw)
+
+		// return errors.Errorf(onDetails+"unknown item.TypeKey(%s) for item.DetailsRaw(%s)", item.TypeKey, item.DetailsRaw)
+
 	}
 
 	return nil
