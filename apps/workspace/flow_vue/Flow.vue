@@ -8,7 +8,7 @@
             <div>
                 {{ sourcePack.url }} &nbsp [{{ dateStr(sourcePack.Time) }}]
 
-                <span v-for="item in sourcePack.flowItems">  <!--  v-bind:key="item.path" :to="item.path" -->
+                <span v-for="item in sourcePack.flowItems">
                     <br><span :id=announceId(item)  class="control" v-on:click="importData">[імпорт]</span> &nbsp;
                     <span v-html="announce(item)" @mouseover="showSummary" @mouseleave="hideSummary" class="announce" :id=announceId(item,true)></span>&nbsp;
                 </span>
@@ -73,7 +73,7 @@
                 }).then(response => {
                     return response.json();
                 }).then(flowItem => {
-                    cfg.router.push({ name: 'data_item_import',  params: { dataItem: flowItem } })
+                    cfg.router.push({ name: 'storage_item_import',  params: { dataItem: flowItem } })
                 });
             },
             
@@ -93,7 +93,9 @@
                 .then(response => {
                     return response.json();
                 }).then(flow => {
-                    this.flow = flow;
+
+                    // this.flow = flow;
+
                     this.sourcePacks = [];
 
                     let source = "";
@@ -101,17 +103,19 @@
                     let sourcePack = {flowItems: []};
 
                     for (let item of flow) {
-                      if (item.Source != source || item.Time != sourceTime) {
-                        if (sourcePack.flowItems.length > 0) {
-                            this.sourcePacks.push(sourcePack);
+                        if (!item.Origin) {
+                            item.Origin = {};
                         }
 
-                        // console.log(item);
+                        if (item.Origin.Source != source || item.Origin.Time != sourceTime) {
+                            if (sourcePack.flowItems.length > 0) {
+                                this.sourcePacks.push(sourcePack);
+                            }
 
-                        sourcePack = {url: (source = item.Source), Time: (sourceTime = item.Time), flowItems: []};
-                      }
+                            sourcePack = {url: (source = item.Origin.Source), Time: (sourceTime = item.Origin.Time), flowItems: []};
+                        }
 
-                      sourcePack.flowItems.push(item);
+                        sourcePack.flowItems.push(item);
                     }
 
                     if (sourcePack.flowItems.length > 0) {

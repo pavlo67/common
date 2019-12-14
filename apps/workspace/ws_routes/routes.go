@@ -6,22 +6,22 @@ import (
 	"io/ioutil"
 
 	"github.com/pavlo67/workshop/common/libraries/filelib"
-	"github.com/pavlo67/workshop/components/data/data_tagged/data_tagged_server_http"
-	"github.com/pavlo67/workshop/components/flow/flow_tagged/flow_tagged_server_http"
+	"github.com/pavlo67/workshop/components/flow/flow_server_http"
+	"github.com/pavlo67/workshop/components/storage/storage_server_http"
 	"github.com/pkg/errors"
 )
 
 var srvCfg = server_http.Config{
 	Title:   "Pavlo's Workshop REST API",
 	Version: "0.0.1",
-	Prefix:  "/workspace",
+	Prefix:  "/storage",
 	Endpoints: []server_http.EndpointConfig{
-		{"save", "/v1/data/save", []string{"data"}, nil, data_tagged_server_http.SaveEndpoint},
-		{"read", "/v1/data/read", []string{"data"}, nil, data_tagged_server_http.ReadEndpoint},
-		{"list", "/v1/data/list", []string{"data"}, nil, data_tagged_server_http.ListEndpoint},
-		{"remove", "/v1/data/remove", []string{"data"}, nil, data_tagged_server_http.RemoveEndpoint},
-		{"flow", "/v1/flow/list", []string{"flow"}, nil, flow_tagged_server_http.FlowEndpoint},
-		{"flow_read", "/v1/flow/read", []string{"flow"}, nil, flow_tagged_server_http.FlowReadEndpoint},
+		{"save", "/v1/data/save", []string{"data"}, nil, storage_server_http.SaveEndpoint},
+		{"read", "/v1/data/read", []string{"data"}, nil, storage_server_http.ReadEndpoint},
+		{"list", "/v1/data/list", []string{"data"}, nil, storage_server_http.ListEndpoint},
+		{"remove", "/v1/data/remove", []string{"data"}, nil, storage_server_http.RemoveEndpoint},
+		{"flow", "/v1/flow/list", []string{"flow"}, nil, flow_server_http.FlowEndpoint},
+		{"flow_read", "/v1/flow/read", []string{"flow"}, nil, flow_server_http.FlowReadEndpoint},
 	},
 }
 

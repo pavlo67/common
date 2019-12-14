@@ -38,7 +38,7 @@
             },
 
             getDataItems() {
-                fetch('http://localhost:3003/workspace/v1/list', {
+                fetch('http://localhost:3003/storage/v1/list', {
                     method: 'GET', // *GET, POST, PUT, DELETE, etc.
                     headers: {
                         'Content-Type': 'application/json',

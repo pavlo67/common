@@ -1,4 +1,4 @@
-package data_tagged_server_http
+package storage_server_http
 
 import (
 	"fmt"
@@ -11,6 +11,7 @@ import (
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/starter"
 	"github.com/pavlo67/workshop/components/data/data_tagged"
+	"github.com/pavlo67/workshop/components/storage"
 )
 
 var dataTaggedOp data_tagged.Operator
@@ -52,9 +53,9 @@ func (ss *dataTaggedServerHTTPStarter) Setup() error {
 func (ss *dataTaggedServerHTTPStarter) Run(joinerOp joiner.Operator) error {
 
 	var ok bool
-	dataTaggedOp, ok = joinerOp.Interface(data_tagged.InterfaceKey).(data_tagged.Operator)
+	dataTaggedOp, ok = joinerOp.Interface(storage.TaggedInterfaceKey).(data_tagged.Operator)
 	if !ok {
-		return errors.Errorf("no workspace.Operator with key %s", data_tagged.InterfaceKey)
+		return errors.Errorf("no storage.Operator with key %s", storage.TaggedInterfaceKey)
 	}
 
 	return nil

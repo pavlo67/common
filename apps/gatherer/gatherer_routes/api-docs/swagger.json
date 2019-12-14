@@ -1,6 +1,6 @@
 {
  "info": {
-  "title": "Pavlo's Data Gatherer REST API",
+  "title": "Pavlo's Storage Gatherer REST API",
   "version": "0.0.1"
  },
  "paths": {

@@ -20,9 +20,9 @@ import (
 
 	"github.com/pavlo67/workshop/components/data/data_sqlite"
 	"github.com/pavlo67/workshop/components/data/data_tagged"
-	"github.com/pavlo67/workshop/components/data/data_tagged/data_tagged_server_http"
 	"github.com/pavlo67/workshop/components/flow"
-	"github.com/pavlo67/workshop/components/flow/flow_tagged/flow_tagged_server_http"
+	"github.com/pavlo67/workshop/components/flow/flow_server_http"
+	"github.com/pavlo67/workshop/components/storage/storage_server_http"
 	"github.com/pavlo67/workshop/components/tagger/tagger_sqlite"
 
 	"github.com/pavlo67/workshop/apps/workspace/ws_routes"
@@ -30,6 +30,7 @@ import (
 	"github.com/pavlo67/workshop/common/scheduler/scheduler_timeout"
 	"github.com/pavlo67/workshop/components/data"
 	"github.com/pavlo67/workshop/components/importer/importer_tasks"
+	"github.com/pavlo67/workshop/components/storage"
 )
 
 var (
@@ -79,7 +80,7 @@ func main() {
 		l.Fatal(err)
 	}
 
-	// workspace config
+	// storage config
 
 	configWorkspacePath := currentPath + "../../environments/workspace." + configEnv + ".yaml"
 	cfgWorkspace, err := config.Get(configWorkspacePath, encodelib.MarshalerYAML)
@@ -104,13 +105,13 @@ func main() {
 
 		{tagger_sqlite.Starter(), nil},
 
-		{data_sqlite.Starter(), nil},
-		{data_tagged.Starter(), nil},
-		{data_tagged_server_http.Starter(), nil},
+		{data_sqlite.Starter(), common.Map{"interface_key": storage.InterfaceKey, "table": storage.CollectionDefault}},
+		{data_tagged.Starter(), common.Map{"interface_key": storage.TaggedInterfaceKey, "data_key": storage.InterfaceKey}},
+		{storage_server_http.Starter(), nil},
 
 		{data_sqlite.Starter(), common.Map{"interface_key": flow.InterfaceKey, "table": flow.CollectionDefault}},
 		{data_tagged.Starter(), common.Map{"interface_key": flow.TaggedInterfaceKey, "data_key": flow.InterfaceKey}},
-		{flow_tagged_server_http.Starter(), nil},
+		{flow_server_http.Starter(), nil},
 
 		{ws_routes.Starter(), nil},
 

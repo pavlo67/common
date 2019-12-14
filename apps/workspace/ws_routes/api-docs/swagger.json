@@ -4,7 +4,7 @@
   "version": "0.0.1"
  },
  "paths": {
-  "/workspace/v1/data/list": {
+  "/storage/v1/data/list": {
    "get": {
     "operationId": "list",
     "produces": [
@@ -15,7 +15,7 @@
     ]
    }
   },
-  "/workspace/v1/data/read/{id}": {
+  "/storage/v1/data/read/{id}": {
    "get": {
     "operationId": "read",
     "parameters": [
@@ -35,15 +35,15 @@
     ]
    }
   },
-  "/workspace/v1/data/remove": {
+  "/storage/v1/data/remove/{id}": {
    "delete": {
     "operationId": "remove",
     "parameters": [
      {
       "description": "",
-      "in": "query",
+      "in": "path",
       "name": "id",
-      "required": false,
+      "required": true,
       "type": "string"
      }
     ],
@@ -55,17 +55,10 @@
     ]
    }
   },
-  "/workspace/v1/data/save/{type}": {
+  "/storage/v1/data/save": {
    "post": {
     "operationId": "save",
     "parameters": [
-     {
-      "description": "",
-      "in": "path",
-      "name": "type",
-      "required": true,
-      "type": "string"
-     },
      {
       "in": "body",
       "name": "body_item",
@@ -81,7 +74,7 @@
     ]
    }
   },
-  "/workspace/v1/flow/list": {
+  "/storage/v1/flow/list": {
    "get": {
     "operationId": "flow",
     "produces": [
@@ -92,7 +85,7 @@
     ]
    }
   },
-  "/workspace/v1/flow/read/{id}": {
+  "/storage/v1/flow/read/{id}": {
    "get": {
     "operationId": "flow_read",
     "parameters": [

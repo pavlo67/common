@@ -111,7 +111,7 @@ func Compare(t *testing.T, dataOp Operator, readed *Item, expectedItem Item, exp
 	l.Infof("readed: %#v", readed)
 	l.Infof("readed details: %#v", detailsToRead)
 
-	expectedItem.CreatedAt = expectedItem.CreatedAt.UTC()
+	expectedItem.Status.CreatedAt = expectedItem.Status.CreatedAt.UTC()
 	expectedItem.Details = nil
 	expectedItem.DetailsRaw = nil
 
@@ -119,8 +119,8 @@ func Compare(t *testing.T, dataOp Operator, readed *Item, expectedItem Item, exp
 	readed.DetailsRaw = nil
 
 	// kostyl!!!
-	require.Equal(t, expectedItem.CreatedAt.Format(time.RFC3339), readed.CreatedAt.Format(time.RFC3339))
-	readed.CreatedAt = expectedItem.CreatedAt
+	require.Equal(t, expectedItem.Status.CreatedAt.Format(time.RFC3339), readed.Status.CreatedAt.Format(time.RFC3339))
+	readed.Status.CreatedAt = expectedItem.Status.CreatedAt
 
 	require.Equal(t, &expectedItem, readed)
 	require.Equal(t, expectedDetails, detailsToRead)
@@ -238,9 +238,9 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		readedUpdated, err := tc.Read(id[toUpdateI], nil)
 		require.NoError(t, err)
 
-		tc.ToUpdate.ExportID = tc.ToSave.ExportID   // unchanged!!!
-		tc.ToUpdate.Origin = tc.ToSave.Origin       // unchanged!!!
-		tc.ToUpdate.CreatedAt = tc.ToSave.CreatedAt // unchanged!!!
+		tc.ToUpdate.ExportID = tc.ToSave.ExportID                 // unchanged!!!
+		tc.ToUpdate.Origin = tc.ToSave.Origin                     // unchanged!!!
+		tc.ToUpdate.Status.CreatedAt = tc.ToSave.Status.CreatedAt // unchanged!!!
 
 		Compare(t, tc, readedUpdated, tc.ToUpdate, tc.DetailsToUpdate, tc.DetailsToReadUpdated, l)
 

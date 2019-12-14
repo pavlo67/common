@@ -1,10 +1,15 @@
+import { ep } from '../../components.js/swagger_convertor';
+
 let cfg = {};
 
 function init(data) {
+    if (!(data instanceof Object)) {
+        return;
+    }
+
     cfg.router = data.router;
-    // TODO: do it safely!!!
-    cfg.listEp = window.location.protocol + "//" + window.location.hostname + data.backend.host + data.backend.endpoints.flow.path;
-    cfg.readEp = window.location.protocol + "//" + window.location.hostname + data.backend.host + data.backend.endpoints.flow_read.path.replace("/{id}", "");
+    cfg.listEp = ep(data.backend, "flow");
+    cfg.readEp = ep(data.backend, "flow_read").replace("/{id}", "");
 }
 
 export { cfg, init };

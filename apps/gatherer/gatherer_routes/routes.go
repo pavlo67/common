@@ -6,16 +6,16 @@ import (
 	"io/ioutil"
 
 	"github.com/pavlo67/workshop/common/libraries/filelib"
-	"github.com/pavlo67/workshop/components/flow/flow_tagged/flow_tagged_server_http"
+	"github.com/pavlo67/workshop/components/flow/flow_server_http"
 	"github.com/pkg/errors"
 )
 
 var srvCfg = server_http.Config{
-	Title:   "Pavlo's Data Gatherer REST API",
+	Title:   "Pavlo's Storage Gatherer REST API",
 	Version: "0.0.1",
 	Prefix:  "/gatherer",
 	Endpoints: []server_http.EndpointConfig{
-		{"flow", "/v1/export", []string{"flow"}, nil, flow_tagged_server_http.ExportFlowEndpoint},
+		{"flow", "/v1/export", []string{"flow"}, nil, flow_server_http.ExportFlowEndpoint},
 	},
 }
 

@@ -1,4 +1,4 @@
-package flow_tagged_server_http
+package flow_server_http
 
 import (
 	"net/http"
@@ -37,7 +37,7 @@ func ExportFlow(user *auth.User, _ server_http.Params, req *http.Request) (serve
 		var err error
 		afterID, err = strconv.Atoi(afterIDStr)
 		if err != nil {
-			return server.ResponseRESTError(http.StatusBadRequest, errors.Errorf("ERROR on GET workspace/...ExportFlow: ",
+			return server.ResponseRESTError(http.StatusBadRequest, errors.Errorf("ERROR on GET storage/...ExportFlow: ",
 				errors.Errorf("can't strconv.Atoi(%s) for after_id parameter", afterIDStr, err)))
 		}
 
@@ -47,7 +47,7 @@ func ExportFlow(user *auth.User, _ server_http.Params, req *http.Request) (serve
 
 	items, err := flowTaggedOp.Export(selector, &crud.GetOptions{OrderBy: []string{"id"}})
 	if err != nil {
-		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on GET workspace/...ExportFlow: ", err))
+		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on GET storage/...ExportFlow: ", err))
 	}
 
 	// TODO!!! MaxID with item.CreatedAt / UpdatedAt if original .ID isn't autoincrement (for mongoDB, for example)

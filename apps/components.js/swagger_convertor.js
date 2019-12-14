@@ -1,4 +1,4 @@
-function swaggerConvertor(sw) {
+function convert(sw) {
   if (!(sw instanceof Object && sw.paths instanceof Object)) return {};
 
   let swc = {
@@ -28,7 +28,7 @@ function swaggerConvertor(sw) {
       let operationId = p[method].operationId;
       delete p[method].operationId;
 
-      p[method].path = path;
+      p[method].path   = path;
       p[method].method = method;
 
       swc.endpoints[operationId] = p[method];
@@ -38,4 +38,12 @@ function swaggerConvertor(sw) {
   return swc;
 }
 
-export default swaggerConvertor;
+function ep(swc, key) {
+  if (!(swc instanceof Object && swc.endpoints instanceof Object && swc.endpoints[key] instanceof Object)) {
+    return "";
+  }
+
+  return window.location.protocol + "//" + window.location.hostname + swc.host + swc.endpoints[key].path;
+}
+
+export { convert, ep } ;

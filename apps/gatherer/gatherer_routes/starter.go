@@ -56,9 +56,9 @@ func (ss *workspaceStarter) Run(joinerOp joiner.Operator) error {
 		return errors.Errorf("no server_http.Operator with key %s", server_http.InterfaceKey)
 	}
 
-	//wsOp, ok := joinerOp.Interface(workspace.InterfaceKey).(workspace.Operator)
+	//wsOp, ok := joinerOp.Interface(storage.InterfaceKey).(storage.Operator)
 	//if !ok {
-	//	return errors.Errorf("no workspace.Operator with key %s", workspace.InterfaceKey)
+	//	return errors.Errorf("no storage.Operator with key %s", storage.InterfaceKey)
 	//}
 
 	srvPort, ok := joinerOp.Interface(server_http.PortInterfaceKey).(int)

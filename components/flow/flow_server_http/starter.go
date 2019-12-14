@@ -1,4 +1,4 @@
-package flow_tagged_server_http
+package flow_server_http
 
 import (
 	"fmt"
@@ -53,7 +53,7 @@ func (ss *flowTaggedServerHTTPStarter) Run(joinerOp joiner.Operator) error {
 	var ok bool
 	flowTaggedOp, ok = joinerOp.Interface(flow.TaggedInterfaceKey).(data_tagged.Operator)
 	if !ok {
-		return errors.Errorf("no workspace.Operator with key %s", flow.TaggedInterfaceKey)
+		return errors.Errorf("no storage.Operator with key %s", flow.TaggedInterfaceKey)
 	}
 
 	return nil

@@ -142,19 +142,30 @@ func (dataOp *dataSQLite) Save(items []data.Item, _ *crud.SaveOptions) ([]common
 
 		//l.Info(item.CreatedAt.Format(time.RFC3339))
 
-		embedded, err := json.Marshal(item.Embedded)
-		if err != nil {
-			return ids, errors.Wrapf(err, onSave+"can't .Marshal(%#v)", item.Embedded)
+		var embedded, tags, details string
+
+		if item.Embedded != nil {
+			embeddedBytes, err := json.Marshal(item.Embedded)
+			if err != nil {
+				return ids, errors.Wrapf(err, onSave+"can't .Marshal(%#v)", item.Embedded)
+			}
+			embedded = string(embeddedBytes)
 		}
 
-		tags, err := json.Marshal(item.Tags)
-		if err != nil {
-			return ids, errors.Wrapf(err, onSave+"can't .Marshal(%#v)", item.Tags)
+		if item.Tags != nil {
+			tagsBytes, err := json.Marshal(item.Tags)
+			if err != nil {
+				return ids, errors.Wrapf(err, onSave+"can't .Marshal(%#v)", item.Tags)
+			}
+			tags = string(tagsBytes)
 		}
 
-		details, err := json.Marshal(item.Details)
-		if err != nil {
-			return ids, errors.Wrapf(err, onSave+"can't .Marshal(%#v)", item.Details)
+		if item.Details != nil {
+			detailsBytes, err := json.Marshal(item.Details)
+			if err != nil {
+				return ids, errors.Wrapf(err, onSave+"can't .Marshal(%#v)", item.Details)
+			}
+			details = string(detailsBytes)
 		}
 
 		if item.ID != "" {
@@ -225,7 +236,7 @@ func (dataOp *dataSQLite) Read(id common.ID, _ *crud.GetOptions) (*data.Item, er
 
 	err = dataOp.stmRead.QueryRow(idNum).Scan(
 		&item.URL, &item.TypeKey, &item.Title, &item.Summary, &embedded, &tags, &item.DetailsRaw,
-		&item.Source, &item.Key, &sourceTimePtr, &item.Data, &item.ExportID,
+		&item.Origin.Source, &item.Origin.Key, &sourceTimePtr, &item.Origin.Data, &item.ExportID,
 		&createdAt, &updatedAtPtr,
 	)
 	if err == sql.ErrNoRows {
@@ -235,7 +246,7 @@ func (dataOp *dataSQLite) Read(id common.ID, _ *crud.GetOptions) (*data.Item, er
 		return nil, errors.Wrapf(err, onRead+sqllib.CantScanQueryRow, dataOp.sqlRead, idNum)
 	}
 
-	item.CreatedAt, err = time.Parse(time.RFC3339, createdAt)
+	item.Status.CreatedAt, err = time.Parse(time.RFC3339, createdAt)
 	if err != nil {
 		return &item, errors.Wrapf(err, onRead+"can't parse .CreatedAt (%s)", createdAt)
 	}
@@ -248,7 +259,7 @@ func (dataOp *dataSQLite) Read(id common.ID, _ *crud.GetOptions) (*data.Item, er
 		if err != nil {
 			return &item, errors.Wrapf(err, onRead+"can't parse .UpdatedAt (%s)", *updatedAtPtr)
 		}
-		item.UpdatedAt = &updatedAt
+		item.Status.UpdatedAt = &updatedAt
 	}
 
 	if sourceTimePtr != nil {
@@ -281,6 +292,11 @@ const onDetails = "on dataSQLite.Details(): "
 func (dataOp *dataSQLite) SetDetails(item *data.Item) error {
 	if item == nil {
 		return errors.New(onDetails + "nil item")
+	}
+
+	if len(item.DetailsRaw) < 1 {
+		item.Details = nil
+		return nil
 	}
 
 	switch item.TypeKey {
@@ -415,7 +431,7 @@ func (dataOp *dataSQLite) List(term *selectors.Term, options *crud.GetOptions) (
 			return items, errors.Wrapf(err, onList+sqllib.CantScanQueryRow, query, values)
 		}
 
-		if item.CreatedAt, err = time.Parse(time.RFC3339, createdAt); err != nil {
+		if item.Status.CreatedAt, err = time.Parse(time.RFC3339, createdAt); err != nil {
 			return items, errors.Wrapf(err, onList+"can't parse .CreatedAt (%s)", createdAt)
 		}
 
@@ -424,7 +440,7 @@ func (dataOp *dataSQLite) List(term *selectors.Term, options *crud.GetOptions) (
 			if err != nil {
 				return items, errors.Wrapf(err, onList+"can't parse .UpdatedAt (%s)", *updatedAtPtr)
 			}
-			item.UpdatedAt = &updatedAt
+			item.Status.UpdatedAt = &updatedAt
 		}
 
 		if sourceTimePtr != nil {

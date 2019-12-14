@@ -1,6 +1,14 @@
 package flow
 
-import "time"
+import (
+	"time"
+
+	"github.com/pavlo67/workshop/common/joiner"
+)
+
+const InterfaceKey joiner.InterfaceKey = "flow"
+const TaggedInterfaceKey joiner.InterfaceKey = "flow_tagged"
+const CollectionDefault = "flow"
 
 type Origin struct {
 	Source string     `bson:",omitempty"    json:",omitempty"`

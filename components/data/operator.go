@@ -16,6 +16,8 @@ const CollectionDefault = "data"
 type TypeKey string
 
 const TypeKeyString TypeKey = "string"
+const TypeKeyHRefImage TypeKey = "href_image"
+const TypeKeyHRef TypeKey = "href"
 
 type Type struct {
 	Key      TypeKey
@@ -38,8 +40,8 @@ type Item struct {
 	// DetailsRaw shouldn't be used directly
 	DetailsRaw []byte `bson:",omitempty"    json:",omitempty"`
 
-	crud.Status `bson:",omitempty"        json:",omitempty"`
-	flow.Origin `bson:",inline,omitempty" json:",inline,omitempty"`
+	Status crud.Status `bson:",omitempty" json:",omitempty"`
+	Origin flow.Origin `bson:",omitempty" json:",omitempty"`
 }
 
 type Operator interface {

@@ -76,8 +76,8 @@ func Copy(url string, impOp importer.Operator, dataOp data.Operator) (int, int, 
 		numProcessed++
 
 		term := logic.AND(
-			selectors.Binary(selectors.Eq, "source", selectors.Value{item.Source}),
-			selectors.Binary(selectors.Eq, "source_key", selectors.Value{item.Key}),
+			selectors.Binary(selectors.Eq, "source", selectors.Value{item.Origin.Source}),
+			selectors.Binary(selectors.Eq, "source_key", selectors.Value{item.Origin.Key}),
 		)
 
 		//itemStr, _ := json.Marshal(item)
@@ -99,7 +99,7 @@ func Copy(url string, impOp importer.Operator, dataOp data.Operator) (int, int, 
 		item.ID = ""
 
 		// TODO: remove this kostyl!!!
-		item.Time = &item.CreatedAt
+		item.Origin.Time = &item.Status.CreatedAt
 
 		_, err = dataOp.Save([]data.Item{item}, nil)
 		if err != nil {

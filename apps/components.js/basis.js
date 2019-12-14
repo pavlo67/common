@@ -18,13 +18,22 @@ export default {
 }
 
 function dateStr(d) {
-    // i(d, typeof d);
+    if (typeof d === "string") {
+        d = new Date(d);
+    }
 
     if (d instanceof Date) {
-        return d.ToLocaleTimeString();
-    } else if (typeof d === "string") {
-        return d.substr(0, 16).replace("T", " ");
+        let month = d.getMonth(); if (month < 10) month = "0" + month;
+        let day = d.getDate(); if (day < 10) day = "0" + day;
+        let hours = d.getHours(); if (hours == 0) { hours = "00"; } else if (hours < 10 ) hours = "0" + hours;
+        let minutes = d.getMinutes(); if (minutes == 0) { minutes = "00"; } else if (minutes < 10 ) minutes = "0" + minutes;
+
+        return d.getFullYear() + "-" + month + "-" + day + " " + hours + ":" + minutes
     }
+
+    // if (typeof d === "string") {
+    //     return d.substr(0, 16).replace("T", " ");
+    // }
 
     return "";
 }

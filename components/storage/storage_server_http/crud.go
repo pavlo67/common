@@ -1,4 +1,4 @@
-package data_tagged_server_http
+package storage_server_http
 
 import (
 	"encoding/json"
@@ -19,38 +19,28 @@ import (
 
 // Save --------------------------------------------------------------------------------------
 
-var SaveEndpoint = server_http.Endpoint{Method: "POST", PathParams: []string{"type"}, WorkerHTTP: Save}
+var SaveEndpoint = server_http.Endpoint{Method: "POST", WorkerHTTP: Save}
 
 func Save(user *auth.User, params server_http.Params, req *http.Request) (server.Response, error) {
 	var item data.Item
 
-	itemType := params["type"]
-	switch itemType {
-	case "test":
-		item.Details = &data.Test{}
-	default:
-		return server.ResponseRESTError(http.StatusBadRequest, errors.Errorf("ERROR on POST workspace/...Save: wrong item type: %s", itemType))
-	}
-
-	var itemJSON []byte
-
 	itemJSON, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		return server.ResponseRESTError(http.StatusBadRequest, errors.Errorf("ERROR on POST workspace/...Save: reading body: %s", err))
+		return server.ResponseRESTError(http.StatusBadRequest, errors.Errorf("ERROR on POST storage/...Save: reading body: %s", err))
 	}
 
 	err = json.Unmarshal(itemJSON, &item)
 	if err != nil {
-		return server.ResponseRESTError(http.StatusBadRequest, errors.Errorf("ERROR on POST workspace/...Save: can't json.Unmarshal(%s): %s", itemJSON, err))
+		return server.ResponseRESTError(http.StatusBadRequest, errors.Errorf("ERROR on POST storage/...Save: can't json.Unmarshal(%s): %s", itemJSON, err))
 	}
 
 	ids, err := dataTaggedOp.Save([]data.Item{item}, nil)
 	if err != nil {
-		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on POST workspace/...Save: %s", err))
+		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on POST storage/...Save: %s", err))
 	}
 
 	if len(ids) != 1 {
-		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on POST workspace/...Save: returned wrong ids (%#v)", ids))
+		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on POST storage/...Save: returned wrong ids (%#v)", ids))
 	}
 
 	return server.ResponseRESTOk(map[string]interface{}{"id": ids[0]})
@@ -65,14 +55,14 @@ func Read(user *auth.User, params server_http.Params, req *http.Request) (server
 
 	item, err := dataTaggedOp.Read(id, nil)
 	if err == common.ErrNotFound {
-		return server.ResponseRESTError(http.StatusNotFound, errors.Errorf("ERROR on GET workspace/...Read: not found item with id = %s", id))
+		return server.ResponseRESTError(http.StatusNotFound, errors.Errorf("ERROR on GET storage/...Read: not found item with id = %s", id))
 	} else if err != nil {
-		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on GET workspace/...Read: ", err))
+		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on GET storage/...Read: ", err))
 	}
 
 	err = dataTaggedOp.SetDetails(item)
 	if err != nil {
-		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on GET workspace/...Read: ", err))
+		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on GET storage/...Read: ", err))
 	}
 
 	return server.ResponseRESTOk(item)
@@ -83,7 +73,7 @@ func Read(user *auth.User, params server_http.Params, req *http.Request) (server
 
 // ListFlow --------------------------------------------------------------------------------------
 
-var ListEndpoint = server_http.Endpoint{Method: "GET", PathParams: nil, WorkerHTTP: List}
+var ListEndpoint = server_http.Endpoint{Method: "GET", WorkerHTTP: List}
 
 func List(user *auth.User, _ server_http.Params, req *http.Request) (server.Response, error) {
 	items, err := dataTaggedOp.List(nil, nil)
@@ -91,7 +81,7 @@ func List(user *auth.User, _ server_http.Params, req *http.Request) (server.Resp
 	l.Infof("%#v", items)
 
 	if err != nil {
-		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on GET workspace/...ListFlow: ", err))
+		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on GET storage/...ListFlow: ", err))
 	}
 
 	return server.ResponseRESTOk(items)
@@ -99,15 +89,14 @@ func List(user *auth.User, _ server_http.Params, req *http.Request) (server.Resp
 
 // Read --------------------------------------------------------------------------------------
 
-var RemoveEndpoint = server_http.Endpoint{Method: "DELETE", PathParams: nil, QueryParams: []string{"id"}, WorkerHTTP: Remove}
+var RemoveEndpoint = server_http.Endpoint{Method: "DELETE", PathParams: []string{"id"}, WorkerHTTP: Remove}
 
 func Remove(user *auth.User, params server_http.Params, req *http.Request) (server.Response, error) {
-	queryParams := req.URL.Query()
-	id := common.ID(queryParams.Get("id"))
+	id := common.ID(params["id"])
 
 	err := dataTaggedOp.Remove(id, nil)
 	if err != nil {
-		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on DELETE workspace/...Remove: ", err))
+		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on DELETE storage/...Remove: ", err))
 	}
 
 	return server.ResponseRESTOk(map[string]interface{}{"id": id})

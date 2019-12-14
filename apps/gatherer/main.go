@@ -24,7 +24,7 @@ import (
 	"github.com/pavlo67/workshop/components/data/data_sqlite"
 	"github.com/pavlo67/workshop/components/data/data_tagged"
 	"github.com/pavlo67/workshop/components/flow"
-	"github.com/pavlo67/workshop/components/flow/flow_tagged/flow_tagged_server_http"
+	"github.com/pavlo67/workshop/components/flow/flow_server_http"
 
 	"github.com/pavlo67/workshop/apps/gatherer/gatherer_routes"
 	"github.com/pavlo67/workshop/components/importer/importer_tasks"
@@ -100,7 +100,7 @@ func main() {
 
 		{data_sqlite.Starter(), common.Map{"table": flow.CollectionDefault, "interface_key": flow.InterfaceKey, "no_tagger": true}},
 		{data_tagged.Starter(), common.Map{"data_key": flow.InterfaceKey, "interface_key": flow.TaggedInterfaceKey, "no_tagger": true}},
-		{flow_tagged_server_http.Starter(), nil},
+		{flow_server_http.Starter(), nil},
 
 		{auth_ecdsa.Starter(), nil},
 		{server_http_jschmhr.Starter(), common.Map{"port": cfgEnvs["gatherer_port"]}},

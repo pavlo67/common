@@ -47,18 +47,20 @@ func (item *Item) GetData() (*data.Item, error) {
 
 	if feedItem.Image != nil {
 		embedded = append(embedded, data.Item{
-			URL:    feedItem.Image.URL,
-			Title:  feedItem.Image.Title,
-			Status: status,
+			TypeKey: data.TypeKeyHRefImage,
+			URL:     feedItem.Image.URL,
+			Title:   feedItem.Image.Title,
+			Status:  status,
 		})
 	}
 
 	if len(feedItem.Enclosures) > 0 {
 		for _, p := range feedItem.Enclosures {
 			embedded = append(embedded, data.Item{
-				URL:    p.URL,
-				Title:  p.Type + ": " + p.Length,
-				Status: status,
+				TypeKey: data.TypeKeyHRef,
+				URL:     p.URL,
+				Title:   p.Type + ": " + p.Length,
+				Status:  status,
 			})
 		}
 	}

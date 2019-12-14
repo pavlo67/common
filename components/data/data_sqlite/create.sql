@@ -1,4 +1,4 @@
-CREATE TABLE data (
+CREATE TABLE storage (
   id           INTEGER             PRIMARY KEY AUTOINCREMENT,
   export_id    TEXT       NOT NULL,
   url          TEXT       NOT NULL,
@@ -16,9 +16,9 @@ CREATE TABLE data (
   updated_at   TIMESTAMP
 );
 
-CREATE INDEX idx_data_source     ON data(source, source_key);
+CREATE INDEX idx_storage_source ON storage(source, source_key);
 
-CREATE INDEX idx_data_title      ON data(`type`, title);
+CREATE INDEX idx_storage_title  ON storage(`type`, title);
 
 --
 

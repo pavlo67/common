@@ -1,4 +1,4 @@
-package flow_tagged_server_http
+package flow_server_http
 
 import (
 	"net/http"

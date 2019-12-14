@@ -11,7 +11,7 @@ import (
 
 	"github.com/pavlo67/workshop/common/logger"
 
-	"github.com/pavlo67/workshop/components/flow/flow_tagged/flow_tagged_server_http"
+	"github.com/pavlo67/workshop/components/flow/flow_server_http"
 	"github.com/pavlo67/workshop/components/importer"
 )
 
@@ -38,7 +38,7 @@ func (sh *seriesHTTP) Get(_ string) (*importer.DataSeries, error) {
 
 	feedURL := sh.exportURL
 	if sh.lastImportedID != "" {
-		feedURL += fmt.Sprintf("?%s=%s", flow_tagged_server_http.AfterIDParam, sh.lastImportedID)
+		feedURL += fmt.Sprintf("?%s=%s", flow_server_http.AfterIDParam, sh.lastImportedID)
 	}
 
 	resp, err := http.Get(feedURL)

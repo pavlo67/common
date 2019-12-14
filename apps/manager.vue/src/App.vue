@@ -18,32 +18,48 @@
 </template>
 
 <style lang="scss">
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
-#nav {
-  padding: 10px;
-  width: 300px;
-  float: left;
-  min-height: 100vh;
-  text-align: left;
-  background-color: #f2dede;
+  #app {
+    font-family: 'Avenir', Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-align: center;
+    color: #2c3e50;
+  }
+
+  #nav {
+    padding: 10px;
+    width: 300px;
+    float: left;
+    min-height: 100vh;
+    text-align: left;
+    background-color: #f2dede;
+    a {
+      color: #4414ff;
+    }
+
+  }
+
+  .title {
+    color: blue;
+  }
+
+  .small {
+    font-size: 12pt;
+  }
+
   a {
     text-decoration: none;
-    color: #2c3e50;
+    color: #820cff;
+    /*
     &.router-link-exact-active {
-      color: #42b983;
+     color: #42b983;
     }
+    */
   }
-}
 
-#view {
-  margin-left: 320px;
-}
+  #view {
+    margin-left: 320px;
+  }
 
 </style>
 

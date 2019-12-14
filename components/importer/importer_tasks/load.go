@@ -93,8 +93,8 @@ func Load(url string, dataOp data.Operator) (int, int, int, error) {
 		numProcessed++
 
 		term := logic.AND(
-			selectors.Binary(selectors.Eq, "source", selectors.Value{item.Source}),
-			selectors.Binary(selectors.Eq, "source_key", selectors.Value{item.Key}),
+			selectors.Binary(selectors.Eq, "source", selectors.Value{item.Origin.Source}),
+			selectors.Binary(selectors.Eq, "source_key", selectors.Value{item.Origin.Key}),
 		)
 
 		//itemStr, _ := json.Marshal(item)

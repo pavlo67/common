@@ -5,8 +5,8 @@ import './ecosystem/registerServiceWorker';  // import store from './ecosystem/s
 
 import parts from './parts';
 
-import swagger from '../../workspace/ws_routes/api-docs/swagger';
-import swaggerConvertor from '../../components.js/swagger_convertor';
+import swagger     from '../../workspace/ws_routes/api-docs/swagger';
+import { convert } from '../../components.js/swagger_convertor';
 
 Vue.use(Router);
 Vue.config.productionTip = false;
@@ -23,8 +23,8 @@ for (let p of parts) {
     }
 }
 
-let backend = swaggerConvertor(swagger);
-let router = new Router({ routes });
+let backend = convert(swagger);
+let router  = new Router({ routes });
 for (let i of inits) i({router, backend});
 
 new Vue({
