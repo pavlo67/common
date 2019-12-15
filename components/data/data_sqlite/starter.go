@@ -79,7 +79,7 @@ func (ts *dataSQLiteStarter) Run(joinerOp joiner.Operator) error {
 		}
 	}
 
-	dataOp, _, err := NewData(ts.config, ts.table, ts.interfaceKey, taggerOp, cleanerOp)
+	dataOp, _, err := New(ts.config, ts.table, ts.interfaceKey, taggerOp, cleanerOp)
 	if err != nil {
 		return errors.Wrap(err, "can't init data.Operator")
 	}

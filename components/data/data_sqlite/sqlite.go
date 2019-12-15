@@ -52,7 +52,7 @@ type dataSQLite struct {
 
 const onNew = "on dataSQLite.New(): "
 
-func NewData(access config.Access, table string, interfaceKey joiner.InterfaceKey, taggerOp tagger.Operator, taggerCleaner crud.Cleaner) (data.Operator, crud.Cleaner, error) {
+func New(access config.Access, table string, interfaceKey joiner.InterfaceKey, taggerOp tagger.Operator, taggerCleaner crud.Cleaner) (data.Operator, crud.Cleaner, error) {
 	db, err := sqllib_sqlite.Connect(access)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, onNew)
@@ -351,35 +351,58 @@ func (dataOp *dataSQLite) Remove(id common.ID, _ *crud.RemoveOptions) error {
 
 const onExport = "on dataSQLite.Export()"
 
-func (dataOp *dataSQLite) Export(term *selectors.Term, options *crud.GetOptions) ([]data.Item, error) {
+func (dataOp *dataSQLite) Export(afterIDStr string, options *crud.GetOptions) ([]data.Item, error) {
 	// TODO: remove limits
 	// if options != nil {
 	//	options.Limits = nil
 	// }
 
-	termUpd := selectors.Binary(selectors.Eq, "export_id", selectors.Value{""})
-	if term != nil {
-		termUpd = logic.AND(term, termUpd)
+	afterIDStr = strings.TrimSpace(afterIDStr)
+
+	var term *selectors.Term
+
+	var afterID int
+	if afterIDStr != "" {
+		var err error
+		afterID, err = strconv.Atoi(afterIDStr)
+		if err != nil {
+			return nil, errors.Errorf("can't strconv.Atoi(%s) for after_id parameter", afterIDStr, err)
+		}
+
+		// TODO!!! term with some item's autoincrement if original .ID isn't it (using .ID to find corresponding autoincrement value)
+		term = selectors.Binary(selectors.Gt, "id", selectors.Value{afterID})
 	}
 
-	condition, values, err := selectors_sql.Use(termUpd)
-	if err != nil {
-		return nil, errors.Errorf(onExport+"wrong selector to update export_id's (%#v): %s", termUpd, err)
-	}
-	condition = " WHERE " + condition
-
-	query := "UPDATE " + dataOp.table + " SET export_id = id " + condition
-	dataOp.db.Exec(query, values...)
-	if err != nil {
-		return nil, errors.Wrapf(err, onExport+sqllib.CantExec, query, values)
-	}
-
-	termEx := selectors.Binary(selectors.Ne, "export_id", selectors.Value{""})
-	if term == nil {
-		term = termEx
+	// TODO!!! order by some item's autoincrement if original .ID isn't it
+	if options == nil {
+		options = &crud.GetOptions{OrderBy: []string{"id"}}
 	} else {
-		term = logic.AND(term, termEx)
+		options.OrderBy = []string{"id"}
 	}
+
+	//termUpd := selectors.Binary(selectors.Eq, "export_id", selectors.Value{""})
+	//if term != nil {
+	//	termUpd = logic.AND(term, termUpd)
+	//}
+	//
+	//condition, values, err := selectors_sql.Use(termUpd)
+	//if err != nil {
+	//	return nil, errors.Errorf(onExport+"wrong term to update export_id's (%#v): %s", termUpd, err)
+	//}
+	//condition = " WHERE " + condition
+	//
+	//query := "UPDATE " + dataOp.table + " SET export_id = id " + condition
+	//dataOp.db.Exec(query, values...)
+	//if err != nil {
+	//	return nil, errors.Wrapf(err, onExport+sqllib.CantExec, query, values)
+	//}
+	//
+	//termEx := selectors.Binary(selectors.Ne, "export_id", selectors.Value{""})
+	//if term == nil {
+	//	term = termEx
+	//} else {
+	//	term = logic.AND(term, termEx)
+	//}
 
 	return dataOp.List(term, options)
 }

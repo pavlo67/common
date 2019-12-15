@@ -15,6 +15,9 @@ import (
 	"github.com/pavlo67/workshop/components/importer/importer_series_http"
 )
 
+// TODO: vary this parameter
+const copyLimit = 200
+
 func NewCopyTask(url string, dataOp data.Operator) (scheduler.Task, error) {
 	url = strings.TrimSpace(url)
 
@@ -26,20 +29,25 @@ func NewCopyTask(url string, dataOp data.Operator) (scheduler.Task, error) {
 		return nil, errors.New("on importer_task.NewCopyTask(): data.Operator == nil")
 	}
 
-	impOp, err := importer_series_http.NewSeriesHTTP(url, "", l)
+	impOp, err := importer_series_http.NewSeriesHTTP(url, l)
 	if err != nil {
 		return nil, errors.Errorf("on importer_tasks.NewCopyTask(): can't importer_series_http.NewSeriesHTTP(%s, '', l)", url)
 	}
 
-	return &copyTask{url, impOp, dataOp}, nil
+	// TODO!!! init .lastImportedId
+
+	return &copyTask{url, impOp, "", dataOp, copyLimit}, nil
 }
 
 var _ scheduler.Task = &copyTask{}
 
 type copyTask struct {
-	url    string
-	impOp  importer.Operator
-	dataOp data.Operator
+	url            string
+	impOp          importer.Operator
+	lastImportedID string
+
+	dataOp    data.Operator
+	copyLimit int
 }
 
 func (it *copyTask) Name() string {
@@ -51,20 +59,23 @@ func (it *copyTask) Run(timeSheduled time.Time) error {
 		return errors.New("on copyTask.Run(): it == nil")
 	}
 
-	numAll, numProcessed, numNew, err := Copy(it.url, it.impOp, it.dataOp)
+	numAll, numProcessed, numNew, err := it.Copy()
 	l.Infof("numAll = %d, numProcessed = %d, numNew = %d", numAll, numProcessed, numNew)
 
 	return err
 }
 
-func Copy(url string, impOp importer.Operator, dataOp data.Operator) (int, int, int, error) {
+func (it *copyTask) Copy() (int, int, int, error) {
+	if it == nil {
+		return 0, 0, 0, errors.New("on copyTask.Copy(): it == nil")
+	}
 
-	series, err := impOp.Get("")
+	series, err := it.impOp.Get(it.lastImportedID)
 	if err != nil {
-		return 0, 0, 0, errors.Errorf("can't impOp.Get('', nil): %s", url, err)
+		return 0, 0, 0, errors.Errorf("can't impOp.Get(%s) from %s: %s", it.lastImportedID, it.url, err)
 	}
 	if series == nil {
-		return 0, 0, 0, errors.Errorf("no series from impOp.Get('%s', nil)", url)
+		return 0, 0, 0, errors.Errorf("no series from impOp.Get(%s) from %s", it.lastImportedID, it.url)
 	}
 
 	numAll := len(series.Data)
@@ -86,30 +97,36 @@ func Copy(url string, impOp importer.Operator, dataOp data.Operator) (int, int, 
 		//termStr, _ := json.Marshal(term)
 		//l.Infof("%s", termStr)
 
-		cnt, err = dataOp.Count(term, nil)
+		cnt, err = it.dataOp.Count(term, nil)
 		if err != nil {
 			err = errors.Errorf("can't dataOp.Count(%#v): %s", term, err)
-			break
+			return numAll, numProcessed, numNew, err
 
 		} else if cnt > 0 {
 			// already exists!
 			continue
 		}
 
+		importedID := item.ID
 		item.ID = ""
 
 		// TODO: remove this kostyl!!!
 		item.Origin.Time = &item.Status.CreatedAt
 
-		_, err = dataOp.Save([]data.Item{item}, nil)
+		_, err = it.dataOp.Save([]data.Item{item}, nil)
 		if err != nil {
 			err = errors.Errorf("can't adminOp.Save(%#v): %s", item, err)
 			break
 
-		} else {
-			numNew++
+		}
+
+		numNew++
+		it.lastImportedID = string(importedID)
+
+		if numNew >= copyLimit {
+			break
 		}
 	}
 
-	return numAll, numProcessed, numNew, err
+	return numAll, numProcessed, numNew, nil
 }

@@ -9,8 +9,6 @@ const DataItemsDataType DataType = "data_items"
 type Packet struct {
 	SourceURL string
 	CreatedAt time.Time
-
-	Type  DataType
-	Data  interface{}
-	MaxID string
+	Type      DataType
+	Data      interface{}
 }

@@ -125,5 +125,5 @@ func Load(url string, dataOp data.Operator) (int, int, int, error) {
 		}
 	}
 
-	return numAll, numProcessed, numNew, err
+	return numAll, numProcessed, numNew, fcOp.Clean(0)
 }

@@ -54,7 +54,7 @@ type Operator interface {
 	List(*selectors.Term, *crud.GetOptions) ([]Item, error)
 	Count(*selectors.Term, *crud.GetOptions) (uint64, error)
 
-	Export(term *selectors.Term, options *crud.GetOptions) ([]Item, error)
+	Export(afterID string, options *crud.GetOptions) ([]Item, error)
 }
 
 type Convertor interface {

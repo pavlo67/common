@@ -27,6 +27,7 @@ import (
 	"github.com/pavlo67/workshop/components/flow/flow_server_http"
 
 	"github.com/pavlo67/workshop/apps/gatherer/gatherer_routes"
+	"github.com/pavlo67/workshop/components/flow/flow_cleaner/flow_cleaner_sqlite"
 	"github.com/pavlo67/workshop/components/importer/importer_tasks"
 )
 
@@ -93,12 +94,15 @@ func main() {
 
 	// running starters
 
+	// TODO!!! vary it
+	const flowTable = flow.CollectionDefault
+
 	label := "GATHERER/SQLITE CLI BUILD"
 
 	starters := []starter.Starter{
 		{control.Starter(), nil},
 
-		{data_sqlite.Starter(), common.Map{"table": flow.CollectionDefault, "interface_key": flow.InterfaceKey, "no_tagger": true}},
+		{data_sqlite.Starter(), common.Map{"table": flowTable, "interface_key": flow.InterfaceKey, "no_tagger": true}},
 		{data_tagged.Starter(), common.Map{"data_key": flow.InterfaceKey, "interface_key": flow.TaggedInterfaceKey, "no_tagger": true}},
 		{flow_server_http.Starter(), nil},
 
@@ -106,6 +110,7 @@ func main() {
 		{server_http_jschmhr.Starter(), common.Map{"port": cfgEnvs["gatherer_port"]}},
 		{gatherer_routes.Starter(), nil},
 
+		{flow_cleaner_sqlite.Starter(), common.Map{"table": flowTable}},
 		{scheduler_timeout.Starter(), nil},
 		{importer_tasks.Starter(), nil},
 	}

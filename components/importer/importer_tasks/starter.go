@@ -6,6 +6,7 @@ import (
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/starter"
+	"github.com/pavlo67/workshop/components/flow/flow_cleaner"
 )
 
 func Starter() starter.Operator {
@@ -20,6 +21,10 @@ type importerTasksStarter struct {
 	//table        string
 	//interfaceKey joiner.InterfaceKey
 }
+
+// ------------------------------------------------
+
+var fcOp flow_cleaner.Operator
 
 func (ts *importerTasksStarter) Name() string {
 	return logger.GetCallInfo().PackageName
@@ -46,5 +51,11 @@ func (ts *importerTasksStarter) Setup() error {
 }
 
 func (ts *importerTasksStarter) Run(joinerOp joiner.Operator) error {
+
+	fcOp, _ = joinerOp.Interface(flow_cleaner.InterfaceKey).(flow_cleaner.Operator)
+	if fcOp == nil {
+		l.Fatalf("no flow_cleaner.Operator with key %s", flow_cleaner.InterfaceKey)
+	}
+
 	return nil
 }

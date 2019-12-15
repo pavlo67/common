@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strings"
 
 	"github.com/pkg/errors"
 
@@ -15,30 +14,28 @@ import (
 	"github.com/pavlo67/workshop/components/importer"
 )
 
-func NewSeriesHTTP(exportURL, lastImportedID string, l logger.Operator) (importer.Operator, error) {
+func NewSeriesHTTP(exportURL string, l logger.Operator) (importer.Operator, error) {
 	if l == nil {
 		return nil, errors.New("on NewSeriesHTTP(): nil logger")
 	}
 
-	return &seriesHTTP{exportURL, lastImportedID, l}, nil
+	return &seriesHTTP{exportURL, l}, nil
 }
 
 var _ importer.Operator = &seriesHTTP{}
 
 type seriesHTTP struct {
-	exportURL      string
-	lastImportedID string
-	l              logger.Operator
+	exportURL string
+	l         logger.Operator
 }
 
 const onGet = "on seriesHTTP.Get(): "
 
-func (sh *seriesHTTP) Get(_ string) (*importer.DataSeries, error) {
-	sh.lastImportedID = strings.TrimSpace(sh.lastImportedID)
+func (sh *seriesHTTP) Get(lastImportedID string) (*importer.DataSeries, error) {
 
 	feedURL := sh.exportURL
-	if sh.lastImportedID != "" {
-		feedURL += fmt.Sprintf("?%s=%s", flow_server_http.AfterIDParam, sh.lastImportedID)
+	if lastImportedID != "" {
+		feedURL += fmt.Sprintf("?%s=%s", flow_server_http.AfterIDParam, lastImportedID)
 	}
 
 	resp, err := http.Get(feedURL)
@@ -56,10 +53,6 @@ func (sh *seriesHTTP) Get(_ string) (*importer.DataSeries, error) {
 	err = json.Unmarshal(body, &series)
 	if err != nil {
 		return nil, errors.Wrapf(err, onGet+"can't json.Unmarshal(%s, &series)", body)
-	}
-
-	if strings.TrimSpace(series.MaxID) != "" {
-		sh.lastImportedID = series.MaxID
 	}
 
 	return &series, nil
