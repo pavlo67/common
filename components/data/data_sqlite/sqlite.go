@@ -71,7 +71,7 @@ func New(access config.Access, table string, interfaceKey joiner.InterfaceKey, t
 		sqlRemove: "DELETE FROM " + table + " where ID = ?",
 
 		sqlRead: "SELECT " + fieldsToReadStr + " FROM " + table + " WHERE id = ?",
-		sqlList: sqlList(table, "", nil),
+		sqlList: sqlList(table, "", &crud.GetOptions{OrderBy: []string{"created_at DESC"}}),
 
 		sqlClean: "DELETE FROM " + table,
 
@@ -418,7 +418,7 @@ func (dataOp *dataSQLite) List(term *selectors.Term, options *crud.GetOptions) (
 	query := dataOp.sqlList
 	stm := dataOp.stmList
 
-	if condition != "" {
+	if condition != "" || options != nil {
 		query = sqlList(dataOp.table, condition, options)
 		stm, err = dataOp.db.Prepare(query)
 		if err != nil {

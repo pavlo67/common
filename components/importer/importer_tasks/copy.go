@@ -16,7 +16,7 @@ import (
 )
 
 // TODO: vary this parameter
-const copyLimit = 200
+const copyLimit = 500
 
 func NewCopyTask(url string, dataOp data.Operator) (scheduler.Task, error) {
 	url = strings.TrimSpace(url)
@@ -70,6 +70,8 @@ func (it *copyTask) Copy() (int, int, int, error) {
 		return 0, 0, 0, errors.New("on copyTask.Copy(): it == nil")
 	}
 
+	// l.Info(it.lastImportedID)
+
 	series, err := it.impOp.Get(it.lastImportedID)
 	if err != nil {
 		return 0, 0, 0, errors.Errorf("can't impOp.Get(%s) from %s: %s", it.lastImportedID, it.url, err)
@@ -83,6 +85,8 @@ func (it *copyTask) Copy() (int, int, int, error) {
 
 	for _, item := range series.Data {
 		var cnt uint64
+
+		// l.Info("? ", item.ID)
 
 		numProcessed++
 
@@ -122,6 +126,8 @@ func (it *copyTask) Copy() (int, int, int, error) {
 
 		numNew++
 		it.lastImportedID = string(importedID)
+
+		// l.Info("--> ", it.lastImportedID)
 
 		if numNew >= copyLimit {
 			break

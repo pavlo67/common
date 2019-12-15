@@ -29,6 +29,7 @@
   #nav {
     padding: 10px;
     width: 300px;
+    font-size: small;
     float: left;
     min-height: 100vh;
     text-align: left;
@@ -44,7 +45,7 @@
   }
 
   .small {
-    font-size: 12pt;
+    font-size: small;
   }
 
   a {

@@ -29,6 +29,7 @@ import (
 	"github.com/pavlo67/workshop/common/scheduler"
 	"github.com/pavlo67/workshop/common/scheduler/scheduler_timeout"
 	"github.com/pavlo67/workshop/components/data"
+	"github.com/pavlo67/workshop/components/flow/flow_cleaner/flow_cleaner_sqlite"
 	"github.com/pavlo67/workshop/components/importer/importer_tasks"
 	"github.com/pavlo67/workshop/components/storage"
 )
@@ -96,6 +97,8 @@ func main() {
 
 	// running starters
 
+	const flowTable = flow.CollectionDefault
+
 	label := "WORKSPACE REST BUILD"
 
 	starters := []starter.Starter{
@@ -109,12 +112,13 @@ func main() {
 		{data_tagged.Starter(), common.Map{"interface_key": storage.TaggedInterfaceKey, "data_key": storage.InterfaceKey}},
 		{storage_server_http.Starter(), nil},
 
-		{data_sqlite.Starter(), common.Map{"interface_key": flow.InterfaceKey, "table": flow.CollectionDefault}},
+		{data_sqlite.Starter(), common.Map{"interface_key": flow.InterfaceKey, "table": flowTable}},
 		{data_tagged.Starter(), common.Map{"interface_key": flow.TaggedInterfaceKey, "data_key": flow.InterfaceKey}},
 		{flow_server_http.Starter(), nil},
 
 		{ws_routes.Starter(), nil},
 
+		{flow_cleaner_sqlite.Starter(), common.Map{"table": flowTable}},
 		{scheduler_timeout.Starter(), nil},
 		{importer_tasks.Starter(), nil},
 	}

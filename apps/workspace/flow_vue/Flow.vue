@@ -2,7 +2,7 @@
     <div id="flow">
         <b>Новини!</b>
 
-        <div v-for="sourcePack in sourcePacks">
+        <div v-for="sourcePack in sourcePacks" class="small">
 
             &nbsp;
             <div>
@@ -122,7 +122,6 @@
                         this.sourcePacks.push(sourcePack);
                     }
 
-                    // console.log(11111111, this.sourcePacks)
                 });
             }
         },
@@ -136,11 +135,11 @@
     font-size: small;
   }
   .summary {
-      color: black;
-      background-color: #97c9be;
-      padding: 10px;
-      position: absolute;
-      display: none;
+    color: black;
+    background-color: #97c9be;
+    padding: 10px;
+    position: absolute;
+    display: none;
   }
   .control {
     color: blue;

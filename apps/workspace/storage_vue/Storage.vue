@@ -2,10 +2,14 @@
     <div id="data">
         <b>Мій каталог</b>
 
-        <div v-for="item in dataItems">
-            <span v-html="announce(item)" class="announce"></span><br>&nbsp;
-        </div>
+        <br>&nbsp;
 
+        <div v-if="dataItems">
+            <DataList v-bind:dataItems="dataItems"/>
+        </div>
+        <div v-else>
+            немає записів для перегляду...
+        </div>
 
     </div>
 </template>
@@ -16,7 +20,7 @@
     import { cfg } from './init';
 
     export default {
-        title: 'каталог даних',
+        title: 'мій каталог',
         created () {
             this.getDataItems();
         },
@@ -26,19 +30,6 @@
              };
         },
         methods: {
-            announce(j) {
-                if (!(typeof j === "object")) return j;
-
-                let text =
-                    "[" +  b.dateStr(j.CreatedAt) + "]" +
-                    " &nbsp; " + j.Title +
-                    "&nbsp;" + "<span class=\"control\">[" +  "докладно" + "][" +  "ред." + "]</span>" +
-                    "<br>" + j.Summary;
-
-                return text;
-            },
-
-
             getDataItems() {
                 fetch(cfg.listEp, {
                     method: 'GET', // *GET, POST, PUT, DELETE, etc.
@@ -63,14 +54,6 @@
 </script>
 
 <style lang="scss">
-    .announce {
-        color: brown;
-        font-size: small;
-    }
-    .control {
-        color: blue;
-        font-size: xx-small;
-    }
     #data {
         padding: 0px 10px 10px 10px;
         text-align: left;

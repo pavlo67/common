@@ -3,7 +3,7 @@
         <b>Мій каталог</b>
 
         <div v-for="item in dataItems">
-            <span v-html="announce(item)" class="announce"></span><br>&nbsp;
+            <span v-html="announce(item)" class="data_announce"></span><br>&nbsp;
         </div>
 
 
@@ -62,7 +62,7 @@
 </script>
 
 <style lang="scss">
-    .announce {
+    .data_announce {
         color: brown;
         font-size: small;
     }
