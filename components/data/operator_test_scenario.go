@@ -61,9 +61,9 @@ func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 					ExportID: "wq3r",
 					Title:    "56567",
 					Summary:  "3333333",
-					Tags:     []tagger.Tag{"1", "332343"},
+					Tags:     []tagger.Tag{{Label: "1"}, {Label: "332343"}},
 				}},
-				Tags: []tagger.Tag{"1", "333"},
+				Tags: []tagger.Tag{{Label: "1"}, {Label: "333"}},
 				Status: crud.Status{
 					CreatedAt: time.Now(),
 				},
@@ -78,7 +78,7 @@ func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 				URL:     "22222222",
 				Title:   "345456rt",
 				Summary: "6578eegj",
-				Tags:    []tagger.Tag{"1", "333"},
+				Tags:    []tagger.Tag{{Label: "1"}, {Label: "333"}},
 				Status: crud.Status{
 					CreatedAt: time.Now().Add(time.Minute),
 				},

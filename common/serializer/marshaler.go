@@ -1,4 +1,4 @@
-package encodelib
+package serializer
 
 import (
 	"encoding/json"

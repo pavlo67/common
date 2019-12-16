@@ -205,9 +205,9 @@ func (dataOp *dataSQLite) Save(items []data.Item, _ *crud.SaveOptions) ([]common
 			id := common.ID(strconv.FormatInt(idSQLite, 10))
 
 			if dataOp.taggerOp != nil && len(item.Tags) > 0 {
-				err = dataOp.taggerOp.SaveTags(dataOp.interfaceKey, id, item.Tags, nil)
+				err = dataOp.taggerOp.AddTags(dataOp.interfaceKey, id, item.Tags, nil)
 				if err != nil {
-					return ids, errors.Wrapf(err, onSave+": can't .SaveTags(%#v)", item.Tags)
+					return ids, errors.Wrapf(err, onSave+": can't .AddTags(%#v)", item.Tags)
 				}
 			}
 

@@ -1,9 +1,11 @@
-package inspector
+package filelib
 
 import (
 	"net/http"
 	"os"
 	"regexp"
+
+	"github.com/pavlo67/workshop/common/libraries/strlib"
 )
 
 var reTXTFile = regexp.MustCompile(`(?i)\.txt$`)
@@ -46,7 +48,7 @@ func MIME(filename string, fileHeader []byte) (string, error) {
 
 	if reMIMETextPlain.MatchString(mimeType) {
 		// TODO: remove this kostyle!!!
-		if reCheckUTF8.MatchString(string(fileHeader)) {
+		if strlib.ReCheckUTF8.MatchString(string(fileHeader)) {
 			return "text/plain; charset=utf-8", nil
 		}
 		return "text/plain; charset=windows-1251", nil
@@ -54,7 +56,7 @@ func MIME(filename string, fileHeader []byte) (string, error) {
 		// TODO: remove this kostyle!!!
 		if reWin1251.MatchString(string(fileHeader)) {
 			return "text/html; charset=windows-1251", nil
-		} else if reCheckUTF8.MatchString(string(fileHeader)) {
+		} else if strlib.ReCheckUTF8.MatchString(string(fileHeader)) {
 			return "text/html; charset=utf-8", nil
 		}
 	}

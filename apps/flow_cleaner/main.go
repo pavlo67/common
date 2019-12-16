@@ -9,9 +9,9 @@ import (
 
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
-	"github.com/pavlo67/workshop/common/libraries/encodelib"
 	"github.com/pavlo67/workshop/common/libraries/filelib"
 	"github.com/pavlo67/workshop/common/logger"
+	"github.com/pavlo67/workshop/common/serializer"
 	"github.com/pavlo67/workshop/common/starter"
 	"github.com/pavlo67/workshop/components/flow"
 	"github.com/pavlo67/workshop/components/flow/flow_cleaner"
@@ -70,7 +70,7 @@ func main() {
 	serviceEnv, ok := os.LookupEnv("SERVICE")
 
 	configGathererPath := currentPath + "../../environments/" + serviceEnv + "." + configEnv + ".yaml"
-	cfgGatherer, err := config.Get(configGathererPath, encodelib.MarshalerYAML)
+	cfgGatherer, err := config.Get(configGathererPath, serializer.MarshalerYAML)
 	if err != nil {
 		l.Fatal(err)
 	}

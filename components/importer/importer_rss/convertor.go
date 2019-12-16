@@ -67,7 +67,7 @@ func (item *Item) GetData() (*data.Item, error) {
 
 	var tags []tagger.Tag
 	for _, c := range feedItem.Categories {
-		tags = append(tags, tagger.Tag(c))
+		tags = append(tags, tagger.Tag{Label: c})
 	}
 
 	origin, _ := json.Marshal(feedItem)

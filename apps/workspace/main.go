@@ -11,9 +11,9 @@ import (
 	"github.com/pavlo67/workshop/common/auth/auth_ecdsa"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/control"
-	"github.com/pavlo67/workshop/common/libraries/encodelib"
 	"github.com/pavlo67/workshop/common/libraries/filelib"
 	"github.com/pavlo67/workshop/common/logger"
+	"github.com/pavlo67/workshop/common/serializer"
 	"github.com/pavlo67/workshop/common/server/server_http"
 	"github.com/pavlo67/workshop/common/server/server_http/server_http_jschmhr"
 	"github.com/pavlo67/workshop/common/starter"
@@ -71,7 +71,7 @@ func main() {
 	// common config
 
 	configCommonPath := currentPath + "../../environments/common." + configEnv + ".yaml"
-	cfgCommon, err := config.Get(configCommonPath, encodelib.MarshalerYAML)
+	cfgCommon, err := config.Get(configCommonPath, serializer.MarshalerYAML)
 	if err != nil {
 		l.Fatal(err)
 	}
@@ -84,7 +84,7 @@ func main() {
 	// storage config
 
 	configWorkspacePath := currentPath + "../../environments/workspace." + configEnv + ".yaml"
-	cfgWorkspace, err := config.Get(configWorkspacePath, encodelib.MarshalerYAML)
+	cfgWorkspace, err := config.Get(configWorkspacePath, serializer.MarshalerYAML)
 	if err != nil {
 		l.Fatal(err)
 	}

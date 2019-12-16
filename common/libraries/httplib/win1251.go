@@ -1,4 +1,4 @@
-package inspector
+package httplib
 
 import (
 	"bytes"
@@ -6,15 +6,14 @@ import (
 	"io/ioutil"
 	"regexp"
 
+	"github.com/pavlo67/workshop/common/libraries/strlib"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/transform"
 )
 
-var reCheckUTF8 = regexp.MustCompile(`(?sm)\p{Cyrillic}+`)
-
 func Win1251ToUTF8(data []byte) ([]byte, error) {
 
-	if reCheckUTF8.MatchString(string(data)) {
+	if strlib.ReCheckUTF8.MatchString(string(data)) {
 		return data, errors.New("it is not win1251 filelib")
 	}
 	rInUTF8 := transform.NewReader(bytes.NewReader(data), charmap.Windows1251.NewDecoder())

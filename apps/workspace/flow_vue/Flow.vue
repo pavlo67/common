@@ -9,11 +9,11 @@
                 {{ sourcePack.url }} &nbsp [{{ dateStr(sourcePack.Time) }}]
 
                 <span v-for="item in sourcePack.flowItems">
-                    <br><span :id=announceId(item)  class="control" v-on:click="importData">[імпорт]</span> &nbsp;
-                    <span v-html="announce(item)" @mouseover="showSummary" @mouseleave="hideSummary" class="announce" :id=announceId(item,true)></span>&nbsp;
+                    <br><span :id=announceId(item)  class="flow_control" v-on:click="importData">[імпорт]</span> &nbsp;
+                    <span v-html="announce(item)" @mouseover="showSummary" @mouseleave="hideSummary" class="flow_announce" :id=announceId(item,true)></span>&nbsp;
                 </span>
-            </div>
 
+            </div>
         </div>
 
     </div>
@@ -50,7 +50,7 @@
 
                 let href = ' &nbsp; <a href="' + j.URL + '" target="_blank">>>></a>';
                 let text = j.Title + href +
-                    "<div class=\"summary\" id=\"" + flowItemPrefix + j.ID + "_summary\">" + j.Summary + "</div>";
+                    "<div class=\"flow_summary\" id=\"" + flowItemPrefix + j.ID + "_summary\">" + j.Summary + "</div>";
 
                 return text;
             },
@@ -70,10 +70,13 @@
                         'Content-Type': 'application/json',
                     },
                     mode: 'cors', // no-cors, cors, *same-origin
+
                 }).then(response => {
                     return response.json();
+
                 }).then(flowItem => {
                     cfg.router.push({ name: 'storage_item_import',  params: { dataItem: flowItem } })
+
                 });
             },
             
@@ -84,18 +87,15 @@
                         'Content-Type': 'application/json',
                     },
                     mode: 'cors', // no-cors, cors, *same-origin
-
                     // cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
                     // credentials: 'same-origin', // include, *same-origin, omit
                     // redirect: 'follow', // manual, *follow, error
                     // referrer: 'no-referrer', // no-referrer, *client
-                })
-                .then(response => {
+
+                }).then(response => {
                     return response.json();
+
                 }).then(flow => {
-
-                    // this.flow = flow;
-
                     this.sourcePacks = [];
 
                     let source = "";
@@ -128,25 +128,24 @@
     };
 </script>
 
-
 <style lang="scss">
-  .announce {
-    color: brown;
-    font-size: small;
-  }
-  .summary {
-    color: black;
-    background-color: #97c9be;
-    padding: 10px;
-    position: absolute;
-    display: none;
-  }
-  .control {
-    color: blue;
-    font-size: xx-small;
-  }
-  #flow {
-    padding: 0px 10px 10px 10px;
-    text-align: left;
-  }
+    #flow {
+        padding: 0px 10px 10px 10px;
+        text-align: left;
+    }
+    .flow_announce {
+        color: brown;
+        font-size: small;
+    }
+    .flow_summary {
+        color: black;
+        background-color: #97c9be;
+        padding: 10px;
+        position: absolute;
+        display: none;
+    }
+    .flow_control {
+        color: blue;
+        font-size: xx-small;
+    }
 </style>

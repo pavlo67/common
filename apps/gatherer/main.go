@@ -11,11 +11,11 @@ import (
 	"github.com/pavlo67/workshop/common/auth/auth_ecdsa"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/control"
-	"github.com/pavlo67/workshop/common/libraries/encodelib"
 	"github.com/pavlo67/workshop/common/libraries/filelib"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/scheduler"
 	"github.com/pavlo67/workshop/common/scheduler/scheduler_timeout"
+	"github.com/pavlo67/workshop/common/serializer"
 	"github.com/pavlo67/workshop/common/server/server_http"
 	"github.com/pavlo67/workshop/common/server/server_http/server_http_jschmhr"
 	"github.com/pavlo67/workshop/common/starter"
@@ -68,7 +68,7 @@ func main() {
 	// common config
 
 	configCommonPath := currentPath + "../../environments/common." + configEnv + ".yaml"
-	cfgCommon, err := config.Get(configCommonPath, encodelib.MarshalerYAML)
+	cfgCommon, err := config.Get(configCommonPath, serializer.MarshalerYAML)
 	if err != nil {
 		l.Fatal(err)
 	}
@@ -81,7 +81,7 @@ func main() {
 	// gatherer config
 
 	configGathererPath := currentPath + "../../environments/gatherer." + configEnv + ".yaml"
-	cfgGatherer, err := config.Get(configGathererPath, encodelib.MarshalerYAML)
+	cfgGatherer, err := config.Get(configGathererPath, serializer.MarshalerYAML)
 	if err != nil {
 		l.Fatal(err)
 	}
@@ -143,7 +143,7 @@ func main() {
 		l.Fatalf("can't schOp.Init(%#v): %s", task, err)
 	}
 
-	err = schOp.Run(taskID, time.Hour, false)
+	err = schOp.Run(taskID, time.Hour, true)
 	if err != nil {
 		l.Fatalf("can't schOp.Run(%s, time.Hour, false): %s", taskID, err)
 	}

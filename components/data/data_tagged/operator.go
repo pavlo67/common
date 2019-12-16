@@ -16,6 +16,6 @@ type Tagger = tagger.Operator // to use data.Operator and tagger.Operator simult
 type Operator interface {
 	data.Operator
 	Tagger
-	ListWithTag(*selectors.Term, tagger.Tag, *crud.GetOptions) ([]data.Item, error)
+	ListWithTag(*selectors.Term, string, *crud.GetOptions) ([]data.Item, error)
 	ListWithText(*selectors.Term, hypertext.ToSearch, *crud.GetOptions) ([]data.Item, error)
 }
