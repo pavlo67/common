@@ -3,7 +3,7 @@ package config
 import (
 	"io/ioutil"
 
-	"github.com/pavlo67/workshop/common/libraries/encodelib"
+	"github.com/pavlo67/workshop/common/serializer"
 	"github.com/pkg/errors"
 )
 
@@ -11,7 +11,7 @@ import (
 
 type Config struct {
 	data      map[string]interface{}
-	marshaler encodelib.Marshaler
+	marshaler serializer.Marshaler
 }
 
 type Access struct {
@@ -38,7 +38,7 @@ func (c Config) Value(key string, target interface{}) error {
 
 // -----------------------------------------------------------------------------
 
-func Get(cfgFile string, marshaler encodelib.Marshaler) (*Config, error) {
+func Get(cfgFile string, marshaler serializer.Marshaler) (*Config, error) {
 
 	if len(cfgFile) < 1 {
 		return nil, errors.New("empty config path")

@@ -1,51 +1,151 @@
 <template>
-  <div class="flow">
-    This is a flow page
+    <div id="flow">
+        <b>Новини!</b>
 
-    <div v-for="item in flowItems">  <!--  v-bind:key="item.path" :to="item.path" -->
-      {{ JSON.stringify(item) }}<br>
+        <div v-for="sourcePack in sourcePacks" class="small">
+
+            &nbsp;
+            <div>
+                {{ sourcePack.url }} &nbsp [{{ dateStr(sourcePack.Time) }}]
+
+                <span v-for="item in sourcePack.flowItems">
+                    <br><span :id=announceId(item)  class="flow_control" v-on:click="importData">[імпорт]</span> &nbsp;
+                    <span v-html="announce(item)" @mouseover="showSummary" @mouseleave="hideSummary" class="flow_announce" :id=announceId(item,true)></span>&nbsp;
+                </span>
+
+            </div>
+        </div>
+
     </div>
-
-
-  </div>
 </template>
 
 
 <script>
+    import b       from '../../components.js/basis';
+    import sh      from '../../components.js/show_hide/show_hide';
+    import { cfg } from './init';
 
-    // -----------------------------------------------------------------------
+    let showHide       = sh.NewShowHide("_summary");
+    let flowItemPrefix = "flow_item_";
+
     export default {
-        name: 'Flow',
+        title: 'новини',
         created () {
             this.getFlowItems();
         },
         data: () => {
             return {
-                flowItems: [],
+                sourcePacks: [],
             };
         },
         methods: {
-            getFlowItems() {
-                fetch('http://localhost:3333/flow/v1/list', {
+            dateStr: b.dateStr,
+
+            announceId(j, prefixed) {
+               return (prefixed ? flowItemPrefix : "") + j.ID;
+            },
+
+            announce(j) {
+                if (typeof j !== "object" || !j) return j;
+
+                let href = ' &nbsp; <a href="' + j.URL + '" target="_blank">>>></a>';
+                let text = j.Title + href +
+                    "<div class=\"flow_summary\" id=\"" + flowItemPrefix + j.ID + "_summary\">" + j.Summary + "</div>";
+
+                return text;
+            },
+
+            showSummary(ev) {
+                showHide.showContent(ev);
+            },
+
+            hideSummary(ev) {
+                showHide.hideContent(ev);
+            },
+
+            importData(ev) {
+                fetch(cfg.readEp + "/" + ev.target.id, {
                     method: 'GET', // *GET, POST, PUT, DELETE, etc.
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     mode: 'cors', // no-cors, cors, *same-origin
 
+                }).then(response => {
+                    return response.json();
+
+                }).then(flowItem => {
+                    cfg.router.push({ name: 'storage_item_import',  params: { dataItem: flowItem } })
+
+                });
+            },
+            
+            getFlowItems() {
+                fetch(cfg.listEp, {
+                    method: 'GET', // *GET, POST, PUT, DELETE, etc.
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    mode: 'cors', // no-cors, cors, *same-origin
                     // cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
                     // credentials: 'same-origin', // include, *same-origin, omit
                     // redirect: 'follow', // manual, *follow, error
                     // referrer: 'no-referrer', // no-referrer, *client
-                })
-                .then(response => {
+
+                }).then(response => {
                     return response.json();
-                }).then(data => {
-                    this.flowItems = data;
-                    console.log(this.flowItems);
+
+                }).then(flow => {
+                    this.sourcePacks = [];
+
+                    let source = "";
+                    let sourceTime = "";
+                    let sourcePack = {flowItems: []};
+
+                    for (let item of flow) {
+                        if (!item.Origin) {
+                            item.Origin = {};
+                        }
+
+                        if (item.Origin.Source != source || item.Origin.Time != sourceTime) {
+                            if (sourcePack.flowItems.length > 0) {
+                                this.sourcePacks.push(sourcePack);
+                            }
+
+                            sourcePack = {url: (source = item.Origin.Source), Time: (sourceTime = item.Origin.Time), flowItems: []};
+                        }
+
+                        sourcePack.flowItems.push(item);
+                    }
+
+                    if (sourcePack.flowItems.length > 0) {
+                        this.sourcePacks.push(sourcePack);
+                    }
+
                 });
             }
         },
-
     };
 </script>
+
+<style lang="scss">
+    #flow {
+        padding: 0px 10px 10px 10px;
+        text-align: left;
+    }
+    .flow_announce {
+        color: brown;
+        font-size: small;
+    }
+    .flow_summary {
+        color: black;
+        background-color: #97c9be;
+        padding: 10px;
+        position: absolute;
+        display: none;
+    }
+    .flow_control {
+        color: blue;
+        font-size: xx-small;
+    }
+</style>

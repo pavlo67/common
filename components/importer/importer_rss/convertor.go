@@ -1,7 +1,6 @@
 package importer_rss
 
 import (
-	"strings"
 	"time"
 
 	"github.com/mmcdole/gofeed"
@@ -12,7 +11,6 @@ import (
 	"github.com/pavlo67/workshop/common/crud"
 	"github.com/pavlo67/workshop/components/data"
 	"github.com/pavlo67/workshop/components/flow"
-	"github.com/pavlo67/workshop/components/importer"
 	"github.com/pavlo67/workshop/components/tagger"
 )
 
@@ -37,47 +35,52 @@ func (item *Item) GetData() (*data.Item, error) {
 	}
 
 	sourceTime := item.sourceTime
-	if feedItem.PublishedParsed != nil {
-		sourceTime = *feedItem.PublishedParsed
-	}
+
+	// TODO: save in special field
+	// if feedItem.PublishedParsed != nil {
+	//	sourceTime = *feedItem.PublishedParsed
+	// }
+
+	status := crud.Status{CreatedAt: sourceTime}
 
 	var embedded []data.Item
-	if strings.TrimSpace(feedItem.Link) != "" {
-		embedded = append(embedded, data.Item{
-			URL: importer.ImportedHREF + feedItem.Link,
-		})
-	}
 
 	if feedItem.Image != nil {
 		embedded = append(embedded, data.Item{
-			URL:   importer.ImportedHREF + feedItem.Image.URL,
-			Title: feedItem.Image.Title,
+			TypeKey: data.TypeKeyHRefImage,
+			URL:     feedItem.Image.URL,
+			Title:   feedItem.Image.Title,
+			Status:  status,
 		})
 	}
 
 	if len(feedItem.Enclosures) > 0 {
 		for _, p := range feedItem.Enclosures {
 			embedded = append(embedded, data.Item{
-				URL:   importer.ImportedHREF + p.URL,
-				Title: p.Type + ": " + p.Length,
+				TypeKey: data.TypeKeyHRef,
+				URL:     p.URL,
+				Title:   p.Type + ": " + p.Length,
+				Status:  status,
 			})
 		}
 	}
 
 	var tags []tagger.Tag
 	for _, c := range feedItem.Categories {
-		tags = append(tags, tagger.Tag(c))
+		tags = append(tags, tagger.Tag{Label: c})
 	}
 
 	origin, _ := json.Marshal(feedItem)
 
 	return &data.Item{
+		URL:      feedItem.Link,
+		TypeKey:  data.TypeKeyString,
 		Title:    feedItem.Title,
 		Summary:  feedItem.Description,
 		Embedded: embedded,
 		Tags:     tags,
 		Details:  feedItem.Content,
-		Status:   crud.Status{CreatedAt: item.sourceTime},
+		Status:   status,
 		Origin: flow.Origin{
 			Source: item.sourceURL,
 			Key:    originalID,

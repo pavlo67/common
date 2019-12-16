@@ -1,0 +1,115 @@
+{
+ "info": {
+  "title": "Pavlo's Workshop REST API",
+  "version": "0.0.1"
+ },
+ "paths": {
+  "/storage/v1/data/list": {
+   "get": {
+    "operationId": "list",
+    "produces": [
+     "application/json"
+    ],
+    "tags": [
+     "data"
+    ]
+   }
+  },
+  "/storage/v1/data/read/{id}": {
+   "get": {
+    "operationId": "read",
+    "parameters": [
+     {
+      "description": "",
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "type": "string"
+     }
+    ],
+    "produces": [
+     "application/json"
+    ],
+    "tags": [
+     "data"
+    ]
+   }
+  },
+  "/storage/v1/data/remove/{id}": {
+   "delete": {
+    "operationId": "remove",
+    "parameters": [
+     {
+      "description": "",
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "type": "string"
+     }
+    ],
+    "produces": [
+     "application/json"
+    ],
+    "tags": [
+     "data"
+    ]
+   }
+  },
+  "/storage/v1/data/save": {
+   "post": {
+    "operationId": "save",
+    "parameters": [
+     {
+      "in": "body",
+      "name": "body_item",
+      "required": true,
+      "type": "string"
+     }
+    ],
+    "produces": [
+     "application/json"
+    ],
+    "tags": [
+     "data"
+    ]
+   }
+  },
+  "/storage/v1/flow/list": {
+   "get": {
+    "operationId": "flow",
+    "produces": [
+     "application/json"
+    ],
+    "tags": [
+     "flow"
+    ]
+   }
+  },
+  "/storage/v1/flow/read/{id}": {
+   "get": {
+    "operationId": "flow_read",
+    "parameters": [
+     {
+      "description": "",
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "type": "string"
+     }
+    ],
+    "produces": [
+     "application/json"
+    ],
+    "tags": [
+     "flow"
+    ]
+   }
+  }
+ },
+ "port": ":3003",
+ "schemes": [
+  "http",
+  "https"
+ ],
+ "swagger": "2.0"
+}

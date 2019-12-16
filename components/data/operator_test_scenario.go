@@ -33,9 +33,16 @@ type Test struct {
 	BBB int
 }
 
+const TypeKeyTest TypeKey = "test"
+
 var TypeTest = Type{
-	Key:      "test",
+	Key:      TypeKeyTest,
 	Exemplar: Test{},
+}
+
+var TypeString = Type{
+	Key:      TypeKeyString,
+	Exemplar: "",
 }
 
 func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
@@ -44,18 +51,19 @@ func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 			Operator: dataOp,
 			Cleaner:  cleanerOp,
 			ToSave: Item{
-				ID:      "",
-				TypeKey: "test",
-				URL:     "rtuy",
-				Title:   "345456",
-				Summary: "6578gj",
+				ID:       "",
+				TypeKey:  "test",
+				ExportID: "rtuy",
+				URL:      "111111",
+				Title:    "345456",
+				Summary:  "6578gj",
 				Embedded: []Item{{
-					URL:     "wq3r",
-					Title:   "56567",
-					Summary: "3333333",
-					Tags:    []tagger.Tag{"1", "332343"},
+					ExportID: "wq3r",
+					Title:    "56567",
+					Summary:  "3333333",
+					Tags:     []tagger.Tag{{Label: "1"}, {Label: "332343"}},
 				}},
-				Tags: []tagger.Tag{"1", "333"},
+				Tags: []tagger.Tag{{Label: "1"}, {Label: "333"}},
 				Status: crud.Status{
 					CreatedAt: time.Now(),
 				},
@@ -67,9 +75,10 @@ func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 			},
 
 			ToUpdate: Item{
+				URL:     "22222222",
 				Title:   "345456rt",
 				Summary: "6578eegj",
-				Tags:    []tagger.Tag{"1", "333"},
+				Tags:    []tagger.Tag{{Label: "1"}, {Label: "333"}},
 				Status: crud.Status{
 					CreatedAt: time.Now().Add(time.Minute),
 				},
@@ -95,14 +104,14 @@ const toDeleteI = 2 // must be < numRepeats1 + numRepeats2
 func Compare(t *testing.T, dataOp Operator, readed *Item, expectedItem Item, expectedDetails, detailsToRead Test, l logger.Operator) {
 	require.NotNil(t, readed)
 
-	err := dataOp.Details(readed, &detailsToRead)
+	err := dataOp.SetDetails(readed)
 	require.NoError(t, err)
 
 	l.Infof("to be saved: %#v", expectedItem)
 	l.Infof("readed: %#v", readed)
 	l.Infof("readed details: %#v", detailsToRead)
 
-	expectedItem.CreatedAt = expectedItem.CreatedAt.UTC()
+	expectedItem.Status.CreatedAt = expectedItem.Status.CreatedAt.UTC()
 	expectedItem.Details = nil
 	expectedItem.DetailsRaw = nil
 
@@ -110,8 +119,8 @@ func Compare(t *testing.T, dataOp Operator, readed *Item, expectedItem Item, exp
 	readed.DetailsRaw = nil
 
 	// kostyl!!!
-	require.Equal(t, expectedItem.CreatedAt.Format(time.RFC3339), readed.CreatedAt.Format(time.RFC3339))
-	readed.CreatedAt = expectedItem.CreatedAt
+	require.Equal(t, expectedItem.Status.CreatedAt.Format(time.RFC3339), readed.Status.CreatedAt.Format(time.RFC3339))
+	readed.Status.CreatedAt = expectedItem.Status.CreatedAt
 
 	require.Equal(t, &expectedItem, readed)
 	require.Equal(t, expectedDetails, detailsToRead)
@@ -229,9 +238,9 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		readedUpdated, err := tc.Read(id[toUpdateI], nil)
 		require.NoError(t, err)
 
-		tc.ToUpdate.URL = tc.ToSave.URL             // unchanged!!!
-		tc.ToUpdate.Origin = tc.ToSave.Origin       // unchanged!!!
-		tc.ToUpdate.CreatedAt = tc.ToSave.CreatedAt // unchanged!!!
+		tc.ToUpdate.ExportID = tc.ToSave.ExportID                 // unchanged!!!
+		tc.ToUpdate.Origin = tc.ToSave.Origin                     // unchanged!!!
+		tc.ToUpdate.Status.CreatedAt = tc.ToSave.Status.CreatedAt // unchanged!!!
 
 		Compare(t, tc, readedUpdated, tc.ToUpdate, tc.DetailsToUpdate, tc.DetailsToReadUpdated, l)
 

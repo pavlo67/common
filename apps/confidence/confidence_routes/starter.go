@@ -45,7 +45,7 @@ func (ss *confidenceStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *confidenceStarter) Init(cfg *config.Config, options common.Map) (info []common.Map, err error) {
+func (ss *confidenceStarter) Init(cfgCommon, cfg *config.Config, options common.Map) (info []common.Map, err error) {
 	Cfg = cfg
 
 	var errs common.Errors

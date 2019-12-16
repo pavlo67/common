@@ -28,7 +28,7 @@ func (ts *taggerSQLiteStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ts *taggerSQLiteStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
+func (ts *taggerSQLiteStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	l = lCommon
 
 	cfgSQLite := config.Access{}
@@ -57,7 +57,7 @@ func (ts *taggerSQLiteStarter) Setup() error {
 }
 
 func (ts *taggerSQLiteStarter) Run(joinerOp joiner.Operator) error {
-	taggerOp, taggerCleanerOp, err := NewTagger(ts.config, "")
+	taggerOp, taggerCleanerOp, err := New(ts.config)
 	if err != nil {
 		return errors.Wrap(err, "can't init tagger.Operator")
 	}

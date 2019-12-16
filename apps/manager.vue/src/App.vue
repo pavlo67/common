@@ -5,7 +5,7 @@
       <Confidence/>
       &nbsp;<br>
 
-      <router-link v-for="item in routes" v-bind:key="item.path" :to="item.path">
+      <router-link v-for="item in menu" v-bind:key="item.path" :to="item.path">
         {{ item.title }}<br>
       </router-link>
 
@@ -18,32 +18,49 @@
 </template>
 
 <style lang="scss">
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
-#nav {
-  padding: 10px;
-  width: 300px;
-  float: left;
-  min-height: 100vh;
-  text-align: left;
-  background-color: #f2dede;
+  #app {
+    font-family: 'Avenir', Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-align: center;
+    color: #2c3e50;
+  }
+
+  #nav {
+    padding: 10px;
+    width: 300px;
+    font-size: small;
+    float: left;
+    min-height: 100vh;
+    text-align: left;
+    background-color: #f2dede;
+    a {
+      color: #4414ff;
+    }
+
+  }
+
+  .title {
+    color: blue;
+  }
+
+  .small {
+    font-size: small;
+  }
+
   a {
     text-decoration: none;
-    color: #2c3e50;
+    color: #820cff;
+    /*
     &.router-link-exact-active {
-      color: #42b983;
+     color: #42b983;
     }
+    */
   }
-}
 
-#view {
-  margin-left: 320px;
-}
+  #view {
+    margin-left: 320px;
+  }
 
 </style>
 

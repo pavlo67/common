@@ -27,7 +27,7 @@ type RESTDataError struct {
 //func RESTError(err error) server.Response {
 //	return server.Response{
 //		Status: http.StatusOK,
-//		Data:   RESTDataError{basis.Errors{err}},
+//		Storage:   RESTDataError{basis.Errors{err}},
 //	}
 //}
 

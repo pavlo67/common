@@ -14,24 +14,30 @@ import (
 	"github.com/pavlo67/workshop/common/logger"
 )
 
-func StartComponent(c Starter, cfg *config.Config, args []string, joinerOp joiner.Operator) error {
+func StartComponent(c Starter, cfgCommon, cfg *config.Config, args []string, joinerOp joiner.Operator) error {
 	l := logger.Get()
 
-	l.Info("checking component: ", c.Name())
+	name := c.Name()
+
+	if key, ok := c.Options.String("interface_key"); ok {
+		name += " / " + key
+	}
+
+	l.Info("checking component: ", name)
 
 	startOptions := c.CorrectedOptions(ReadOptions(args))
 
-	info, err := c.Init(cfg, l, startOptions)
+	info, err := c.Init(cfgCommon, cfg, l, startOptions)
 	for _, i := range info {
 		log.Println(i)
 	}
 	if err != nil {
-		return fmt.Errorf("error calling .Init() for component (%s): %s", c.Name(), err)
+		return fmt.Errorf("error calling .Init() for component (%s): %s", name, err)
 	}
 
 	err = c.Run(joinerOp)
 	if err != nil {
-		return fmt.Errorf("error calling .Prepare() for component (%s): %s", c.Name(), err)
+		return fmt.Errorf("error calling .Prepare() for component (%s): %s", name, err)
 	}
 
 	return nil
@@ -43,7 +49,7 @@ func ReadOptions(args []string) common.Map {
 	return nil
 }
 
-func Run(starters []Starter, cfg *config.Config, args []string, label string) (joiner.Operator, error) {
+func Run(starters []Starter, cfgCommon, cfg *config.Config, args []string, label string) (joiner.Operator, error) {
 
 	if cfg == nil {
 		return nil, errors.New("no config data for starter.Prepare()")
@@ -53,7 +59,7 @@ func Run(starters []Starter, cfg *config.Config, args []string, label string) (j
 
 	joinerOp := joiner.New()
 	for _, c := range starters {
-		err := StartComponent(c, cfg, args, joinerOp)
+		err := StartComponent(c, cfgCommon, cfg, args, joinerOp)
 		if err != nil {
 			return joinerOp, err
 		}

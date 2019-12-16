@@ -1,0 +1,34 @@
+{
+ "info": {
+  "title": "Pavlo's Storage Gatherer REST API",
+  "version": "0.0.1"
+ },
+ "paths": {
+  "/gatherer/v1/export": {
+   "get": {
+    "operationId": "flow",
+    "parameters": [
+     {
+      "description": "",
+      "in": "query",
+      "name": "after_id",
+      "required": false,
+      "type": "string"
+     }
+    ],
+    "produces": [
+     "application/json"
+    ],
+    "tags": [
+     "flow"
+    ]
+   }
+  }
+ },
+ "port": ":3002",
+ "schemes": [
+  "http",
+  "https"
+ ],
+ "swagger": "2.0"
+}

@@ -23,10 +23,10 @@ import (
 	"github.com/pavlo67/workshop/components/tagger"
 )
 
-var fieldsToUpdate = []string{"type", "title", "summary", "embedded", "tags", "details"}
+var fieldsToUpdate = []string{"url", "type", "title", "summary", "embedded", "tags", "details"}
 var fieldsToUpdateStr = strings.Join(fieldsToUpdate, " = ?, ") + " = ?"
 
-var fieldsToInsert = append(fieldsToUpdate, "source", "source_key", "source_time", "source_data", "url")
+var fieldsToInsert = append(fieldsToUpdate, "source", "source_key", "source_time", "source_data", "export_id")
 var fieldsToInsertStr = strings.Join(fieldsToInsert, ", ")
 
 var fieldsToRead = append(fieldsToInsert, "created_at", "updated_at")
@@ -52,7 +52,7 @@ type dataSQLite struct {
 
 const onNew = "on dataSQLite.New(): "
 
-func NewData(access config.Access, table string, interfaceKey joiner.InterfaceKey, taggerOp tagger.Operator, taggerCleaner crud.Cleaner) (data.Operator, crud.Cleaner, error) {
+func New(access config.Access, table string, interfaceKey joiner.InterfaceKey, taggerOp tagger.Operator, taggerCleaner crud.Cleaner) (data.Operator, crud.Cleaner, error) {
 	db, err := sqllib_sqlite.Connect(access)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, onNew)
@@ -71,7 +71,7 @@ func NewData(access config.Access, table string, interfaceKey joiner.InterfaceKe
 		sqlRemove: "DELETE FROM " + table + " where ID = ?",
 
 		sqlRead: "SELECT " + fieldsToReadStr + " FROM " + table + " WHERE id = ?",
-		sqlList: sqlList(table, "", nil),
+		sqlList: sqlList(table, "", &crud.GetOptions{OrderBy: []string{"created_at DESC"}}),
 
 		sqlClean: "DELETE FROM " + table,
 
@@ -99,11 +99,28 @@ func NewData(access config.Access, table string, interfaceKey joiner.InterfaceKe
 	return &dataOp, &dataOp, nil
 }
 
-func sqlList(table, condition string, _ *crud.GetOptions) string {
+func sqlList(table, condition string, options *crud.GetOptions) string {
 	if strings.TrimSpace(condition) != "" {
 		condition = " WHERE " + condition
 	}
-	return "SELECT " + fieldsToListStr + " FROM " + table + condition + " ORDER BY created_at DESC"
+
+	var limit string
+
+	order := "created_at DESC"
+	if options != nil {
+		if len(options.OrderBy) > 0 {
+			order = strings.Join(options.OrderBy, ", ")
+		}
+
+		if options.Limit0+options.Limit1 > 0 {
+			limit = " LIMIT " + strconv.FormatUint(options.Limit0, 10)
+			if options.Limit1 > 0 {
+				limit += ", " + strconv.FormatUint(options.Limit1, 10)
+			}
+		}
+	}
+
+	return "SELECT " + fieldsToListStr + " FROM " + table + condition + " ORDER BY " + order + limit
 }
 
 func sqlCount(table, condition string, _ *crud.GetOptions) string {
@@ -125,24 +142,35 @@ func (dataOp *dataSQLite) Save(items []data.Item, _ *crud.SaveOptions) ([]common
 
 		//l.Info(item.CreatedAt.Format(time.RFC3339))
 
-		embedded, err := json.Marshal(item.Embedded)
-		if err != nil {
-			return ids, errors.Wrapf(err, onSave+"can't .Marshal(%#v)", item.Embedded)
+		var embedded, tags, details string
+
+		if item.Embedded != nil {
+			embeddedBytes, err := json.Marshal(item.Embedded)
+			if err != nil {
+				return ids, errors.Wrapf(err, onSave+"can't .Marshal(%#v)", item.Embedded)
+			}
+			embedded = string(embeddedBytes)
 		}
 
-		tags, err := json.Marshal(item.Tags)
-		if err != nil {
-			return ids, errors.Wrapf(err, onSave+"can't .Marshal(%#v)", item.Tags)
+		if item.Tags != nil {
+			tagsBytes, err := json.Marshal(item.Tags)
+			if err != nil {
+				return ids, errors.Wrapf(err, onSave+"can't .Marshal(%#v)", item.Tags)
+			}
+			tags = string(tagsBytes)
 		}
 
-		details, err := json.Marshal(item.Details)
-		if err != nil {
-			return ids, errors.Wrapf(err, onSave+"can't .Marshal(%#v)", item.Details)
+		if item.Details != nil {
+			detailsBytes, err := json.Marshal(item.Details)
+			if err != nil {
+				return ids, errors.Wrapf(err, onSave+"can't .Marshal(%#v)", item.Details)
+			}
+			details = string(detailsBytes)
 		}
 
 		if item.ID != "" {
 			values := []interface{}{
-				item.TypeKey, item.Title, item.Summary, embedded, tags, details, item.ID,
+				item.URL, item.TypeKey, item.Title, item.Summary, embedded, tags, details, item.ID,
 			}
 
 			_, err := dataOp.stmUpdate.Exec(values...)
@@ -161,8 +189,8 @@ func (dataOp *dataSQLite) Save(items []data.Item, _ *crud.SaveOptions) ([]common
 
 		} else {
 			values := []interface{}{
-				item.TypeKey, item.Title, item.Summary, embedded, tags, details,
-				item.Origin.Source, item.Origin.Key, item.Origin.Time, item.Origin.Data, item.URL,
+				item.URL, item.TypeKey, item.Title, item.Summary, embedded, tags, details,
+				item.Origin.Source, item.Origin.Key, item.Origin.Time, item.Origin.Data, item.ExportID,
 			}
 
 			res, err := dataOp.stmInsert.Exec(values...)
@@ -177,9 +205,9 @@ func (dataOp *dataSQLite) Save(items []data.Item, _ *crud.SaveOptions) ([]common
 			id := common.ID(strconv.FormatInt(idSQLite, 10))
 
 			if dataOp.taggerOp != nil && len(item.Tags) > 0 {
-				err = dataOp.taggerOp.SaveTags(dataOp.interfaceKey, id, item.Tags, nil)
+				err = dataOp.taggerOp.AddTags(dataOp.interfaceKey, id, item.Tags, nil)
 				if err != nil {
-					return ids, errors.Wrapf(err, onSave+": can't .SaveTags(%#v)", item.Tags)
+					return ids, errors.Wrapf(err, onSave+": can't .AddTags(%#v)", item.Tags)
 				}
 			}
 
@@ -207,8 +235,8 @@ func (dataOp *dataSQLite) Read(id common.ID, _ *crud.GetOptions) (*data.Item, er
 	var sourceTimePtr, updatedAtPtr *string
 
 	err = dataOp.stmRead.QueryRow(idNum).Scan(
-		&item.TypeKey, &item.Title, &item.Summary, &embedded, &tags, &item.DetailsRaw,
-		&item.Source, &item.Key, &sourceTimePtr, &item.Data, &item.URL,
+		&item.URL, &item.TypeKey, &item.Title, &item.Summary, &embedded, &tags, &item.DetailsRaw,
+		&item.Origin.Source, &item.Origin.Key, &sourceTimePtr, &item.Origin.Data, &item.ExportID,
 		&createdAt, &updatedAtPtr,
 	)
 	if err == sql.ErrNoRows {
@@ -218,7 +246,7 @@ func (dataOp *dataSQLite) Read(id common.ID, _ *crud.GetOptions) (*data.Item, er
 		return nil, errors.Wrapf(err, onRead+sqllib.CantScanQueryRow, dataOp.sqlRead, idNum)
 	}
 
-	item.CreatedAt, err = time.Parse(time.RFC3339, createdAt)
+	item.Status.CreatedAt, err = time.Parse(time.RFC3339, createdAt)
 	if err != nil {
 		return &item, errors.Wrapf(err, onRead+"can't parse .CreatedAt (%s)", createdAt)
 	}
@@ -231,7 +259,7 @@ func (dataOp *dataSQLite) Read(id common.ID, _ *crud.GetOptions) (*data.Item, er
 		if err != nil {
 			return &item, errors.Wrapf(err, onRead+"can't parse .UpdatedAt (%s)", *updatedAtPtr)
 		}
-		item.UpdatedAt = &updatedAt
+		item.Status.UpdatedAt = &updatedAt
 	}
 
 	if sourceTimePtr != nil {
@@ -261,18 +289,34 @@ func (dataOp *dataSQLite) Read(id common.ID, _ *crud.GetOptions) (*data.Item, er
 
 const onDetails = "on dataSQLite.Details(): "
 
-func (dataOp *dataSQLite) Details(item *data.Item, exemplar interface{}) error {
-	// TODO: check .TypeKey
-
+func (dataOp *dataSQLite) SetDetails(item *data.Item) error {
 	if item == nil {
 		return errors.New(onDetails + "nil item")
 	}
 
-	item.Details = exemplar
+	if len(item.DetailsRaw) < 1 {
+		item.Details = nil
+		return nil
+	}
 
-	err := json.Unmarshal(item.DetailsRaw, exemplar)
-	if err != nil {
-		return errors.Wrapf(err, onDetails+"can't .Unmarshal(%#v)", item.DetailsRaw)
+	switch item.TypeKey {
+	case data.TypeKeyString:
+		item.Details = string(item.DetailsRaw)
+
+	case data.TypeKeyTest:
+		item.Details = &data.Test{}
+		err := json.Unmarshal(item.DetailsRaw, item.Details)
+		if err != nil {
+			return errors.Wrapf(err, onDetails+"can't .Unmarshal(%#v)", item.DetailsRaw)
+		}
+
+	default:
+
+		// TODO: remove this kostyl
+		item.Details = string(item.DetailsRaw)
+
+		// return errors.Errorf(onDetails+"unknown item.TypeKey(%s) for item.DetailsRaw(%s)", item.TypeKey, item.DetailsRaw)
+
 	}
 
 	return nil
@@ -305,21 +349,84 @@ func (dataOp *dataSQLite) Remove(id common.ID, _ *crud.RemoveOptions) error {
 	return nil
 }
 
+const onExport = "on dataSQLite.Export()"
+
+func (dataOp *dataSQLite) Export(afterIDStr string, options *crud.GetOptions) ([]data.Item, error) {
+	// TODO: remove limits
+	// if options != nil {
+	//	options.Limits = nil
+	// }
+
+	afterIDStr = strings.TrimSpace(afterIDStr)
+
+	var term *selectors.Term
+
+	var afterID int
+	if afterIDStr != "" {
+		var err error
+		afterID, err = strconv.Atoi(afterIDStr)
+		if err != nil {
+			return nil, errors.Errorf("can't strconv.Atoi(%s) for after_id parameter", afterIDStr, err)
+		}
+
+		// TODO!!! term with some item's autoincrement if original .ID isn't it (using .ID to find corresponding autoincrement value)
+		term = selectors.Binary(selectors.Gt, "id", selectors.Value{afterID})
+	}
+
+	// TODO!!! order by some item's autoincrement if original .ID isn't it
+	if options == nil {
+		options = &crud.GetOptions{OrderBy: []string{"id"}}
+	} else {
+		options.OrderBy = []string{"id"}
+	}
+
+	//termUpd := selectors.Binary(selectors.Eq, "export_id", selectors.Value{""})
+	//if term != nil {
+	//	termUpd = logic.AND(term, termUpd)
+	//}
+	//
+	//condition, values, err := selectors_sql.Use(termUpd)
+	//if err != nil {
+	//	return nil, errors.Errorf(onExport+"wrong term to update export_id's (%#v): %s", termUpd, err)
+	//}
+	//condition = " WHERE " + condition
+	//
+	//query := "UPDATE " + dataOp.table + " SET export_id = id " + condition
+	//dataOp.db.Exec(query, values...)
+	//if err != nil {
+	//	return nil, errors.Wrapf(err, onExport+sqllib.CantExec, query, values)
+	//}
+	//
+	//termEx := selectors.Binary(selectors.Ne, "export_id", selectors.Value{""})
+	//if term == nil {
+	//	term = termEx
+	//} else {
+	//	term = logic.AND(term, termEx)
+	//}
+
+	return dataOp.List(term, options)
+}
+
 const onList = "on dataSQLite.List()"
 
 func (dataOp *dataSQLite) List(term *selectors.Term, options *crud.GetOptions) ([]data.Item, error) {
 	condition, values, err := selectors_sql.Use(term)
+	if err != nil {
+		return nil, errors.Errorf(onList+"wrong selector (%#v): %s", term, err)
+	}
 
 	query := dataOp.sqlList
 	stm := dataOp.stmList
 
-	if condition != "" {
+	if condition != "" || options != nil {
 		query = sqlList(dataOp.table, condition, options)
 		stm, err = dataOp.db.Prepare(query)
 		if err != nil {
 			return nil, errors.Wrapf(err, onList+": can't db.Prepare(%s)", query)
 		}
 	}
+
+	//l.Infof("%s / %#v\n%s", condition, values, query)
 
 	rows, err := stm.Query(values...)
 
@@ -339,15 +446,15 @@ func (dataOp *dataSQLite) List(term *selectors.Term, options *crud.GetOptions) (
 		var sourceTimePtr, updatedAtPtr *string
 
 		err := rows.Scan(
-			&idNum, &item.TypeKey, &item.Title, &item.Summary, &embedded, &tags, &item.DetailsRaw,
-			&item.Origin.Source, &item.Origin.Key, &sourceTimePtr, &item.Origin.Data, &item.URL,
+			&idNum, &item.URL, &item.TypeKey, &item.Title, &item.Summary, &embedded, &tags, &item.DetailsRaw,
+			&item.Origin.Source, &item.Origin.Key, &sourceTimePtr, &item.Origin.Data, &item.ExportID,
 			&createdAt, &updatedAtPtr,
 		)
 		if err != nil {
 			return items, errors.Wrapf(err, onList+sqllib.CantScanQueryRow, query, values)
 		}
 
-		if item.CreatedAt, err = time.Parse(time.RFC3339, createdAt); err != nil {
+		if item.Status.CreatedAt, err = time.Parse(time.RFC3339, createdAt); err != nil {
 			return items, errors.Wrapf(err, onList+"can't parse .CreatedAt (%s)", createdAt)
 		}
 
@@ -356,7 +463,7 @@ func (dataOp *dataSQLite) List(term *selectors.Term, options *crud.GetOptions) (
 			if err != nil {
 				return items, errors.Wrapf(err, onList+"can't parse .UpdatedAt (%s)", *updatedAtPtr)
 			}
-			item.UpdatedAt = &updatedAt
+			item.Status.UpdatedAt = &updatedAt
 		}
 
 		if sourceTimePtr != nil {
@@ -399,7 +506,7 @@ func (dataOp *dataSQLite) Count(term *selectors.Term, options *crud.GetOptions) 
 		return 0, errors.Wrapf(err, onCount+": can't selectors_sql.Use(%s)", termStr)
 	}
 
-	l.Infof("%s / %#v", condition, values)
+	// l.Infof("%s / %#v", condition, values)
 
 	query := sqlCount(dataOp.table, condition, options)
 	stm, err := dataOp.db.Prepare(query)

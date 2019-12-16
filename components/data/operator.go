@@ -15,6 +15,10 @@ const CollectionDefault = "data"
 
 type TypeKey string
 
+const TypeKeyString TypeKey = "string"
+const TypeKeyHRefImage TypeKey = "href_image"
+const TypeKeyHRef TypeKey = "href"
+
 type Type struct {
 	Key      TypeKey
 	Exemplar interface{}
@@ -22,6 +26,7 @@ type Type struct {
 
 type Item struct {
 	ID       common.ID    `bson:"_id,omitempty" json:",omitempty"`
+	ExportID string       `bson:",omitempty"    json:",omitempty"`
 	URL      string       `bson:",omitempty"    json:",omitempty"`
 	TypeKey  TypeKey      `bson:",omitempty"    json:",omitempty"`
 	Title    string       `bson:",omitempty"    json:",omitempty"`
@@ -35,8 +40,8 @@ type Item struct {
 	// DetailsRaw shouldn't be used directly
 	DetailsRaw []byte `bson:",omitempty"    json:",omitempty"`
 
-	crud.Status `bson:",omitempty"    json:",omitempty"`
-	flow.Origin `bson:",omitempty"    json:",omitempty"`
+	Status crud.Status `bson:",omitempty" json:",omitempty"`
+	Origin flow.Origin `bson:",omitempty" json:",omitempty"`
 }
 
 type Operator interface {
@@ -44,10 +49,12 @@ type Operator interface {
 	Remove(common.ID, *crud.RemoveOptions) error
 
 	Read(common.ID, *crud.GetOptions) (*Item, error)
-	Details(item *Item, exemplar interface{}) error
+	SetDetails(item *Item) error
 
 	List(*selectors.Term, *crud.GetOptions) ([]Item, error)
 	Count(*selectors.Term, *crud.GetOptions) (uint64, error)
+
+	Export(afterID string, options *crud.GetOptions) ([]Item, error)
 }
 
 type Convertor interface {

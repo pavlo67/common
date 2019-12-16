@@ -22,7 +22,7 @@ type TagsToChange struct {
 
 type TagToCheck struct {
 	Tag             Tag
-	Tagged          crud.Index
+	Tagged          Index
 	IsErrorExpected bool
 }
 
@@ -40,10 +40,10 @@ func QueryTagsTestCases(taggerOp Operator) []TestCase {
 	id1 := common.ID("11")
 	id2 := common.ID("22")
 
-	tags1 := []Tag{"1", "2", "3"}
-	tags2 := []Tag{"5", "6", "3"}
+	tags1 := []Tag{{"1", ""}, {"2", ""}, {"3", ""}}
+	tags2 := []Tag{{"3", ""}, {"5", ""}, {"6", ""}}
 
-	key := string(InterfaceKey)
+	key := InterfaceKey
 
 	return []TestCase{
 		// 0 all ok
@@ -52,34 +52,34 @@ func QueryTagsTestCases(taggerOp Operator) []TestCase {
 			Steps: []TestStep{
 				{
 					TagsToChange: TagsToChange{
-						Action: "save",
+						Action: "add",
 						Key:    InterfaceKey,
 						ID:     id1,
 						Tags:   tags1,
 					},
 					TagsToCheck: []TagToCheck{
-						{Tag: "1", Tagged: crud.Index{key: []common.ID{id1}}},
-						{Tag: "2", Tagged: crud.Index{key: []common.ID{id1}}},
-						{Tag: "3", Tagged: crud.Index{key: []common.ID{id1}}},
-						{Tag: "4", Tagged: crud.Index{}},
-						{Tag: "5", Tagged: crud.Index{}},
-						{Tag: "6", Tagged: crud.Index{}},
+						{Tag: Tag{"1", ""}, Tagged: Index{key: []Tagged{{ID: id1}}}},
+						{Tag: Tag{"2", ""}, Tagged: Index{key: []Tagged{{ID: id1}}}},
+						{Tag: Tag{"3", ""}, Tagged: Index{key: []Tagged{{ID: id1}}}},
+						{Tag: Tag{"4", ""}, Tagged: Index{}},
+						{Tag: Tag{"5", ""}, Tagged: Index{}},
+						{Tag: Tag{"6", ""}, Tagged: Index{}},
 					},
 				},
 				{
 					TagsToChange: TagsToChange{
-						Action: "save",
+						Action: "add",
 						Key:    InterfaceKey,
 						ID:     id2,
 						Tags:   tags2,
 					},
 					TagsToCheck: []TagToCheck{
-						{Tag: "1", Tagged: crud.Index{key: []common.ID{id1}}},
-						{Tag: "2", Tagged: crud.Index{key: []common.ID{id1}}},
-						{Tag: "3", Tagged: crud.Index{key: []common.ID{id1, id2}}},
-						{Tag: "4", Tagged: crud.Index{}},
-						{Tag: "5", Tagged: crud.Index{key: []common.ID{id2}}},
-						{Tag: "6", Tagged: crud.Index{key: []common.ID{id2}}},
+						{Tag: Tag{"1", ""}, Tagged: Index{key: []Tagged{{ID: id1}}}},
+						{Tag: Tag{"2", ""}, Tagged: Index{key: []Tagged{{ID: id1}}}},
+						{Tag: Tag{"3", ""}, Tagged: Index{key: []Tagged{{ID: id1}, {ID: id2}}}},
+						{Tag: Tag{"4", ""}, Tagged: Index{}},
+						{Tag: Tag{"5", ""}, Tagged: Index{key: []Tagged{{ID: id2}}}},
+						{Tag: Tag{"6", ""}, Tagged: Index{key: []Tagged{{ID: id2}}}},
 					},
 				},
 				{
@@ -90,12 +90,12 @@ func QueryTagsTestCases(taggerOp Operator) []TestCase {
 						Tags:   nil,
 					},
 					TagsToCheck: []TagToCheck{
-						{Tag: "1", Tagged: crud.Index{}},
-						{Tag: "2", Tagged: crud.Index{}},
-						{Tag: "3", Tagged: crud.Index{key: []common.ID{id2}}},
-						{Tag: "4", Tagged: crud.Index{}},
-						{Tag: "5", Tagged: crud.Index{key: []common.ID{id2}}},
-						{Tag: "6", Tagged: crud.Index{key: []common.ID{id2}}},
+						{Tag: Tag{"1", ""}, Tagged: Index{}},
+						{Tag: Tag{"2", ""}, Tagged: Index{}},
+						{Tag: Tag{"3", ""}, Tagged: Index{key: []Tagged{{ID: id2}}}},
+						{Tag: Tag{"4", ""}, Tagged: Index{}},
+						{Tag: Tag{"5", ""}, Tagged: Index{key: []Tagged{{ID: id2}}}},
+						{Tag: Tag{"6", ""}, Tagged: Index{key: []Tagged{{ID: id2}}}},
 					},
 				},
 			},
@@ -119,10 +119,10 @@ func OperatorTestScenario(t *testing.T, testCases []TestCase, cleanerOp crud.Cle
 
 			var err error
 			switch step.Action {
-			case "save":
-				err = tc.Operator.SaveTags(step.Key, step.ID, step.Tags, nil)
-			case "remove":
-				err = tc.Operator.RemoveTags(step.Key, step.ID, step.Tags, nil)
+			case "add":
+				err = tc.Operator.AddTags(step.Key, step.ID, step.Tags, nil)
+			//case "remove":
+			//	err = tc.Operator.RemoveTags(step.Key, step.ID, step.Tags, nil)
 			case "replace":
 				err = tc.Operator.ReplaceTags(step.Key, step.ID, step.Tags, nil)
 			case "tags":
@@ -144,13 +144,13 @@ func OperatorTestScenario(t *testing.T, testCases []TestCase, cleanerOp crud.Cle
 			}
 
 			for _, tagToCheck := range step.TagsToCheck {
-				tagged, err := tc.Operator.IndexWithTag(tagToCheck.Tag, nil)
+				tagged, err := tc.Operator.IndexWithTag(tagToCheck.Tag.Label, nil)
 
 				if tagToCheck.IsErrorExpected {
 					require.Error(t, err)
 				} else {
 					require.NoError(t, err)
-					require.Equal(t, tagToCheck.Tagged, tagged)
+					require.Equal(t, tagToCheck.Tagged, tagged, "was checked: "+tagToCheck.Tag.Label)
 				}
 			}
 		}
