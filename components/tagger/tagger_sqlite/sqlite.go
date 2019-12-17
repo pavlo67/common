@@ -36,8 +36,8 @@ type taggerSQLite struct {
 
 	ownInterfaceKey joiner.InterfaceKey
 
-	sqlListTags, sqlIndexWithTag, sqlCountTagged, sqlCountTaggedAll string
-	stmListTags, stmIndexWithTag, stmCountTagged, stmCountTaggedAll *sql.Stmt
+	sqlListTags, sqlIndexWithTag, sqlCountTags, sqlCountTagsAll string
+	stmListTags, stmIndexWithTag, stmCountTags, stmCountTagsAll *sql.Stmt
 
 	// sqlSetTag, sqlGetTag
 	sqlAddTag, sqlCountTag, sqlAddTagged, sqlRemoveTagged string
@@ -66,25 +66,20 @@ func New(access config.Access, ownInterfaceKey joiner.InterfaceKey) (tagger.Oper
 		sqlAddTagged:    "INSERT OR REPLACE INTO " + table + " (" + fieldsToSaveStr + ") VALUES (" + strings.Repeat(",? ", len(fieldsToSave))[1:] + ")",
 		sqlRemoveTagged: "DELETE FROM " + table + " WHERE key = ? AND id = ?",
 
-		// sqlGetTag: "SELECT " + fieldsToCountStr + " FROM " + tableTags + " WHERE tag = ?",
-		// sqlSetTag: "UPDATE " + tableTags + " SET is_internal = ?, parted_size = ? WHERE tag = ?",
-
-		sqlAddTag: "INSERT OR REPLACE INTO " + tableTags + " (" + fieldsToCountStr + ") VALUES (" + strings.Repeat(",? ", len(fieldsToCount))[1:] + ")",
-
-		// CASE parted_size WHEN NULL THEN 0 ELSE parted_size END
+		sqlAddTag:   "INSERT OR REPLACE INTO " + tableTags + " (" + fieldsToCountStr + ") VALUES (" + strings.Repeat(",? ", len(fieldsToCount))[1:] + ")",
 		sqlCountTag: "SELECT SUM(parted_size) FROM " + tableJoinedUp + " WHERE " + table + ".tag = ?",
 		sqlListTags: "SELECT tag, relation    FROM " + table + "         WHERE key = ? AND id = ?    ORDER BY tag",
 
-		sqlIndexWithTag:   "SELECT key, id, relation                        FROM " + table + "       WHERE tag = ?                                       ORDER BY key, id",
-		sqlCountTagged:    "SELECT " + table + ".tag, COUNT(*), parted_size FROM " + tableJoined + " WHERE key = ?            GROUP BY " + table + ".tag ORDER BY " + table + ".tag",
-		sqlCountTaggedAll: "SELECT " + table + ".tag, COUNT(*), parted_size FROM " + tableJoined + "                          GROUP BY " + table + ".tag ORDER BY " + table + ".tag",
+		sqlIndexWithTag: "SELECT key, id, relation                        FROM " + table + "       WHERE tag = ?                            ORDER BY key, id",
+		sqlCountTags:    "SELECT " + table + ".tag, COUNT(*), parted_size FROM " + tableJoined + " WHERE key = ? GROUP BY " + table + ".tag ORDER BY " + table + ".tag",
+		sqlCountTagsAll: "SELECT " + table + ".tag, COUNT(*), parted_size FROM " + tableJoined + "               GROUP BY " + table + ".tag ORDER BY " + table + ".tag",
 	}
 
 	sqlStmts := []sqllib.SqlStmt{
 		{&taggerOp.stmListTags, taggerOp.sqlListTags},
 		{&taggerOp.stmIndexWithTag, taggerOp.sqlIndexWithTag},
-		{&taggerOp.stmCountTagged, taggerOp.sqlCountTagged},
-		{&taggerOp.stmCountTaggedAll, taggerOp.sqlCountTaggedAll},
+		{&taggerOp.stmCountTags, taggerOp.sqlCountTags},
+		{&taggerOp.stmCountTagsAll, taggerOp.sqlCountTagsAll},
 	}
 
 	for _, sqlStmt := range sqlStmts {
@@ -234,46 +229,50 @@ func (taggerOp *taggerSQLite) ListTags(key joiner.InterfaceKey, id common.ID, _ 
 	return tags, nil
 }
 
-const onCountTagged = "on taggerSQLite.CountTagged(): "
+const onCountTags = "on taggerSQLite.CountTags(): "
 
-func (taggerOp *taggerSQLite) CountTagged(key *joiner.InterfaceKey, _ *crud.GetOptions) (tagger.Counter, error) {
+func (taggerOp *taggerSQLite) CountTags(key *joiner.InterfaceKey, _ *crud.GetOptions) ([]tagger.TagCount, error) {
 	var values []interface{}
 	var query string
 	var stm *sql.Stmt
 
 	if key == nil {
-		query = taggerOp.sqlCountTaggedAll
-		stm = taggerOp.stmCountTaggedAll
+		query = taggerOp.sqlCountTagsAll
+		stm = taggerOp.stmCountTagsAll
 	} else {
 		values = []interface{}{*key}
-		query = taggerOp.sqlCountTagged
-		stm = taggerOp.stmCountTagged
+		query = taggerOp.sqlCountTags
+		stm = taggerOp.stmCountTags
 	}
 
 	rows, err := stm.Query(values...)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	} else if err != nil {
-		return nil, errors.Wrapf(err, onCountTagged+sqllib.CantQuery, query, values)
+		return nil, errors.Wrapf(err, onCountTags+sqllib.CantQuery, query, values)
 	}
 	defer rows.Close()
 
-	counter := tagger.Counter{}
+	var counter []tagger.TagCount
 
 	for rows.Next() {
-		var key string
-		var count tagger.TaggedCount
+		var count tagger.TagCount
+		full := new(uint64)
 
-		err = rows.Scan(&key, &count.Immediate, &count.Full)
+		err = rows.Scan(&count.Label, &count.Immediate, &full)
 		if err != nil {
-			return counter, errors.Wrapf(err, onCountTagged+sqllib.CantScanQueryRow, query, values)
+			return counter, errors.Wrapf(err, onCountTags+sqllib.CantScanQueryRow, query, values)
 		}
 
-		counter[key] = count
+		if full != nil {
+			count.Full = *full
+		}
+
+		counter = append(counter, count)
 	}
 	err = rows.Err()
 	if err != nil {
-		return counter, errors.Wrapf(err, onCountTagged+": "+sqllib.RowsError, query, values)
+		return counter, errors.Wrapf(err, onCountTags+": "+sqllib.RowsError, query, values)
 	}
 
 	return counter, nil

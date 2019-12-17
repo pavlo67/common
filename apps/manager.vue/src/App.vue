@@ -44,6 +44,11 @@
     color: blue;
   }
 
+  .control {
+    color: blue;
+    font-size: xx-small;
+  }
+
   .small {
     font-size: small;
   }

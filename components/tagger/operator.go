@@ -14,7 +14,8 @@ type Tag struct {
 	Relation string
 }
 
-type TaggedCount struct {
+type TagCount struct {
+	Label     string
 	Immediate uint64
 	Full      uint64
 }
@@ -24,19 +25,15 @@ type Tagged struct {
 	Relation string
 }
 
-type Counter map[string]TaggedCount // parted by Tag.Label
-
 type Index map[joiner.InterfaceKey][]Tagged
 
 type Operator interface {
 	AddTags(joiner.InterfaceKey, common.ID, []Tag, *crud.SaveOptions) error
 	ReplaceTags(joiner.InterfaceKey, common.ID, []Tag, *crud.SaveOptions) error // or remove in particlar
-	ListTags(joiner.InterfaceKey, common.ID, *crud.GetOptions) ([]Tag, error)   // i.e. parent sections if joiner.InterfaceKey == "tagger"
 
-	//RemoveTags(joiner.InterfaceKey, common.ID, []string, *crud.SaveOptions) error
-	//CleanTags(joiner.InterfaceKey, *selectors.Term, *crud.SaveOptions) error
+	ListTags(joiner.InterfaceKey, common.ID, *crud.GetOptions) ([]Tag, error) // i.e. parent sections if joiner.InterfaceKey == "tagger"
+	CountTags(*joiner.InterfaceKey, *crud.GetOptions) ([]TagCount, error)
 
-	CountTagged(*joiner.InterfaceKey, *crud.GetOptions) (Counter, error)
 	IndexWithTag(string, *crud.GetOptions) (Index, error)
 }
 

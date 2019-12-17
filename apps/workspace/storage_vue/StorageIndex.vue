@@ -1,15 +1,10 @@
 <template>
     <div id="data">
-        <b>Мій каталог</b>
+        <b>Мій каталог (теми, сиріч теґи, мітки)</b>
 
-        <br>&nbsp;
+        <br>
 
-        <div v-if="dataItems">
-            <DataList v-bind:dataItems="dataItems"/>
-        </div>
-        <div v-else>
-            немає записів для перегляду...
-        </div>
+        <TagsIndex v-bind:tags="tags"/>
 
     </div>
 </template>
@@ -22,19 +17,19 @@
     export default {
         title: 'мій каталог',
         created () {
-            this.getDataItems();
+            this.getTags();
         },
         data: () => {
-             return {
-                 dataItems: [],
-             };
+            return {
+                tags: [],
+            };
         },
         methods: {
-            getDataItems() {
-                fetch(cfg.listEp, {
+            getTags() {
+                fetch(cfg.tagsEp, {
                     method: 'GET', // *GET, POST, PUT, DELETE, etc.
                     headers: {
-                    'Content-Type': 'application/json',
+                        'Content-Type': 'application/json',
                     },
                     mode: 'cors', // no-cors, cors, *same-origin
 
@@ -45,8 +40,8 @@
                 }).then(response => {
                     return response.json();
                 }).then(data => {
-                    this.dataItems = data;
-                    console.log(this.dataItems);
+                    this.tags = data;
+                    console.log(this.tags);
                 });
             }
         },

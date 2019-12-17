@@ -20,6 +20,10 @@ var srvCfg = server_http.Config{
 		{"read", "/v1/data/read", []string{"data"}, nil, storage_server_http.ReadEndpoint},
 		{"list", "/v1/data/list", []string{"data"}, nil, storage_server_http.ListEndpoint},
 		{"remove", "/v1/data/remove", []string{"data"}, nil, storage_server_http.RemoveEndpoint},
+
+		{"tags", "/v1/data/tags", []string{"data"}, nil, storage_server_http.CountTagsEndpoint},
+		{"tagged", "/v1/data/tagged", []string{"data"}, nil, storage_server_http.ListWithTagEndpoint},
+
 		{"flow", "/v1/flow/list", []string{"flow"}, nil, flow_server_http.FlowEndpoint},
 		{"flow_read", "/v1/flow/read", []string{"flow"}, nil, flow_server_http.FlowReadEndpoint},
 	},

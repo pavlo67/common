@@ -14,6 +14,9 @@ function init(data) {
     cfg.readEp   = ep(data.backend, "read").replace("/{id}", "");
     cfg.saveEp   = ep(data.backend, "save");
     cfg.removeEp = ep(data.backend, "remove").replace("/{id}", "");
+
+    cfg.tagsEp   = ep(data.backend, "tags");
+    cfg.taggedEp = ep(data.backend, "tagged").replace("/{tag}", "");
 }
 
 export { cfg, init };

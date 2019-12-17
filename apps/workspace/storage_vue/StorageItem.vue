@@ -17,11 +17,11 @@
     export default {
         name: 'Workspace',
         created () {
-            this.getDataItems();
+            this.getTags();
         },
         data: () => {
             return {
-                dataItems: [],
+                tags: [],
             };
         },
         methods: {
@@ -37,7 +37,7 @@
                 return text;
             },
 
-            getDataItems() {
+            getTags() {
                 fetch('http://localhost:3003/storage/v1/list', {
                     method: 'GET', // *GET, POST, PUT, DELETE, etc.
                     headers: {
@@ -54,7 +54,7 @@
                         return response.json();
                     }).then(data => {
                     this.dataItems = data;
-                    console.log(this.dataItems);
+                    console.log(this.tags);
                 });
             }
         },

@@ -14,9 +14,9 @@ import (
 const interfaceKeyParamName = "type_key"
 const tagLabelParamName = "tag"
 
-var CountTaggedEndpoint = server_http.Endpoint{Method: "GET", QueryParams: []string{interfaceKeyParamName}, WorkerHTTP: CountTagged}
+var CountTagsEndpoint = server_http.Endpoint{Method: "GET", QueryParams: []string{interfaceKeyParamName}, WorkerHTTP: CountTags}
 
-func CountTagged(_ *auth.User, _ server_http.Params, req *http.Request) (server.Response, error) {
+func CountTags(_ *auth.User, _ server_http.Params, req *http.Request) (server.Response, error) {
 	var interfaceKeyPtr *joiner.InterfaceKey
 
 	if key := req.URL.Query().Get(interfaceKeyParamName); key != "" {
@@ -24,9 +24,9 @@ func CountTagged(_ *auth.User, _ server_http.Params, req *http.Request) (server.
 		interfaceKeyPtr = &interfaceKey
 	}
 
-	counter, err := dataTaggedOp.CountTagged(interfaceKeyPtr, nil)
+	counter, err := dataTaggedOp.CountTags(interfaceKeyPtr, nil)
 	if err != nil {
-		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on GET storage/...CountTagged (%#v): %s", req.URL.Query(), err))
+		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on GET storage/...CountTags (%#v): %s", req.URL.Query(), err))
 	}
 
 	return server.ResponseRESTOk(counter)

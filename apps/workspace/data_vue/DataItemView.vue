@@ -10,7 +10,7 @@
         </div>
         <span @mouseover="showDetails" @mouseleave="hideDetails" :id=itemId(itemToImport) class="small">
             подробиці...
-            <div class="summary" :id=itemId(itemToImport,true)>{{ details(itemToImport) }}</div>
+            <div class="data_summary" :id=itemId(itemToImport,true)>{{ details(itemToImport) }}</div>
         </span>
 
         <br>
@@ -60,7 +60,7 @@
 </script>
 
 <style lang="scss">
-    .summary {
+    .data_summary {
         color: black;
         background-color: #97c9be;
         padding: 10px;

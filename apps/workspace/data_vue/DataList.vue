@@ -17,7 +17,7 @@
 
     export default {
         name: 'DataList',
-        props: ['dataItems'],
+        props: ['tags'],
         methods: {
             href: e.href,
             announce(j) {
@@ -40,9 +40,5 @@
 <style lang="scss">
     .data_announce {
         font-size: small;
-    }
-    .control {
-        color: blue;
-        font-size: xx-small;
     }
 </style>

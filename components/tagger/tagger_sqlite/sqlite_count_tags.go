@@ -13,7 +13,7 @@ import (
 
 const onCountTagsOnTag = "on taggerSQLite.countTag(): "
 
-func (taggerOp *taggerSQLite) countTag(tagLabel string, passedTags []string, labelsRemoved []string, stmCountTagged, stmListTags, stmAddTag *sql.Stmt) ([]string, error) {
+func (taggerOp *taggerSQLite) countTag(tagLabel string, passedTags []string, labelsRemoved []string, stmCountTags, stmListTags, stmAddTag *sql.Stmt) ([]string, error) {
 	if strlib.In(passedTags, tagLabel) {
 		return passedTags, nil
 	}
@@ -21,7 +21,7 @@ func (taggerOp *taggerSQLite) countTag(tagLabel string, passedTags []string, lab
 	var partedSize uint64
 	partedSizePtr := &partedSize
 	values := []interface{}{taggerOp.ownInterfaceKey, tagLabel}
-	row := stmCountTagged.QueryRow(values...)
+	row := stmCountTags.QueryRow(values...)
 	if err := row.Scan(&partedSizePtr); err != nil && err != sql.ErrNoRows {
 		return passedTags, errors.Wrapf(err, onCountTagsOnTag+": can't tx.QueryRow(%s, %#v)", taggerOp.sqlCountTag, values)
 	}
@@ -61,7 +61,7 @@ func (taggerOp *taggerSQLite) countTag(tagLabel string, passedTags []string, lab
 	}
 
 	for _, labelToCount := range labelsToCount {
-		if passedTags, err = taggerOp.countTag(labelToCount, passedTags, nil, stmCountTagged, stmListTags, stmAddTag); err != nil {
+		if passedTags, err = taggerOp.countTag(labelToCount, passedTags, nil, stmCountTags, stmListTags, stmAddTag); err != nil {
 			return passedTags, errors.Wrapf(err, "on tag '%s'", tagLabel)
 		}
 	}
@@ -77,7 +77,7 @@ func (taggerOp *taggerSQLite) countTagChanged(key joiner.InterfaceKey, id common
 	}
 	tagLabel := string(id)
 
-	stmCountTagged, err := tx.Prepare(taggerOp.sqlCountTag)
+	stmCountTags, err := tx.Prepare(taggerOp.sqlCountTag)
 	if err != nil {
 		return errors.Wrapf(err, onCountTagsChanged+": can't tx.Prepare(%s)", taggerOp.sqlCountTag)
 	}
@@ -90,7 +90,7 @@ func (taggerOp *taggerSQLite) countTagChanged(key joiner.InterfaceKey, id common
 		return errors.Wrapf(err, onCountTagsChanged+": can't tx.Prepare(%s)", taggerOp.sqlAddTag)
 	}
 
-	if _, err := taggerOp.countTag(tagLabel, nil, tagLabelsRemoved, stmCountTagged, stmListTags, stmAddTag); err != nil {
+	if _, err := taggerOp.countTag(tagLabel, nil, tagLabelsRemoved, stmCountTags, stmListTags, stmAddTag); err != nil {
 		return errors.Wrapf(err, onCountTagsChanged+": can't taggerOp.countTag(%s, ...)", tagLabel)
 	}
 

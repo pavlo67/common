@@ -11,7 +11,7 @@ import (
 )
 
 var srvCfg = server_http.Config{
-	Title:   "Pavlo's Storage Gatherer REST API",
+	Title:   "Pavlo's StorageIndex Gatherer REST API",
 	Version: "0.0.1",
 	Prefix:  "/gatherer",
 	Endpoints: []server_http.EndpointConfig{

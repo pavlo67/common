@@ -74,6 +74,46 @@
     ]
    }
   },
+  "/storage/v1/data/tagged": {
+   "get": {
+    "operationId": "tagged",
+    "parameters": [
+     {
+      "description": "",
+      "in": "query",
+      "name": "tag",
+      "required": false,
+      "type": "string"
+     }
+    ],
+    "produces": [
+     "application/json"
+    ],
+    "tags": [
+     "data"
+    ]
+   }
+  },
+  "/storage/v1/data/tags": {
+   "get": {
+    "operationId": "tags",
+    "parameters": [
+     {
+      "description": "",
+      "in": "query",
+      "name": "type_key",
+      "required": false,
+      "type": "string"
+     }
+    ],
+    "produces": [
+     "application/json"
+    ],
+    "tags": [
+     "data"
+    ]
+   }
+  },
   "/storage/v1/flow/list": {
    "get": {
     "operationId": "flow",
