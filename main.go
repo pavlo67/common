@@ -2,16 +2,15 @@ package main
 
 import (
 	"log"
-	"reflect"
+
+	"github.com/pkg/errors"
 )
+
+// executable cod for various probes only
 
 func main() {
 
-	type aaa struct{ a int }
+	err := errors.New("original error")
 
-	exemplar := aaa{1}
-
-	exemplar1 := reflect.New(reflect.TypeOf(exemplar)).Elem().Interface()
-
-	log.Printf("%#v\n%#v", exemplar, exemplar1)
+	log.Print(errors.Wrap(err, "wrapped text"))
 }
