@@ -3,6 +3,8 @@ package selectors_sql
 import (
 	"github.com/pkg/errors"
 
+	"strings"
+
 	"github.com/pavlo67/workshop/common/selectors"
 )
 
@@ -78,6 +80,18 @@ func use(value interface{}) (sqlCondition string, values []interface{}, err erro
 		return v, nil, nil
 	case selectors.Value:
 		return "?", []interface{}{v.V}, nil
+	case selectors.TermOneOf:
+		if len(v.Values) < 1 {
+			// TODO!!! is it correct?
+			return "", nil, nil
+		}
+		return v.Key + " in (" + strings.Repeat(",?", len(v.Values))[1:] + ")", v.Values, nil
+	case *selectors.TermOneOf:
+		if v == nil || len(v.Values) < 1 {
+			// TODO!!! is it correct?
+			return "", nil, nil
+		}
+		return v.Key + " in (" + strings.Repeat(",?", len(v.Values))[1:] + ")", v.Values, nil
 	default:
 		return "", nil, errors.Errorf("wrong value for selectors_sql.use(%#v)", value)
 	}

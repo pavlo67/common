@@ -11,21 +11,24 @@ import { convert } from '../../components.js/swagger_convertor';
 Vue.use(Router);
 Vue.config.productionTip = false;
 
-let inits  = [];
+let backend = convert(swagger);
+
+// let inits  = [];
 let routes = [];
 let menu   = [];
 for (let p of parts) {
     if (typeof p === "function") {
-        inits.push(p);
+        // inits.push(p);
+        p({backend});
     } else {
         routes.push(p);
         if (p.inMenu) menu.push(p);
     }
 }
 
-let backend = convert(swagger);
+// for (let i of inits) i({backend});
+
 let router  = new Router({ routes });
-for (let i of inits) i({router, backend});
 
 new Vue({
   data: { menu },

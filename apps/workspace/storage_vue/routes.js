@@ -15,17 +15,16 @@ export default [
     {
         path:      '/storage/:tag',
         name:      'StorageTagged',
-        title:     StorageTagged.title,
         component: StorageTagged,
     },
     {
-        path:      '/storage/item_import',
-        name:      'StorageItemImport',
-        component: () => import('./StorageImport.vue'),
-    },
-    {
-        path:     '/storage/item/:id',
+        path:     '/storage_item/:id',
         name:     'StorageItem',
         component: () => import('./StorageItem.vue'),
+    },
+    {
+        path:      '/storage_item_import',
+        name:      'StorageItemImport',
+        component: () => import('./StorageImport.vue'),
     },
 ];

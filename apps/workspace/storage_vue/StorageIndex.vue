@@ -1,10 +1,10 @@
 <template>
-    <div id="data">
+    <div id="storage">
         <b>Мій каталог (теми, сиріч теґи, мітки)</b>
 
-        <br>
+        <br>&nbsp;
 
-        <TagsIndex v-bind:tags="tags"/>
+        <TagsIndex v-bind:tagsIndex="tagsIndex"/>
 
     </div>
 </template>
@@ -21,12 +21,12 @@
         },
         data: () => {
             return {
-                tags: [],
+                tagsIndex: [],
             };
         },
         methods: {
             getTags() {
-                fetch(cfg.tagsEp, {
+                fetch(cfg.tagsEp + "?key=storage", {
                     method: 'GET', // *GET, POST, PUT, DELETE, etc.
                     headers: {
                         'Content-Type': 'application/json',
@@ -40,8 +40,8 @@
                 }).then(response => {
                     return response.json();
                 }).then(data => {
-                    this.tags = data;
-                    console.log(this.tags);
+                    this.tagsIndex = data;
+                    console.log(this.tagsIndex);
                 });
             }
         },
@@ -49,7 +49,7 @@
 </script>
 
 <style lang="scss">
-    #data {
+    #storage {
         padding: 0px 10px 10px 10px;
         text-align: left;
     }

@@ -2,15 +2,15 @@
 
     <div id="data_item_view">
 
-        <div class="title">{{ itemToImport.Title }}</div>
+        <div class="title">{{ dataItem.Title }}</div>
         <br>
         <div>
-            {{ itemToImport.Summary }}
-            <br> <span v-html="href(itemToImport.URL)" class="href small"></span>
+            <span v-html="dataItem.Summary"></span>
+            <br> <span v-html="href(dataItem.URL)" class="href small"></span>
         </div>
-        <span @mouseover="showDetails" @mouseleave="hideDetails" :id=itemId(itemToImport) class="small">
+        <span @mouseover="showDetails" @mouseleave="hideDetails" :id=itemId(dataItem) class="small">
             подробиці...
-            <div class="data_summary" :id=itemId(itemToImport,true)>{{ details(itemToImport) }}</div>
+            <div class="data_summary" :id=itemId(dataItem,true)>{{ details(dataItem) }}</div>
         </span>
 
         <br>
@@ -29,7 +29,7 @@
 
     export default {
         name: 'DataItemView',
-        props: ['itemToImport'],
+        props: ['dataItem'],
         methods: {
             href: e.href,
             itemId(item, postfixed) {

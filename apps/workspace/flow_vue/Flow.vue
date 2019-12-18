@@ -75,7 +75,7 @@
                     return response.json();
 
                 }).then(flowItem => {
-                    cfg.router.push({ name: 'storage_item_import',  params: { dataItem: flowItem } })
+                    this.$router.push({ name: 'StorageItemImport',  params: { dataItem: flowItem } })
 
                 });
             },

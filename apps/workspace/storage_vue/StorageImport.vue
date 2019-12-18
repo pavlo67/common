@@ -5,7 +5,7 @@
         <br>&nbsp;
 
         <div v-if="itemToImport">
-            <DataItemView v-bind:itemToImport="itemToImport"/>
+            <DataItemView v-bind:dataItem="itemToImport"/>
             <button v-on:click="saveToStorage()">Save to the storage</button>
         </div>
         <div v-else>
@@ -21,8 +21,6 @@
     import { cfg } from './init';
 
     export default {
-        name: 'DataItemImport',
-
         beforeMount() {
             this.itemToImport = this.$route.params.dataItem;
         },

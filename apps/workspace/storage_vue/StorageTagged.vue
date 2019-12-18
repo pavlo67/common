@@ -1,18 +1,19 @@
 <template>
-    <div id="data">
-        <b>Мій каталог</b>
-
-        <DataIndex v-bind:dataIndex="dataIndex"/>
+    <div id="storage">
+        <b>Мій каталог: всі записи з міткою '{{ $route.params.tag }}'</b>
 
         <br>&nbsp;
 
-        <div v-if="dataItems">
-            <DataList v-bind:dataItems="dataItems"/>
-        </div><div v-else>
-        немає записів для перегляду...
+        <DataList v-bind:dataList="dataList"/>
+
+        <!--<br>&nbsp;-->
+
+        <!--<div v-if="dataItems">-->
+            <!--<DataList v-bind:dataItems="dataItems"/>-->
+        <!--</div><div v-else>-->
+        <!--немає записів для перегляду...-->
     </div>
 
-    </div>
 </template>
 
 
@@ -21,18 +22,20 @@
     import { cfg } from './init';
 
     export default {
-        title: 'мій каталог',
+        name: 'StorageTagged',
         created () {
-            this.getTags();
+            this.getDataList();
         },
         data: () => {
             return {
-                tags: [],
+                dataList: [],
             };
         },
         methods: {
-            getTags() {
-                fetch(cfg.listEp, {
+            getDataList() {
+                console.log(cfg.taggedEp + "?tag=" + encodeURIComponent(this.$route.params.tag));
+
+                fetch(cfg.taggedEp + "?key=storage&tag=" + encodeURIComponent(this.$route.params.tag), {
                     method: 'GET', // *GET, POST, PUT, DELETE, etc.
                     headers: {
                         'Content-Type': 'application/json',
@@ -46,8 +49,8 @@
                 }).then(response => {
                     return response.json();
                 }).then(data => {
-                    this.dataItems = data;
-                    console.log(this.tags);
+                    this.dataList = data;
+                    // console.log(this.tags);
                 });
             }
         },
@@ -55,7 +58,7 @@
 </script>
 
 <style lang="scss">
-    #data {
+    #storage {
         padding: 0px 10px 10px 10px;
         text-align: left;
     }

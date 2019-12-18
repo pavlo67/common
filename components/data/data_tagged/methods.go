@@ -5,7 +5,9 @@ import (
 
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/crud"
+	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/selectors"
+	"github.com/pavlo67/workshop/common/selectors/logic"
 	"github.com/pavlo67/workshop/components/data"
 	"github.com/pavlo67/workshop/components/hypertext"
 	"github.com/pavlo67/workshop/components/tagger"
@@ -36,53 +38,36 @@ func New(dataOp data.Operator, taggerOp tagger.Operator) (Operator, crud.Cleaner
 
 const onListWithTag = "on ws.ListWithTag(): "
 
-func (wsOp *ws) ListWithTag(selector *selectors.Term, tagLabel string, options *crud.GetOptions) ([]data.Item, error) {
+func (wsOp *ws) ListWithTag(key *joiner.InterfaceKey, tagLabel string, selector *selectors.Term, options *crud.GetOptions) ([]data.Item, error) {
 	if wsOp.Tagger == nil {
 		return nil, errors.New(onListWithTag + ": no tagger.Operator")
 	}
 
-	_, err := wsOp.IndexWithTag(tagLabel, options)
+	index, err := wsOp.IndexWithTag(key, tagLabel, options)
 	if err != nil {
 		return nil, errors.Wrap(err, onListWithTag)
 	}
+	var taggedIDs []interface{}
+	for _, i := range index {
+		for _, tagged := range i {
+			taggedIDs = append(taggedIDs, string(tagged.ID))
+		}
+	}
 
-	// TODO: modify selector with index
+	selectorTagged := selectors.In("id", taggedIDs...)
+	if selector != nil {
+		selectorTagged = logic.AND(selectorTagged, *selector)
+	}
 
-	//	selectorTagged := selector.FieldStr("id", linkedIDs...)
-	//	if options == nil {
-	//		options = &content.ListOptions{Selector: selectorTagged}
-	//	} else if options.Selector == nil {
-	//		options.Selector = selectorTagged
-	//	} else {
-	//		options.Selector = selector.And(options.Selector, selectorTagged)
-	//	}
-	//
-	//	for _, l := range linked {
-	//		id, _ := strconv.ParseUint(l.ObjectID, 10, 64)
-	//		if id > 0 {
-	//			duplicatedID := false
-	//			idStr := strings.TrimSpace(l.ObjectID)
-	//			for _, parentID := range parentIDs {
-	//				if idStr == parentID {
-	//					duplicatedID = true
-	//					continue
-	//				}
-	//			}
-	//			if !duplicatedID {
-	//				parentIDs = append(parentIDs, idStr)
-	//			}
-	//		}
-	//	}
-	//
-	//	linkedObjs, allCnt, err = objOp.ReadList(userIS, options)
-	//
-	return wsOp.List(selector, options)
+	// l.Infof("%#v\n%#v", selectorTagged, options)
+	return wsOp.List(selectorTagged, options)
 
+	// TODO: check if all item.TypeKey are correct in the result of wsOp.List
 }
 
 const onListWithText = "on ws.ListWithText(): "
 
-func (wsOp *ws) ListWithText(*selectors.Term, hypertext.ToSearch, *crud.GetOptions) ([]data.Item, error) {
+func (wsOp *ws) ListWithText(*joiner.InterfaceKey, hypertext.ToSearch, *selectors.Term, *crud.GetOptions) ([]data.Item, error) {
 	return nil, common.ErrNotImplemented
 }
 

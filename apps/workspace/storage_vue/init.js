@@ -7,7 +7,6 @@ function init(data) {
         return;
     }
 
-    cfg.router = data.router;
     // TODO: do it safely!!!
 
     cfg.listEp   = ep(data.backend, "list");
@@ -16,7 +15,7 @@ function init(data) {
     cfg.removeEp = ep(data.backend, "remove").replace("/{id}", "");
 
     cfg.tagsEp   = ep(data.backend, "tags");
-    cfg.taggedEp = ep(data.backend, "tagged").replace("/{tag}", "");
+    cfg.taggedEp = ep(data.backend, "tagged");
 }
 
 export { cfg, init };

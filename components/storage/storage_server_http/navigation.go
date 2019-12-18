@@ -11,18 +11,22 @@ import (
 	"github.com/pavlo67/workshop/common/server/server_http"
 )
 
-const interfaceKeyParamName = "type_key"
+const interfaceKeyParamName = "key"
 const tagLabelParamName = "tag"
 
 var CountTagsEndpoint = server_http.Endpoint{Method: "GET", QueryParams: []string{interfaceKeyParamName}, WorkerHTTP: CountTags}
 
 func CountTags(_ *auth.User, _ server_http.Params, req *http.Request) (server.Response, error) {
 	var interfaceKeyPtr *joiner.InterfaceKey
-
 	if key := req.URL.Query().Get(interfaceKeyParamName); key != "" {
 		interfaceKey := joiner.InterfaceKey(key)
 		interfaceKeyPtr = &interfaceKey
 	}
+
+	//l.Info(1111111, interfaceKeyPtr)
+	//if interfaceKeyPtr != nil {
+	//	l.Info(22222, *interfaceKeyPtr)
+	//}
 
 	counter, err := dataTaggedOp.CountTags(interfaceKeyPtr, nil)
 	if err != nil {
@@ -32,12 +36,18 @@ func CountTags(_ *auth.User, _ server_http.Params, req *http.Request) (server.Re
 	return server.ResponseRESTOk(counter)
 }
 
-var ListWithTagEndpoint = server_http.Endpoint{Method: "GET", QueryParams: []string{"tag"}, WorkerHTTP: ListWithTag}
+var ListWithTagEndpoint = server_http.Endpoint{Method: "GET", QueryParams: []string{interfaceKeyParamName, tagLabelParamName}, WorkerHTTP: ListWithTag}
 
 func ListWithTag(user *auth.User, _ server_http.Params, req *http.Request) (server.Response, error) {
+	var interfaceKeyPtr *joiner.InterfaceKey
+	if key := req.URL.Query().Get(interfaceKeyParamName); key != "" {
+		interfaceKey := joiner.InterfaceKey(key)
+		interfaceKeyPtr = &interfaceKey
+	}
 
 	tagLabel := req.URL.Query().Get(tagLabelParamName)
-	items, err := dataTaggedOp.ListWithTag(nil, tagLabel, nil)
+
+	items, err := dataTaggedOp.ListWithTag(interfaceKeyPtr, tagLabel, nil, nil)
 
 	if err != nil {
 		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on GET storage/...ListWithTag (%#v): %s", req.URL.Query(), err))

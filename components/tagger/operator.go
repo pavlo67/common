@@ -34,7 +34,7 @@ type Operator interface {
 	ListTags(joiner.InterfaceKey, common.ID, *crud.GetOptions) ([]Tag, error) // i.e. parent sections if joiner.InterfaceKey == "tagger"
 	CountTags(*joiner.InterfaceKey, *crud.GetOptions) ([]TagCount, error)
 
-	IndexWithTag(string, *crud.GetOptions) (Index, error)
+	IndexWithTag(*joiner.InterfaceKey, string, *crud.GetOptions) (Index, error)
 }
 
 //func CheckCycle(userIS auth.ID, operator Operator, id string, passedIDs []string) ([]string, error) {

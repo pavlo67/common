@@ -1,9 +1,12 @@
 <template>
-    <div id="data">
-        <b>Мій каталог</b>
-
-        <div v-for="item in dataItems">
-            <span v-html="announce(item)" class="data_announce"></span><br>&nbsp;
+    <div id="storage">
+        <div v-if="dataItem">
+            <b>Мій каталог: {{ dataItem.Title }}</b>
+            <br>&nbsp;
+            <DataItemView v-bind:dataItem="dataItem"/>
+        </div>
+        <div v-else>
+            <b>Мій каталог:</b> відсутній запис для показу
         </div>
 
 
@@ -12,33 +15,21 @@
 
 
 <script>
-    import b from '../../components.js/basis';
+    import b       from '../../components.js/basis';
+    import { cfg } from './init';
 
     export default {
-        name: 'Workspace',
         created () {
-            this.getTags();
+            this.getDataItem();
         },
         data: () => {
             return {
-                tags: [],
+                dataItem: {},
             };
         },
         methods: {
-            announce(j) {
-                if (!(typeof j === "object")) return j;
-
-                let text =
-                    "[" +  b.dateStr(j.CreatedAt) + "]" +
-                    " &nbsp; " + j.Title +
-                    "&nbsp;" + "<span class=\"control\">[" +  "докладно" + "][" +  "ред." + "]</span>" +
-                    "<br>" + j.Summary;
-
-                return text;
-            },
-
-            getTags() {
-                fetch('http://localhost:3003/storage/v1/list', {
+            getDataItem() {
+                fetch(cfg.readEp + "/" + encodeURIComponent(this.$route.params.id), {
                     method: 'GET', // *GET, POST, PUT, DELETE, etc.
                     headers: {
                         'Content-Type': 'application/json',
@@ -49,12 +40,11 @@
                     // credentials: 'same-origin', // include, *same-origin, omit
                     // redirect: 'follow', // manual, *follow, error
                     // referrer: 'no-referrer', // no-referrer, *client
-                })
-                    .then(response => {
-                        return response.json();
-                    }).then(data => {
-                    this.dataItems = data;
-                    console.log(this.tags);
+                }).then(response => {
+                    return response.json();
+                }).then(data => {
+                    this.dataItem = data;
+                    console.log(66666666, this.dataItem);
                 });
             }
         },
@@ -70,7 +60,7 @@
         color: blue;
         font-size: xx-small;
     }
-    #data {
+    #storage {
         padding: 0px 10px 10px 10px;
         text-align: left;
     }

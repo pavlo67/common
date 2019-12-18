@@ -81,6 +81,13 @@
      {
       "description": "",
       "in": "query",
+      "name": "key",
+      "required": false,
+      "type": "string"
+     },
+     {
+      "description": "",
+      "in": "query",
       "name": "tag",
       "required": false,
       "type": "string"
@@ -101,7 +108,7 @@
      {
       "description": "",
       "in": "query",
-      "name": "type_key",
+      "name": "key",
       "required": false,
       "type": "string"
      }

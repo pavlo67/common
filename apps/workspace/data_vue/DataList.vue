@@ -1,7 +1,12 @@
 <template>
     <div>
-        <div v-for="item in dataItems" class="small">
-            <span v-html="announce(item)" class="data_announce"></span><br>&nbsp;
+        <div v-for="item in dataList" class="small">
+            <span class="data_announce">
+                 [{{ dateStr(object(item.Status).CreatedAt) }}] &nbsp; {{ item.Title }}
+                 &nbsp; <span class="control" v-on:click="$router.push({ name: 'StorageItem',  params: { id: item.ID } })">[докладно][ред]</span>
+                <br><span v-html="item.Summary"></span>
+            </span>
+            <br>&nbsp;
         </div>
     </div>
 </template>
@@ -17,22 +22,11 @@
 
     export default {
         name: 'DataList',
-        props: ['tags'],
+        props: ['dataList'],
         methods: {
-            href: e.href,
-            announce(j) {
-                if (!(typeof j === "object")) return j;
-
-                console.log(j)
-
-                let text =
-                    "[" +  b.dateStr(b.object(j.Status).CreatedAt) + "]" +
-                    " &nbsp; " + j.Title +
-                    "&nbsp;" + "<span class=\"control\">[" +  "докладно" + "][" +  "ред." + "]</span>" +
-                    "<br>" + j.Summary;
-
-                return text;
-            },
+            object:  b.object,
+            dateStr: b.dateStr,
+            href:    e.href,
         },
     }
 </script>

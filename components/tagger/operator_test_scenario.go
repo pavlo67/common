@@ -144,7 +144,7 @@ func OperatorTestScenario(t *testing.T, testCases []TestCase, cleanerOp crud.Cle
 			}
 
 			for _, tagToCheck := range step.TagsToCheck {
-				tagged, err := tc.Operator.IndexWithTag(tagToCheck.Tag.Label, nil)
+				tagged, err := tc.Operator.IndexWithTag(nil, tagToCheck.Tag.Label, nil)
 
 				if tagToCheck.IsErrorExpected {
 					require.Error(t, err)
