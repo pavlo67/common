@@ -32,7 +32,4 @@
 </script>
 
 <style lang="scss">
-    .data_announce {
-        font-size: small;
-    }
 </style>

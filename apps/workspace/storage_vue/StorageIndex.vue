@@ -1,5 +1,5 @@
 <template>
-    <div id="storage">
+    <div id="storage_index">
         <b>Мій каталог (теми, сиріч теґи, мітки)</b>
 
         <br>&nbsp;
@@ -49,8 +49,4 @@
 </script>
 
 <style lang="scss">
-    #storage {
-        padding: 0px 10px 10px 10px;
-        text-align: left;
-    }
 </style>

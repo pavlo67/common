@@ -1,5 +1,5 @@
 <template>
-    <div id="storage">
+    <div id="storage_item" class="small">
         <div v-if="dataItem">
             <b>Мій каталог: {{ dataItem.Title }}</b>
             <br>&nbsp;
@@ -52,16 +52,4 @@
 </script>
 
 <style lang="scss">
-    .data_announce {
-        color: brown;
-        font-size: small;
-    }
-    .control {
-        color: blue;
-        font-size: xx-small;
-    }
-    #storage {
-        padding: 0px 10px 10px 10px;
-        text-align: left;
-    }
 </style>

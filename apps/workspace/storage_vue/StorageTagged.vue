@@ -1,5 +1,5 @@
 <template>
-    <div id="storage">
+    <div id="storage_tagged" class="small">
         <b>Мій каталог: всі записи з міткою '{{ $route.params.tag }}'</b>
 
         <br>&nbsp;
@@ -58,8 +58,4 @@
 </script>
 
 <style lang="scss">
-    #storage {
-        padding: 0px 10px 10px 10px;
-        text-align: left;
-    }
 </style>

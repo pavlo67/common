@@ -9,7 +9,7 @@
                 {{ sourcePack.url }} &nbsp [{{ dateStr(sourcePack.Time) }}]
 
                 <span v-for="item in sourcePack.flowItems">
-                    <br><span :id=announceId(item)  class="flow_control" v-on:click="importData">[імпорт]</span> &nbsp;
+                    <br><span :id=announceId(item)  class="control" v-on:click="importData">[імпорт]</span> &nbsp;
                     <span v-html="announce(item)" @mouseover="showSummary" @mouseleave="hideSummary" class="flow_announce" :id=announceId(item,true)></span>&nbsp;
                 </span>
 
@@ -129,13 +129,8 @@
 </script>
 
 <style lang="scss">
-    #flow {
-        padding: 0px 10px 10px 10px;
-        text-align: left;
-    }
     .flow_announce {
         color: brown;
-        font-size: small;
     }
     .flow_summary {
         color: black;
@@ -143,9 +138,5 @@
         padding: 10px;
         position: absolute;
         display: none;
-    }
-    .flow_control {
-        color: blue;
-        font-size: xx-small;
     }
 </style>

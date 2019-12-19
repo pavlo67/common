@@ -11,6 +11,9 @@
 
     </div>
 
+    <!--<div id="message">-->
+    <!--</div>-->
+
     <div id="view">
       <router-view/>
     </div>
@@ -63,22 +66,67 @@
     */
   }
 
+  #message {
+    margin-left: 320px;
+    padding: 10px;
+    text-align: center;
+    font-size: small;
+    background-color: #BC6060;
+    position: absolute;
+    visibility: hidden;
+  }
+
   #view {
     margin-left: 320px;
+    padding: 0px 10px 10px 10px;
+    text-align: left;
+    font-size: small;
   }
 
 </style>
 
 
 <script>
+  import Vue from 'vue';
   import Confidence from '../../confidence/_vue/Confidence.vue';
 
+  let eventBus = new Vue();
+
+  function show(id, html) {
+    let el = document.getElementById(id);
+    if (el) {
+      el.innerHTML = html;
+      el.style.position = "relative";
+      el.style.visibility = "visible";
+    }
+  }
+
+  function hide(id) {
+    let el = document.getElementById(id);
+    if (el) {
+      el.style.visibility = "hidden";
+      el.style.position = "absolute";
+    }
+  }
+
   export default {
+    eventBus,
+    mounted() {
+      eventBus.$on('message', message => {
+        show("message", "received: " + message);
+        setTimeout(() => { hide("message"); }, 3000);
+      });
+
+      eventBus.$emit('message', "!!!");
+    },
+    data: () => {
+      return {
+        message: '',
+      };
+    },
+
     components: {
       Confidence,
     },
   };
-
-
-
 </script>

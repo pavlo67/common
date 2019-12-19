@@ -18,7 +18,4 @@
 </script>
 
 <style lang="scss">
-    .tags_index {
-        font-size: small;
-    }
 </style>

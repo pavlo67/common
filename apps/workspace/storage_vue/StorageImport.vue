@@ -1,5 +1,5 @@
 <template>
-    <div id="item_import">
+    <div id="storage_import">
         <b>Імпорт запису в приватний каталог</b>
 
         <br>&nbsp;
@@ -41,8 +41,15 @@
                     },
                     mode: 'cors', // no-cors, cors, *same-origin
                     body: JSON.stringify(this.itemToImport),
+
                 }).then(response => {
-                    console.log(99999999, response);
+                    return response.json();
+
+                }).then(data => {
+                    console.log(888, data);
+                    console.log(999, data.ID);
+                    this.$router.push({ name: 'StorageItem',  params: { id: data.ID } })
+
                 });
             }
         },
@@ -51,8 +58,4 @@
 </script>
 
 <style lang="scss">
-    #item_import {
-        padding: 0px 10px 10px 10px;
-        text-align: left;
-    }
 </style>

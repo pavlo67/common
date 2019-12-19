@@ -67,6 +67,4 @@
         position: absolute;
         display: none;
     }
-    #data_item_view {
-    }
 </style>
