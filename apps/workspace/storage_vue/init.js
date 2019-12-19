@@ -7,6 +7,8 @@ function init(data) {
         return;
     }
 
+    cfg.eventBus = data.eventBus;
+
     // TODO: do it safely!!!
 
     cfg.listEp   = ep(data.backend, "list");

@@ -46,9 +46,15 @@
                     return response.json();
 
                 }).then(data => {
-                    console.log(888, data);
-                    console.log(999, data.ID);
-                    this.$router.push({ name: 'StorageItem',  params: { id: data.ID } })
+                    if (data.ID > 0) {
+                        cfg.eventBus.$emit('message', "запис з id = " + data.ID + " збережено");
+                        this.$router.push({ name: 'StorageItem',  params: { id: data.ID } })
+
+                    } else {
+                        console.log(data);
+                        cfg.eventBus.$emit('message', "не вдалось зберегти запис: " + data.Error);
+                    }
+
 
                 });
             }

@@ -11,8 +11,8 @@
 
     </div>
 
-    <!--<div id="message">-->
-    <!--</div>-->
+    <div id="message">
+    </div>
 
     <div id="view">
       <router-view/>
@@ -67,11 +67,13 @@
   }
 
   #message {
-    margin-left: 320px;
+    margin: 0px 0px 10px 330px;
     padding: 10px;
     text-align: center;
     font-size: small;
-    background-color: #BC6060;
+    border-color: green;
+    border-width: 1px;
+    border-style: solid;
     position: absolute;
     visibility: hidden;
   }
@@ -92,12 +94,13 @@
 
   let eventBus = new Vue();
 
-  function show(id, html) {
+  function show(id, html, color) {
     let el = document.getElementById(id);
     if (el) {
       el.innerHTML = html;
       el.style.position = "relative";
       el.style.visibility = "visible";
+      el.style["border-color"] = color || "green";
     }
   }
 
@@ -109,20 +112,21 @@
     }
   }
 
+  export { eventBus };
+
   export default {
-    eventBus,
     mounted() {
       eventBus.$on('message', message => {
-        show("message", "received: " + message);
+        show("message", message);
+        setTimeout(() => { hide("message"); }, 3000);
+      });
+      eventBus.$on('error', message => {
+        show("message", message, "red");
         setTimeout(() => { hide("message"); }, 3000);
       });
 
-      eventBus.$emit('message', "!!!");
-    },
-    data: () => {
-      return {
-        message: '',
-      };
+
+      eventBus.$emit('error', "!!!");
     },
 
     components: {
