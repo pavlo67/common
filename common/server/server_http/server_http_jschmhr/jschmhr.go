@@ -116,7 +116,7 @@ func (s *serverHTTPJschmhr) HandleFiles(key, serverPath string, staticPath serve
 		w.Header().Set("Access-Control-Allow-Headers", server_http.CORSAllowHeaders)
 		w.Header().Set("Access-Control-Allow-Methods", server_http.CORSAllowMethods)
 		w.Header().Set("Access-Control-Allow-Credentials", server_http.CORSAllowCredentials)
-		w.Header().Set("Content-Type", *staticPath.MIMEType)
+		w.Header().Set("Content-WorkerType", *staticPath.MIMEType)
 		OpenFile, err := os.Open(staticPath.LocalPath + "/" + p.ByName("filepath"))
 		defer OpenFile.Close()
 		if err != nil {
@@ -142,7 +142,7 @@ func (s *serverHTTPJschmhr) HandleFiles(key, serverPath string, staticPath serve
 //	s.handleFunc("GET", serverRoute, func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 //		if mimeType != nil {
 //			// "application/javascript"
-//			w.Header().Set("Content-Type", *mimeType)
+//			w.Header().Set("Content-WorkerType", *mimeType)
 //		}
 //		w.Write([]byte(str))
 //	})
@@ -200,7 +200,7 @@ func (s *serverHTTPJschmhr) HandleEndpoint(key, serverPath string, endpoint serv
 			http.Error(w, err.Error(), responseData.Status)
 			return
 		}
-		w.Header().Set("Content-Type", responseData.MIMEType)
+		w.Header().Set("Content-WorkerType", responseData.MIMEType)
 		w.Header().Set("Content-Length", strconv.Itoa(len(responseData.Data)))
 		if responseData.FileName != "" {
 			w.Header().Set("Content-Disposition", "attachment; filename="+responseData.FileName)

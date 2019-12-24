@@ -6,8 +6,8 @@ import (
 	"io/ioutil"
 
 	"github.com/pavlo67/workshop/common/libraries/filelib"
-	"github.com/pavlo67/workshop/components/flow/flow_server_http"
-	"github.com/pavlo67/workshop/components/storage/storage_server_http"
+	"github.com/pavlo67/workshop/constructions/dataflow/flow_server_http"
+	"github.com/pavlo67/workshop/constructions/storage/storage_server_http"
 	"github.com/pkg/errors"
 )
 

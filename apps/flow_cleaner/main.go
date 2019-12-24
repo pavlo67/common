@@ -13,9 +13,9 @@ import (
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/serializer"
 	"github.com/pavlo67/workshop/common/starter"
-	"github.com/pavlo67/workshop/components/flow"
-	"github.com/pavlo67/workshop/components/flow/flow_cleaner"
-	"github.com/pavlo67/workshop/components/flow/flow_cleaner/flow_cleaner_sqlite"
+	"github.com/pavlo67/workshop/constructions/dataflow"
+	"github.com/pavlo67/workshop/constructions/dataflow/flow_cleaner"
+	"github.com/pavlo67/workshop/constructions/dataflow/flow_cleaner/flow_cleaner_sqlite"
 )
 
 var (
@@ -86,7 +86,7 @@ func main() {
 	label := "FLOW CLEANER/SQLITE CLI BUILD"
 
 	starters := []starter.Starter{
-		{flow_cleaner_sqlite.Starter(), common.Map{"table": flow.CollectionDefault}},
+		{flow_cleaner_sqlite.Starter(), common.Map{"table": dataflow.CollectionDefault}},
 	}
 
 	joiner, err := starter.Run(starters, nil, cfgGatherer, os.Args[1:], label)

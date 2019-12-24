@@ -2,13 +2,20 @@
 
     <div id="data_item_view">
 
-        <div class="title">{{ dataItem.Title }}</div>
-        <br>
-        <div>
-            <span v-html="dataItem.Summary"></span>
-            <br> <span v-html="href(dataItem.URL)" class="href small"></span>
+        <div v-if="showTitle">
+            {{ dataItem.Title }}
+            <br>&nbsp;
         </div>
-        <span @mouseover="showDetails" @mouseleave="hideDetails" :id=itemId(dataItem) class="small">
+
+        <div v-if="dataItem.Summary">
+            <span v-html="dataItem.Summary"></span>
+            <br>
+        </div>
+
+        <span v-html="href(dataItem.URL)" class="href smaller"></span>
+        <br>
+
+        <span @mouseover="showDetails" @mouseleave="hideDetails" :id=itemId(dataItem) class="smaller">
             подробиці...
             <div class="data_summary" :id=itemId(dataItem,true)>{{ details(dataItem) }}</div>
         </span>
@@ -29,7 +36,7 @@
 
     export default {
         name: 'DataItemView',
-        props: ['dataItem'],
+        props: ["dataItem", "showTitle"],
         methods: {
             href: e.href,
             itemId(item, postfixed) {

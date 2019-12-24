@@ -9,8 +9,8 @@ import (
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/crud"
 	"github.com/pavlo67/workshop/common/logger"
-	"github.com/pavlo67/workshop/components/flow"
 	"github.com/pavlo67/workshop/components/tagger"
+	"github.com/pavlo67/workshop/constructions/dataflow"
 	"github.com/stretchr/testify/require"
 )
 
@@ -64,10 +64,10 @@ func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 					Tags:     []tagger.Tag{{Label: "1"}, {Label: "332343"}},
 				}},
 				Tags: []tagger.Tag{{Label: "1"}, {Label: "333"}},
-				Status: crud.Status{
+				Status: crud.History{
 					CreatedAt: time.Now(),
 				},
-				Origin: flow.Origin{},
+				Origin: dataflow.Origin{},
 			},
 			DetailsToSave: Test{
 				AAA: "aaa",
@@ -79,7 +79,7 @@ func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 				Title:   "345456rt",
 				Summary: "6578eegj",
 				Tags:    []tagger.Tag{{Label: "1"}, {Label: "333"}},
-				Status: crud.Status{
+				Status: crud.History{
 					CreatedAt: time.Now().Add(time.Minute),
 				},
 			},
@@ -142,7 +142,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 
 		// ClearDatabase ------------------------------------------------------------------------------------
 
-		err := tc.Cleaner.Clean(nil)
+		err := tc.Cleaner.Clean(nil, nil)
 		require.NoError(t, err, "what is the error on .Cleaner()?")
 
 		// test Describe ------------------------------------------------------------------------------------

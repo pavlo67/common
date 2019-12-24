@@ -5,7 +5,7 @@
         <br>&nbsp;
 
         <div v-if="itemToImport">
-            <DataItemView v-bind:dataItem="itemToImport"/>
+            <DataItemView v-bind:dataItem="itemToImport" v-bind:showTitle="true" />
             <button v-on:click="saveToStorage()">Save to the storage</button>
         </div>
         <div v-else>

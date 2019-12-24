@@ -17,6 +17,7 @@ type GetOptions struct {
 }
 
 type RemoveOptions struct {
+	Limit  uint64
 	AuthID common.ID
 	Delete bool
 }

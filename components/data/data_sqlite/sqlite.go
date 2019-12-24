@@ -571,7 +571,7 @@ func (dataOp *dataSQLite) ids(condition string, values []interface{}) ([]interfa
 
 const onClean = "on dataSQLite.Clean(): "
 
-func (dataOp *dataSQLite) Clean(term *selectors.Term) error {
+func (dataOp *dataSQLite) Clean(term *selectors.Term, _ *crud.RemoveOptions) error {
 	var termTags *selectors.Term
 
 	condition, values, err := selectors_sql.Use(term)
@@ -597,7 +597,7 @@ func (dataOp *dataSQLite) Clean(term *selectors.Term) error {
 	}
 
 	if dataOp.taggerCleaner != nil {
-		err = dataOp.taggerCleaner.Clean(termTags)
+		err = dataOp.taggerCleaner.Clean(termTags, nil)
 		if err != nil {
 			return errors.Wrap(err, onClean)
 		}

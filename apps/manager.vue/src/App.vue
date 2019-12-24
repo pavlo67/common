@@ -47,6 +47,10 @@
     color: blue;
   }
 
+  .time {
+    color: brown;
+  }
+
   .control {
     color: blue;
     font-size: xx-small;
@@ -55,6 +59,15 @@
   .small {
     font-size: small;
   }
+
+  .smaller {
+    font-size: x-small;
+  }
+
+  .smallest {
+    font-size: xx-small;
+  }
+
 
   a {
     text-decoration: none;
@@ -124,9 +137,6 @@
         show("message", message, "red");
         setTimeout(() => { hide("message"); }, 3000);
       });
-
-
-      eventBus.$emit('error', "!!!");
     },
 
     components: {

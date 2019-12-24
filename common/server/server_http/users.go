@@ -38,7 +38,7 @@ func UserWithRequest(r *http.Request, authOps []auth.Operator) (*auth.User, erro
 	//// COOKIE CHECK
 	//c, _ := r.Cookie("Token") // ErrNoCookie only
 	//if c != nil && c.Left != "" {
-	//	user, errs = auth.GetUser([]auth.Creds{{Type: auth.CredsToken, Left: c.Left}}, authOps, errs)
+	//	user, errs = auth.GetUser([]auth.Creds{{WorkerType: auth.CredsToken, Left: c.Left}}, authOps, errs)
 	//	if user != nil {
 	//		return user, errs.Err()
 	//	}

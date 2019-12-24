@@ -356,7 +356,7 @@ func (taggerOp *taggerSQLite) Close() error {
 	return errors.Wrap(taggerOp.db.Close(), "on taggerSQLite.Close()")
 }
 
-func (taggerOp *taggerSQLite) Clean(*selectors.Term) error {
+func (taggerOp *taggerSQLite) Clean(*selectors.Term, *crud.RemoveOptions) error {
 	_, err := taggerOp.db.Exec("DELETE FROM " + taggerOp.table)
 
 	return err

@@ -4,7 +4,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
-	"github.com/pavlo67/workshop/components/editor"
+	"github.com/pavlo67/workshop/constructions/editor"
 )
 
 var _ editor.Operator = &Item{}

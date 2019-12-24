@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"sync"
 
+	"github.com/pavlo67/workshop/common"
 	"github.com/pkg/errors"
 )
 
@@ -20,6 +21,11 @@ type Operator interface {
 	Interface(InterfaceKey) interface{}
 	InterfacesAll(ptrToInterface interface{}) []Component
 	CloseAll()
+}
+
+type Link struct {
+	InterfaceKey
+	common.ID
 }
 
 var _ Operator = &joiner{}

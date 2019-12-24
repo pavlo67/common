@@ -111,7 +111,7 @@ func OperatorTestScenario(t *testing.T, testCases []TestCase, cleanerOp crud.Cle
 	for i, tc := range testCases {
 		l.Infof("test #%d", i)
 
-		err := cleanerOp.Clean(nil)
+		err := cleanerOp.Clean(nil, nil)
 		require.NoError(t, err)
 
 		for j, step := range tc.Steps {
@@ -249,7 +249,7 @@ func OperatorTestScenario(t *testing.T, testCases []TestCase, cleanerOp crud.Cle
 //}
 //
 //func Hash(li Linked) string {
-//	return li.ObjectID + " " + li.Type + " " + li.LinkedID + " " + li.LinkedType + " " + li.Tag
+//	return li.ObjectID + " " + li.WorkerType + " " + li.LinkedID + " " + li.LinkedType + " " + li.Tag
 //}
 //
 //type byLinked []Linked

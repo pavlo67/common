@@ -13,8 +13,6 @@ import (
 	"github.com/pavlo67/workshop/common/control"
 	"github.com/pavlo67/workshop/common/libraries/filelib"
 	"github.com/pavlo67/workshop/common/logger"
-	"github.com/pavlo67/workshop/common/scheduler"
-	"github.com/pavlo67/workshop/common/scheduler/scheduler_timeout"
 	"github.com/pavlo67/workshop/common/serializer"
 	"github.com/pavlo67/workshop/common/server/server_http"
 	"github.com/pavlo67/workshop/common/server/server_http/server_http_jschmhr"
@@ -23,12 +21,14 @@ import (
 	"github.com/pavlo67/workshop/components/data"
 	"github.com/pavlo67/workshop/components/data/data_sqlite"
 	"github.com/pavlo67/workshop/components/data/data_tagged"
-	"github.com/pavlo67/workshop/components/flow"
-	"github.com/pavlo67/workshop/components/flow/flow_server_http"
+	"github.com/pavlo67/workshop/constructions/dataflow"
+	"github.com/pavlo67/workshop/constructions/dataflow/flow_cleaner/flow_cleaner_sqlite"
+	"github.com/pavlo67/workshop/constructions/dataflow/flow_server_http"
+	"github.com/pavlo67/workshop/constructions/importer/importer_tasks"
+	"github.com/pavlo67/workshop/constructions/scheduler"
+	"github.com/pavlo67/workshop/constructions/scheduler/scheduler_timeout"
 
 	"github.com/pavlo67/workshop/apps/gatherer/gatherer_routes"
-	"github.com/pavlo67/workshop/components/flow/flow_cleaner/flow_cleaner_sqlite"
-	"github.com/pavlo67/workshop/components/importer/importer_tasks"
 )
 
 var (
@@ -95,15 +95,15 @@ func main() {
 	// running starters
 
 	// TODO!!! vary it
-	const flowTable = flow.CollectionDefault
+	const flowTable = dataflow.CollectionDefault
 
 	label := "GATHERER/SQLITE CLI BUILD"
 
 	starters := []starter.Starter{
 		{control.Starter(), nil},
 
-		{data_sqlite.Starter(), common.Map{"table": flowTable, "interface_key": flow.InterfaceKey, "no_tagger": true}},
-		{data_tagged.Starter(), common.Map{"data_key": flow.InterfaceKey, "interface_key": flow.TaggedInterfaceKey, "no_tagger": true}},
+		{data_sqlite.Starter(), common.Map{"table": flowTable, "interface_key": dataflow.InterfaceKey, "no_tagger": true}},
+		{data_tagged.Starter(), common.Map{"data_key": dataflow.InterfaceKey, "interface_key": dataflow.TaggedInterfaceKey, "no_tagger": true}},
 		{flow_server_http.Starter(), nil},
 
 		{auth_ecdsa.Starter(), nil},
@@ -123,9 +123,9 @@ func main() {
 
 	// scheduling importer task
 
-	dataOp, ok := joiner.Interface(flow.InterfaceKey).(data.Operator)
+	dataOp, ok := joiner.Interface(dataflow.InterfaceKey).(data.Operator)
 	if !ok {
-		l.Fatalf("no data.Operator with key %s", flow.InterfaceKey)
+		l.Fatalf("no data.Operator with key %s", dataflow.InterfaceKey)
 	}
 
 	task, err := importer_tasks.NewLoader(dataOp)

@@ -6,8 +6,8 @@ import (
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/selectors"
 
-	"github.com/pavlo67/workshop/components/flow"
 	"github.com/pavlo67/workshop/components/tagger"
+	"github.com/pavlo67/workshop/constructions/dataflow"
 )
 
 const InterfaceKey joiner.InterfaceKey = "data"
@@ -25,23 +25,18 @@ type Type struct {
 }
 
 type Item struct {
-	ID       common.ID    `bson:"_id,omitempty" json:",omitempty"`
-	ExportID string       `bson:",omitempty"    json:",omitempty"`
-	URL      string       `bson:",omitempty"    json:",omitempty"`
-	TypeKey  TypeKey      `bson:",omitempty"    json:",omitempty"`
-	Title    string       `bson:",omitempty"    json:",omitempty"`
-	Summary  string       `bson:",omitempty"    json:",omitempty"`
-	Embedded []Item       `bson:",omitempty"    json:",omitempty"`
-	Tags     []tagger.Tag `bson:",omitempty"    json:",omitempty"`
-
-	// Details should be used with Operator.Save only (and use Operator.Details to get .Details value)
-	Details interface{} `bson:"-" json:",omitempty"`
-
-	// DetailsRaw shouldn't be used directly
-	DetailsRaw []byte `bson:",omitempty"    json:",omitempty"`
-
-	Status crud.Status `bson:",omitempty" json:",omitempty"`
-	Origin flow.Origin `bson:",omitempty" json:",omitempty"`
+	ID         common.ID       `bson:"_id,omitempty" json:",omitempty"`
+	ExportID   string          `bson:",omitempty"    json:",omitempty"`
+	URL        string          `bson:",omitempty"    json:",omitempty"`
+	TypeKey    TypeKey         `bson:",omitempty"    json:",omitempty"`
+	Title      string          `bson:",omitempty"    json:",omitempty"`
+	Summary    string          `bson:",omitempty"    json:",omitempty"`
+	Embedded   []Item          `bson:",omitempty"    json:",omitempty"`
+	Tags       []tagger.Tag    `bson:",omitempty"    json:",omitempty"`
+	Details    interface{}     `bson:"-"             json:",omitempty"`
+	DetailsRaw []byte          `bson:",omitempty"    json:",omitempty"` // shouldn't be used directly
+	Status     crud.History    `bson:",omitempty"    json:",omitempty"`
+	Origin     dataflow.Origin `bson:",omitempty"    json:",omitempty"`
 }
 
 type Operator interface {
