@@ -1,11 +1,11 @@
-package taskqueue_postgres
+package taskqueue
 
 import (
 	"github.com/pavlo67/workshop/common/joiner"
-	"github.com/pavlo67/workshop/constructions/taskqueue"
+	"github.com/pavlo67/workshop/components/tasks"
 )
 
-func Process(queueOp taskqueue.Operator, joinerOp joiner.Operator, tasks []taskqueue.Item) error {
+func Process(queueOp tasks.Operator, joinerOp joiner.Operator, tasks []tasks.Item) error {
 
 	//for ; len(tasks) > 0; tasks = tasks[1:] {
 	//	task := tasks[0]

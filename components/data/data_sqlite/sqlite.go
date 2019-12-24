@@ -71,7 +71,7 @@ func New(access config.Access, table string, interfaceKey joiner.InterfaceKey, t
 		sqlRemove: "DELETE FROM " + table + " where ID = ?",
 
 		sqlRead: "SELECT " + fieldsToReadStr + " FROM " + table + " WHERE id = ?",
-		sqlList: sqlList(table, "", &crud.GetOptions{OrderBy: []string{"created_at DESC"}}),
+		sqlList: sqllib.SQLList(table, fieldsToListStr, "", &crud.GetOptions{OrderBy: []string{"created_at DESC"}}),
 
 		sqlClean: "DELETE FROM " + table,
 
@@ -99,39 +99,39 @@ func New(access config.Access, table string, interfaceKey joiner.InterfaceKey, t
 	return &dataOp, &dataOp, nil
 }
 
-func sqlList(table, condition string, options *crud.GetOptions) string {
-	if strings.TrimSpace(condition) != "" {
-		condition = " WHERE " + condition
-	}
-
-	var limit string
-
-	order := "created_at DESC"
-	if options != nil {
-		if len(options.OrderBy) > 0 {
-			order = strings.Join(options.OrderBy, ", ")
-		}
-
-		if options.Limit0+options.Limit1 > 0 {
-			limit = " LIMIT " + strconv.FormatUint(options.Limit0, 10)
-			if options.Limit1 > 0 {
-				limit += ", " + strconv.FormatUint(options.Limit1, 10)
-			}
-		}
-	}
-
-	return "SELECT " + fieldsToListStr + " FROM " + table + condition + " ORDER BY " + order + limit
-}
-
-func sqlCount(table, condition string, _ *crud.GetOptions) string {
-	query := "SELECT COUNT(*) FROM " + table
-
-	if strings.TrimSpace(condition) != "" {
-		return query + " WHERE " + condition
-	}
-
-	return query
-}
+//func sqlList(table, condition string, options *crud.GetOptions) string {
+//	if strings.TrimSpace(condition) != "" {
+//		condition = " WHERE " + condition
+//	}
+//
+//	var limit string
+//
+//	order := "created_at DESC"
+//	if options != nil {
+//		if len(options.OrderBy) > 0 {
+//			order = strings.Join(options.OrderBy, ", ")
+//		}
+//
+//		if options.Limit0+options.Limit1 > 0 {
+//			limit = " LIMIT " + strconv.FormatUint(options.Limit0, 10)
+//			if options.Limit1 > 0 {
+//				limit += ", " + strconv.FormatUint(options.Limit1, 10)
+//			}
+//		}
+//	}
+//
+//	return "SELECT " + fieldsToListStr + " FROM " + table + condition + " ORDER BY " + order + limit
+//}
+//
+//func sqlCount(table, condition string, _ *crud.GetOptions) string {
+//	query := "SELECT COUNT(*) FROM " + table
+//
+//	if strings.TrimSpace(condition) != "" {
+//		return query + " WHERE " + condition
+//	}
+//
+//	return query
+//}
 
 const onSave = "on dataSQLite.Save(): "
 
@@ -419,7 +419,7 @@ func (dataOp *dataSQLite) List(term *selectors.Term, options *crud.GetOptions) (
 	stm := dataOp.stmList
 
 	if condition != "" || options != nil {
-		query = sqlList(dataOp.table, condition, options)
+		query = sqllib.SQLList(dataOp.table, fieldsToListStr, condition, options)
 		stm, err = dataOp.db.Prepare(query)
 		if err != nil {
 			return nil, errors.Wrapf(err, onList+": can't db.Prepare(%s)", query)
@@ -506,9 +506,7 @@ func (dataOp *dataSQLite) Count(term *selectors.Term, options *crud.GetOptions) 
 		return 0, errors.Wrapf(err, onCount+": can't selectors_sql.Use(%s)", termStr)
 	}
 
-	// l.Infof("%s / %#v", condition, values)
-
-	query := sqlCount(dataOp.table, condition, options)
+	query := sqllib.SQLCount(dataOp.table, condition, options)
 	stm, err := dataOp.db.Prepare(query)
 	if err != nil {
 		return 0, errors.Wrapf(err, onCount+": can't db.Prepare(%s)", query)

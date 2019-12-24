@@ -4,6 +4,9 @@ import (
 	"database/sql"
 	"strconv"
 
+	"strings"
+
+	"github.com/pavlo67/workshop/common/crud"
 	"github.com/pkg/errors"
 )
 
@@ -18,6 +21,40 @@ const CantScanQueryRow = "can't scan query row ('%s', %#v)"
 const RowsError = "error on .Rows ('%s', %#v)"
 
 var ErrNoTable = errors.New("table doesn't exist")
+
+func SQLList(table, fields, condition string, options *crud.GetOptions) string {
+	if strings.TrimSpace(condition) != "" {
+		condition = " WHERE " + condition
+	}
+
+	var limit string
+
+	order := "created_at DESC"
+	if options != nil {
+		if len(options.OrderBy) > 0 {
+			order = strings.Join(options.OrderBy, ", ")
+		}
+
+		if options.Limit0+options.Limit1 > 0 {
+			limit = " LIMIT " + strconv.FormatUint(options.Limit0, 10)
+			if options.Limit1 > 0 {
+				limit += ", " + strconv.FormatUint(options.Limit1, 10)
+			}
+		}
+	}
+
+	return "SELECT " + fields + " FROM " + table + condition + " ORDER BY " + order + limit
+}
+
+func SQLCount(table, condition string, _ *crud.GetOptions) string {
+	query := "SELECT COUNT(*) FROM " + table
+
+	if strings.TrimSpace(condition) != "" {
+		return query + " WHERE " + condition
+	}
+
+	return query
+}
 
 const defaultPageLengthStr = "200"
 

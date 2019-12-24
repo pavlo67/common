@@ -9,6 +9,7 @@ import (
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/components/data"
+	"github.com/pavlo67/workshop/components/tasks"
 	"github.com/pavlo67/workshop/components/worker"
 	"github.com/pavlo67/workshop/constructions/importer/importer_http_rss"
 )
@@ -32,7 +33,7 @@ func (it *loadTask) Name() string {
 	return "loader"
 }
 
-func (it *loadTask) Run(_ *worker.Task, _ string) (info common.Map, posterior []joiner.Link, err error) {
+func (it *loadTask) Run(_ *tasks.Item, _ string) (info common.Map, posterior []joiner.Link, err error) {
 	if it == nil {
 		return nil, nil, errors.New("on importer_task.Run(): loadTask == nil")
 	}

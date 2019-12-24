@@ -5,12 +5,13 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/pavlo67/workshop/common"
+	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/selectors"
 	"github.com/pavlo67/workshop/common/selectors/logic"
 
-	"github.com/pavlo67/workshop/common"
-	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/components/data"
+	"github.com/pavlo67/workshop/components/tasks"
 	"github.com/pavlo67/workshop/components/worker"
 	"github.com/pavlo67/workshop/constructions/importer"
 	"github.com/pavlo67/workshop/constructions/importer/importer_http_series"
@@ -55,7 +56,7 @@ func (it *copyTask) Name() string {
 	return "copier from series_http"
 }
 
-func (it *copyTask) Run(_ *worker.Task, _ string) (info common.Map, posterior []joiner.Link, err error) {
+func (it *copyTask) Run(_ *tasks.Item, _ string) (info common.Map, posterior []joiner.Link, err error) {
 	if it == nil {
 		return nil, nil, errors.New("on copyTask.Run(): it == nil")
 	}
