@@ -3,15 +3,15 @@ package data
 import (
 	"os"
 	"testing"
-
 	"time"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/crud"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/components/tagger"
 	"github.com/pavlo67/workshop/constructions/dataflow"
-	"github.com/stretchr/testify/require"
 )
 
 type OperatorTestCase struct {

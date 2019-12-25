@@ -43,7 +43,7 @@ type dataSQLite struct {
 	table string
 
 	sqlInsert, sqlUpdate, sqlRead, sqlRemove, sqlList, sqlClean string
-	stmInsert, stmUpdate, stmRead, stmRemove, stmList, stmClean *sql.Stmt
+	stmInsert, stmUpdate, stmRead, stmRemove, stmList           *sql.Stmt
 
 	taggerOp      tagger.Operator
 	interfaceKey  joiner.InterfaceKey
@@ -87,7 +87,6 @@ func New(access config.Access, table string, interfaceKey joiner.InterfaceKey, t
 
 		{&dataOp.stmRead, dataOp.sqlRead},
 		{&dataOp.stmList, dataOp.sqlList},
-		{&dataOp.stmClean, dataOp.sqlClean},
 	}
 
 	for _, sqlStmt := range sqlStmts {
@@ -573,25 +572,29 @@ func (dataOp *dataSQLite) Clean(term *selectors.Term, _ *crud.RemoveOptions) err
 	var termTags *selectors.Term
 
 	condition, values, err := selectors_sql.Use(term)
+	if err != nil {
+		return errors.Errorf(onClean+"wrong selector (%#v): %s", term, err)
+	}
+
+	query := dataOp.sqlClean
 
 	if strings.TrimSpace(condition) != "" {
 		ids, err := dataOp.ids(condition, values)
-
-		query := dataOp.sqlClean + " WHERE " + condition
-		_, err = dataOp.db.Exec(query, values...)
 		if err != nil {
-			return errors.Wrapf(err, onClean+sqllib.CantExec, query, values)
+			return errors.Wrap(err, onClean+"can't dataOp.ids(condition, values)")
 		}
-
 		termTags = logic.AND(selectors.In("key", dataOp.interfaceKey), selectors.In("id", ids...))
 
-	} else {
-		_, err = dataOp.stmClean.Exec()
-		if err != nil {
-			return errors.Wrapf(err, onClean+sqllib.CantExec, dataOp.sqlClean, nil)
-		}
+		query += " WHERE " + condition
 
+	} else {
 		termTags = selectors.In("key", dataOp.interfaceKey) // TODO!!! correct field key
+
+	}
+
+	_, err = dataOp.db.Exec(query, values...)
+	if err != nil {
+		return errors.Wrapf(err, onClean+sqllib.CantExec, query, values)
 	}
 
 	if dataOp.taggerCleaner != nil {

@@ -13,8 +13,8 @@ const InterfaceKey joiner.InterfaceKey = "tasks"
 const CollectionDefault = "tasks"
 
 type Timing struct {
-	StartedAt  *time.Time
-	FinishedAt *time.Time
+	StartedAt  time.Time
+	FinishedAt time.Time
 }
 
 type Result struct {
@@ -29,7 +29,7 @@ type Status struct {
 
 type Task struct {
 	WorkerType joiner.InterfaceKey `bson:",omitempty" json:",omitempty"`
-	Params     interface{}         `bson:"-"          json:",omitempty"`
+	Params     common.Map          `bson:"-"          json:",omitempty"`
 	ParamsRaw  []byte              `bson:",omitempty" json:",omitempty"` // shouldn't be used directly
 }
 

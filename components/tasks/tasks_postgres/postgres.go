@@ -14,39 +14,43 @@ import (
 	"github.com/pavlo67/workshop/common/crud"
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/libraries/sqllib"
-	"github.com/pavlo67/workshop/common/libraries/sqllib/sqllib_sqlite"
+	"github.com/pavlo67/workshop/common/libraries/sqllib/sqllib_postgres"
 	"github.com/pavlo67/workshop/common/selectors"
 	"github.com/pavlo67/workshop/common/selectors/selectors_sql"
 
 	"github.com/pavlo67/workshop/components/tasks"
 )
 
-var fieldsToInsert = []string{"type", "params"}
-var fieldsToInsertStr = strings.Join(fieldsToInsert, ", ")
+var fieldsToInsert = []string{"worker_type", "params", "status", "results"}
+var fieldsToInsertStr = strings.Join(fieldsToInsert, ",")
 
-var fieldsToRead = append(fieldsToInsert, "status", "results", "created_at", "updated_at")
-var fieldsToReadStr = strings.Join(fieldsToRead, ", ")
+var fieldsToRead = append(fieldsToInsert, "created_at", "updated_at")
+var fieldsToReadStr = strings.Join(fieldsToRead, ",")
 
 var fieldsToList = append([]string{"id"}, fieldsToRead...)
-var fieldsToListStr = strings.Join(fieldsToList, ", ")
+var fieldsToListStr = strings.Join(fieldsToList, ",")
 
-var _ tasks.Operator = &tasksSQLite{}
-var _ crud.Cleaner = &tasksSQLite{}
+var fieldsToSetResults = []string{"status", "results", "updated_at"}
+var fieldsToReadToSetStr = strings.Join(fieldsToSetResults, ",")
+var fieldsToSetResultsStr = sqllib_postgres.WildcardsForUpdate(fieldsToSetResults)
 
-type tasksSQLite struct {
+var _ tasks.Operator = &tasksPostgres{}
+var _ crud.Cleaner = &tasksPostgres{}
+
+type tasksPostgres struct {
 	db    *sql.DB
 	table string
 
-	sqlInsert, sqlRead, sqlList string
-	stmInsert, stmRead, stmList *sql.Stmt
+	sqlInsert, sqlRead, sqlList, sqlReadToSet, sqlSetResults, sqlClean string
+	stmInsert, stmRead, stmList, stmReadToSet, stmSetResults           *sql.Stmt
 
 	interfaceKey joiner.InterfaceKey
 }
 
-const onNew = "on tasksSQLite.New(): "
+const onNew = "on tasksPostgres.New(): "
 
 func New(access config.Access, table string, interfaceKey joiner.InterfaceKey) (tasks.Operator, crud.Cleaner, error) {
-	db, err := sqllib_sqlite.Connect(access)
+	db, err := sqllib_postgres.Connect(access)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, onNew)
 	}
@@ -55,17 +59,19 @@ func New(access config.Access, table string, interfaceKey joiner.InterfaceKey) (
 		table = tasks.CollectionDefault
 	}
 
-	tasksOp := tasksSQLite{
+	tasksOp := tasksPostgres{
 		db:    db,
 		table: table,
 
-		sqlInsert: "INSERT INTO " + table + " (" + fieldsToInsertStr + ") VALUES (" + strings.Repeat(",? ", len(fieldsToInsert))[1:] + ")",
-		sqlRead:   "SELECT " + fieldsToReadStr + " FROM " + table + " WHERE id = ?",
-		sqlList:   sqllib.SQLList(table, fieldsToListStr, "", &crud.GetOptions{OrderBy: []string{"created_at DESC"}}),
+		sqlInsert: "INSERT INTO " + table + " (" + fieldsToInsertStr + ") VALUES (" + sqllib_postgres.WildcardsForInsert(fieldsToInsert) + ") RETURNING id",
+		sqlRead:   "SELECT " + fieldsToReadStr + " FROM " + table + " WHERE id = $1",
+		sqlList:   sqllib.SQLList(table, fieldsToListStr, "", &crud.GetOptions{OrderBy: []string{"created_at"}}),
 
-		//sqlUpdate: "UPDATE " + table + " SET " + fieldsToUpdateStr + " WHERE id = ?",
-		//sqlRemove: "DELETE FROM " + table + " where ID = ?",
-		//sqlClean: "DELETE FROM " + table,
+		sqlReadToSet:  "SELECT " + fieldsToReadToSetStr + " FROM " + table + " WHERE id = $1",
+		sqlSetResults: "UPDATE " + table + " SET " + fieldsToSetResultsStr + " WHERE id = $" + strconv.Itoa(len(fieldsToSetResults)+1),
+
+		//sqlRemove: "DELETE FROM " + table + " where ID = $1",
+		sqlClean: "DELETE FROM " + table,
 
 		interfaceKey: interfaceKey,
 	}
@@ -74,10 +80,10 @@ func New(access config.Access, table string, interfaceKey joiner.InterfaceKey) (
 		{&tasksOp.stmInsert, tasksOp.sqlInsert},
 		{&tasksOp.stmRead, tasksOp.sqlRead},
 		{&tasksOp.stmList, tasksOp.sqlList},
+		{&tasksOp.stmSetResults, tasksOp.sqlSetResults},
+		{&tasksOp.stmReadToSet, tasksOp.sqlReadToSet},
 
-		//	{&tasksOp.stmUpdate, tasksOp.sqlUpdate},
 		//	{&tasksOp.stmRemove, tasksOp.sqlRemove},
-		//	{&tasksOp.stmClean, tasksOp.sqlClean},
 	}
 
 	for _, sqlStmt := range sqlStmts {
@@ -89,9 +95,9 @@ func New(access config.Access, table string, interfaceKey joiner.InterfaceKey) (
 	return &tasksOp, &tasksOp, nil
 }
 
-const onSave = "on tasksSQLite.Save(): "
+const onSave = "on tasksPostgres.Save(): "
 
-func (tasksOp *tasksSQLite) Save(task tasks.Task, _ *crud.SaveOptions) (common.ID, error) {
+func (tasksOp *tasksPostgres) Save(task tasks.Task, _ *crud.SaveOptions) (common.ID, error) {
 	var paramsBytes []byte
 
 	if task.Params != nil {
@@ -102,24 +108,21 @@ func (tasksOp *tasksSQLite) Save(task tasks.Task, _ *crud.SaveOptions) (common.I
 		}
 	}
 
-	values := []interface{}{task.WorkerType, string(paramsBytes)}
+	values := []interface{}{task.WorkerType, string(paramsBytes), "", ""}
 
-	res, err := tasksOp.stmInsert.Exec(values...)
+	var lastInsertId uint64
+
+	err := tasksOp.stmInsert.QueryRow(values...).Scan(&lastInsertId)
 	if err != nil {
 		return "", errors.Wrapf(err, onSave+sqllib.CantExec, tasksOp.sqlInsert, values)
 	}
 
-	idSQLite, err := res.LastInsertId()
-	if err != nil {
-		return "", errors.Wrapf(err, onSave+sqllib.CantGetLastInsertId, tasksOp.sqlInsert, values)
-	}
-
-	return common.ID(strconv.FormatInt(idSQLite, 10)), nil
+	return common.ID(strconv.FormatUint(lastInsertId, 10)), nil
 }
 
-const onRead = "on tasksSQLite.Read(): "
+const onRead = "on tasksPostgres.Read(): "
 
-func (tasksOp *tasksSQLite) Read(id common.ID, _ *crud.GetOptions) (*tasks.Item, error) {
+func (tasksOp *tasksPostgres) Read(id common.ID, _ *crud.GetOptions) (*tasks.Item, error) {
 	if len(id) < 1 {
 		return nil, errors.New(onRead + "empty ID")
 	}
@@ -180,15 +183,15 @@ func (tasksOp *tasksSQLite) Read(id common.ID, _ *crud.GetOptions) (*tasks.Item,
 	return &item, nil
 }
 
-const onRemove = "on tasksSQLite.Remove()"
+const onRemove = "on tasksPostgres.Remove()"
 
-func (tasksOp *tasksSQLite) Remove(common.ID, *crud.RemoveOptions) error {
+func (tasksOp *tasksPostgres) Remove(common.ID, *crud.RemoveOptions) error {
 	return common.ErrNotImplemented
 }
 
-const onList = "on tasksSQLite.List()"
+const onList = "on tasksPostgres.List()"
 
-func (tasksOp *tasksSQLite) List(term *selectors.Term, options *crud.GetOptions) ([]tasks.Item, error) {
+func (tasksOp *tasksPostgres) List(term *selectors.Term, options *crud.GetOptions) ([]tasks.Item, error) {
 	condition, values, err := selectors_sql.Use(term)
 	if err != nil {
 		return nil, errors.Errorf(onList+"wrong selector (%#v): %s", term, err)
@@ -198,7 +201,8 @@ func (tasksOp *tasksSQLite) List(term *selectors.Term, options *crud.GetOptions)
 	stm := tasksOp.stmList
 
 	if condition != "" || options != nil {
-		query = sqllib.SQLList(tasksOp.table, fieldsToListStr, condition, options)
+		query = sqllib_postgres.CorrectWildcards(sqllib.SQLList(tasksOp.table, fieldsToListStr, condition, options))
+
 		stm, err = tasksOp.db.Prepare(query)
 		if err != nil {
 			return nil, errors.Wrapf(err, onList+": can't db.Prepare(%s)", query)
@@ -275,51 +279,82 @@ func (tasksOp *tasksSQLite) List(term *selectors.Term, options *crud.GetOptions)
 	return items, nil
 }
 
-const onSetResult = "on tasksSQLite.SetResult(): "
+const onSetResult = "on tasksPostgres.SetResult(): "
 
-func (tasksOp *tasksSQLite) SetResult(common.ID, tasks.Result, *crud.SaveOptions) error {
+func (tasksOp *tasksPostgres) SetResult(id common.ID, result tasks.Result, _ *crud.SaveOptions) error {
+	if len(id) < 1 {
+		return errors.New(onSetResult + "empty ID")
+	}
+
+	idNum, err := strconv.ParseUint(string(id), 10, 64)
+	if err != nil {
+		return errors.Errorf(onSetResult+"wrong ID (%s)", id)
+	}
+
+	var statusStr, resultsStr string
+	var updatedAtPtr *string
+
+	err = tasksOp.stmReadToSet.QueryRow(idNum).Scan(&statusStr, &resultsStr, &updatedAtPtr)
+	if err != nil {
+		return errors.Wrapf(err, onSetResult+sqllib.CantScanQueryRow, tasksOp.sqlReadToSet, idNum)
+	}
+
+	//var status tasks.Status
+	//if len(statusStr) > 0 {
+	//	err = json.Unmarshal([]byte(statusStr), &status)
+	//	if err != nil {
+	//		return  errors.Wrapf(err, onSetResult+"can't unmarshal .Status (%s)", statusStr)
+	//	}
+	//}
+	// TODO!!!
+	statusBytes := []byte(statusStr)
+
+	var results []tasks.Result
+	if len(resultsStr) > 0 {
+		err = json.Unmarshal([]byte(resultsStr), &results)
+		if err != nil {
+			return errors.Wrapf(err, onSetResult+"can't unmarshal .Results (%s)", resultsStr)
+		}
+	}
+	results = append(results, result)
+	resultsBytes, err := json.Marshal(results)
+	if err != nil {
+		return errors.Wrapf(err, onSetResult+"can't .Marshal(%#v)", results)
+	}
+
+	values := []interface{}{
+		statusBytes, resultsBytes, time.Now().Format(time.RFC3339), id,
+	}
+
+	_, err = tasksOp.stmSetResults.Exec(values...)
+	if err != nil {
+		return errors.Wrapf(err, onSetResult+sqllib.CantExec, tasksOp.sqlSetResults, values)
+	}
+
 	return nil
 }
 
-func (tasksOp *tasksSQLite) Close() error {
-	return errors.Wrap(tasksOp.db.Close(), "on tasksSQLite.Close()")
+func (tasksOp *tasksPostgres) Close() error {
+	return errors.Wrap(tasksOp.db.Close(), "on tasksPostgres.Close()")
 }
 
-const onClean = "on tasksSQLite.Clean(): "
+const onClean = "on tasksPostgres.Clean(): "
 
-func (tasksOp *tasksSQLite) Clean(term *selectors.Term, _ *crud.RemoveOptions) error {
-	//var termTags *selectors.Term
-	//
-	//condition, values, err := selectors_sql.Use(term)
-	//
-	//if strings.TrimSpace(condition) != "" {
-	//	ids, err := tasksOp.ids(condition, values)
-	//
-	//	query := tasksOp.sqlClean + " WHERE " + condition
-	//	_, err = tasksOp.db.Exec(query, values...)
-	//	if err != nil {
-	//		return errors.Wrapf(err, onClean+sqllib.CantExec, query, values)
-	//	}
-	//
-	//	termTags = logic.AND(selectors.In("key", tasksOp.interfaceKey), selectors.In("id", ids...))
-	//
-	//} else {
-	//	_, err = tasksOp.stmClean.Exec()
-	//	if err != nil {
-	//		return errors.Wrapf(err, onClean+sqllib.CantExec, tasksOp.sqlClean, nil)
-	//	}
-	//
-	//	termTags = selectors.In("key", tasksOp.interfaceKey) // TODO!!! correct field key
-	//}
-	//
-	//if tasksOp.taggerCleaner != nil {
-	//	err = tasksOp.taggerCleaner.Clean(termTags, nil)
-	//	if err != nil {
-	//		return errors.Wrap(err, onClean)
-	//	}
-	//}
-	//
-	//return err
+func (tasksOp *tasksPostgres) Clean(term *selectors.Term, _ *crud.RemoveOptions) error {
+	condition, values, err := selectors_sql.Use(term)
+	if err != nil {
+		return errors.Errorf(onClean+"wrong selector (%#v): %s", term, err)
+	}
+
+	query := tasksOp.sqlClean
+	if strings.TrimSpace(condition) != "" {
+		query += " WHERE " + sqllib_postgres.CorrectWildcards(condition)
+	}
+
+	_, err = tasksOp.db.Exec(query, values...)
+	if err != nil {
+		return errors.Wrapf(err, onClean+sqllib.CantExec, query, values)
+	}
 
 	return nil
 }

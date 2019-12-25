@@ -6,6 +6,11 @@ server_http:
   tls_key_file:  "/etc/certificate/server.key"
   testers: ["127.0.0.1"]
 
+postgres:
+  user: "msq"
+  pass: "msq_psw1"
+  path: "workspace_test"
+
 mongodb:
   host: "localhost"
   port: 27017
