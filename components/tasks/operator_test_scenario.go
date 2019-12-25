@@ -104,7 +104,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 
 		// test .SetResults & .Read ----------------------------------------------------------------------
 
-		err = tc.SetResult(id[toSetResultsI], tc.ToSetResults, nil)
+		err = tc.Finish(id[toSetResultsI], tc.ToSetResults, nil)
 		require.NoError(t, err)
 
 		readedUpdated, err := tc.Read(id[toSetResultsI], nil)
@@ -121,7 +121,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 
 		// test .SetResults & .Read again  ---------------------------------------------------------------
 
-		err = tc.SetResult(id[toSetResultsI], tc.ToSetResults, nil)
+		err = tc.Finish(id[toSetResultsI], tc.ToSetResults, nil)
 		require.NoError(t, err)
 
 		readedUpdated2, err := tc.Read(id[toSetResultsI], nil)

@@ -18,13 +18,14 @@ type Timing struct {
 }
 
 type Result struct {
-	Timing    `            bson:",inline"    json:",inline"`
-	Success   bool        `bson:",omitempty" json:",omitempty"`
-	Info      common.Map  `bson:",omitempty" json:",omitempty"`
-	Posterior []common.ID `bson:",omitempty" json:",omitempty"`
+	Timing    `              bson:",inline"    json:",inline"`
+	Success   bool          `bson:",omitempty" json:",omitempty"`
+	Info      common.Map    `bson:",omitempty" json:",omitempty"`
+	Posterior []joiner.Link `bson:",omitempty" json:",omitempty"`
 }
 
 type Status struct {
+	StartedAt *time.Time `bson:",omitempty" json:",omitempty"`
 }
 
 type Task struct {
@@ -47,5 +48,6 @@ type Operator interface {
 	Read(common.ID, *crud.GetOptions) (*Item, error)
 	List(*selectors.Term, *crud.GetOptions) ([]Item, error)
 
-	SetResult(common.ID, Result, *crud.SaveOptions) error
+	Start(common.ID, *crud.SaveOptions) error
+	Finish(common.ID, Result, *crud.SaveOptions) error
 }

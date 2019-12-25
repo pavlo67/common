@@ -30,9 +30,14 @@ var fieldsToReadStr = strings.Join(fieldsToRead, ",")
 var fieldsToList = append([]string{"id"}, fieldsToRead...)
 var fieldsToListStr = strings.Join(fieldsToList, ",")
 
-var fieldsToSetResults = []string{"status", "results", "updated_at"}
-var fieldsToReadToSetStr = strings.Join(fieldsToSetResults, ",")
-var fieldsToSetResultsStr = sqllib_postgres.WildcardsForUpdate(fieldsToSetResults)
+var fieldsToStart = []string{"status", "updated_at"}
+var fieldsToStartStr = sqllib_postgres.WildcardsForUpdate(fieldsToStart)
+
+// var fieldsToReadToStartStr = strings.Join(fieldsToStart[:len(fieldsToStart)-1], ",")
+
+var fieldsToFinish = []string{"status", "results", "updated_at"}
+var fieldsToFinishStr = sqllib_postgres.WildcardsForUpdate(fieldsToFinish)
+var fieldsToReadToFinishStr = strings.Join(fieldsToFinish[:len(fieldsToFinish)-1], ",")
 
 var _ tasks.Operator = &tasksPostgres{}
 var _ crud.Cleaner = &tasksPostgres{}
@@ -41,8 +46,8 @@ type tasksPostgres struct {
 	db    *sql.DB
 	table string
 
-	sqlInsert, sqlRead, sqlList, sqlReadToSet, sqlSetResults, sqlClean string
-	stmInsert, stmRead, stmList, stmReadToSet, stmSetResults           *sql.Stmt
+	sqlInsert, sqlRead, sqlList, sqlReadToStart, sqlStart, sqlReadToFinish, sqlFinish, sqlClean string
+	stmInsert, stmRead, stmList, stmReadToStart, stmStart, stmReadToFinish, stmFinish           *sql.Stmt
 
 	interfaceKey joiner.InterfaceKey
 }
@@ -67,8 +72,11 @@ func New(access config.Access, table string, interfaceKey joiner.InterfaceKey) (
 		sqlRead:   "SELECT " + fieldsToReadStr + " FROM " + table + " WHERE id = $1",
 		sqlList:   sqllib.SQLList(table, fieldsToListStr, "", &crud.GetOptions{OrderBy: []string{"created_at"}}),
 
-		sqlReadToSet:  "SELECT " + fieldsToReadToSetStr + " FROM " + table + " WHERE id = $1",
-		sqlSetResults: "UPDATE " + table + " SET " + fieldsToSetResultsStr + " WHERE id = $" + strconv.Itoa(len(fieldsToSetResults)+1),
+		// sqlReadToStart: "SELECT " + fieldsToReadToStartStr + " FROM " + table + " WHERE id = $1",
+		sqlStart: "UPDATE " + table + " SET " + fieldsToStartStr + " WHERE id = $" + strconv.Itoa(len(fieldsToStart)+1),
+
+		sqlReadToFinish: "SELECT " + fieldsToReadToFinishStr + " FROM " + table + " WHERE id = $1",
+		sqlFinish:       "UPDATE " + table + " SET " + fieldsToFinishStr + " WHERE id = $" + strconv.Itoa(len(fieldsToFinish)+1),
 
 		//sqlRemove: "DELETE FROM " + table + " where ID = $1",
 		sqlClean: "DELETE FROM " + table,
@@ -80,10 +88,13 @@ func New(access config.Access, table string, interfaceKey joiner.InterfaceKey) (
 		{&tasksOp.stmInsert, tasksOp.sqlInsert},
 		{&tasksOp.stmRead, tasksOp.sqlRead},
 		{&tasksOp.stmList, tasksOp.sqlList},
-		{&tasksOp.stmSetResults, tasksOp.sqlSetResults},
-		{&tasksOp.stmReadToSet, tasksOp.sqlReadToSet},
-
 		//	{&tasksOp.stmRemove, tasksOp.sqlRemove},
+
+		// {&tasksOp.stmReadToStart, tasksOp.sqlReadToStart},
+		{&tasksOp.stmStart, tasksOp.sqlStart},
+
+		{&tasksOp.stmReadToFinish, tasksOp.sqlReadToFinish},
+		{&tasksOp.stmFinish, tasksOp.sqlFinish},
 	}
 
 	for _, sqlStmt := range sqlStmts {
@@ -279,56 +290,99 @@ func (tasksOp *tasksPostgres) List(term *selectors.Term, options *crud.GetOption
 	return items, nil
 }
 
-const onSetResult = "on tasksPostgres.SetResult(): "
+const onStart = "on tasksPostgres.Start(): "
 
-func (tasksOp *tasksPostgres) SetResult(id common.ID, result tasks.Result, _ *crud.SaveOptions) error {
+func (tasksOp *tasksPostgres) Start(id common.ID, _ *crud.SaveOptions) error {
 	if len(id) < 1 {
-		return errors.New(onSetResult + "empty ID")
+		return errors.New(onStart + "empty ID")
 	}
 
 	idNum, err := strconv.ParseUint(string(id), 10, 64)
 	if err != nil {
-		return errors.Errorf(onSetResult+"wrong ID (%s)", id)
+		return errors.Errorf(onStart+"wrong ID (%s)", id)
+	}
+
+	//err = tasksOp.stmReadToStart.QueryRow(idNum).Scan(&statusStr)
+	//if err != nil {
+	//	return errors.Wrapf(err, onStart+sqllib.CantScanQueryRow, tasksOp.sqlReadToStart, idNum)
+	//}
+
+	// setting status ---------------------------------------------------------------------------------
+
+	startedAt := time.Now()
+	status := tasks.Status{StartedAt: &startedAt}
+	statusBytes, err := json.Marshal(status)
+	if err != nil {
+		return errors.Wrapf(err, onStart+"can't marshal .Status (%#v)", status)
+	}
+
+	// saving the updates -----------------------------------------------------------------------------
+
+	values := []interface{}{statusBytes, startedAt.Format(time.RFC3339), idNum}
+	_, err = tasksOp.stmStart.Exec(values...)
+	if err != nil {
+		return errors.Wrapf(err, onStart+sqllib.CantExec, tasksOp.sqlStart, values)
+	}
+
+	return nil
+}
+
+const onFinish = "on tasksPostgres.Finish(): "
+
+func (tasksOp *tasksPostgres) Finish(id common.ID, result tasks.Result, _ *crud.SaveOptions) error {
+	if len(id) < 1 {
+		return errors.New(onFinish + "empty ID")
+	}
+
+	idNum, err := strconv.ParseUint(string(id), 10, 64)
+	if err != nil {
+		return errors.Errorf(onFinish+"wrong ID (%s)", id)
 	}
 
 	var statusStr, resultsStr string
-	var updatedAtPtr *string
 
-	err = tasksOp.stmReadToSet.QueryRow(idNum).Scan(&statusStr, &resultsStr, &updatedAtPtr)
+	err = tasksOp.stmReadToFinish.QueryRow(idNum).Scan(&statusStr, &resultsStr)
 	if err != nil {
-		return errors.Wrapf(err, onSetResult+sqllib.CantScanQueryRow, tasksOp.sqlReadToSet, idNum)
+		return errors.Wrapf(err, onFinish+sqllib.CantScanQueryRow, tasksOp.sqlReadToFinish, idNum)
 	}
 
-	//var status tasks.Status
-	//if len(statusStr) > 0 {
-	//	err = json.Unmarshal([]byte(statusStr), &status)
-	//	if err != nil {
-	//		return  errors.Wrapf(err, onSetResult+"can't unmarshal .Status (%s)", statusStr)
-	//	}
-	//}
-	// TODO!!!
-	statusBytes := []byte(statusStr)
+	// clearing status --------------------------------------------------------------------------------
+
+	var status tasks.Status
+	if len(statusStr) > 0 {
+		err = json.Unmarshal([]byte(statusStr), &status)
+		if err != nil {
+			return errors.Wrapf(err, onFinish+"can't unmarshal .Status (%s)", statusStr)
+		}
+	}
+	if status.StartedAt != nil {
+		// TODO!!! be careful
+		result.StartedAt = *status.StartedAt
+	}
+	statusStr = ""
+
+	// adding the result ------------------------------------------------------------------------------
 
 	var results []tasks.Result
 	if len(resultsStr) > 0 {
 		err = json.Unmarshal([]byte(resultsStr), &results)
 		if err != nil {
-			return errors.Wrapf(err, onSetResult+"can't unmarshal .Results (%s)", resultsStr)
+			return errors.Wrapf(err, onFinish+"can't unmarshal .Results (%s)", resultsStr)
 		}
 	}
+	result.FinishedAt = time.Now()
 	results = append(results, result)
 	resultsBytes, err := json.Marshal(results)
 	if err != nil {
-		return errors.Wrapf(err, onSetResult+"can't .Marshal(%#v)", results)
+		return errors.Wrapf(err, onFinish+"can't .Marshal(%#v)", results)
 	}
 
-	values := []interface{}{
-		statusBytes, resultsBytes, time.Now().Format(time.RFC3339), id,
-	}
+	// saving the updates -----------------------------------------------------------------------------
 
-	_, err = tasksOp.stmSetResults.Exec(values...)
+	values := []interface{}{statusStr, resultsBytes, time.Now().Format(time.RFC3339), idNum}
+	_, err = tasksOp.stmFinish.Exec(values...)
 	if err != nil {
-		return errors.Wrapf(err, onSetResult+sqllib.CantExec, tasksOp.sqlSetResults, values)
+		return errors.Wrapf(err, onFinish+sqllib.CantExec, tasksOp.sqlFinish, values)
 	}
 
 	return nil

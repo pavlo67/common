@@ -33,7 +33,7 @@ func (it *loadTask) Name() string {
 	return "loader"
 }
 
-func (it *loadTask) Run(_ *tasks.Item, _ string) (info common.Map, posterior []joiner.Link, err error) {
+func (it *loadTask) Run(_ *tasks.Task, _ string) (posterior []joiner.Link, info common.Map, err error) {
 	if it == nil {
 		return nil, nil, errors.New("on importer_task.Run(): loadTask == nil")
 	}

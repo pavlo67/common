@@ -56,7 +56,7 @@ func (it *copyTask) Name() string {
 	return "copier from series_http"
 }
 
-func (it *copyTask) Run(_ *tasks.Item, _ string) (info common.Map, posterior []joiner.Link, err error) {
+func (it *copyTask) Run(_ *tasks.Task, _ string) (posterior []joiner.Link, info common.Map, err error) {
 	if it == nil {
 		return nil, nil, errors.New("on copyTask.Run(): it == nil")
 	}
