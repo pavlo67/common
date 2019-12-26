@@ -9,5 +9,5 @@ import (
 const InterfaceKey joiner.InterfaceKey = "filesloader"
 
 type Operator interface {
-	Load(pathToLoad, pathToStore string) (*files.Item, error)
+	Load(urlToLoad, pathToStore string, priority Priority) (*files.Item, error)
 }
