@@ -107,7 +107,7 @@ func (authOp *authJWT) Authorize(toAuth auth.Creds) (*auth.User, error) {
 	}
 
 	return &auth.User{
-		ID:       common.ID(res.ID),
+		ID:       common.Key(res.ID),
 		Nickname: nick,
 		Creds:    res.Creds,
 	}, nil

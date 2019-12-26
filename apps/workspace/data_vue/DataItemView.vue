@@ -28,8 +28,8 @@
 
 
 <script>
-    import e  from '../../components.js/elements';
-    import sh from '../../components.js/show_hide/show_hide';
+    import e  from '../../../components.js/elements';
+    import sh from '../../../components.js/show_hide/show_hide';
 
     let itemPostfix = "_details";
     let showHide = sh.NewShowHide(itemPostfix);

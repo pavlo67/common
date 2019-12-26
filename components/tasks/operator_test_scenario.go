@@ -11,6 +11,7 @@ import (
 
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/crud"
+	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/selectors"
 )
@@ -43,7 +44,7 @@ func TestCases(tasksOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 				},
 				Success:   true,
 				Info:      common.Map{"1": float64(4)},
-				Posterior: []common.ID{"6", "8"},
+				Posterior: []joiner.Link{{"6", "8"}},
 			},
 		},
 	}
@@ -54,7 +55,7 @@ const toReadI = 0       // must be < numRepeats
 const toSetResultsI = 1 // must be < numRepeats
 const toDeleteI = 2     // must be < numRepeats
 
-func ChechReaded(t *testing.T, readed *Item, expectedID common.ID, expectedTask Task, l logger.Operator) {
+func ChechReaded(t *testing.T, readed *Item, expectedID common.Key, expectedTask Task, l logger.Operator) {
 	require.NotNil(t, readed)
 
 	l.Infof("was saved: %#v", expectedTask)
@@ -77,7 +78,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 	for i, tc := range testCases {
 		l.Debug(i)
 
-		var id [numRepeats]common.ID
+		var id [numRepeats]common.Key
 		var toSave [numRepeats]Task
 
 		// ClearDatabase ---------------------------------------------------------------------------------
@@ -91,7 +92,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 			toSave[i] = tc.ToSave
 			idI, err := tc.Save(toSave[i], nil)
 			require.NoError(t, err)
-			require.NotEqual(t, common.ID(""), idI)
+			require.NotEqual(t, common.Key(""), idI)
 			id[i] = idI
 		}
 
@@ -151,7 +152,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		ChechReaded(t, readedSaved, id[toDeleteI], tc.ToSave, l)
 		require.Equal(t, 0, len(readedSaved.Results))
 
-		// test List -------------------------------------------------------------------------------------
+		// test ListTags -------------------------------------------------------------------------------------
 
 		itemsAll, err := tc.List(nil, nil)
 		require.NoError(t, err)
@@ -176,7 +177,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		//require.Error(t, err)
 		//require.Nil(t, readDeleted)
 		//
-		//itemsAll, err = tc.List(nil, nil)
+		//itemsAll, err = tc.ListTags(nil, nil)
 		//require.NoError(t, err)
 		//require.True(t, len(itemsAll) == numRepeats-1)
 	}

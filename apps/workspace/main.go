@@ -21,16 +21,16 @@ import (
 	"github.com/pavlo67/workshop/components/data"
 	"github.com/pavlo67/workshop/components/data/data_sqlite"
 	"github.com/pavlo67/workshop/components/data/data_tagged"
-	"github.com/pavlo67/workshop/components/tagger/tagger_sqlite"
+	"github.com/pavlo67/workshop/components/tags/tags_sqlite"
 
 	"github.com/pavlo67/workshop/constructions/dataflow"
 	"github.com/pavlo67/workshop/constructions/dataflow/flow_cleaner/flow_cleaner_sqlite"
 	"github.com/pavlo67/workshop/constructions/dataflow/flow_server_http"
-	"github.com/pavlo67/workshop/constructions/importer/importer_tasks"
-	"github.com/pavlo67/workshop/constructions/scheduler"
-	"github.com/pavlo67/workshop/constructions/scheduler/scheduler_timeout"
-	"github.com/pavlo67/workshop/constructions/storage"
-	"github.com/pavlo67/workshop/constructions/storage/storage_server_http"
+	"github.com/pavlo67/workshop/constructions/dataimporter/importer_tasks"
+	"github.com/pavlo67/workshop/constructions/datastorage"
+	"github.com/pavlo67/workshop/constructions/datastorage/storage_server_http"
+	"github.com/pavlo67/workshop/constructions/taskscheduler"
+	"github.com/pavlo67/workshop/constructions/taskscheduler/scheduler_timeout"
 
 	"github.com/pavlo67/workshop/apps/workspace/ws_routes"
 )
@@ -107,10 +107,10 @@ func main() {
 		{auth_ecdsa.Starter(), nil},
 		{server_http_jschmhr.Starter(), common.Map{"port": cfgEnvs["workspace_port"]}},
 
-		{tagger_sqlite.Starter(), nil},
+		{tags_sqlite.Starter(), nil},
 
-		{data_sqlite.Starter(), common.Map{"interface_key": storage.InterfaceKey, "table": storage.CollectionDefault}},
-		{data_tagged.Starter(), common.Map{"interface_key": storage.TaggedInterfaceKey, "data_key": storage.InterfaceKey}},
+		{data_sqlite.Starter(), common.Map{"interface_key": datastorage.InterfaceKey, "table": datastorage.CollectionDefault}},
+		{data_tagged.Starter(), common.Map{"interface_key": datastorage.TaggedInterfaceKey, "data_key": datastorage.InterfaceKey}},
 		{storage_server_http.Starter(), nil},
 
 		{data_sqlite.Starter(), common.Map{"interface_key": dataflow.InterfaceKey, "table": flowTable}},
@@ -145,9 +145,9 @@ func main() {
 		l.Fatal(err)
 	}
 
-	schOp, ok := joiner.Interface(scheduler.InterfaceKey).(scheduler.Operator)
+	schOp, ok := joiner.Interface(taskscheduler.InterfaceKey).(taskscheduler.Operator)
 	if !ok {
-		l.Fatalf("no scheduler.Operator with key %s", scheduler.InterfaceKey)
+		l.Fatalf("no scheduler.Operator with key %s", taskscheduler.InterfaceKey)
 	}
 
 	taskID, err := schOp.Init(task)

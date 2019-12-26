@@ -21,8 +21,8 @@
 
 
 <script>
-    import b       from '../../components.js/basis';
-    import sh      from '../../components.js/show_hide/show_hide';
+    import b       from '../../../components.js/basis';
+    import sh      from '../../../components.js/show_hide/show_hide';
     import { cfg } from './init';
 
     let showHide       = sh.NewShowHide("_summary");

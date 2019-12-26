@@ -24,9 +24,9 @@ import (
 	"github.com/pavlo67/workshop/constructions/dataflow"
 	"github.com/pavlo67/workshop/constructions/dataflow/flow_cleaner/flow_cleaner_sqlite"
 	"github.com/pavlo67/workshop/constructions/dataflow/flow_server_http"
-	"github.com/pavlo67/workshop/constructions/importer/importer_tasks"
-	"github.com/pavlo67/workshop/constructions/scheduler"
-	"github.com/pavlo67/workshop/constructions/scheduler/scheduler_timeout"
+	"github.com/pavlo67/workshop/constructions/dataimporter/importer_tasks"
+	"github.com/pavlo67/workshop/constructions/taskscheduler"
+	"github.com/pavlo67/workshop/constructions/taskscheduler/scheduler_timeout"
 
 	"github.com/pavlo67/workshop/apps/gatherer/gatherer_routes"
 )
@@ -133,9 +133,9 @@ func main() {
 		l.Fatal(err)
 	}
 
-	schOp, ok := joiner.Interface(scheduler.InterfaceKey).(scheduler.Operator)
+	schOp, ok := joiner.Interface(taskscheduler.InterfaceKey).(taskscheduler.Operator)
 	if !ok {
-		l.Fatalf("no scheduler.Operator with key %s", scheduler.InterfaceKey)
+		l.Fatalf("no scheduler.Operator with key %s", taskscheduler.InterfaceKey)
 	}
 
 	taskID, err := schOp.Init(task)

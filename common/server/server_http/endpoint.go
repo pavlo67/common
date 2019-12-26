@@ -30,7 +30,7 @@ type Endpoint struct {
 
 	WorkerHTTP
 
-	// AllowedIDs []common.ID `json:"allowed_ids,omitempty"`
+	// AllowedIDs []common.Key `json:"allowed_ids,omitempty"`
 	// DataItem   interface{} `json:"data_item,omitempty"` // for Interface
 	// SwaggerDescription string
 }
@@ -47,7 +47,7 @@ var rePathParam = regexp.MustCompile(":[^/]+")
 //
 //	path := ep.Path
 //	for nm := numMatches - 1; nm >= 0; nm-- {
-//		path = path[:matches[nm][0]] + url.PathEscape(strings.Replace(params[nm], "/", "%2F", -1)) + path[matches[nm][1]:]
+//		path = path[:matches[nm][0]] + url.PathEscape(strings.ReplaceTags(params[nm], "/", "%2F", -1)) + path[matches[nm][1]:]
 //	}
 //
 //	return path

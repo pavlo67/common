@@ -6,12 +6,12 @@ import (
 	"github.com/pavlo67/workshop/common/selectors"
 	"github.com/pavlo67/workshop/components/data"
 	"github.com/pavlo67/workshop/components/hypertext"
-	"github.com/pavlo67/workshop/components/tagger"
+	"github.com/pavlo67/workshop/components/tags"
 )
 
 const InterfaceKey joiner.InterfaceKey = "data_tagged"
 
-type Tagger = tagger.Operator // to use data.Operator and tagger.Operator simultaneously in Operator interface
+type Tagger = tags.Operator // to use data.Operator and tagger.Operator simultaneously in Operator interface
 
 type Operator interface {
 	data.Operator

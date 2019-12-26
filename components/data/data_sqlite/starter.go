@@ -10,7 +10,7 @@ import (
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/starter"
 	"github.com/pavlo67/workshop/components/data"
-	"github.com/pavlo67/workshop/components/tagger"
+	"github.com/pavlo67/workshop/components/tags"
 )
 
 func Starter() starter.Operator {
@@ -64,18 +64,18 @@ func (ts *dataSQLiteStarter) Setup() error {
 
 func (ts *dataSQLiteStarter) Run(joinerOp joiner.Operator) error {
 	var ok bool
-	var taggerOp tagger.Operator
+	var taggerOp tags.Operator
 	var cleanerOp crud.Cleaner
 
 	if !ts.noTagger {
-		taggerOp, ok = joinerOp.Interface(tagger.InterfaceKey).(tagger.Operator)
+		taggerOp, ok = joinerOp.Interface(tags.InterfaceKey).(tags.Operator)
 		if !ok {
-			return errors.Errorf("no tagger.Operator with key %s", tagger.InterfaceKey)
+			return errors.Errorf("no tagger.Operator with key %s", tags.InterfaceKey)
 		}
 
-		cleanerOp, ok = joinerOp.Interface(tagger.CleanerInterfaceKey).(crud.Cleaner)
+		cleanerOp, ok = joinerOp.Interface(tags.CleanerInterfaceKey).(crud.Cleaner)
 		if !ok {
-			return errors.Errorf("no tagger.Cleaner with key %s", tagger.InterfaceKey)
+			return errors.Errorf("no tagger.Cleaner with key %s", tags.InterfaceKey)
 		}
 	}
 

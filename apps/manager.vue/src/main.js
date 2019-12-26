@@ -7,7 +7,7 @@ import App          from './App.vue';
 import { eventBus } from './App.vue';
 import parts        from './parts';
 import swagger      from '../../workspace/ws_routes/api-docs/swagger';
-import { convert }  from '../../components.js/swagger_convertor';
+import { convert }  from '../../../components.js/swagger_convertor';
 
 Vue.use(Router);
 Vue.config.productionTip = false;

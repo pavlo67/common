@@ -8,8 +8,8 @@ import (
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/selectors"
 
+	"github.com/pavlo67/workshop/common/actor"
 	"github.com/pavlo67/workshop/components/tasks"
-	"github.com/pavlo67/workshop/components/worker"
 )
 
 const timeToWait = time.Millisecond * 1000
@@ -41,7 +41,7 @@ func Process(tasksOp tasks.Operator, joinerOp joiner.Operator, l logger.Operator
 		numOmitted = 0
 
 		for _, item := range items {
-			workerOp, ok := joinerOp.Interface(item.WorkerType).(worker.Operator)
+			workerOp, ok := joinerOp.Interface(item.WorkerType).(actor.Operator)
 			if !ok {
 				l.Errorf("no worker.Operator for task (%#v)", item)
 				time.Sleep(timeToWait)
@@ -77,5 +77,5 @@ func Process(tasksOp tasks.Operator, joinerOp joiner.Operator, l logger.Operator
 
 func SelectTasksToProcess(tasksOp tasks.Operator) ([]tasks.Item, error) {
 	return tasksOp.List(selectors.Binary(selectors.Eq, "status", selectors.Value{""}), &crud.GetOptions{Limit0: 0, Limit1: 1})
-	// return tasksOp.List(selectors.In("status", ""), &crud.GetOptions{Limit0: 0, Limit1: 1})
+	// return tasksOp.ListTags(selectors.In("status", ""), &crud.GetOptions{Limit0: 0, Limit1: 1})
 }

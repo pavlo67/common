@@ -15,7 +15,7 @@
 
 
 <script>
-    import b       from '../../components.js/basis';
+    import b       from '../../../components.js/basis';
     import { cfg } from './init';
 
     export default {

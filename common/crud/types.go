@@ -15,4 +15,4 @@ type History struct {
 
 type Counter map[string]uint64
 
-type Index map[string][]common.ID
+type Index map[string][]common.Key

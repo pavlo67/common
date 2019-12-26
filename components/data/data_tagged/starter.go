@@ -9,7 +9,7 @@ import (
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/starter"
 	"github.com/pavlo67/workshop/components/data"
-	"github.com/pavlo67/workshop/components/tagger"
+	"github.com/pavlo67/workshop/components/tags"
 )
 
 func Starter() starter.Operator {
@@ -49,12 +49,12 @@ func (ws *workspaceStarter) Run(joinerOp joiner.Operator) error {
 		return errors.Errorf("no data.Operator with key %s", ws.dataKey)
 	}
 
-	var taggerOp tagger.Operator
+	var taggerOp tags.Operator
 
 	if !ws.noTagger {
-		taggerOp, ok = joinerOp.Interface(tagger.InterfaceKey).(tagger.Operator)
+		taggerOp, ok = joinerOp.Interface(tags.InterfaceKey).(tags.Operator)
 		if !ok {
-			return errors.Errorf("no tagger.Operator with key %s", tagger.InterfaceKey)
+			return errors.Errorf("no tagger.Operator with key %s", tags.InterfaceKey)
 		}
 	}
 

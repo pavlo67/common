@@ -4,39 +4,12 @@ import (
 	"io"
 	"os"
 	"path"
-	"regexp"
-	"time"
-
 	"runtime"
-
 	"strings"
-
-	"log"
+	"time"
 
 	"github.com/pkg/errors"
 )
-
-func RelativePath(pathFull, pathBase, pathPrefix string) string {
-	path := ""
-
-	if pathFull[:len(pathBase)] == pathBase {
-		path = pathFull[len(pathBase):]
-	} else {
-		log.Printf(".RelativePath(%s, %s, %s)????", pathFull, pathBase, pathPrefix)
-	}
-
-	return pathPrefix + path
-}
-
-func CurrentPath() string {
-	if _, filename, _, ok := runtime.Caller(1); ok {
-		return path.Dir(filename) + "/"
-	}
-	return ""
-}
-
-var reBackslash = regexp.MustCompile(`\\`)
-var reExt = regexp.MustCompile(`\..*`)
 
 func CurrentFile(removeExt bool) string {
 	if _, filename, _, ok := runtime.Caller(1); ok {
@@ -54,31 +27,9 @@ func CurrentFile(removeExt bool) string {
 	return ""
 }
 
-func Dir(path string) error {
-	path = strings.TrimSpace(path)
-	if path == "" {
-		return errors.New("can't create dir for empty path")
-	}
-
-	if _, err := os.Stat(path); err != nil {
-		if os.IsNotExist(err) {
-			err = os.MkdirAll(path, os.ModePerm)
-			if err != nil {
-				return errors.Wrapf(err, "can't create dir '%s'", path)
-			}
-			return nil
-		}
-		return errors.Wrapf(err, "can't get stat for file '%s'", path)
-	}
-	return nil
-}
-
-var rePoint = regexp.MustCompile(`^\.`)
-var reSlash = regexp.MustCompile(`\\|\/|\?`)
-
 func CorrectFileName(name string) string {
 	name = rePoint.ReplaceAllLiteralString(name, "_")
-	name = reSlash.ReplaceAllLiteralString(name, "_")
+	name = reSpecials.ReplaceAllLiteralString(name, "_")
 	return name
 }
 

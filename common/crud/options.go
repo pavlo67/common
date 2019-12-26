@@ -3,13 +3,13 @@ package crud
 import "github.com/pavlo67/workshop/common"
 
 type SaveOptions struct {
-	AuthID    common.ID
+	AuthID    common.Key
 	Replace   bool
 	ReturnIDs bool
 }
 
 type GetOptions struct {
-	AuthID  common.ID
+	AuthID  common.Key
 	GroupBy []string
 	OrderBy []string
 	Limit0  uint64
@@ -18,6 +18,6 @@ type GetOptions struct {
 
 type RemoveOptions struct {
 	Limit  uint64
-	AuthID common.ID
+	AuthID common.Key
 	Delete bool
 }

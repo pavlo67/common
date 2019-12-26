@@ -63,11 +63,11 @@ func NewData(access *config.Access, timeout time.Duration, dbName, collectionNam
 
 const onSave = "on dataMongoDB.Save()"
 
-func (mgoOp dataMongoDB) Save(items []data.Item, options *crud.SaveOptions) ([]common.ID, error) {
+func (mgoOp dataMongoDB) Save(items []data.Item, options *crud.SaveOptions) ([]common.Key, error) {
 	// TODO: use Upsert
 
 	var err error
-	var ids []common.ID
+	var ids []common.Key
 
 	for i, item := range items {
 		if item.ID != "" {
@@ -94,9 +94,9 @@ func (mgoOp dataMongoDB) Save(items []data.Item, options *crud.SaveOptions) ([]c
 			return nil, errors.Wrapf(err, onSave+": can't .InsertOne(nil, %#v)", item)
 		}
 
-		var id common.ID
+		var id common.Key
 		if objectID, ok := res.InsertedID.(primitive.ObjectID); ok {
-			id = common.ID(objectID.Hex())
+			id = common.Key(objectID.Hex())
 
 			// TODO!!! save tags
 
@@ -113,7 +113,7 @@ func (mgoOp dataMongoDB) Save(items []data.Item, options *crud.SaveOptions) ([]c
 
 const onRead = "on dataMongoDB.Read()"
 
-func (mgoOp dataMongoDB) Read(id common.ID, options *crud.GetOptions) (*data.Item, error) {
+func (mgoOp dataMongoDB) Read(id common.Key, options *crud.GetOptions) (*data.Item, error) {
 	objectID, err := primitive.ObjectIDFromHex(string(id))
 	if err != nil {
 		return nil, errors.Wrapf(err, onSave+": can't primitive.ObjectIDFromHex(string(%s))", id)
@@ -164,13 +164,13 @@ func (mgoOp dataMongoDB) Details(item *data.Item, exemplar interface{}) error {
 	return nil
 }
 
-const onCount = "on dataMongoDB.Count()"
+const onCount = "on dataMongoDB.CountTags()"
 
 func (mgoOp dataMongoDB) Count(*selectors.Term, *crud.GetOptions) ([]crud.Counter, error) {
 	return nil, common.ErrNotImplemented
 }
 
-const onList = "on dataMongoDB.List()"
+const onList = "on dataMongoDB.ListTags()"
 
 func (mgoOp dataMongoDB) List(*selectors.Term, *crud.GetOptions) ([]data.Item, error) {
 

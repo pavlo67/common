@@ -10,7 +10,7 @@ import (
 	"github.com/pavlo67/workshop/common/selectors/logic"
 	"github.com/pavlo67/workshop/components/data"
 	"github.com/pavlo67/workshop/components/hypertext"
-	"github.com/pavlo67/workshop/components/tagger"
+	"github.com/pavlo67/workshop/components/tags"
 )
 
 var _ Operator = &ws{}
@@ -24,7 +24,7 @@ type ws struct {
 
 const onNewWorkspace = "on New(): "
 
-func New(dataOp data.Operator, taggerOp tagger.Operator) (Operator, crud.Cleaner, error) {
+func New(dataOp data.Operator, taggerOp tags.Operator) (Operator, crud.Cleaner, error) {
 	if dataOp == nil {
 		return nil, nil, errors.New(onNewWorkspace + ": no data.Operatoe")
 	}
@@ -43,7 +43,7 @@ func (wsOp *ws) ListWithTag(key *joiner.InterfaceKey, tagLabel string, selector 
 		return nil, errors.New(onListWithTag + ": no tagger.Operator")
 	}
 
-	index, err := wsOp.IndexWithTag(key, tagLabel, options)
+	index, err := wsOp.IndexTagged(key, tagLabel, options)
 	if err != nil {
 		return nil, errors.Wrap(err, onListWithTag)
 	}
@@ -62,7 +62,7 @@ func (wsOp *ws) ListWithTag(key *joiner.InterfaceKey, tagLabel string, selector 
 	// l.Infof("%#v\n%#v", selectorTagged, options)
 	return wsOp.List(selectorTagged, options)
 
-	// TODO: check if all item.TypeKey are correct in the result of wsOp.List
+	// TODO: check if all item.TypeKey are correct in the result of wsOp.ListTags
 }
 
 const onListWithText = "on ws.ListWithText(): "
@@ -76,7 +76,7 @@ func (wsOp *ws) ListWithText(*joiner.InterfaceKey, hypertext.ToSearch, *selector
 //var rePhrase = regexp.MustCompile(`^\s*".*"\s*$`)
 //var reDelimiter = regexp.MustCompile(`[\.,\s\t;:\-\+\!\?\(\)\{\}\[\]\/'"\*]+`)
 //
-//func (objOp *notesMySQL) ReadListByWords(userIS common.ID, options *content.ListOptions, searched string) (objects []notes.Item, allCnt uint64, err error) {
+//func (objOp *notesMySQL) ReadListByWords(userIS common.Key, options *content.ListOptions, searched string) (objects []notes.Item, allCnt uint64, err error) {
 //	if !rePhrase.MatchString(searched) {
 //		words := reDelimiter.Split(searched, -1)
 //		searched = ""
@@ -104,7 +104,7 @@ func (wsOp *ws) ListWithText(*joiner.InterfaceKey, hypertext.ToSearch, *selector
 //
 //const onUpdateLinks = "on notesMySQL.UpdateLinks"
 //
-//func (objOp *notesMySQL) UpdateLinks(userIS common.ID, idStr string, linksListNew []links.Item, linkType string) error {
+//func (objOp *notesMySQL) UpdateLinks(userIS common.Key, idStr string, linksListNew []links.Item, linkType string) error {
 //	// TODO: lock object record for update (use history!!!)
 //
 //	o, err := objOp.Read(userIS, idStr)
@@ -124,11 +124,11 @@ func (wsOp *ws) ListWithText(*joiner.InterfaceKey, hypertext.ToSearch, *selector
 //		}
 //	}
 //
-//	values := []interface{}{jsonLinks, o.ID}
+//	values := []interface{}{jsonLinks, o.Key}
 //	_, err = objOp.stmtUpdateLinks.Exec(values...)
 //	if err != nil {
 //		return errors.Wrapf(err, onUpdateLinks+": "+basis.CantExecQuery, objOp.sqlUpdateLinks, values)
 //	}
 //
-//	return objOp.setLinks(userIS, o.ID, linksListCopy)
+//	return objOp.setLinks(userIS, o.Key, linksListCopy)
 //}

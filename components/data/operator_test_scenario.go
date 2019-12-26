@@ -10,7 +10,7 @@ import (
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/crud"
 	"github.com/pavlo67/workshop/common/logger"
-	"github.com/pavlo67/workshop/components/tagger"
+	"github.com/pavlo67/workshop/components/tags"
 	"github.com/pavlo67/workshop/constructions/dataflow"
 )
 
@@ -61,9 +61,9 @@ func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 					ExportID: "wq3r",
 					Title:    "56567",
 					Summary:  "3333333",
-					Tags:     []tagger.Tag{{Label: "1"}, {Label: "332343"}},
+					Tags:     []tags.Item{{Label: "1"}, {Label: "332343"}},
 				}},
-				Tags: []tagger.Tag{{Label: "1"}, {Label: "333"}},
+				Tags: []tags.Item{{Label: "1"}, {Label: "333"}},
 				Status: crud.History{
 					CreatedAt: time.Now(),
 				},
@@ -78,7 +78,7 @@ func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 				URL:     "22222222",
 				Title:   "345456rt",
 				Summary: "6578eegj",
-				Tags:    []tagger.Tag{{Label: "1"}, {Label: "333"}},
+				Tags:    []tags.Item{{Label: "1"}, {Label: "333"}},
 				Status: crud.History{
 					CreatedAt: time.Now().Add(time.Minute),
 				},
@@ -136,7 +136,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 	for i, tc := range testCases {
 		l.Debug(i)
 
-		var id [numRepeats1 + numRepeats2]common.ID
+		var id [numRepeats1 + numRepeats2]common.Key
 		var toSave [numRepeats1 + numRepeats2]Item
 		// var data Item
 
@@ -322,19 +322,19 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		//	}
 		//}
 
-		// test List -------------------------------------------------------------------------------------
+		// test ListTags -------------------------------------------------------------------------------------
 
 		//if !tc.ExcludeListTest {
-		//	var ids []common.ID
+		//	var ids []common.Key
 		//	for _, idi := range id {
 		//		ids = append(ids, idi)
 		//	}
 		//
 		//	if !tc.ExpectedReadOk {
 		//		// TODO: selector.InStr(keyFields[0], ids...)
-		//		briefsAll, err := tc.List(nil, nil)
+		//		briefsAll, err := tc.ListTags(nil, nil)
 		//
-		//		require.Equal(t, 0, len(briefsAll), "why len(dataAll) is not zero after .List()?")
+		//		require.Equal(t, 0, len(briefsAll), "why len(dataAll) is not zero after .ListTags()?")
 		//		require.Error(t, err)
 		//		continue
 		//	}

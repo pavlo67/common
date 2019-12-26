@@ -6,7 +6,7 @@ import (
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/selectors"
 
-	"github.com/pavlo67/workshop/components/tagger"
+	"github.com/pavlo67/workshop/components/tags"
 	"github.com/pavlo67/workshop/constructions/dataflow"
 )
 
@@ -25,14 +25,14 @@ type Type struct {
 }
 
 type Item struct {
-	ID         common.ID       `bson:"_id,omitempty" json:",omitempty"`
+	ID         common.Key      `bson:"_id,omitempty" json:",omitempty"`
 	ExportID   string          `bson:",omitempty"    json:",omitempty"`
 	URL        string          `bson:",omitempty"    json:",omitempty"`
 	TypeKey    TypeKey         `bson:",omitempty"    json:",omitempty"`
 	Title      string          `bson:",omitempty"    json:",omitempty"`
 	Summary    string          `bson:",omitempty"    json:",omitempty"`
 	Embedded   []Item          `bson:",omitempty"    json:",omitempty"`
-	Tags       []tagger.Tag    `bson:",omitempty"    json:",omitempty"`
+	Tags       []tags.Item     `bson:",omitempty"    json:",omitempty"`
 	Details    interface{}     `bson:"-"             json:",omitempty"`
 	DetailsRaw []byte          `bson:",omitempty"    json:",omitempty"` // shouldn't be used directly
 	Status     crud.History    `bson:",omitempty"    json:",omitempty"`
@@ -40,10 +40,10 @@ type Item struct {
 }
 
 type Operator interface {
-	Save([]Item, *crud.SaveOptions) ([]common.ID, error)
-	Remove(common.ID, *crud.RemoveOptions) error
+	Save([]Item, *crud.SaveOptions) ([]common.Key, error)
+	Remove(common.Key, *crud.RemoveOptions) error
 
-	Read(common.ID, *crud.GetOptions) (*Item, error)
+	Read(common.Key, *crud.GetOptions) (*Item, error)
 	SetDetails(item *Item) error
 
 	List(*selectors.Term, *crud.GetOptions) ([]Item, error)
@@ -59,7 +59,7 @@ type Convertor interface {
 
 // TODO: .History, etc...
 
-//	ID        dataspace.ID `bson:"id"                   json:"id"`
+//	Key        dataspace.Key `bson:"id"                   json:"id"`
 //	Version   vcs.Version  `bson:"version,omitempty"    json:"version,omitempty"`
 //
 //	Title   string       `bson:"title"             json:"title"`
@@ -68,5 +68,5 @@ type Convertor interface {
 //	Item content.Item `bson:"content,omitempty" json:"content,omitempty"`
 //	Tags   links.Tags  `bson:"links,omitempty"   json:"links,omitempty"`
 //
-//	RView  common.ID `bson:"r_view,omitempty"  json:"r_view,omitempty"`
-//	ROwner common.ID `bson:"r_owner,omitempty" json:"r_owner,omitempty"`
+//	RView  common.Key `bson:"r_view,omitempty"  json:"r_view,omitempty"`
+//	ROwner common.Key `bson:"r_owner,omitempty" json:"r_owner,omitempty"`
