@@ -24,7 +24,7 @@ func TestCases(flOp Operator, cleanerOp crud.Cleaner, pathToStore string) []Oper
 			Operator:    flOp,
 			Cleaner:     cleanerOp,
 			PathToStore: pathToStore,
-			URLToLoad:   "http://abc.ru",
+			URLToLoad:   "http://grustno.hobby.ru",
 		},
 	}
 }
