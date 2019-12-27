@@ -2,7 +2,7 @@ package filelib
 
 import "regexp"
 
-var reSpecials = regexp.MustCompile(`\\|\/|\?|\!`)
+var reSpecials = regexp.MustCompile(`[\\/?!:\s+]`)
 
 var reBackslash = regexp.MustCompile(`\\`)
 var reExt = regexp.MustCompile(`\..*`)

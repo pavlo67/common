@@ -7,6 +7,9 @@ import (
 	"runtime"
 	"strings"
 
+	"strconv"
+	"time"
+
 	"github.com/pkg/errors"
 )
 
@@ -31,13 +34,7 @@ func CurrentPath() string {
 
 const onGetDir = "on filelib.GetDir(): "
 
-func GetDir(path, pathDefault string) (string, error) {
-
-	path = strings.TrimSpace(path)
-	if path == "" {
-		path = pathDefault
-
-	}
+func GetDir(path string) (string, error) {
 
 	// converting Windows-backslashed pathes to the normal ones
 	path = reBackslash.ReplaceAllString(path, "/")
@@ -58,21 +55,48 @@ func GetDir(path, pathDefault string) (string, error) {
 	return path, nil
 }
 
-func Dir(path string) error {
+func Dir(path string) (string, error) {
 	path = strings.TrimSpace(path)
 	if path == "" {
-		return errors.New("can't create dir for empty path")
+		return "", errors.New("can't create dir for empty path")
+	}
+
+	// converting Windows-backslashed pathes to the normal ones
+	path = reBackslash.ReplaceAllString(path, "/")
+	if path[len(path)-1] != '/' {
+		path += "/"
 	}
 
 	if _, err := os.Stat(path); err != nil {
 		if os.IsNotExist(err) {
 			err = os.MkdirAll(path, os.ModePerm)
 			if err != nil {
-				return errors.Wrapf(err, "can't create dir '%s'", path)
+				return "", errors.Wrapf(err, "can't create dir '%s'", path)
 			}
-			return nil
+			return path, nil
 		}
-		return errors.Wrapf(err, "can't get stat for file '%s'", path)
+		return "", errors.Wrapf(err, "can't get stat for dir '%s'", path)
 	}
-	return nil
+
+	return path, nil
+}
+
+const maxRetries = 10
+
+func SubDirUnique(path string) (string, error) {
+	path, err := Dir(path)
+	if err != nil {
+		return "", err
+	}
+
+	var subpath string
+
+	for i := 0; i < maxRetries; i++ {
+		subpath, err = Dir(path + CorrectFileName(time.Now().Format(time.RFC3339)) + "_" + strconv.Itoa(i))
+		if err == nil {
+			return subpath, nil
+		}
+	}
+
+	return "", errors.Errorf("can't create unique subpath %d times, last try was '%s'", maxRetries, subpath)
 }

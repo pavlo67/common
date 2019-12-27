@@ -12,6 +12,11 @@ import (
 
 	"github.com/pavlo67/workshop/components/files"
 
+	"time"
+
+	"strings"
+
+	"github.com/pavlo67/workshop/common/flow"
 	"github.com/pavlo67/workshop/constructions/filesloader"
 )
 
@@ -24,13 +29,16 @@ type filesloaderHTTP struct {
 const onNew = "on filesloaderHTTP.New(): "
 
 func New(pathToStoreDefault string) (filesloader.Operator, crud.Cleaner, error) {
-	pathToStoreDefault, err := filelib.GetDir(pathToStoreDefault, "./")
+	if strings.TrimSpace(pathToStoreDefault) == "" {
+		pathToStoreDefault = "./"
+	}
+	pathToStoreDefaultFinal, err := filelib.Dir(pathToStoreDefault)
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, onNew+"can't filelib.GetDir('%s', './')", pathToStoreDefault)
 	}
 
 	flOp := filesloaderHTTP{
-		pathToStoreDefault: pathToStoreDefault,
+		pathToStoreDefault: pathToStoreDefaultFinal,
 	}
 
 	return &flOp, nil, nil
@@ -46,9 +54,13 @@ type toPrepare struct {
 const onLoad = "on filesloaderHTTP.Load(): "
 
 func (flOp *filesloaderHTTP) Load(urlToLoad, pathToStore string, priority filesloader.Priority) (*files.Item, error) {
-	pathToStore, err := filelib.GetDir(pathToStore, flOp.pathToStoreDefault)
+	if strings.TrimSpace(pathToStore) == "" {
+		pathToStore = flOp.pathToStoreDefault
+	}
+
+	pathToStoreFinal, err := filelib.SubDirUnique(pathToStore)
 	if err != nil {
-		return nil, errors.Wrapf(err, onLoad+"can't filelib.GetDir('%s', '%s')", pathToStore, flOp.pathToStoreDefault)
+		return nil, errors.Wrapf(err, onLoad+"can't filelib.SubDirUnique('%s')", pathToStore)
 	}
 
 	if priority == nil {
@@ -57,7 +69,7 @@ func (flOp *filesloaderHTTP) Load(urlToLoad, pathToStore string, priority filesl
 
 	var fileIndex int
 
-	fileName, fileType, err := httplib.DownloadFile(urlToLoad, pathToStore, fileIndex, 0644)
+	fileName, fileType, err := httplib.DownloadFile(urlToLoad, pathToStoreFinal, fileIndex, 0644)
 	// TODO!!! postpone errors
 	if err != nil {
 		return nil, err
@@ -72,7 +84,7 @@ func (flOp *filesloaderHTTP) Load(urlToLoad, pathToStore string, priority filesl
 
 		var posterior []toPrepare
 
-		posterior, fileIndex, err = flOp.PreparePosterior(fileToPrepare, pathToStore, fileIndex, priority)
+		posterior, fileIndex, err = flOp.PreparePosterior(fileToPrepare, pathToStoreFinal, fileIndex, priority)
 		// TODO!!! postpone errors
 		if err != nil {
 			return nil, err
@@ -84,7 +96,15 @@ func (flOp *filesloaderHTTP) Load(urlToLoad, pathToStore string, priority filesl
 		}
 	}
 
-	return &files.Item{urlToLoad}, nil
+	now := time.Now()
+
+	return &files.Item{
+		Path: pathToStoreFinal,
+		Origin: flow.Origin{
+			Source: urlToLoad,
+			Time:   &now,
+		},
+	}, nil
 }
 
 const onPreparePosterior = "on filesloaderHTTP.PreparePosterior(): "

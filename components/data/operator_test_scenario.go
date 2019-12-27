@@ -9,9 +9,9 @@ import (
 
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/crud"
+	"github.com/pavlo67/workshop/common/flow"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/components/tags"
-	"github.com/pavlo67/workshop/constructions/dataflow"
 )
 
 type OperatorTestCase struct {
@@ -67,7 +67,7 @@ func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 				Status: crud.History{
 					CreatedAt: time.Now(),
 				},
-				Origin: dataflow.Origin{},
+				Origin: flow.Origin{},
 			},
 			DetailsToSave: Test{
 				AAA: "aaa",

@@ -1,13 +1,15 @@
 package filesloader_http
 
 import (
+	"github.com/pkg/errors"
+
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/starter"
+
 	"github.com/pavlo67/workshop/constructions/filesloader"
-	"github.com/pkg/errors"
 )
 
 func Starter() starter.Operator {
@@ -19,38 +21,39 @@ var _ starter.Operator = &loaderHTTPStarter{}
 
 type loaderHTTPStarter struct {
 	interfaceKey joiner.InterfaceKey
+	pathToStore  string
 
 	// TODO: use proxies
 }
 
 // ------------------------------------------------
 
-func (lh *loaderHTTPStarter) Name() string {
+func (fl *loaderHTTPStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (lh *loaderHTTPStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
+func (fl *loaderHTTPStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	l = lCommon
 
-	lh.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(filesloader.InterfaceKey)))
+	fl.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(filesloader.InterfaceKey)))
+	fl.pathToStore = options.StringDefault("path_to_store", "./")
 
 	return nil, nil
 }
 
-func (lh *loaderHTTPStarter) Setup() error {
+func (fl *loaderHTTPStarter) Setup() error {
 	return nil
 }
 
-func (lh *loaderHTTPStarter) Run(joinerOp joiner.Operator) error {
-
-	dataOp, _, err := New(ts.config, ts.table, ts.interfaceKey, taggerOp, cleanerOp)
+func (fl *loaderHTTPStarter) Run(joinerOp joiner.Operator) error {
+	flOp, _, err := New(fl.pathToStore)
 	if err != nil {
-		return errors.Wrap(err, "can't init data.Operator")
+		return errors.Wrap(err, "can't init filesloader.Operator")
 	}
 
-	err = joinerOp.Join(dataOp, ts.interfaceKey)
+	err = joinerOp.Join(flOp, fl.interfaceKey)
 	if err != nil {
-		return errors.Wrapf(err, "can't join *dataSQLite as data.Operator with key '%s'", ts.interfaceKey)
+		return errors.Wrapf(err, "can't join *filesloaderHTTP as filesloader.Operator with key '%s'", fl.interfaceKey)
 	}
 
 	return nil

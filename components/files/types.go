@@ -3,10 +3,13 @@ package files
 import (
 	"io/ioutil"
 	"os"
+
+	"github.com/pavlo67/workshop/common/flow"
 )
 
 type Item struct {
-	Path string
+	Path   string      `bson:",omitempty" json:",omitempty"`
+	Origin flow.Origin `bson:",omitempty" json:",omitempty"`
 }
 
 func (f Item) IsDir() (bool, error) {

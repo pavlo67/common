@@ -9,9 +9,9 @@ import (
 
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/crud"
+	"github.com/pavlo67/workshop/common/flow"
 	"github.com/pavlo67/workshop/components/data"
 	"github.com/pavlo67/workshop/components/tags"
-	"github.com/pavlo67/workshop/constructions/dataflow"
 )
 
 var _ data.Convertor = &Item{}
@@ -81,7 +81,7 @@ func (item *Item) GetData() (*data.Item, error) {
 		Tags:     items,
 		Details:  feedItem.Content,
 		Status:   status,
-		Origin: dataflow.Origin{
+		Origin: flow.Origin{
 			Source: item.sourceURL,
 			Key:    originalID,
 			Time:   &sourceTime,

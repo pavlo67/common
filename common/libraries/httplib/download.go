@@ -1,10 +1,12 @@
 package httplib
 
 import (
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 )
 
 func Download(url string) ([]byte, error) {
@@ -21,6 +23,11 @@ func Download(url string) ([]byte, error) {
 }
 
 func DownloadFile(url, pathToLoad string, fileIndex int, perm os.FileMode) (fileName, fileType string, err error) {
+	url = strings.TrimSpace(url)
+	if url == "" {
+		return "", "", errors.New("empty URL to download data")
+	}
+
 	resp, err := http.Get(url)
 	if err != nil {
 		return "", "", err
