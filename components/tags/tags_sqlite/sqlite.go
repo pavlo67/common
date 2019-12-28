@@ -95,7 +95,7 @@ func New(access config.Access, ownInterfaceKey joiner.InterfaceKey) (tags.Operat
 
 const onAddTags = "on tagsSQLite.AddTags(): "
 
-func (taggerOp *tagsSQLite) AddTags(key joiner.InterfaceKey, id common.Key, items []tags.Item, _ *crud.SaveOptions) error {
+func (taggerOp *tagsSQLite) AddTags(key joiner.InterfaceKey, id common.ID, items []tags.Item, _ *crud.SaveOptions) error {
 	var tagsFiltered []tags.Item
 	for _, tag := range items {
 		tag.Label = strings.TrimSpace(tag.Label)
@@ -151,7 +151,7 @@ ROLLBACK:
 
 const onReplaceTags = "on tagsSQLite.ReplaceTags(): "
 
-func (taggerOp *tagsSQLite) ReplaceTags(key joiner.InterfaceKey, id common.Key, items []tags.Item, options *crud.SaveOptions) error {
+func (taggerOp *tagsSQLite) ReplaceTags(key joiner.InterfaceKey, id common.ID, items []tags.Item, options *crud.SaveOptions) error {
 
 	var tagsFiltered []tags.Item
 	for _, tag := range items {
@@ -224,7 +224,7 @@ ROLLBACK:
 
 const onListTags = "on tagsSQLite.ListTags(): "
 
-func (taggerOp *tagsSQLite) ListTags(key joiner.InterfaceKey, id common.Key, _ *crud.GetOptions) ([]tags.Item, error) {
+func (taggerOp *tagsSQLite) ListTags(key joiner.InterfaceKey, id common.ID, _ *crud.GetOptions) ([]tags.Item, error) {
 	values := []interface{}{key, id}
 
 	rows, err := taggerOp.stmList.Query(values...)

@@ -78,7 +78,7 @@ func New(access config.Access, table string, interfaceKey joiner.InterfaceKey) (
 		sqlReadToFinish: "SELECT " + fieldsToReadToFinishStr + " FROM " + table + " WHERE id = $1",
 		sqlFinish:       "UPDATE " + table + " SET " + fieldsToFinishStr + " WHERE id = $" + strconv.Itoa(len(fieldsToFinish)+1),
 
-		//sqlRemove: "DELETE FROM " + table + " where Key = $1",
+		//sqlRemove: "DELETE FROM " + table + " where ID = $1",
 		sqlClean: "DELETE FROM " + table,
 
 		interfaceKey: interfaceKey,
@@ -108,7 +108,7 @@ func New(access config.Access, table string, interfaceKey joiner.InterfaceKey) (
 
 const onSave = "on tasksPostgres.Save(): "
 
-func (tasksOp *tasksPostgres) Save(task tasks.Task, _ *crud.SaveOptions) (common.Key, error) {
+func (tasksOp *tasksPostgres) Save(task tasks.Task, _ *crud.SaveOptions) (common.ID, error) {
 	var paramsBytes []byte
 
 	if task.Params != nil {
@@ -128,19 +128,19 @@ func (tasksOp *tasksPostgres) Save(task tasks.Task, _ *crud.SaveOptions) (common
 		return "", errors.Wrapf(err, onSave+sqllib.CantExec, tasksOp.sqlInsert, values)
 	}
 
-	return common.Key(strconv.FormatUint(lastInsertId, 10)), nil
+	return common.ID(strconv.FormatUint(lastInsertId, 10)), nil
 }
 
 const onRead = "on tasksPostgres.Read(): "
 
-func (tasksOp *tasksPostgres) Read(id common.Key, _ *crud.GetOptions) (*tasks.Item, error) {
+func (tasksOp *tasksPostgres) Read(id common.ID, _ *crud.GetOptions) (*tasks.Item, error) {
 	if len(id) < 1 {
-		return nil, errors.New(onRead + "empty Key")
+		return nil, errors.New(onRead + "empty ID")
 	}
 
 	idNum, err := strconv.ParseUint(string(id), 10, 64)
 	if err != nil {
-		return nil, errors.Errorf(onRead+"wrong Key (%s)", id)
+		return nil, errors.Errorf(onRead+"wrong ID (%s)", id)
 	}
 
 	item := tasks.Item{ID: id}
@@ -167,7 +167,7 @@ func (tasksOp *tasksPostgres) Read(id common.Key, _ *crud.GetOptions) (*tasks.It
 	if len(status) > 0 {
 		err = json.Unmarshal([]byte(status), &item.Status)
 		if err != nil {
-			return &item, errors.Wrapf(err, onRead+"can't unmarshal .Status (%s)", status)
+			return &item, errors.Wrapf(err, onRead+"can't unmarshal .History (%s)", status)
 		}
 	}
 
@@ -180,7 +180,7 @@ func (tasksOp *tasksPostgres) Read(id common.Key, _ *crud.GetOptions) (*tasks.It
 
 	item.History.CreatedAt, err = time.Parse(time.RFC3339, createdAt)
 	if err != nil {
-		return &item, errors.Wrapf(err, onRead+"can't parse .CreatedAt (%s)", createdAt)
+		return &item, errors.Wrapf(err, onRead+"can't parse .SentAt (%s)", createdAt)
 	}
 
 	if updatedAtPtr != nil {
@@ -196,7 +196,7 @@ func (tasksOp *tasksPostgres) Read(id common.Key, _ *crud.GetOptions) (*tasks.It
 
 const onRemove = "on tasksPostgres.Remove()"
 
-func (tasksOp *tasksPostgres) Remove(common.Key, *crud.RemoveOptions) error {
+func (tasksOp *tasksPostgres) Remove(common.ID, *crud.RemoveOptions) error {
 	return common.ErrNotImplemented
 }
 
@@ -255,7 +255,7 @@ func (tasksOp *tasksPostgres) List(term *selectors.Term, options *crud.GetOption
 		if len(status) > 0 {
 			err = json.Unmarshal([]byte(status), &item.Status)
 			if err != nil {
-				return items, errors.Wrapf(err, onRead+"can't unmarshal .Status (%s)", status)
+				return items, errors.Wrapf(err, onRead+"can't unmarshal .History (%s)", status)
 			}
 		}
 
@@ -268,7 +268,7 @@ func (tasksOp *tasksPostgres) List(term *selectors.Term, options *crud.GetOption
 
 		item.History.CreatedAt, err = time.Parse(time.RFC3339, createdAt)
 		if err != nil {
-			return items, errors.Wrapf(err, onRead+"can't parse .CreatedAt (%s)", createdAt)
+			return items, errors.Wrapf(err, onRead+"can't parse .SentAt (%s)", createdAt)
 		}
 
 		if updatedAtPtr != nil {
@@ -279,7 +279,7 @@ func (tasksOp *tasksPostgres) List(term *selectors.Term, options *crud.GetOption
 			item.History.UpdatedAt = &updatedAt
 		}
 
-		item.ID = common.Key(strconv.FormatInt(idNum, 10))
+		item.ID = common.ID(strconv.FormatInt(idNum, 10))
 		items = append(items, item)
 	}
 	err = rows.Err()
@@ -292,14 +292,14 @@ func (tasksOp *tasksPostgres) List(term *selectors.Term, options *crud.GetOption
 
 const onStart = "on tasksPostgres.Start(): "
 
-func (tasksOp *tasksPostgres) Start(id common.Key, _ *crud.SaveOptions) error {
+func (tasksOp *tasksPostgres) Start(id common.ID, _ *crud.SaveOptions) error {
 	if len(id) < 1 {
-		return errors.New(onStart + "empty Key")
+		return errors.New(onStart + "empty ID")
 	}
 
 	idNum, err := strconv.ParseUint(string(id), 10, 64)
 	if err != nil {
-		return errors.Errorf(onStart+"wrong Key (%s)", id)
+		return errors.Errorf(onStart+"wrong ID (%s)", id)
 	}
 
 	//err = tasksOp.stmReadToStart.QueryRow(idNum).Scan(&statusStr)
@@ -313,7 +313,7 @@ func (tasksOp *tasksPostgres) Start(id common.Key, _ *crud.SaveOptions) error {
 	status := tasks.Status{StartedAt: &startedAt}
 	statusBytes, err := json.Marshal(status)
 	if err != nil {
-		return errors.Wrapf(err, onStart+"can't marshal .Status (%#v)", status)
+		return errors.Wrapf(err, onStart+"can't marshal .History (%#v)", status)
 	}
 
 	// saving the updates -----------------------------------------------------------------------------
@@ -329,14 +329,14 @@ func (tasksOp *tasksPostgres) Start(id common.Key, _ *crud.SaveOptions) error {
 
 const onFinish = "on tasksPostgres.Finish(): "
 
-func (tasksOp *tasksPostgres) Finish(id common.Key, result tasks.Result, _ *crud.SaveOptions) error {
+func (tasksOp *tasksPostgres) Finish(id common.ID, result tasks.Result, _ *crud.SaveOptions) error {
 	if len(id) < 1 {
-		return errors.New(onFinish + "empty Key")
+		return errors.New(onFinish + "empty ID")
 	}
 
 	idNum, err := strconv.ParseUint(string(id), 10, 64)
 	if err != nil {
-		return errors.Errorf(onFinish+"wrong Key (%s)", id)
+		return errors.Errorf(onFinish+"wrong ID (%s)", id)
 	}
 
 	var statusStr, resultsStr string
@@ -352,7 +352,7 @@ func (tasksOp *tasksPostgres) Finish(id common.Key, result tasks.Result, _ *crud
 	if len(statusStr) > 0 {
 		err = json.Unmarshal([]byte(statusStr), &status)
 		if err != nil {
-			return errors.Wrapf(err, onFinish+"can't unmarshal .Status (%s)", statusStr)
+			return errors.Wrapf(err, onFinish+"can't unmarshal .History (%s)", statusStr)
 		}
 	}
 	if status.StartedAt != nil {

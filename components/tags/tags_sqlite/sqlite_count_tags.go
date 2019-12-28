@@ -71,7 +71,7 @@ func (taggerOp *tagsSQLite) countTag(tagLabel string, passedTags []string, label
 
 const onCountChanged = "on tagsSQLite.countTagChanged(): "
 
-func (taggerOp *tagsSQLite) countTagChanged(key joiner.InterfaceKey, id common.Key, tagLabelsRemoved []string, tx *sql.Tx) error {
+func (taggerOp *tagsSQLite) countTagChanged(key joiner.InterfaceKey, id common.ID, tagLabelsRemoved []string, tx *sql.Tx) error {
 	if key != taggerOp.ownInterfaceKey {
 		return nil
 	}

@@ -19,7 +19,7 @@ func Starter() starter.Operator {
 }
 
 type UserStub struct {
-	ID       common.Key
+	ID       common.ID
 	Login    string
 	Password string
 }

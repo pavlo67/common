@@ -19,6 +19,7 @@ import (
 	"github.com/pavlo67/workshop/common/selectors/logic"
 	"github.com/pavlo67/workshop/common/selectors/selectors_sql"
 
+	"github.com/pavlo67/workshop/common/types"
 	"github.com/pavlo67/workshop/components/data"
 	"github.com/pavlo67/workshop/components/tags"
 )
@@ -134,12 +135,12 @@ func New(access config.Access, table string, interfaceKey joiner.InterfaceKey, t
 
 const onSave = "on dataSQLite.Save(): "
 
-func (dataOp *dataSQLite) Save(items []data.Item, _ *crud.SaveOptions) ([]common.Key, error) {
-	var ids []common.Key
+func (dataOp *dataSQLite) Save(items []data.Item, _ *crud.SaveOptions) ([]common.ID, error) {
+	var ids []common.ID
 
 	for _, item := range items {
 
-		//l.Info(item.CreatedAt.Format(time.RFC3339))
+		//l.Info(item.SentAt.Format(time.RFC3339))
 
 		var embedded, tags, details string
 
@@ -201,7 +202,7 @@ func (dataOp *dataSQLite) Save(items []data.Item, _ *crud.SaveOptions) ([]common
 			if err != nil {
 				return ids, errors.Wrapf(err, onSave+sqllib.CantGetLastInsertId, dataOp.sqlInsert, values)
 			}
-			id := common.Key(strconv.FormatInt(idSQLite, 10))
+			id := common.ID(strconv.FormatInt(idSQLite, 10))
 
 			if dataOp.taggerOp != nil && len(item.Tags) > 0 {
 				err = dataOp.taggerOp.AddTags(dataOp.interfaceKey, id, item.Tags, nil)
@@ -219,14 +220,14 @@ func (dataOp *dataSQLite) Save(items []data.Item, _ *crud.SaveOptions) ([]common
 
 const onRead = "on dataSQLite.Read(): "
 
-func (dataOp *dataSQLite) Read(id common.Key, _ *crud.GetOptions) (*data.Item, error) {
+func (dataOp *dataSQLite) Read(id common.ID, _ *crud.GetOptions) (*data.Item, error) {
 	if len(id) < 1 {
-		return nil, errors.New(onRead + "empty Key")
+		return nil, errors.New(onRead + "empty ID")
 	}
 
 	idNum, err := strconv.ParseUint(string(id), 10, 64)
 	if err != nil {
-		return nil, errors.Errorf(onRead+"wrong Key (%s)", id)
+		return nil, errors.Errorf(onRead+"wrong ID (%s)", id)
 	}
 
 	item := data.Item{ID: id}
@@ -245,20 +246,20 @@ func (dataOp *dataSQLite) Read(id common.Key, _ *crud.GetOptions) (*data.Item, e
 		return nil, errors.Wrapf(err, onRead+sqllib.CantScanQueryRow, dataOp.sqlRead, idNum)
 	}
 
-	item.Status.CreatedAt, err = time.Parse(time.RFC3339, createdAt)
+	item.History.CreatedAt, err = time.Parse(time.RFC3339, createdAt)
 	if err != nil {
-		return &item, errors.Wrapf(err, onRead+"can't parse .CreatedAt (%s)", createdAt)
+		return &item, errors.Wrapf(err, onRead+"can't parse .SentAt (%s)", createdAt)
 	}
 
 	//l.Info(createdAt)
-	//l.Info(item.CreatedAt.Format(time.RFC3339))
+	//l.Info(item.SentAt.Format(time.RFC3339))
 
 	if updatedAtPtr != nil {
 		updatedAt, err := time.Parse(time.RFC3339, *updatedAtPtr)
 		if err != nil {
 			return &item, errors.Wrapf(err, onRead+"can't parse .UpdatedAt (%s)", *updatedAtPtr)
 		}
-		item.Status.UpdatedAt = &updatedAt
+		item.History.Actions = []crud.Action{{Key: "updated", DoneAt: updatedAt}}
 	}
 
 	if sourceTimePtr != nil {
@@ -299,7 +300,7 @@ func (dataOp *dataSQLite) SetDetails(item *data.Item) error {
 	}
 
 	switch item.TypeKey {
-	case data.TypeKeyString:
+	case types.KeyString:
 		item.Details = string(item.DetailsRaw)
 
 	case data.TypeKeyTest:
@@ -323,14 +324,14 @@ func (dataOp *dataSQLite) SetDetails(item *data.Item) error {
 
 const onRemove = "on dataSQLite.Remove()"
 
-func (dataOp *dataSQLite) Remove(id common.Key, _ *crud.RemoveOptions) error {
+func (dataOp *dataSQLite) Remove(id common.ID, _ *crud.RemoveOptions) error {
 	if len(id) < 1 {
-		return errors.New(onRemove + "empty Key")
+		return errors.New(onRemove + "empty ID")
 	}
 
 	idNum, err := strconv.ParseUint(string(id), 10, 64)
 	if err != nil {
-		return errors.Errorf(onRemove+"wrong Key (%s)", id)
+		return errors.Errorf(onRemove+"wrong ID (%s)", id)
 	}
 
 	_, err = dataOp.stmRemove.Exec(idNum)
@@ -368,11 +369,11 @@ func (dataOp *dataSQLite) Export(afterIDStr string, options *crud.GetOptions) ([
 			return nil, errors.Errorf("can't strconv.Atoi(%s) for after_id parameter", afterIDStr, err)
 		}
 
-		// TODO!!! term with some item's autoincrement if original .Key isn't it (using .Key to find corresponding autoincrement value)
+		// TODO!!! term with some item's autoincrement if original .ID isn't it (using .ID to find corresponding autoincrement value)
 		term = selectors.Binary(selectors.Gt, "id", selectors.Value{afterID})
 	}
 
-	// TODO!!! order by some item's autoincrement if original .Key isn't it
+	// TODO!!! order by some item's autoincrement if original .ID isn't it
 	if options == nil {
 		options = &crud.GetOptions{OrderBy: []string{"id"}}
 	} else {
@@ -453,8 +454,8 @@ func (dataOp *dataSQLite) List(term *selectors.Term, options *crud.GetOptions) (
 			return items, errors.Wrapf(err, onList+sqllib.CantScanQueryRow, query, values)
 		}
 
-		if item.Status.CreatedAt, err = time.Parse(time.RFC3339, createdAt); err != nil {
-			return items, errors.Wrapf(err, onList+"can't parse .CreatedAt (%s)", createdAt)
+		if item.History.CreatedAt, err = time.Parse(time.RFC3339, createdAt); err != nil {
+			return items, errors.Wrapf(err, onList+"can't parse .SentAt (%s)", createdAt)
 		}
 
 		if updatedAtPtr != nil {
@@ -462,7 +463,7 @@ func (dataOp *dataSQLite) List(term *selectors.Term, options *crud.GetOptions) (
 			if err != nil {
 				return items, errors.Wrapf(err, onList+"can't parse .UpdatedAt (%s)", *updatedAtPtr)
 			}
-			item.Status.UpdatedAt = &updatedAt
+			item.History.Actions = []crud.Action{{Key: "updated", DoneAt: updatedAt}}
 		}
 
 		if sourceTimePtr != nil {
@@ -485,7 +486,7 @@ func (dataOp *dataSQLite) List(term *selectors.Term, options *crud.GetOptions) (
 			}
 		}
 
-		item.ID = common.Key(strconv.FormatInt(idNum, 10))
+		item.ID = common.ID(strconv.FormatInt(idNum, 10))
 		items = append(items, item)
 	}
 	err = rows.Err()
@@ -549,7 +550,7 @@ func (dataOp *dataSQLite) ids(condition string, values []interface{}) ([]interfa
 	var ids []interface{}
 
 	for rows.Next() {
-		var id common.Key
+		var id common.ID
 
 		err := rows.Scan(&id)
 		if err != nil {

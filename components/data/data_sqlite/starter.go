@@ -58,7 +58,7 @@ func (ts *dataSQLiteStarter) Setup() error {
 	//return sqllib.SetupTables(
 	//	sm.mysqlConfig,
 	//	sm.index.MySQL,
-	//	[]config.Table{{Key: "table", Title: sm.table}},
+	//	[]config.Table{{ID: "table", Title: sm.table}},
 	//)
 }
 

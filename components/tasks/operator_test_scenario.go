@@ -55,7 +55,7 @@ const toReadI = 0       // must be < numRepeats
 const toSetResultsI = 1 // must be < numRepeats
 const toDeleteI = 2     // must be < numRepeats
 
-func ChechReaded(t *testing.T, readed *Item, expectedID common.Key, expectedTask Task, l logger.Operator) {
+func ChechReaded(t *testing.T, readed *Item, expectedID common.ID, expectedTask Task, l logger.Operator) {
 	require.NotNil(t, readed)
 
 	l.Infof("was saved: %#v", expectedTask)
@@ -67,7 +67,7 @@ func ChechReaded(t *testing.T, readed *Item, expectedID common.Key, expectedTask
 	require.True(t, readed.History.CreatedAt.After(time.Time{}))
 	require.True(t, readed.History.CreatedAt.Before(time.Now()))
 
-	// TODO!!! check .Status
+	// TODO!!! check .History
 }
 
 func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.Operator) {
@@ -78,7 +78,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 	for i, tc := range testCases {
 		l.Debug(i)
 
-		var id [numRepeats]common.Key
+		var id [numRepeats]common.ID
 		var toSave [numRepeats]Task
 
 		// ClearDatabase ---------------------------------------------------------------------------------
@@ -92,7 +92,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 			toSave[i] = tc.ToSave
 			idI, err := tc.Save(toSave[i], nil)
 			require.NoError(t, err)
-			require.NotEqual(t, common.Key(""), idI)
+			require.NotEqual(t, common.ID(""), idI)
 			id[i] = idI
 		}
 

@@ -47,7 +47,7 @@ func TestInterface(t *testing.T) {
 //	require.Equal(t, 2, len(routes))
 //
 //	for _, component := range routes {
-//		require.Equal(t, keyA1, component.Key)
+//		require.Equal(t, keyA1, component.ID)
 //
 //		interfaceA, ok := component.Interface.(InterfaceA)
 //		require.True(t, ok)

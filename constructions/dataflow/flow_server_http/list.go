@@ -33,7 +33,7 @@ func Flow(user *auth.User, _ server_http.Params, req *http.Request) (server.Resp
 var FlowReadEndpoint = server_http.Endpoint{Method: "GET", PathParams: []string{"id"}, WorkerHTTP: FlowRead}
 
 func FlowRead(user *auth.User, params server_http.Params, req *http.Request) (server.Response, error) {
-	id := common.Key(params["id"])
+	id := common.ID(params["id"])
 
 	item, err := flowTaggedOp.Read(id, nil)
 	if err == common.ErrNotFound {

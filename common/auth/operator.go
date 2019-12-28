@@ -9,18 +9,18 @@ import (
 
 const InterfaceKey joiner.InterfaceKey = "auth"
 
-const Anyone common.Key = "_"
+const Anyone common.ID = "_"
 
 //type Access struct {
-//	TargetID   Key     `bson:"target_id"             json:"target_id"`
+//	TargetID   ID     `bson:"target_id"             json:"target_id"`
 //	TargetNick string `bson:"target_nick,omitempty" json:"target_nick,omitempty"`
 //	Right      Right  `bson:"right,omitempty"       json:"right,omitempty"`
 //}
 
 type User struct {
-	ID       common.Key `bson:"id"               json:"id"`
-	Nickname string     `bson:"nickname"         json:"nickname"`
-	Creds    Creds      `bson:"creds, omitempty" json:"creds, omitempty"`
+	ID       common.ID `bson:"id"               json:"id"`
+	Nickname string    `bson:"nickname"         json:"nickname"`
+	Creds    Creds     `bson:"creds, omitempty" json:"creds, omitempty"`
 	// Accesses []Access `bson:"accesses,omitempty" json:"accesses,omitempty"`
 }
 

@@ -87,7 +87,7 @@ func (it *copyTask) Copy() (int, int, int, error) {
 	for _, item := range series.Data {
 		var cnt uint64
 
-		// l.Info("? ", item.Key)
+		// l.Info("? ", item.ID)
 
 		numProcessed++
 
@@ -116,7 +116,7 @@ func (it *copyTask) Copy() (int, int, int, error) {
 		item.ID = ""
 
 		// TODO: remove this kostyl!!!
-		item.Origin.Time = &item.Status.CreatedAt
+		item.Origin.Time = &item.History.CreatedAt
 
 		_, err = it.dataOp.Save([]data.Item{item}, nil)
 		if err != nil {

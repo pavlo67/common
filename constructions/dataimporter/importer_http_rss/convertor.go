@@ -10,6 +10,7 @@ import (
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/crud"
 	"github.com/pavlo67/workshop/common/flow"
+	"github.com/pavlo67/workshop/common/types"
 	"github.com/pavlo67/workshop/components/data"
 	"github.com/pavlo67/workshop/components/tags"
 )
@@ -47,20 +48,20 @@ func (item *Item) GetData() (*data.Item, error) {
 
 	if feedItem.Image != nil {
 		embedded = append(embedded, data.Item{
-			TypeKey: data.TypeKeyHRefImage,
+			TypeKey: types.KeyHRefImage,
 			URL:     feedItem.Image.URL,
 			Title:   feedItem.Image.Title,
-			Status:  status,
+			History: status,
 		})
 	}
 
 	if len(feedItem.Enclosures) > 0 {
 		for _, p := range feedItem.Enclosures {
 			embedded = append(embedded, data.Item{
-				TypeKey: data.TypeKeyHRef,
+				TypeKey: types.KeyHRef,
 				URL:     p.URL,
 				Title:   p.Type + ": " + p.Length,
-				Status:  status,
+				History: status,
 			})
 		}
 	}
@@ -74,13 +75,13 @@ func (item *Item) GetData() (*data.Item, error) {
 
 	return &data.Item{
 		URL:      feedItem.Link,
-		TypeKey:  data.TypeKeyString,
+		TypeKey:  types.KeyString,
 		Title:    feedItem.Title,
 		Summary:  feedItem.Description,
 		Embedded: embedded,
 		Tags:     items,
 		Details:  feedItem.Content,
-		Status:   status,
+		History:  status,
 		Origin: flow.Origin{
 			Source: item.sourceURL,
 			Key:    originalID,

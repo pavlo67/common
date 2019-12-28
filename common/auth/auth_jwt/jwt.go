@@ -20,7 +20,7 @@ const Proto addrlib.Proto = "jwt://"
 
 var _ auth.Operator = &authJWT{}
 
-//var errEmptyPublicKeyAddress = errors.New("empty public Key address")
+//var errEmptyPublicKeyAddress = errors.New("empty public ID address")
 //var errEmptyPrivateKeyGenerated = errors.New("empty private key generated")
 
 type authJWT struct {
@@ -107,7 +107,7 @@ func (authOp *authJWT) Authorize(toAuth auth.Creds) (*auth.User, error) {
 	}
 
 	return &auth.User{
-		ID:       common.Key(res.ID),
+		ID:       common.ID(res.ID),
 		Nickname: nick,
 		Creds:    res.Creds,
 	}, nil

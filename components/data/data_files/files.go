@@ -51,13 +51,13 @@ func (cfOp contentFiles) Descript() (*structura.Description, error) {
 
 const onSave = "on contentFiles.Save()"
 
-func (cfOp contentFiles) Save(item structura.Item, options *structura.SaveOptions) (id common.Key, err error) {
+func (cfOp contentFiles) Save(item structura.Item, options *structura.SaveOptions) (id common.ID, err error) {
 	data, err := cfOp.marshaler.Marshal(item)
 	if err != nil {
 		return "", errors.Wrapf(err, onSave+" with native value (%#v)", item)
 	}
 
-	id = common.Key(strconv.FormatInt(time.Now().UnixNano(), 10))
+	id = common.ID(strconv.FormatInt(time.Now().UnixNano(), 10))
 	err = ioutil.WriteFile(cfOp.path+string(id), data, 0755)
 	if err != nil {
 		return "", errors.Wrapf(err, onSave+" with path (%s) & id (%s)", cfOp.path, id)
@@ -68,7 +68,7 @@ func (cfOp contentFiles) Save(item structura.Item, options *structura.SaveOption
 
 const onRead = "on contentFiles.Read()"
 
-func (cfOp contentFiles) Read(id common.Key, options *structura.GetOptions) (*structura.Item, error) {
+func (cfOp contentFiles) Read(id common.ID, options *structura.GetOptions) (*structura.Item, error) {
 	data, err := ioutil.ReadFile(cfOp.path + string(id))
 	if err != nil {
 		return nil, errors.Wrapf(err, onRead+" with path (%s) & id (%s)", cfOp.path, id)
@@ -98,7 +98,7 @@ func (cfOp contentFiles) List(selector *selectors.Term, options *structura.GetOp
 			continue
 		}
 
-		item, err := cfOp.Read(common.Key(file.Name()), nil)
+		item, err := cfOp.Read(common.ID(file.Name()), nil)
 		if err != nil {
 			return nil, errors.Wrapf(err, onList)
 		}
@@ -111,7 +111,7 @@ func (cfOp contentFiles) List(selector *selectors.Term, options *structura.GetOp
 
 const onRemove = "on contentFiles.Remove()"
 
-func (cfOp contentFiles) Remove(id common.Key, options *structura.RemoveOptions) error {
+func (cfOp contentFiles) Remove(id common.ID, options *structura.RemoveOptions) error {
 	err := os.Remove(cfOp.path + string(id))
 	if err != nil {
 		return errors.Wrapf(err, onRemove+" with path (%s) & id (%s)", cfOp.path, id)

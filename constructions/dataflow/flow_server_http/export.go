@@ -5,12 +5,12 @@ import (
 
 	"github.com/pkg/errors"
 
-	"time"
-
 	"github.com/pavlo67/workshop/common/auth"
 	"github.com/pavlo67/workshop/common/server"
 	"github.com/pavlo67/workshop/common/server/server_http"
-	"github.com/pavlo67/workshop/common/transport"
+
+	"github.com/pavlo67/workshop/components/data"
+	"github.com/pavlo67/workshop/components/packages"
 )
 
 // TODO!!! add parameters info into responces
@@ -29,10 +29,10 @@ func ExportFlow(user *auth.User, _ server_http.Params, req *http.Request) (serve
 		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on GET storage/...ExportFlow: ", err))
 	}
 
-	return server.ResponseRESTOk(transport.Packet{
+	return server.ResponseRESTOk(packages.Item{
 		// SourceURL: "",
-		CreatedAt: time.Now(),
-		Type:      transport.DataItemsDataType,
-		Data:      items,
+		// SentAt:  time.Now(),
+		TypeKey: data.TypesKeyDataItems,
+		Content: items,
 	})
 }

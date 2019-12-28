@@ -11,6 +11,7 @@ import (
 	"github.com/pavlo67/workshop/common/crud"
 	"github.com/pavlo67/workshop/common/flow"
 	"github.com/pavlo67/workshop/common/logger"
+	"github.com/pavlo67/workshop/common/types"
 	"github.com/pavlo67/workshop/components/tags"
 )
 
@@ -33,16 +34,11 @@ type Test struct {
 	BBB int
 }
 
-const TypeKeyTest TypeKey = "test"
+const TypeKeyTest types.Key = "test"
 
-var TypeTest = Type{
+var TypeTest = types.Type{
 	Key:      TypeKeyTest,
 	Exemplar: Test{},
-}
-
-var TypeString = Type{
-	Key:      TypeKeyString,
-	Exemplar: "",
 }
 
 func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
@@ -64,7 +60,7 @@ func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 					Tags:     []tags.Item{{Label: "1"}, {Label: "332343"}},
 				}},
 				Tags: []tags.Item{{Label: "1"}, {Label: "333"}},
-				Status: crud.History{
+				History: crud.History{
 					CreatedAt: time.Now(),
 				},
 				Origin: flow.Origin{},
@@ -79,7 +75,7 @@ func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 				Title:   "345456rt",
 				Summary: "6578eegj",
 				Tags:    []tags.Item{{Label: "1"}, {Label: "333"}},
-				Status: crud.History{
+				History: crud.History{
 					CreatedAt: time.Now().Add(time.Minute),
 				},
 			},
@@ -111,7 +107,7 @@ func Compare(t *testing.T, dataOp Operator, readed *Item, expectedItem Item, exp
 	l.Infof("readed: %#v", readed)
 	l.Infof("readed details: %#v", detailsToRead)
 
-	expectedItem.Status.CreatedAt = expectedItem.Status.CreatedAt.UTC()
+	expectedItem.History.CreatedAt = expectedItem.History.CreatedAt.UTC()
 	expectedItem.Details = nil
 	expectedItem.DetailsRaw = nil
 
@@ -119,8 +115,8 @@ func Compare(t *testing.T, dataOp Operator, readed *Item, expectedItem Item, exp
 	readed.DetailsRaw = nil
 
 	// kostyl!!!
-	require.Equal(t, expectedItem.Status.CreatedAt.Format(time.RFC3339), readed.Status.CreatedAt.Format(time.RFC3339))
-	readed.Status.CreatedAt = expectedItem.Status.CreatedAt
+	require.Equal(t, expectedItem.History.CreatedAt.Format(time.RFC3339), readed.History.CreatedAt.Format(time.RFC3339))
+	readed.History.CreatedAt = expectedItem.History.CreatedAt
 
 	require.Equal(t, &expectedItem, readed)
 	require.Equal(t, expectedDetails, detailsToRead)
@@ -136,7 +132,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 	for i, tc := range testCases {
 		l.Debug(i)
 
-		var id [numRepeats1 + numRepeats2]common.Key
+		var id [numRepeats1 + numRepeats2]common.ID
 		var toSave [numRepeats1 + numRepeats2]Item
 		// var data Item
 
@@ -166,7 +162,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		//var uniques, autoUniques []string
 		//
 		//for _, field := range description.FieldsArr {
-		//	key := field.Key
+		//	key := field.ID
 		//	if field.Unique {
 		//		if field.AutoUnique {
 		//			autoUniques = append(autoUniques, key)
@@ -238,9 +234,9 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		readedUpdated, err := tc.Read(id[toUpdateI], nil)
 		require.NoError(t, err)
 
-		tc.ToUpdate.ExportID = tc.ToSave.ExportID                 // unchanged!!!
-		tc.ToUpdate.Origin = tc.ToSave.Origin                     // unchanged!!!
-		tc.ToUpdate.Status.CreatedAt = tc.ToSave.Status.CreatedAt // unchanged!!!
+		tc.ToUpdate.ExportID = tc.ToSave.ExportID                   // unchanged!!!
+		tc.ToUpdate.Origin = tc.ToSave.Origin                       // unchanged!!!
+		tc.ToUpdate.History.CreatedAt = tc.ToSave.History.CreatedAt // unchanged!!!
 
 		Compare(t, tc, readedUpdated, tc.ToUpdate, tc.DetailsToUpdate, tc.DetailsToReadUpdated, l)
 
@@ -249,7 +245,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		//		var uniquesUpdatable []string
 		//		for _, field := range description.FieldsArr {
 		//			if field.Unique && (field.Updatable && !field.AutoUnique) { // || field.Additable
-		//				uniquesUpdatable = append(uniquesUpdatable, field.Key)
+		//				uniquesUpdatable = append(uniquesUpdatable, field.ID)
 		//			}
 		//		}
 		//
@@ -318,14 +314,14 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		//toUpdateResult := tc.ToUpdate
 		//for _, f := range description.FieldsArr {
 		//	if !f.Creatable {
-		//		toUpdateResult[f.Key] = data[f.Key]
+		//		toUpdateResult[f.ID] = data[f.ID]
 		//	}
 		//}
 
 		// test ListTags -------------------------------------------------------------------------------------
 
 		//if !tc.ExcludeListTest {
-		//	var ids []common.Key
+		//	var ids []common.ID
 		//	for _, idi := range id {
 		//		ids = append(ids, idi)
 		//	}
@@ -416,7 +412,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 //	}
 //
 //	for _, field := range description.FieldsArr {
-//		key := field.Key
+//		key := field.ID
 //
 //		// TODO: check key field
 //

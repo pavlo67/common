@@ -12,7 +12,7 @@ import (
 const InterfaceKey joiner.InterfaceKey = "scheduler"
 
 type Operator interface {
-	Init(task actor.Operator) (common.Key, error)
-	Run(taskID common.Key, interval time.Duration, startImmediately bool) error
-	Stop(taskID common.Key) error
+	Init(task actor.Operator) (common.ID, error)
+	Run(taskID common.ID, interval time.Duration, startImmediately bool) error
+	Stop(taskID common.ID) error
 }

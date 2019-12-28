@@ -15,7 +15,7 @@ import (
 type TagsToChange struct {
 	Action          string
 	Key             joiner.InterfaceKey
-	ID              common.Key
+	ID              common.ID
 	Tags            []Item
 	IsErrorExpected bool
 }
@@ -37,8 +37,8 @@ type TestCase struct {
 }
 
 func QueryTagsTestCases(taggerOp Operator) []TestCase {
-	id1 := common.Key("11")
-	id2 := common.Key("22")
+	id1 := common.ID("11")
+	id2 := common.ID("22")
 
 	tags1 := []Item{{"1", ""}, {"2", ""}, {"3", ""}}
 	tags2 := []Item{{"3", ""}, {"5", ""}, {"6", ""}}
@@ -122,7 +122,7 @@ func OperatorTestScenario(t *testing.T, testCases []TestCase, cleanerOp crud.Cle
 			case "add":
 				err = tc.Operator.AddTags(step.Key, step.ID, step.Tags, nil)
 			//case "remove":
-			//	err = tc.Operator.RemoveTags(step.Key, step.Key, step.Tags, nil)
+			//	err = tc.Operator.RemoveTags(step.ID, step.ID, step.Tags, nil)
 			case "replace":
 				err = tc.Operator.ReplaceTags(step.Key, step.ID, step.Tags, nil)
 			case "tags":

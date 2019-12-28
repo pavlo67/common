@@ -20,7 +20,7 @@ func Starter() starter.Operator {
 }
 
 type UserSQLite struct {
-	ID       common.Key
+	ID       common.ID
 	Login    string
 	Password string
 }

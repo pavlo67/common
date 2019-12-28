@@ -1,6 +1,6 @@
 package selectors
 
-// type Key string
+// type ID string
 type Value struct {
 	V interface{} `bson:",omitempty"    json:",omitempty"`
 }

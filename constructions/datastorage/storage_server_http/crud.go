@@ -43,7 +43,7 @@ func Save(user *auth.User, params server_http.Params, req *http.Request) (server
 		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on POST storage/...Save: returned wrong ids (%#v)", ids))
 	}
 
-	return server.ResponseRESTOk(map[string]interface{}{"Key": ids[0]})
+	return server.ResponseRESTOk(map[string]interface{}{"ID": ids[0]})
 }
 
 // Read --------------------------------------------------------------------------------------
@@ -51,7 +51,7 @@ func Save(user *auth.User, params server_http.Params, req *http.Request) (server
 var ReadEndpoint = server_http.Endpoint{Method: "GET", PathParams: []string{"id"}, WorkerHTTP: Read}
 
 func Read(user *auth.User, params server_http.Params, req *http.Request) (server.Response, error) {
-	id := common.Key(params["id"])
+	id := common.ID(params["id"])
 
 	item, err := dataTaggedOp.Read(id, nil)
 	if err == common.ErrNotFound {
@@ -92,7 +92,7 @@ func List(user *auth.User, _ server_http.Params, req *http.Request) (server.Resp
 var RemoveEndpoint = server_http.Endpoint{Method: "DELETE", PathParams: []string{"id"}, WorkerHTTP: Remove}
 
 func Remove(user *auth.User, params server_http.Params, req *http.Request) (server.Response, error) {
-	id := common.Key(params["id"])
+	id := common.ID(params["id"])
 
 	err := dataTaggedOp.Remove(id, nil)
 	if err != nil {

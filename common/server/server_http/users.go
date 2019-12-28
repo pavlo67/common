@@ -48,7 +48,7 @@ func UserWithRequest(r *http.Request, authOps []auth.Operator) (*auth.User, erro
 	// SIGNATURE CHECK
 	signature := r.Header.Get("Signature")
 	if signature != "" && r.URL != nil {
-		publicKeyAddress := r.Header.Get("Public-Key-Address")
+		publicKeyAddress := r.Header.Get("Public-ID-Address")
 		numberToSignature := r.Header.Get("Number-To-Signature")
 
 		credsSignature := auth.Creds{

@@ -78,7 +78,7 @@ func main() {
 
 	// flag.Parse()
 
-	//var ownerID basis.Key      // from flags
+	//var ownerID basis.ID      // from flags
 	//ownerPublKey := encrlib.Base58Decode([]byte(ownerID))
 	//var managersJSON, signature []byte   // from some external channel
 	//if !encrlib.ECDSAVerify(ownerPublKey, managersJSON, signature) {

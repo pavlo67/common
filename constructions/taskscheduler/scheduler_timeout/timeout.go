@@ -14,7 +14,7 @@ import (
 
 func New() taskscheduler.Operator {
 	return &schedulerTimeout{
-		tasks: map[common.Key]*taskWithSignals{},
+		tasks: map[common.ID]*taskWithSignals{},
 		mutex: &sync.RWMutex{},
 	}
 }
@@ -34,16 +34,16 @@ type taskWithSignals struct {
 }
 
 type schedulerTimeout struct {
-	tasks map[common.Key]*taskWithSignals
+	tasks map[common.ID]*taskWithSignals
 	mutex *sync.RWMutex
 }
 
-func (st *schedulerTimeout) Init(task actor.Operator) (common.Key, error) {
+func (st *schedulerTimeout) Init(task actor.Operator) (common.ID, error) {
 	if st.tasks == nil {
 		return "", errors.New("schedulerTimeout.tasks == nil")
 	}
 
-	id := common.Key(strconv.Itoa(len(st.tasks) + 1))
+	id := common.ID(strconv.Itoa(len(st.tasks) + 1))
 
 	st.mutex.Lock()
 	st.tasks[id] = &taskWithSignals{
@@ -55,7 +55,7 @@ func (st *schedulerTimeout) Init(task actor.Operator) (common.Key, error) {
 	return id, nil
 }
 
-func (st *schedulerTimeout) Run(taskID common.Key, interval time.Duration, startImmediately bool) error {
+func (st *schedulerTimeout) Run(taskID common.ID, interval time.Duration, startImmediately bool) error {
 	st.mutex.RLock()
 	task := st.tasks[taskID]
 	st.mutex.RUnlock()
@@ -174,7 +174,7 @@ func label(t time.Time) string {
 	return t.Format(time.RFC3339)[:19]
 }
 
-func (st *schedulerTimeout) Stop(taskID common.Key) error {
+func (st *schedulerTimeout) Stop(taskID common.ID) error {
 	st.mutex.RLock()
 	task := st.tasks[taskID]
 	st.mutex.RUnlock()

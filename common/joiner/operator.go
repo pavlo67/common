@@ -25,7 +25,7 @@ type Operator interface {
 
 type Link struct {
 	InterfaceKey
-	common.Key
+	common.ID
 }
 
 var _ Operator = &joiner{}

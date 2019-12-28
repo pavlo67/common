@@ -24,7 +24,7 @@ var _ auth.Operator = &identityECDSA{}
 var errWrongAddressProto = errors.New("wrong address proto")
 var errWrongSignature = errors.New("wrong signature")
 var errWrongNumber = errors.New("wrong user's number")
-var errEmptyPublicKeyAddress = errors.New("empty public Key address")
+var errEmptyPublicKeyAddress = errors.New("empty public ID address")
 var errEmptyPrivateKeyGenerated = errors.New("empty private key generated")
 
 type identityECDSA struct {
@@ -105,7 +105,7 @@ func (is *identityECDSA) Authorize(toAuth auth.Creds) (*auth.User, error) {
 	}
 
 	return &auth.User{
-		ID:       common.Key(publKeyAddress),
+		ID:       common.ID(publKeyAddress),
 		Nickname: publKeyAddress,
 	}, nil
 }

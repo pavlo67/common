@@ -30,7 +30,7 @@ type Endpoint struct {
 
 	WorkerHTTP
 
-	// AllowedIDs []common.Key `json:"allowed_ids,omitempty"`
+	// AllowedIDs []common.ID `json:"allowed_ids,omitempty"`
 	// DataItem   interface{} `json:"data_item,omitempty"` // for Interface
 	// SwaggerDescription string
 }

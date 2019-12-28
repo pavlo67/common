@@ -21,7 +21,7 @@ type TagCount struct {
 }
 
 type Tagged struct {
-	ID       common.Key
+	ID       common.ID
 	Relation string
 }
 
@@ -30,16 +30,16 @@ type Index map[joiner.InterfaceKey][]Tagged
 // TODO: don't remove "...Tags", it's necessary to resolve conflict in data_tagged.Operator
 
 type Operator interface {
-	AddTags(joiner.InterfaceKey, common.Key, []Item, *crud.SaveOptions) error
-	ReplaceTags(joiner.InterfaceKey, common.Key, []Item, *crud.SaveOptions) error // or remove in particlar
+	AddTags(joiner.InterfaceKey, common.ID, []Item, *crud.SaveOptions) error
+	ReplaceTags(joiner.InterfaceKey, common.ID, []Item, *crud.SaveOptions) error // or remove in particlar
 
-	ListTags(joiner.InterfaceKey, common.Key, *crud.GetOptions) ([]Item, error) // i.e. parent sections if joiner.InterfaceKey == "tagger"
+	ListTags(joiner.InterfaceKey, common.ID, *crud.GetOptions) ([]Item, error) // i.e. parent sections if joiner.InterfaceKey == "tagger"
 	CountTags(*joiner.InterfaceKey, *crud.GetOptions) ([]TagCount, error)
 
 	IndexTagged(*joiner.InterfaceKey, string, *crud.GetOptions) (Index, error)
 }
 
-//func CheckCycle(userIS auth.Key, operator Operator, id string, passedIDs []string) ([]string, error) {
+//func CheckCycle(userIS auth.ID, operator Operator, id string, passedIDs []string) ([]string, error) {
 //	for _, passedID := range passedIDs {
 //		if id == passedID {
 //			return nil, ErrSectionCycle

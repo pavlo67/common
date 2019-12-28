@@ -76,7 +76,7 @@ func (wsOp *ws) ListWithText(*joiner.InterfaceKey, hypertext.ToSearch, *selector
 //var rePhrase = regexp.MustCompile(`^\s*".*"\s*$`)
 //var reDelimiter = regexp.MustCompile(`[\.,\s\t;:\-\+\!\?\(\)\{\}\[\]\/'"\*]+`)
 //
-//func (objOp *notesMySQL) ReadListByWords(userIS common.Key, options *content.ListOptions, searched string) (objects []notes.Item, allCnt uint64, err error) {
+//func (objOp *notesMySQL) ReadListByWords(userIS common.ID, options *content.ListOptions, searched string) (objects []notes.Item, allCnt uint64, err error) {
 //	if !rePhrase.MatchString(searched) {
 //		words := reDelimiter.Split(searched, -1)
 //		searched = ""
@@ -104,7 +104,7 @@ func (wsOp *ws) ListWithText(*joiner.InterfaceKey, hypertext.ToSearch, *selector
 //
 //const onUpdateLinks = "on notesMySQL.UpdateLinks"
 //
-//func (objOp *notesMySQL) UpdateLinks(userIS common.Key, idStr string, linksListNew []links.Item, linkType string) error {
+//func (objOp *notesMySQL) UpdateLinks(userIS common.ID, idStr string, linksListNew []links.Item, linkType string) error {
 //	// TODO: lock object record for update (use history!!!)
 //
 //	o, err := objOp.Read(userIS, idStr)
@@ -124,11 +124,11 @@ func (wsOp *ws) ListWithText(*joiner.InterfaceKey, hypertext.ToSearch, *selector
 //		}
 //	}
 //
-//	values := []interface{}{jsonLinks, o.Key}
+//	values := []interface{}{jsonLinks, o.ID}
 //	_, err = objOp.stmtUpdateLinks.Exec(values...)
 //	if err != nil {
 //		return errors.Wrapf(err, onUpdateLinks+": "+basis.CantExecQuery, objOp.sqlUpdateLinks, values)
 //	}
 //
-//	return objOp.setLinks(userIS, o.Key, linksListCopy)
+//	return objOp.setLinks(userIS, o.ID, linksListCopy)
 //}

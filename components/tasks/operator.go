@@ -37,17 +37,17 @@ type Task struct {
 type Item struct {
 	Task    `             bson:",inline"       json:",inline"`
 	Status  `             bson:",inline"       json:",inline"`
-	ID      common.Key   `bson:"_id,omitempty" json:",omitempty"`
+	ID      common.ID    `bson:"_id,omitempty" json:",omitempty"`
 	Results []Result     `bson:",omitempty"    json:",omitempty"`
 	History crud.History `bson:",omitempty"    json:",omitempty"`
 }
 
 type Operator interface {
-	Save(Task, *crud.SaveOptions) (common.Key, error)
-	Remove(common.Key, *crud.RemoveOptions) error
-	Read(common.Key, *crud.GetOptions) (*Item, error)
+	Save(Task, *crud.SaveOptions) (common.ID, error)
+	Remove(common.ID, *crud.RemoveOptions) error
+	Read(common.ID, *crud.GetOptions) (*Item, error)
 	List(*selectors.Term, *crud.GetOptions) ([]Item, error)
 
-	Start(common.Key, *crud.SaveOptions) error
-	Finish(common.Key, Result, *crud.SaveOptions) error
+	Start(common.ID, *crud.SaveOptions) error
+	Finish(common.ID, Result, *crud.SaveOptions) error
 }
