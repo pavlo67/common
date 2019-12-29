@@ -90,12 +90,6 @@ func main() {
 		l.Fatal(err)
 	}
 
-	var cfgSQLite config.Access
-	err = cfgWorkspace.Value("sqlite", &cfgSQLite)
-	if err != nil {
-		l.Fatal(err)
-	}
-
 	// running starters
 
 	const flowTable = dataflow.CollectionDefault
