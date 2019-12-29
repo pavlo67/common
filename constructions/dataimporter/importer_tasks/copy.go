@@ -115,8 +115,10 @@ func (it *copyTask) Copy() (int, int, int, error) {
 		importedID := item.ID
 		item.ID = ""
 
-		// TODO: remove this kostyl!!!
-		item.Origin.Time = &item.History.CreatedAt
+		//// TODO: remove this kostyl!!!
+		if len(item.History.Actions) > 0 {
+			item.Origin.Time = &item.History.Actions[0].DoneAt
+		}
 
 		_, err = it.dataOp.Save([]data.Item{item}, nil)
 		if err != nil {

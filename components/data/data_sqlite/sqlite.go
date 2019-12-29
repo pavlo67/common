@@ -246,10 +246,10 @@ func (dataOp *dataSQLite) Read(id common.ID, _ *crud.GetOptions) (*data.Item, er
 		return nil, errors.Wrapf(err, onRead+sqllib.CantScanQueryRow, dataOp.sqlRead, idNum)
 	}
 
-	item.History.CreatedAt, err = time.Parse(time.RFC3339, createdAt)
-	if err != nil {
-		return &item, errors.Wrapf(err, onRead+"can't parse .SentAt (%s)", createdAt)
-	}
+	//item.History.CreatedAt, err = time.Parse(time.RFC3339, createdAt)
+	//if err != nil {
+	//	return &item, errors.Wrapf(err, onRead+"can't parse .SentAt (%s)", createdAt)
+	//}
 
 	//l.Info(createdAt)
 	//l.Info(item.SentAt.Format(time.RFC3339))
@@ -454,9 +454,9 @@ func (dataOp *dataSQLite) List(term *selectors.Term, options *crud.GetOptions) (
 			return items, errors.Wrapf(err, onList+sqllib.CantScanQueryRow, query, values)
 		}
 
-		if item.History.CreatedAt, err = time.Parse(time.RFC3339, createdAt); err != nil {
-			return items, errors.Wrapf(err, onList+"can't parse .SentAt (%s)", createdAt)
-		}
+		//if item.History.CreatedAt, err = time.Parse(time.RFC3339, createdAt); err != nil {
+		//	return items, errors.Wrapf(err, onList+"can't parse .SentAt (%s)", createdAt)
+		//}
 
 		if updatedAtPtr != nil {
 			updatedAt, err := time.Parse(time.RFC3339, *updatedAtPtr)

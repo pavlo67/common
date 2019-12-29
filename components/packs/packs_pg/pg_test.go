@@ -1,4 +1,4 @@
-package tasks_postgres
+package packs_pg
 
 import (
 	"os"
@@ -11,7 +11,7 @@ import (
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/serializer"
 
-	"github.com/pavlo67/workshop/components/tasks"
+	"github.com/pavlo67/workshop/components/packs"
 )
 
 func TestCRUD(t *testing.T) {
@@ -34,10 +34,10 @@ func TestCRUD(t *testing.T) {
 
 	l.Infof("%#v", cfgPostgres)
 
-	tasksOp, cleanerOp, err := New(cfgPostgres, "", "")
+	packsOp, cleanerOp, err := New(cfgPostgres, "", "")
 	require.NoError(t, err)
 
-	testCases := tasks.TestCases(tasksOp, cleanerOp)
+	testCases := packs.TestCases(packsOp, cleanerOp)
 
-	tasks.OperatorTestScenario(t, testCases, l)
+	packs.OperatorTestScenario(t, testCases, l)
 }

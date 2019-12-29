@@ -42,7 +42,12 @@ func (item *Item) GetData() (*data.Item, error) {
 	//	sourceTime = *feedItem.PublishedParsed
 	// }
 
-	status := crud.History{CreatedAt: sourceTime}
+	status := crud.History{
+		Actions: []crud.Action{{
+			Key:    crud.CreatedAction,
+			DoneAt: sourceTime,
+		}},
+	}
 
 	var embedded []data.Item
 

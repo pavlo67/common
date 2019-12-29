@@ -10,7 +10,7 @@ import (
 	"github.com/pavlo67/workshop/common/server/server_http"
 
 	"github.com/pavlo67/workshop/components/data"
-	"github.com/pavlo67/workshop/components/packages"
+	"github.com/pavlo67/workshop/components/packs"
 )
 
 // TODO!!! add parameters info into responces
@@ -29,7 +29,7 @@ func ExportFlow(user *auth.User, _ server_http.Params, req *http.Request) (serve
 		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on GET storage/...ExportFlow: ", err))
 	}
 
-	return server.ResponseRESTOk(packages.Item{
+	return server.ResponseRESTOk(packs.Pack{
 		// SourceURL: "",
 		// SentAt:  time.Now(),
 		TypeKey: data.TypesKeyDataItems,

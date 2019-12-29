@@ -58,8 +58,8 @@ func Get(cfgFile string, marshaler serializer.Marshaler) (*Config, error) {
 	return &cfg, nil
 }
 
-//// String ...
-//func (c *Config) String(key string, errs common.Errors) (string, common.Errors) {
+//// Key ...
+//func (c *Config) Key(key string, errs common.Errors) (string, common.Errors) {
 //	if c == nil {
 //		return "", append(errs, ErrNoConfig)
 //	}

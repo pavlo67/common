@@ -31,7 +31,7 @@ type Errors []error
 // it's would be not good to use Errors as an error interface directly because of:
 
 // func (errs Errors) Error() string {
-//    return errs.String()
+//    return errs.Key()
 // }
 // var errs basis.Errors; log.Println(errs == nil) // true
 // var err  error;        log.Println(err  == nil) // true

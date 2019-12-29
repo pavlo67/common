@@ -61,7 +61,10 @@ func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 				}},
 				Tags: []tags.Item{{Label: "1"}, {Label: "333"}},
 				History: crud.History{
-					CreatedAt: time.Now(),
+					Actions: []crud.Action{{
+						Key:    crud.CreatedAction,
+						DoneAt: time.Time{},
+					}},
 				},
 				Origin: flow.Origin{},
 			},
@@ -76,7 +79,10 @@ func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 				Summary: "6578eegj",
 				Tags:    []tags.Item{{Label: "1"}, {Label: "333"}},
 				History: crud.History{
-					CreatedAt: time.Now().Add(time.Minute),
+					Actions: []crud.Action{
+						{Key: crud.CreatedAction, DoneAt: time.Time{}},
+						{Key: crud.UpdatedAction, DoneAt: time.Now().Add(time.Minute)},
+					},
 				},
 			},
 			DetailsToUpdate: Test{
@@ -107,7 +113,10 @@ func Compare(t *testing.T, dataOp Operator, readed *Item, expectedItem Item, exp
 	l.Infof("readed: %#v", readed)
 	l.Infof("readed details: %#v", detailsToRead)
 
-	expectedItem.History.CreatedAt = expectedItem.History.CreatedAt.UTC()
+	for i, action := range expectedItem.History.Actions {
+		expectedItem.History.Actions[i].DoneAt = action.DoneAt.UTC()
+	}
+
 	expectedItem.Details = nil
 	expectedItem.DetailsRaw = nil
 
@@ -115,8 +124,8 @@ func Compare(t *testing.T, dataOp Operator, readed *Item, expectedItem Item, exp
 	readed.DetailsRaw = nil
 
 	// kostyl!!!
-	require.Equal(t, expectedItem.History.CreatedAt.Format(time.RFC3339), readed.History.CreatedAt.Format(time.RFC3339))
-	readed.History.CreatedAt = expectedItem.History.CreatedAt
+	//require.Equal(t, expectedItem.History.CreatedAt.Format(time.RFC3339), readed.History.CreatedAt.Format(time.RFC3339))
+	//readed.History.CreatedAt = expectedItem.History.CreatedAt
 
 	require.Equal(t, &expectedItem, readed)
 	require.Equal(t, expectedDetails, detailsToRead)
@@ -234,9 +243,10 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		readedUpdated, err := tc.Read(id[toUpdateI], nil)
 		require.NoError(t, err)
 
-		tc.ToUpdate.ExportID = tc.ToSave.ExportID                   // unchanged!!!
-		tc.ToUpdate.Origin = tc.ToSave.Origin                       // unchanged!!!
-		tc.ToUpdate.History.CreatedAt = tc.ToSave.History.CreatedAt // unchanged!!!
+		tc.ToUpdate.ExportID = tc.ToSave.ExportID // unchanged!!!
+		tc.ToUpdate.Origin = tc.ToSave.Origin     // unchanged!!!
+
+		// tc.ToUpdate.History.CreatedAt = tc.ToSave.History.CreatedAt // unchanged!!!
 
 		Compare(t, tc, readedUpdated, tc.ToUpdate, tc.DetailsToUpdate, tc.DetailsToReadUpdated, l)
 

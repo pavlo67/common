@@ -1,4 +1,4 @@
-package tasks_postgres
+package tasks_pg
 
 import (
 	"database/sql"
@@ -110,7 +110,6 @@ const onSave = "on tasksPostgres.Save(): "
 
 func (tasksOp *tasksPostgres) Save(task tasks.Task, _ *crud.SaveOptions) (common.ID, error) {
 	var paramsBytes []byte
-
 	if task.Params != nil {
 		var err error
 		paramsBytes, err = json.Marshal(task.Params)

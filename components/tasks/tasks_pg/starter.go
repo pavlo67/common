@@ -1,4 +1,4 @@
-package tasks_postgres
+package tasks_pg
 
 import (
 	"github.com/pkg/errors"
@@ -13,32 +13,32 @@ import (
 )
 
 func Starter() starter.Operator {
-	return &tasksSQLiteStarter{}
+	return &tasksPgStarter{}
 }
 
 var l logger.Operator
-var _ starter.Operator = &tasksSQLiteStarter{}
+var _ starter.Operator = &tasksPgStarter{}
 
-type tasksSQLiteStarter struct {
+type tasksPgStarter struct {
 	config       config.Access
 	table        string
 	interfaceKey joiner.InterfaceKey
 }
 
-func (ts *tasksSQLiteStarter) Name() string {
+func (ts *tasksPgStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ts *tasksSQLiteStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
+func (ts *tasksPgStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	l = lCommon
 
-	var cfgSQLite config.Access
-	err := cfg.Value("postgres", &cfgSQLite)
+	var cfgPg config.Access
+	err := cfg.Value("postgres", &cfgPg)
 	if err != nil {
 		return nil, err
 	}
 
-	ts.config = cfgSQLite
+	ts.config = cfgPg
 	ts.table, _ = options.String("table")
 	ts.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(tasks.InterfaceKey)))
 
@@ -47,11 +47,11 @@ func (ts *tasksSQLiteStarter) Init(cfgCommon, cfg *config.Config, lCommon logger
 	return nil, nil
 }
 
-func (ts *tasksSQLiteStarter) Setup() error {
+func (ts *tasksPgStarter) Setup() error {
 	return nil
 }
 
-func (ts *tasksSQLiteStarter) Run(joinerOp joiner.Operator) error {
+func (ts *tasksPgStarter) Run(joinerOp joiner.Operator) error {
 	tasksOp, _, err := New(ts.config, ts.table, ts.interfaceKey)
 	if err != nil {
 		return errors.Wrap(err, "can't init tasks.Operator")
@@ -59,7 +59,7 @@ func (ts *tasksSQLiteStarter) Run(joinerOp joiner.Operator) error {
 
 	err = joinerOp.Join(tasksOp, ts.interfaceKey)
 	if err != nil {
-		return errors.Wrapf(err, "can't join &tasksSQLite as tasks.Operator with key '%s'", ts.interfaceKey)
+		return errors.Wrapf(err, "can't join &tasksPg as tasks.Operator with key '%s'", ts.interfaceKey)
 	}
 
 	return nil
