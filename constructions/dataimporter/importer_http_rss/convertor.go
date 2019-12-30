@@ -12,7 +12,7 @@ import (
 	"github.com/pavlo67/workshop/common/flow"
 	"github.com/pavlo67/workshop/common/types"
 	"github.com/pavlo67/workshop/components/data"
-	"github.com/pavlo67/workshop/components/tags"
+	"github.com/pavlo67/workshop/components/tagger"
 )
 
 var _ data.Convertor = &Item{}
@@ -71,9 +71,9 @@ func (item *Item) GetData() (*data.Item, error) {
 		}
 	}
 
-	var items []tags.Item
+	var items []tagger.Tag
 	for _, c := range feedItem.Categories {
-		items = append(items, tags.Item{Label: c})
+		items = append(items, tagger.Tag{Label: c})
 	}
 
 	origin, _ := json.Marshal(feedItem)

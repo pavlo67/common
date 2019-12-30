@@ -1,4 +1,4 @@
-package tags_sqlite
+package tagger_sqlite
 
 import (
 	"os"
@@ -10,7 +10,7 @@ import (
 	"github.com/pavlo67/workshop/common/libraries/filelib"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/serializer"
-	"github.com/pavlo67/workshop/components/tags"
+	"github.com/pavlo67/workshop/components/tagger"
 )
 
 type Test struct {
@@ -38,12 +38,12 @@ func TestCRUD(t *testing.T) {
 
 	l.Debugf("%#v", cfgSQLite)
 
-	taggerOp, cleanerOp, err := New(cfgSQLite, tags.InterfaceKey)
+	taggerOp, cleanerOp, err := New(cfgSQLite, tagger.InterfaceKey)
 	require.NoError(t, err)
 
 	l.Debugf("%#v", taggerOp)
 
-	testCases := tags.QueryTagsTestCases(taggerOp)
+	testCases := tagger.QueryTagsTestCases(taggerOp)
 
-	tags.OperatorTestScenario(t, testCases, cleanerOp, l)
+	tagger.OperatorTestScenario(t, testCases, cleanerOp, l)
 }

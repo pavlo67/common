@@ -8,7 +8,7 @@ import (
 	"github.com/pavlo67/workshop/common/selectors"
 
 	"github.com/pavlo67/workshop/common/types"
-	"github.com/pavlo67/workshop/components/tags"
+	"github.com/pavlo67/workshop/components/tagger"
 )
 
 const InterfaceKey joiner.InterfaceKey = "data"
@@ -22,7 +22,7 @@ type Item struct {
 	Title      string       `bson:",omitempty"    json:",omitempty"`
 	Summary    string       `bson:",omitempty"    json:",omitempty"`
 	Embedded   []Item       `bson:",omitempty"    json:",omitempty"`
-	Tags       []tags.Item  `bson:",omitempty"    json:",omitempty"`
+	Tags       []tagger.Tag `bson:",omitempty"    json:",omitempty"`
 	Details    interface{}  `bson:"-"             json:",omitempty"`
 	DetailsRaw []byte       `bson:",omitempty"    json:",omitempty"` // shouldn't be used directly
 	History    crud.History `bson:",omitempty"    json:",omitempty"`
@@ -53,9 +53,9 @@ type Convertor interface {
 //	Version   vcs.Version  `bson:"version,omitempty"    json:"version,omitempty"`
 //
 //	Title   string       `bson:"title"             json:"title"`
-//	Item   string       `bson:"brief,omitempty"   json:"brief,omitempty"`
+//	Tag   string       `bson:"brief,omitempty"   json:"brief,omitempty"`
 //	Author  string       `bson:"author,omitempty"  json:"author,omitempty"`
-//	Item content.Item `bson:"content,omitempty" json:"content,omitempty"`
+//	Tag content.Tag `bson:"content,omitempty" json:"content,omitempty"`
 //	Tags   links.Tags  `bson:"links,omitempty"   json:"links,omitempty"`
 //
 //	RView  common.ID `bson:"r_view,omitempty"  json:"r_view,omitempty"`

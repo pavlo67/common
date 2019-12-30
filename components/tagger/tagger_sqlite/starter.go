@@ -1,4 +1,4 @@
-package tags_sqlite
+package tagger_sqlite
 
 import (
 	"github.com/pkg/errors"
@@ -8,7 +8,7 @@ import (
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/starter"
-	"github.com/pavlo67/workshop/components/tags"
+	"github.com/pavlo67/workshop/components/tagger"
 )
 
 func Starter() starter.Operator {
@@ -38,8 +38,8 @@ func (ts *taggerSQLiteStarter) Init(cfgCommon, cfg *config.Config, lCommon logge
 	}
 
 	ts.config = cfgSQLite
-	ts.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(tags.InterfaceKey)))
-	ts.cleanerInterfaceKey = joiner.InterfaceKey(options.StringDefault("cleaner_interface_key", string(tags.CleanerInterfaceKey)))
+	ts.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(tagger.InterfaceKey)))
+	ts.cleanerInterfaceKey = joiner.InterfaceKey(options.StringDefault("cleaner_interface_key", string(tagger.CleanerInterfaceKey)))
 
 	// sqllib.CheckTables
 

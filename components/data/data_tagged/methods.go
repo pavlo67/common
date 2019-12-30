@@ -10,7 +10,7 @@ import (
 	"github.com/pavlo67/workshop/common/selectors/logic"
 	"github.com/pavlo67/workshop/components/data"
 	"github.com/pavlo67/workshop/components/hypertext"
-	"github.com/pavlo67/workshop/components/tags"
+	"github.com/pavlo67/workshop/components/tagger"
 )
 
 var _ Operator = &ws{}
@@ -24,7 +24,7 @@ type ws struct {
 
 const onNewWorkspace = "on New(): "
 
-func New(dataOp data.Operator, taggerOp tags.Operator) (Operator, crud.Cleaner, error) {
+func New(dataOp data.Operator, taggerOp tagger.Operator) (Operator, crud.Cleaner, error) {
 	if dataOp == nil {
 		return nil, nil, errors.New(onNewWorkspace + ": no data.Operatoe")
 	}
@@ -76,7 +76,7 @@ func (wsOp *ws) ListWithText(*joiner.InterfaceKey, hypertext.ToSearch, *selector
 //var rePhrase = regexp.MustCompile(`^\s*".*"\s*$`)
 //var reDelimiter = regexp.MustCompile(`[\.,\s\t;:\-\+\!\?\(\)\{\}\[\]\/'"\*]+`)
 //
-//func (objOp *notesMySQL) ReadListByWords(userIS common.ID, options *content.ListOptions, searched string) (objects []notes.Item, allCnt uint64, err error) {
+//func (objOp *notesMySQL) ReadListByWords(userIS common.ID, options *content.ListOptions, searched string) (objects []notes.Tag, allCnt uint64, err error) {
 //	if !rePhrase.MatchString(searched) {
 //		words := reDelimiter.Split(searched, -1)
 //		searched = ""
@@ -104,7 +104,7 @@ func (wsOp *ws) ListWithText(*joiner.InterfaceKey, hypertext.ToSearch, *selector
 //
 //const onUpdateLinks = "on notesMySQL.UpdateLinks"
 //
-//func (objOp *notesMySQL) UpdateLinks(userIS common.ID, idStr string, linksListNew []links.Item, linkType string) error {
+//func (objOp *notesMySQL) UpdateLinks(userIS common.ID, idStr string, linksListNew []links.Tag, linkType string) error {
 //	// TODO: lock object record for update (use history!!!)
 //
 //	o, err := objOp.Read(userIS, idStr)

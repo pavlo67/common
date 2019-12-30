@@ -1,4 +1,4 @@
-package tags_sqlite
+package tagger_sqlite
 
 import (
 	"database/sql"
@@ -14,7 +14,7 @@ import (
 	"github.com/pavlo67/workshop/common/libraries/sqllib/sqllib_sqlite"
 	"github.com/pavlo67/workshop/common/selectors"
 
-	"github.com/pavlo67/workshop/components/tags"
+	"github.com/pavlo67/workshop/components/tagger"
 )
 
 const tableDefault = "tagged"
@@ -26,7 +26,7 @@ var fieldsToCountStr = strings.Join(fieldsToCount, ", ")
 var fieldsToSave = []string{"key", "id", "tag", "relation"}
 var fieldsToSaveStr = strings.Join(fieldsToSave, ", ")
 
-var _ tags.Operator = &tagsSQLite{}
+var _ tagger.Operator = &tagsSQLite{}
 var _ crud.Cleaner = &tagsSQLite{}
 
 type tagsSQLite struct {
@@ -45,7 +45,7 @@ type tagsSQLite struct {
 
 const onNew = "on tagsSQLite.New(): "
 
-func New(access config.Access, ownInterfaceKey joiner.InterfaceKey) (tags.Operator, crud.Cleaner, error) {
+func New(access config.Access, ownInterfaceKey joiner.InterfaceKey) (tagger.Operator, crud.Cleaner, error) {
 	db, err := sqllib_sqlite.Connect(access)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, onNew)
@@ -95,8 +95,8 @@ func New(access config.Access, ownInterfaceKey joiner.InterfaceKey) (tags.Operat
 
 const onAddTags = "on tagsSQLite.AddTags(): "
 
-func (taggerOp *tagsSQLite) AddTags(key joiner.InterfaceKey, id common.ID, items []tags.Item, _ *crud.SaveOptions) error {
-	var tagsFiltered []tags.Item
+func (taggerOp *tagsSQLite) AddTags(key joiner.InterfaceKey, id common.ID, items []tagger.Tag, _ *crud.SaveOptions) error {
+	var tagsFiltered []tagger.Tag
 	for _, tag := range items {
 		tag.Label = strings.TrimSpace(tag.Label)
 		if tag.Label != "" {
@@ -151,9 +151,9 @@ ROLLBACK:
 
 const onReplaceTags = "on tagsSQLite.ReplaceTags(): "
 
-func (taggerOp *tagsSQLite) ReplaceTags(key joiner.InterfaceKey, id common.ID, items []tags.Item, options *crud.SaveOptions) error {
+func (taggerOp *tagsSQLite) ReplaceTags(key joiner.InterfaceKey, id common.ID, items []tagger.Tag, options *crud.SaveOptions) error {
 
-	var tagsFiltered []tags.Item
+	var tagsFiltered []tagger.Tag
 	for _, tag := range items {
 		tag.Label = strings.TrimSpace(tag.Label)
 		if tag.Label != "" {
@@ -224,7 +224,7 @@ ROLLBACK:
 
 const onListTags = "on tagsSQLite.ListTags(): "
 
-func (taggerOp *tagsSQLite) ListTags(key joiner.InterfaceKey, id common.ID, _ *crud.GetOptions) ([]tags.Item, error) {
+func (taggerOp *tagsSQLite) ListTags(key joiner.InterfaceKey, id common.ID, _ *crud.GetOptions) ([]tagger.Tag, error) {
 	values := []interface{}{key, id}
 
 	rows, err := taggerOp.stmList.Query(values...)
@@ -235,10 +235,10 @@ func (taggerOp *tagsSQLite) ListTags(key joiner.InterfaceKey, id common.ID, _ *c
 	}
 	defer rows.Close()
 
-	var items []tags.Item
+	var items []tagger.Tag
 
 	for rows.Next() {
-		var tag tags.Item
+		var tag tagger.Tag
 
 		err = rows.Scan(&tag.Label, &tag.Relation)
 		if err != nil {
@@ -257,7 +257,7 @@ func (taggerOp *tagsSQLite) ListTags(key joiner.InterfaceKey, id common.ID, _ *c
 
 const onCountTags = "on tagsSQLite.CountTags(): "
 
-func (taggerOp *tagsSQLite) CountTags(key *joiner.InterfaceKey, _ *crud.GetOptions) ([]tags.TagCount, error) {
+func (taggerOp *tagsSQLite) CountTags(key *joiner.InterfaceKey, _ *crud.GetOptions) ([]tagger.TagCount, error) {
 	var values []interface{}
 	var query string
 	var stm *sql.Stmt
@@ -279,10 +279,10 @@ func (taggerOp *tagsSQLite) CountTags(key *joiner.InterfaceKey, _ *crud.GetOptio
 	}
 	defer rows.Close()
 
-	var counter []tags.TagCount
+	var counter []tagger.TagCount
 
 	for rows.Next() {
-		var count tags.TagCount
+		var count tagger.TagCount
 		full := new(uint64)
 
 		err = rows.Scan(&count.Label, &count.Immediate, &full)
@@ -306,7 +306,7 @@ func (taggerOp *tagsSQLite) CountTags(key *joiner.InterfaceKey, _ *crud.GetOptio
 
 const onIndexTagged = "on tagsSQLite.IndexTagged()"
 
-func (taggerOp *tagsSQLite) IndexTagged(key *joiner.InterfaceKey, label string, _ *crud.GetOptions) (tags.Index, error) {
+func (taggerOp *tagsSQLite) IndexTagged(key *joiner.InterfaceKey, label string, _ *crud.GetOptions) (tagger.Index, error) {
 	var values []interface{}
 	var query string
 	var stm *sql.Stmt
@@ -331,11 +331,11 @@ func (taggerOp *tagsSQLite) IndexTagged(key *joiner.InterfaceKey, label string, 
 	}
 	defer rows.Close()
 
-	index := tags.Index{}
+	index := tagger.Index{}
 
 	for rows.Next() {
 		var key string
-		var tagged tags.Tagged
+		var tagged tagger.Tagged
 
 		err = rows.Scan(&key, &tagged.ID, &tagged.Relation)
 		if err != nil {

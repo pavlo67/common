@@ -12,7 +12,7 @@ import (
 	"github.com/pavlo67/workshop/common/flow"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/types"
-	"github.com/pavlo67/workshop/components/tags"
+	"github.com/pavlo67/workshop/components/tagger"
 )
 
 type OperatorTestCase struct {
@@ -57,9 +57,9 @@ func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 					ExportID: "wq3r",
 					Title:    "56567",
 					Summary:  "3333333",
-					Tags:     []tags.Item{{Label: "1"}, {Label: "332343"}},
+					Tags:     []tagger.Tag{{Label: "1"}, {Label: "332343"}},
 				}},
-				Tags: []tags.Item{{Label: "1"}, {Label: "333"}},
+				Tags: []tagger.Tag{{Label: "1"}, {Label: "333"}},
 				History: crud.History{
 					Actions: []crud.Action{{
 						Key:    crud.CreatedAction,
@@ -77,7 +77,7 @@ func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 				URL:     "22222222",
 				Title:   "345456rt",
 				Summary: "6578eegj",
-				Tags:    []tags.Item{{Label: "1"}, {Label: "333"}},
+				Tags:    []tagger.Tag{{Label: "1"}, {Label: "333"}},
 				History: crud.History{
 					Actions: []crud.Action{
 						{Key: crud.CreatedAction, DoneAt: time.Time{}},
@@ -143,7 +143,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 
 		var id [numRepeats1 + numRepeats2]common.ID
 		var toSave [numRepeats1 + numRepeats2]Item
-		// var data Item
+		// var data Tag
 
 		// ClearDatabase ------------------------------------------------------------------------------------
 
@@ -185,7 +185,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		//require.NoError(t, err)
 
 		//if !tc.ExpectedSaveOk {
-		//	_, err = tc.Save([]Item{tc.ToSave}, nil)
+		//	_, err = tc.Save([]Tag{tc.ToSave}, nil)
 		//	require.Error(t, err, "where is an error on .Save()?")
 		//	continue
 		//}
@@ -288,7 +288,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		//		require.NoError(t, err)
 		//		testData(t, keyFields, []string{id[toUpdateI]}, toUpdateResult, data, false, description, "on .Read() after Update()")
 		//
-		//		toUpdate := Item{}
+		//		toUpdate := Tag{}
 		//		for k, v := range toUpdateResult {
 		//			toUpdate[k] = v
 		//		}
@@ -409,7 +409,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 	}
 }
 
-//func testData(t *testing.T, keyFields, expectedID []string, expectedData, data Item, onCreate bool, description Description, on string) {
+//func testData(t *testing.T, keyFields, expectedID []string, expectedData, data Tag, onCreate bool, description Description, on string) {
 //	if expectedData == nil {
 //		require.Nil(t, data)
 //		return

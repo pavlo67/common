@@ -21,7 +21,7 @@ import (
 
 	"github.com/pavlo67/workshop/common/types"
 	"github.com/pavlo67/workshop/components/data"
-	"github.com/pavlo67/workshop/components/tags"
+	"github.com/pavlo67/workshop/components/tagger"
 )
 
 var fieldsToUpdate = []string{"url", "type", "title", "summary", "embedded", "tags", "details"}
@@ -46,14 +46,14 @@ type dataSQLite struct {
 	sqlInsert, sqlUpdate, sqlRead, sqlRemove, sqlList, sqlClean string
 	stmInsert, stmUpdate, stmRead, stmRemove, stmList           *sql.Stmt
 
-	taggerOp      tags.Operator
+	taggerOp      tagger.Operator
 	interfaceKey  joiner.InterfaceKey
 	taggerCleaner crud.Cleaner
 }
 
 const onNew = "on dataSQLite.New(): "
 
-func New(access config.Access, table string, interfaceKey joiner.InterfaceKey, taggerOp tags.Operator, taggerCleaner crud.Cleaner) (data.Operator, crud.Cleaner, error) {
+func New(access config.Access, table string, interfaceKey joiner.InterfaceKey, taggerOp tagger.Operator, taggerCleaner crud.Cleaner) (data.Operator, crud.Cleaner, error) {
 	db, err := sqllib_sqlite.Connect(access)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, onNew)

@@ -1,4 +1,4 @@
-package tags_sqlite
+package tagger_sqlite
 
 import (
 	"database/sql"

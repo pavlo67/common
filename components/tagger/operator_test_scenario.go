@@ -1,4 +1,4 @@
-package tags
+package tagger
 
 import (
 	"os"
@@ -16,12 +16,12 @@ type TagsToChange struct {
 	Action          string
 	Key             joiner.InterfaceKey
 	ID              common.ID
-	Tags            []Item
+	Tags            []Tag
 	IsErrorExpected bool
 }
 
 type TagToCheck struct {
-	Tag             Item
+	Tag             Tag
 	Tagged          Index
 	IsErrorExpected bool
 }
@@ -40,8 +40,8 @@ func QueryTagsTestCases(taggerOp Operator) []TestCase {
 	id1 := common.ID("11")
 	id2 := common.ID("22")
 
-	tags1 := []Item{{"1", ""}, {"2", ""}, {"3", ""}}
-	tags2 := []Item{{"3", ""}, {"5", ""}, {"6", ""}}
+	tags1 := []Tag{{"1", ""}, {"2", ""}, {"3", ""}}
+	tags2 := []Tag{{"3", ""}, {"5", ""}, {"6", ""}}
 
 	key := InterfaceKey
 
@@ -58,12 +58,12 @@ func QueryTagsTestCases(taggerOp Operator) []TestCase {
 						Tags:   tags1,
 					},
 					TagsToCheck: []TagToCheck{
-						{Tag: Item{"1", ""}, Tagged: Index{key: []Tagged{{ID: id1}}}},
-						{Tag: Item{"2", ""}, Tagged: Index{key: []Tagged{{ID: id1}}}},
-						{Tag: Item{"3", ""}, Tagged: Index{key: []Tagged{{ID: id1}}}},
-						{Tag: Item{"4", ""}, Tagged: Index{}},
-						{Tag: Item{"5", ""}, Tagged: Index{}},
-						{Tag: Item{"6", ""}, Tagged: Index{}},
+						{Tag: Tag{"1", ""}, Tagged: Index{key: []Tagged{{ID: id1}}}},
+						{Tag: Tag{"2", ""}, Tagged: Index{key: []Tagged{{ID: id1}}}},
+						{Tag: Tag{"3", ""}, Tagged: Index{key: []Tagged{{ID: id1}}}},
+						{Tag: Tag{"4", ""}, Tagged: Index{}},
+						{Tag: Tag{"5", ""}, Tagged: Index{}},
+						{Tag: Tag{"6", ""}, Tagged: Index{}},
 					},
 				},
 				{
@@ -74,12 +74,12 @@ func QueryTagsTestCases(taggerOp Operator) []TestCase {
 						Tags:   tags2,
 					},
 					TagsToCheck: []TagToCheck{
-						{Tag: Item{"1", ""}, Tagged: Index{key: []Tagged{{ID: id1}}}},
-						{Tag: Item{"2", ""}, Tagged: Index{key: []Tagged{{ID: id1}}}},
-						{Tag: Item{"3", ""}, Tagged: Index{key: []Tagged{{ID: id1}, {ID: id2}}}},
-						{Tag: Item{"4", ""}, Tagged: Index{}},
-						{Tag: Item{"5", ""}, Tagged: Index{key: []Tagged{{ID: id2}}}},
-						{Tag: Item{"6", ""}, Tagged: Index{key: []Tagged{{ID: id2}}}},
+						{Tag: Tag{"1", ""}, Tagged: Index{key: []Tagged{{ID: id1}}}},
+						{Tag: Tag{"2", ""}, Tagged: Index{key: []Tagged{{ID: id1}}}},
+						{Tag: Tag{"3", ""}, Tagged: Index{key: []Tagged{{ID: id1}, {ID: id2}}}},
+						{Tag: Tag{"4", ""}, Tagged: Index{}},
+						{Tag: Tag{"5", ""}, Tagged: Index{key: []Tagged{{ID: id2}}}},
+						{Tag: Tag{"6", ""}, Tagged: Index{key: []Tagged{{ID: id2}}}},
 					},
 				},
 				{
@@ -90,12 +90,12 @@ func QueryTagsTestCases(taggerOp Operator) []TestCase {
 						Tags:   nil,
 					},
 					TagsToCheck: []TagToCheck{
-						{Tag: Item{"1", ""}, Tagged: Index{}},
-						{Tag: Item{"2", ""}, Tagged: Index{}},
-						{Tag: Item{"3", ""}, Tagged: Index{key: []Tagged{{ID: id2}}}},
-						{Tag: Item{"4", ""}, Tagged: Index{}},
-						{Tag: Item{"5", ""}, Tagged: Index{key: []Tagged{{ID: id2}}}},
-						{Tag: Item{"6", ""}, Tagged: Index{key: []Tagged{{ID: id2}}}},
+						{Tag: Tag{"1", ""}, Tagged: Index{}},
+						{Tag: Tag{"2", ""}, Tagged: Index{}},
+						{Tag: Tag{"3", ""}, Tagged: Index{key: []Tagged{{ID: id2}}}},
+						{Tag: Tag{"4", ""}, Tagged: Index{}},
+						{Tag: Tag{"5", ""}, Tagged: Index{key: []Tagged{{ID: id2}}}},
+						{Tag: Tag{"6", ""}, Tagged: Index{key: []Tagged{{ID: id2}}}},
 					},
 				},
 			},
@@ -126,7 +126,7 @@ func OperatorTestScenario(t *testing.T, testCases []TestCase, cleanerOp crud.Cle
 			case "replace":
 				err = tc.Operator.ReplaceTags(step.Key, step.ID, step.Tags, nil)
 			case "tags":
-				var tags []Item
+				var tags []Tag
 				tags, err = tc.Operator.ListTags(step.Key, step.ID, nil)
 				if !step.TagsToChange.IsErrorExpected {
 					require.Equal(t, step.Tags, tags)
@@ -242,14 +242,14 @@ func OperatorTestScenario(t *testing.T, testCases []TestCase, cleanerOp crud.Cle
 //func mapTagInfo(tagInfo []TagInfo) map[string]uint64 {
 //	res := map[string]uint64{}
 //	for _, v := range tagInfo {
-//		res[v.Item] = v.CountTags
+//		res[v.Tag] = v.CountTags
 //	}
 //
 //	return res
 //}
 //
 //func Hash(li Linked) string {
-//	return li.ObjectID + " " + li.WorkerType + " " + li.LinkedID + " " + li.LinkedType + " " + li.Item
+//	return li.ObjectID + " " + li.WorkerType + " " + li.LinkedID + " " + li.LinkedType + " " + li.Tag
 //}
 //
 //type byLinked []Linked

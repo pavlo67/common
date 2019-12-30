@@ -21,7 +21,7 @@ import (
 	"github.com/pavlo67/workshop/components/data"
 	"github.com/pavlo67/workshop/components/data/data_sqlite"
 	"github.com/pavlo67/workshop/components/data/data_tagged"
-	"github.com/pavlo67/workshop/components/tags/tags_sqlite"
+	"github.com/pavlo67/workshop/components/tagger/tagger_sqlite"
 
 	"github.com/pavlo67/workshop/constructions/dataflow"
 	"github.com/pavlo67/workshop/constructions/dataflow/flow_cleaner/flow_cleaner_sqlite"
@@ -101,7 +101,7 @@ func main() {
 		{auth_ecdsa.Starter(), nil},
 		{server_http_jschmhr.Starter(), common.Map{"port": cfgEnvs["workspace_port"]}},
 
-		{tags_sqlite.Starter(), nil},
+		{tagger_sqlite.Starter(), nil},
 
 		{data_sqlite.Starter(), common.Map{"interface_key": datastorage.InterfaceKey, "table": datastorage.CollectionDefault}},
 		{data_tagged.Starter(), common.Map{"interface_key": datastorage.TaggedInterfaceKey, "data_key": datastorage.InterfaceKey}},
