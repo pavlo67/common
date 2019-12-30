@@ -123,7 +123,7 @@
   },
   "/storage/v1/flow/list": {
    "get": {
-    "operationId": "flow",
+    "operationId": "flow_list",
     "produces": [
      "application/json"
     ],

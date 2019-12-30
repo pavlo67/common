@@ -23,7 +23,7 @@ import (
 	"github.com/pavlo67/workshop/components/data/data_tagged"
 	"github.com/pavlo67/workshop/constructions/dataflow"
 	"github.com/pavlo67/workshop/constructions/dataflow/flow_cleaner/flow_cleaner_sqlite"
-	"github.com/pavlo67/workshop/constructions/dataflow/flow_server_http"
+	"github.com/pavlo67/workshop/constructions/dataflow/flow_server_http_handler"
 	"github.com/pavlo67/workshop/constructions/dataimporter/importer_tasks"
 	"github.com/pavlo67/workshop/constructions/taskscheduler"
 	"github.com/pavlo67/workshop/constructions/taskscheduler/scheduler_timeout"
@@ -36,6 +36,8 @@ var (
 	BuildTag    = "unknown"
 	BuildCommit = "unknown"
 )
+
+const serviceName = "gatherer"
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
@@ -65,22 +67,29 @@ func main() {
 		configEnv = "local"
 	}
 
-	// common config
+	// routes config
 
 	configCommonPath := currentPath + "../../environments/common." + configEnv + ".yaml"
 	cfgCommon, err := config.Get(configCommonPath, serializer.MarshalerYAML)
 	if err != nil {
 		l.Fatal(err)
 	}
-	var cfgEnvs map[string]string
-	err = cfgCommon.Value("envs", &cfgEnvs)
+	var routesCfg map[string]config.Access
+	err = cfgCommon.Value("routes", &routesCfg)
 	if err != nil {
 		l.Fatal(err)
 	}
 
+	var port int
+	if serviceAccess, ok := routesCfg[serviceName]; ok {
+		port = serviceAccess.Port
+	} else {
+		l.Fatalf("no access config for key %s (%#v)", serviceName, routesCfg)
+	}
+
 	// gatherer config
 
-	configGathererPath := currentPath + "../../environments/gatherer." + configEnv + ".yaml"
+	configGathererPath := currentPath + "../../environments/" + serviceName + "." + configEnv + ".yaml"
 	cfgGatherer, err := config.Get(configGathererPath, serializer.MarshalerYAML)
 	if err != nil {
 		l.Fatal(err)
@@ -102,12 +111,12 @@ func main() {
 	starters := []starter.Starter{
 		{control.Starter(), nil},
 
-		{data_sqlite.Starter(), common.Map{"table": flowTable, "interface_key": dataflow.InterfaceKey, "no_tagger": true}},
-		{data_tagged.Starter(), common.Map{"data_key": dataflow.InterfaceKey, "interface_key": dataflow.TaggedInterfaceKey, "no_tagger": true}},
-		{flow_server_http.Starter(), nil},
+		{data_sqlite.Starter(), common.Map{"table": flowTable, "interface_key": dataflow.DataInterfaceKey, "no_tagger": true}},
+		{data_tagged.Starter(), common.Map{"data_key": dataflow.DataInterfaceKey, "interface_key": dataflow.InterfaceKey, "no_tagger": true}},
+		{flow_server_http_handler.Starter(), nil},
 
 		{auth_ecdsa.Starter(), nil},
-		{server_http_jschmhr.Starter(), common.Map{"port": cfgEnvs["gatherer_port"]}},
+		{server_http_jschmhr.Starter(), common.Map{"port": port}},
 		{gatherer_routes.Starter(), nil},
 
 		{flow_cleaner_sqlite.Starter(), common.Map{"table": flowTable}},
@@ -123,9 +132,9 @@ func main() {
 
 	// scheduling importer task
 
-	dataOp, ok := joiner.Interface(dataflow.InterfaceKey).(data.Operator)
+	dataOp, ok := joiner.Interface(dataflow.DataInterfaceKey).(data.Operator)
 	if !ok {
-		l.Fatalf("no data.Operator with key %s", dataflow.InterfaceKey)
+		l.Fatalf("no data.Operator with key %s", dataflow.DataInterfaceKey)
 	}
 
 	task, err := importer_tasks.NewLoader(dataOp)

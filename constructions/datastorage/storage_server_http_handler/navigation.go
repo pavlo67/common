@@ -1,4 +1,4 @@
-package storage_server_http
+package storage_server_http_handler
 
 import (
 	"net/http"
@@ -14,7 +14,7 @@ import (
 const interfaceKeyParamName = "key"
 const tagLabelParamName = "tag"
 
-var CountTagsEndpoint = server_http.Endpoint{Method: "GET", QueryParams: []string{interfaceKeyParamName}, WorkerHTTP: CountTags}
+var countTagsEndpoint = server_http.Endpoint{Method: "GET", QueryParams: []string{interfaceKeyParamName}, WorkerHTTP: CountTags}
 
 func CountTags(_ *auth.User, _ server_http.Params, req *http.Request) (server.Response, error) {
 	var interfaceKeyPtr *joiner.InterfaceKey
@@ -22,11 +22,6 @@ func CountTags(_ *auth.User, _ server_http.Params, req *http.Request) (server.Re
 		interfaceKey := joiner.InterfaceKey(key)
 		interfaceKeyPtr = &interfaceKey
 	}
-
-	//l.Info(1111111, interfaceKeyPtr)
-	//if interfaceKeyPtr != nil {
-	//	l.Info(22222, *interfaceKeyPtr)
-	//}
 
 	counter, err := dataTaggedOp.CountTags(interfaceKeyPtr, nil)
 	if err != nil {
@@ -36,7 +31,7 @@ func CountTags(_ *auth.User, _ server_http.Params, req *http.Request) (server.Re
 	return server.ResponseRESTOk(counter)
 }
 
-var ListWithTagEndpoint = server_http.Endpoint{Method: "GET", QueryParams: []string{interfaceKeyParamName, tagLabelParamName}, WorkerHTTP: ListWithTag}
+var listWithTagEndpoint = server_http.Endpoint{Method: "GET", QueryParams: []string{interfaceKeyParamName, tagLabelParamName}, WorkerHTTP: ListWithTag}
 
 func ListWithTag(user *auth.User, _ server_http.Params, req *http.Request) (server.Response, error) {
 	var interfaceKeyPtr *joiner.InterfaceKey

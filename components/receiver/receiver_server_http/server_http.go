@@ -1,4 +1,4 @@
-package flow_server_http
+package receiver_server_http
 
 import (
 	"net/http"
@@ -17,14 +17,11 @@ import (
 
 // Flow --------------------------------------------------------------------------------------
 
-const AfterIDParam = "after_id"
-
-var ExportFlowEndpoint = server_http.Endpoint{Method: "GET", PathParams: nil, QueryParams: []string{AfterIDParam}, WorkerHTTP: ExportFlow}
+var ExportFlowEndpoint = server_http.Endpoint{Method: "POST", WorkerHTTP: ExportFlow}
 
 func ExportFlow(user *auth.User, _ server_http.Params, req *http.Request) (server.Response, error) {
-	afterIDStr := req.URL.Query().Get(AfterIDParam)
 
-	items, err := flowTaggedOp.Export(afterIDStr, nil)
+	items, err := receiverTaggedOp.Export(afterIDStr, nil)
 	if err != nil {
 		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on GET storage/...ExportFlow: ", err))
 	}

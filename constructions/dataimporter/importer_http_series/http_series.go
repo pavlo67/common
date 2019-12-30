@@ -10,7 +10,6 @@ import (
 
 	"github.com/pavlo67/workshop/common/logger"
 
-	"github.com/pavlo67/workshop/constructions/dataflow/flow_server_http"
 	"github.com/pavlo67/workshop/constructions/dataimporter"
 )
 
@@ -35,7 +34,7 @@ func (sh *seriesHTTP) Get(lastImportedID string) (*dataimporter.DataSeries, erro
 
 	feedURL := sh.exportURL
 	if lastImportedID != "" {
-		feedURL += fmt.Sprintf("?%s=%s", flow_server_http.AfterIDParam, lastImportedID)
+		feedURL += fmt.Sprintf("?%s=%s", "after_id", lastImportedID) // flow_server_http_handler.AfterIDParam
 	}
 
 	resp, err := http.Get(feedURL)

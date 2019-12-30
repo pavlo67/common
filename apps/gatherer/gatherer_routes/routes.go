@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 
 	"github.com/pavlo67/workshop/common/libraries/filelib"
-	"github.com/pavlo67/workshop/constructions/dataflow/flow_server_http"
+	"github.com/pavlo67/workshop/constructions/dataflow/flow_server_http_handler"
 	"github.com/pkg/errors"
 )
 
@@ -15,7 +15,7 @@ var srvCfg = server_http.Config{
 	Version: "0.0.1",
 	Prefix:  "/gatherer",
 	Endpoints: []server_http.EndpointConfig{
-		{"flow", "/v1/export", []string{"flow"}, nil, flow_server_http.ExportFlowEndpoint},
+		{"flow", "/v1/export", []string{"flow"}, nil, flow_server_http_handler.ExportFlowEndpoint},
 	},
 }
 
@@ -23,9 +23,9 @@ func InitEndpoints(port string, srvOp server_http.Operator) error {
 	swaggerPath := filelib.CurrentPath() + "api-docs/"
 	swaggerFile := swaggerPath + "swagger.json"
 
-	swagger, err := srvCfg.Swagger2(port)
+	swagger, err := srvCfg.SwaggerV2(port)
 	if err != nil {
-		return errors.Errorf("on .Swagger2(%#v): %s", srvCfg, err)
+		return errors.Errorf("on .SwaggerV2(%#v): %s", srvCfg, err)
 	}
 
 	err = ioutil.WriteFile(swaggerFile, swagger, 0644)

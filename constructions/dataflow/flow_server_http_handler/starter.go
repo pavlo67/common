@@ -1,4 +1,4 @@
-package flow_server_http
+package flow_server_http_handler
 
 import (
 	"fmt"
@@ -10,19 +10,19 @@ import (
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/starter"
+
 	"github.com/pavlo67/workshop/components/data/data_tagged"
+
 	"github.com/pavlo67/workshop/constructions/dataflow"
 )
 
-var flowTaggedOp data_tagged.Operator
+var dataTaggedOp data_tagged.Operator
 var l logger.Operator
-
-const Name = "flow_tagged_server_http"
 
 var _ starter.Operator = &flowTaggedServerHTTPStarter{}
 
 type flowTaggedServerHTTPStarter struct {
-	// interfaceKey joiner.InterfaceKey
+	// interfaceKey joiner.DataInterfaceKey
 }
 
 func Starter() starter.Operator {
@@ -38,7 +38,7 @@ func (ss *flowTaggedServerHTTPStarter) Init(cfgCommon, cfg *config.Config, lComm
 
 	l = lCommon
 	if l == nil {
-		errs = append(errs, fmt.Errorf("no logger for %s:-(", Name))
+		errs = append(errs, fmt.Errorf("no logger for %s:-(", ss.Name()))
 	}
 
 	return nil, errs.Err()
@@ -51,9 +51,19 @@ func (ss *flowTaggedServerHTTPStarter) Setup() error {
 func (ss *flowTaggedServerHTTPStarter) Run(joinerOp joiner.Operator) error {
 
 	var ok bool
-	flowTaggedOp, ok = joinerOp.Interface(dataflow.TaggedInterfaceKey).(data_tagged.Operator)
+	dataTaggedOp, ok = joinerOp.Interface(dataflow.InterfaceKey).(data_tagged.Operator)
 	if !ok {
-		return errors.Errorf("no storage.Operator with key %s", dataflow.TaggedInterfaceKey)
+		return errors.Errorf("no data_tagged.Operator with key %s", dataflow.InterfaceKey)
+	}
+
+	err := joinerOp.Join(&listEndpoint, dataflow.ListInterfaceKey)
+	if err != nil {
+		return errors.Wrapf(err, "can't join listEndpoint as server_http.Endpoint with key '%s'", dataflow.ListInterfaceKey)
+	}
+
+	err = joinerOp.Join(&readEndpoint, dataflow.ReadInterfaceKey)
+	if err != nil {
+		return errors.Wrapf(err, "can't join readEndpoint as server_http.Endpoint with key '%s'", dataflow.ReadInterfaceKey)
 	}
 
 	return nil

@@ -1,52 +1,46 @@
 package ws_routes
 
 import (
-	"github.com/pavlo67/workshop/common/server/server_http"
-
-	"io/ioutil"
+	"strconv"
 
 	"github.com/pavlo67/workshop/common/libraries/filelib"
-	"github.com/pavlo67/workshop/constructions/dataflow/flow_server_http"
-	"github.com/pavlo67/workshop/constructions/datastorage/storage_server_http"
-	"github.com/pkg/errors"
+	"github.com/pavlo67/workshop/common/server/server_http"
+
+	"github.com/pavlo67/workshop/constructions/dataflow"
+	"github.com/pavlo67/workshop/constructions/datastorage"
 )
 
-var srvCfg = server_http.Config{
-	Title:   "Pavlo's Workshop REST API",
-	Version: "0.0.1",
-	Prefix:  "/storage",
-	Endpoints: []server_http.EndpointConfig{
-		{"save", "/v1/data/save", []string{"data"}, nil, storage_server_http.SaveEndpoint},
-		{"read", "/v1/data/read", []string{"data"}, nil, storage_server_http.ReadEndpoint},
-		{"list", "/v1/data/list", []string{"data"}, nil, storage_server_http.ListEndpoint},
-		{"remove", "/v1/data/remove", []string{"data"}, nil, storage_server_http.RemoveEndpoint},
+var endpoints = server_http.Endpoints{
+	"read": {Path: "/v1/data/read", Tags: []string{"data"}, InterfaceKey: datastorage.ReadInterfaceKey},
+	"list": {Path: "/v1/data/list", Tags: []string{"data"}, InterfaceKey: datastorage.ListInterfaceKey},
 
-		{"tags", "/v1/data/tags", []string{"data"}, nil, storage_server_http.CountTagsEndpoint},
-		{"tagged", "/v1/data/tagged", []string{"data"}, nil, storage_server_http.ListWithTagEndpoint},
+	"save":   {Path: "/v1/data/save", Tags: []string{"data"}, InterfaceKey: datastorage.SaveInterfaceKey},
+	"remove": {Path: "/v1/data/remove", Tags: []string{"data"}, InterfaceKey: datastorage.RemoveInterfaceKey},
 
-		{"flow", "/v1/flow/list", []string{"flow"}, nil, flow_server_http.FlowEndpoint},
-		{"flow_read", "/v1/flow/read", []string{"flow"}, nil, flow_server_http.FlowReadEndpoint},
-	},
+	"tags":   {Path: "/v1/data/tags", Tags: []string{"data"}, InterfaceKey: datastorage.CountTagsInterfaceKey},
+	"tagged": {Path: "/v1/data/tagged", Tags: []string{"data"}, InterfaceKey: datastorage.ListWithTagInterfaceKey},
+
+	"flow_read": {Path: "/v1/flow/read", Tags: []string{"flow"}, InterfaceKey: dataflow.ReadInterfaceKey},
+	"flow_list": {Path: "/v1/flow/list", Tags: []string{"flow"}, InterfaceKey: dataflow.ListInterfaceKey},
 }
 
-func InitEndpoints(host string, srvOp server_http.Operator) error {
-	swaggerPath := filelib.CurrentPath() + "api-docs/"
-	swaggerFile := swaggerPath + "swagger.json"
+func Init(srvOp server_http.Operator, port int) error {
 
-	swagger, err := srvCfg.Swagger2(host)
-	if err != nil {
-		return errors.Errorf("on .Swagger2(%#v): %s", srvCfg, err)
+	cfg := server_http.Config{
+		Title:     "Pavlo's Workshop REST API",
+		Version:   "0.0.1",
+		Prefix:    "/storage",
+		Endpoints: endpoints,
 	}
 
-	err = ioutil.WriteFile(swaggerFile, swagger, 0644)
-	if err != nil {
-		return errors.Errorf("on ioutil.WriteFile(%s, %s, 0755): %s", swaggerFile, swagger, err)
-	}
-	l.Infof("%d bytes are written into %s", len(swagger), swaggerFile)
+	return server_http.InitEndpointsWithSwaggerV2(
+		cfg,
+		":"+strconv.Itoa(port),
+		srvOp,
+		filelib.CurrentPath()+"api-docs/",
+		"swagger.json",
+		"api-docs",
+		l,
+	)
 
-	err = server_http.InitEndpoints(srvCfg, srvOp, l)
-	if err != nil {
-		return err
-	}
-	return srvOp.HandleFiles("swagger", srvCfg.Prefix+"/api-docs/*filepath", server_http.StaticPath{LocalPath: swaggerPath, MIMEType: nil})
 }

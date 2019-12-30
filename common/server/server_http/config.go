@@ -4,37 +4,45 @@ import (
 	"encoding/json"
 	"strings"
 
+	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pkg/errors"
 )
 
 type EndpointConfig struct {
-	Key      string
 	Path     string
 	Tags     []string
 	Produces []string
-	Endpoint
+
+	Handler      *Endpoint
+	InterfaceKey joiner.InterfaceKey // for init purposes only
 }
 
+type Endpoints map[string]EndpointConfig
+
 type Config struct {
-	Title     string
-	Version   string
-	Prefix    string
-	Endpoints []EndpointConfig
+	Title   string
+	Version string
+	Prefix  string
+	Endpoints
 }
 
 type Swagger map[string]interface{}
 
 // type SwaggerEndpoint struct {}
 
-func (c Config) Swagger2(port string) ([]byte, error) {
+func (c Config) SwaggerV2(port string) ([]byte, error) {
 	paths := map[string]map[string]map[string]interface{}{}
 
-	for _, ep := range c.Endpoints {
-		path := c.Prefix + ep.PathTemplateBraced(ep.Path)
-		method := strings.ToLower(ep.Method)
+	for key, ep := range c.Endpoints {
+		if ep.Handler == nil {
+			continue
+		}
+
+		path := c.Prefix + ep.Handler.PathTemplateBraced(ep.Path)
+		method := strings.ToLower(ep.Handler.Method)
 
 		epDescr := map[string]interface{}{
-			"operationId": ep.Key,
+			"operationId": key,
 			"tags":        ep.Tags,
 		}
 
@@ -46,7 +54,7 @@ func (c Config) Swagger2(port string) ([]byte, error) {
 
 		var parameters []map[string]interface{}
 
-		for _, pp := range ep.PathParams {
+		for _, pp := range ep.Handler.PathParams {
 			parameters = append(
 				parameters,
 				map[string]interface{}{
@@ -58,7 +66,7 @@ func (c Config) Swagger2(port string) ([]byte, error) {
 				},
 			)
 		}
-		for _, qp := range ep.QueryParams {
+		for _, qp := range ep.Handler.QueryParams {
 			parameters = append(
 				parameters,
 				map[string]interface{}{

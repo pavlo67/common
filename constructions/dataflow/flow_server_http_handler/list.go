@@ -1,4 +1,4 @@
-package flow_server_http
+package flow_server_http_handler
 
 import (
 	"net/http"
@@ -14,35 +14,35 @@ import (
 
 // TODO!!! add parameters info into responces
 
-// Flow --------------------------------------------------------------------------------------
+// FlowList --------------------------------------------------------------------------------------
 
-var FlowEndpoint = server_http.Endpoint{Method: "GET", PathParams: nil, WorkerHTTP: Flow}
+var listEndpoint = server_http.Endpoint{Method: "GET", PathParams: nil, WorkerHTTP: FlowList}
 
-func Flow(user *auth.User, _ server_http.Params, req *http.Request) (server.Response, error) {
-	items, err := flowTaggedOp.List(nil, &crud.GetOptions{Limit1: 200})
+func FlowList(user *auth.User, _ server_http.Params, req *http.Request) (server.Response, error) {
+	items, err := dataTaggedOp.List(nil, &crud.GetOptions{Limit1: 200})
 
 	l.Debugf("%#v", items)
 
 	if err != nil {
-		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on GET ...Flow: ", err))
+		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on GET ...FlowList: ", err))
 	}
 
 	return server.ResponseRESTOk(items)
 }
 
-var FlowReadEndpoint = server_http.Endpoint{Method: "GET", PathParams: []string{"id"}, WorkerHTTP: FlowRead}
+var readEndpoint = server_http.Endpoint{Method: "GET", PathParams: []string{"id"}, WorkerHTTP: FlowRead}
 
 func FlowRead(user *auth.User, params server_http.Params, req *http.Request) (server.Response, error) {
 	id := common.ID(params["id"])
 
-	item, err := flowTaggedOp.Read(id, nil)
+	item, err := dataTaggedOp.Read(id, nil)
 	if err == common.ErrNotFound {
 		return server.ResponseRESTError(http.StatusNotFound, errors.Errorf("ERROR on GET ...FlowRead: not found item with id = %s", id))
 	} else if err != nil {
 		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on GET ...FlowRead: ", err))
 	}
 
-	err = flowTaggedOp.SetDetails(item)
+	err = dataTaggedOp.SetDetails(item)
 	if err != nil {
 		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on GET ...FlowRead: ", err))
 	}

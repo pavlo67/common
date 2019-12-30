@@ -4,19 +4,46 @@ import (
 	"regexp"
 	"strings"
 
+	"io/ioutil"
+
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pkg/errors"
 )
+
+func InitEndpointsWithSwaggerV2(cfg Config, host string, srvOp Operator, swaggerPath, swaggerFile, swaggerSubpath string, l logger.Operator) error {
+	swaggerFilePath := swaggerPath + swaggerFile
+
+	swagger, err := cfg.SwaggerV2(host)
+	if err != nil {
+		return errors.Errorf("on .SwaggerV2(%#v): %s", cfg, err)
+	}
+
+	err = ioutil.WriteFile(swaggerFilePath, swagger, 0644)
+	if err != nil {
+		return errors.Errorf("on ioutil.WriteFile(%s, %s, 0755): %s", swaggerFilePath, swagger, err)
+	}
+	l.Infof("%d bytes are written into %s", len(swagger), swaggerFilePath)
+
+	err = InitEndpoints(cfg, srvOp, l)
+	if err != nil {
+		return err
+	}
+	return srvOp.HandleFiles("swagger", cfg.Prefix+"/"+swaggerSubpath+"/*filepath", StaticPath{LocalPath: swaggerPath, MIMEType: nil})
+}
 
 func InitEndpoints(cfg Config, srvOp Operator, l logger.Operator) error {
 	if srvOp == nil {
 		return errors.New("on .InitEndpoints(): srvOp == nil")
 	}
 
-	for _, ep := range cfg.Endpoints {
-		err := srvOp.HandleEndpoint(ep.Key, cfg.Prefix+ep.Path, ep.Endpoint)
+	for key, ep := range cfg.Endpoints {
+		if ep.Handler == nil {
+			return errors.Errorf("on InitEndpoints: no .Handler %#v", ep)
+		}
+
+		err := srvOp.HandleEndpoint(key, cfg.Prefix+ep.Path, *ep.Handler)
 		if err != nil {
-			return errors.Errorf("on .srvOp.HandleEndpoint(%s, %s, %#v): %s", ep.Key, ep.Path, ep.Endpoint, err)
+			return errors.Errorf("on srvOp.HandleEndpoint(%s, %s, %#v): %s", key, ep.Path, ep.Handler, err)
 		}
 	}
 

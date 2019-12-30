@@ -1,4 +1,4 @@
-package storage_server_http
+package storage_server_http_handler
 
 import (
 	"encoding/json"
@@ -15,11 +15,11 @@ import (
 	"github.com/pavlo67/workshop/components/data"
 )
 
-// TODO!!! add parameters info into responces
+// TODO!!! add parameters info the responses
 
 // Save --------------------------------------------------------------------------------------
 
-var SaveEndpoint = server_http.Endpoint{Method: "POST", WorkerHTTP: Save}
+var saveEndpoint = server_http.Endpoint{Method: "POST", WorkerHTTP: Save}
 
 func Save(user *auth.User, params server_http.Params, req *http.Request) (server.Response, error) {
 	var item data.Item
@@ -48,7 +48,7 @@ func Save(user *auth.User, params server_http.Params, req *http.Request) (server
 
 // Read --------------------------------------------------------------------------------------
 
-var ReadEndpoint = server_http.Endpoint{Method: "GET", PathParams: []string{"id"}, WorkerHTTP: Read}
+var readEndpoint = server_http.Endpoint{Method: "GET", PathParams: []string{"id"}, WorkerHTTP: Read}
 
 func Read(user *auth.User, params server_http.Params, req *http.Request) (server.Response, error) {
 	id := common.ID(params["id"])
@@ -68,12 +68,9 @@ func Read(user *auth.User, params server_http.Params, req *http.Request) (server
 	return server.ResponseRESTOk(item)
 }
 
-// l.Infof("item: %#v", item)
-// l.Infof("details!!!: %#v", item.Details)
-
 // ListFlow --------------------------------------------------------------------------------------
 
-var ListEndpoint = server_http.Endpoint{Method: "GET", WorkerHTTP: List}
+var listEndpoint = server_http.Endpoint{Method: "GET", WorkerHTTP: List}
 
 func List(user *auth.User, _ server_http.Params, req *http.Request) (server.Response, error) {
 	items, err := dataTaggedOp.List(nil, nil)
@@ -89,7 +86,7 @@ func List(user *auth.User, _ server_http.Params, req *http.Request) (server.Resp
 
 // Read --------------------------------------------------------------------------------------
 
-var RemoveEndpoint = server_http.Endpoint{Method: "DELETE", PathParams: []string{"id"}, WorkerHTTP: Remove}
+var removeEndpoint = server_http.Endpoint{Method: "DELETE", PathParams: []string{"id"}, WorkerHTTP: Remove}
 
 func Remove(user *auth.User, params server_http.Params, req *http.Request) (server.Response, error) {
 	id := common.ID(params["id"])
