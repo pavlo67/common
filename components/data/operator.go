@@ -3,7 +3,6 @@ package data
 import (
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/crud"
-	"github.com/pavlo67/workshop/common/flow"
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/selectors"
 
@@ -15,18 +14,18 @@ const InterfaceKey joiner.InterfaceKey = "data"
 const CollectionDefault = "data"
 
 type Item struct {
-	ID         common.ID    `bson:"_id,omitempty" json:",omitempty"`
-	ExportID   string       `bson:",omitempty"    json:",omitempty"`
-	URL        string       `bson:",omitempty"    json:",omitempty"`
-	TypeKey    types.Key    `bson:",omitempty"    json:",omitempty"`
-	Title      string       `bson:",omitempty"    json:",omitempty"`
-	Summary    string       `bson:",omitempty"    json:",omitempty"`
-	Embedded   []Item       `bson:",omitempty"    json:",omitempty"`
-	Tags       []tagger.Tag `bson:",omitempty"    json:",omitempty"`
-	Details    interface{}  `bson:"-"             json:",omitempty"`
-	DetailsRaw []byte       `bson:",omitempty"    json:",omitempty"` // shouldn't be used directly
-	History    crud.History `bson:",omitempty"    json:",omitempty"`
-	Origin     flow.Origin  `bson:",omitempty"    json:",omitempty"`
+	ID       common.ID    `bson:"_id,omitempty" json:",omitempty"`
+	URL      string       `bson:",omitempty"    json:",omitempty"`
+	TypeKey  types.Key    `bson:",omitempty"    json:",omitempty"`
+	Title    string       `bson:",omitempty"    json:",omitempty"`
+	Summary  string       `bson:",omitempty"    json:",omitempty"`
+	Embedded []Item       `bson:",omitempty"    json:",omitempty"`
+	Tags     []tagger.Tag `bson:",omitempty"    json:",omitempty"`
+
+	DetailsRaw []byte      `bson:",omitempty"    json:",omitempty"`
+	Details    interface{} `bson:",omitempty"    json:",omitempty"`
+
+	History crud.History `bson:",omitempty"    json:",omitempty"`
 }
 
 type Operator interface {

@@ -5,14 +5,13 @@ import (
 
 	"github.com/mmcdole/gofeed"
 
-	"encoding/json"
-
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/crud"
-	"github.com/pavlo67/workshop/common/flow"
 	"github.com/pavlo67/workshop/common/types"
+
 	"github.com/pavlo67/workshop/components/data"
 	"github.com/pavlo67/workshop/components/tagger"
+	"github.com/pavlo67/workshop/constructions/dataimporter"
 )
 
 var _ data.Convertor = &Item{}
@@ -36,17 +35,15 @@ func (item *Item) GetData() (*data.Item, error) {
 	}
 
 	sourceTime := item.sourceTime
-
-	// TODO: save in special field
 	// if feedItem.PublishedParsed != nil {
 	//	sourceTime = *feedItem.PublishedParsed
 	// }
 
-	status := crud.History{
-		Actions: []crud.Action{{
-			Key:    crud.CreatedAction,
-			DoneAt: sourceTime,
-		}},
+	// origin, _ := json.Marshal(feedItem)
+
+	history := []crud.Action{
+		{Key: crud.CreatedAction, DoneAt: sourceTime},
+		{Key: dataimporter.ActionKey, DoneAt: time.Now(), Identity: dataimporter.Identity(item.sourceURL, originalID)},
 	}
 
 	var embedded []data.Item
@@ -56,7 +53,7 @@ func (item *Item) GetData() (*data.Item, error) {
 			TypeKey: types.KeyHRefImage,
 			URL:     feedItem.Image.URL,
 			Title:   feedItem.Image.Title,
-			History: status,
+			History: history,
 		})
 	}
 
@@ -66,7 +63,7 @@ func (item *Item) GetData() (*data.Item, error) {
 				TypeKey: types.KeyHRef,
 				URL:     p.URL,
 				Title:   p.Type + ": " + p.Length,
-				History: status,
+				History: history,
 			})
 		}
 	}
@@ -76,8 +73,6 @@ func (item *Item) GetData() (*data.Item, error) {
 		items = append(items, tagger.Tag{Label: c})
 	}
 
-	origin, _ := json.Marshal(feedItem)
-
 	return &data.Item{
 		URL:      feedItem.Link,
 		TypeKey:  types.KeyString,
@@ -86,13 +81,7 @@ func (item *Item) GetData() (*data.Item, error) {
 		Embedded: embedded,
 		Tags:     items,
 		Details:  feedItem.Content,
-		History:  status,
-		Origin: flow.Origin{
-			Source: item.sourceURL,
-			Key:    originalID,
-			Time:   &sourceTime,
-			Data:   string(origin),
-		},
+		History:  history,
 	}, nil
 
 }

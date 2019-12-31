@@ -6,11 +6,9 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
+	"github.com/pavlo67/workshop/common/actor"
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/selectors"
-	"github.com/pavlo67/workshop/common/selectors/logic"
-
-	"github.com/pavlo67/workshop/common/actor"
 	"github.com/pavlo67/workshop/components/data"
 	"github.com/pavlo67/workshop/constructions/dataimporter"
 	"github.com/pavlo67/workshop/constructions/dataimporter/importer_http_series"
@@ -91,10 +89,10 @@ func (it *copyTask) Copy() (int, int, int, error) {
 
 		numProcessed++
 
-		term := logic.AND(
-			selectors.Binary(selectors.Eq, "source", selectors.Value{item.Origin.Source}),
-			selectors.Binary(selectors.Eq, "source_key", selectors.Value{item.Origin.Key}),
-		)
+		sourceKey := dataimporter.SourceKey(item.History)
+		// TODO!!! check if both are not empty
+
+		term := selectors.Binary(selectors.Eq, "source_key", selectors.Value{sourceKey})
 
 		//itemStr, _ := json.Marshal(item)
 		//l.Infof("%s ", itemStr)
@@ -114,11 +112,6 @@ func (it *copyTask) Copy() (int, int, int, error) {
 
 		importedID := item.ID
 		item.ID = ""
-
-		//// TODO: remove this kostyl!!!
-		if len(item.History.Actions) > 0 {
-			item.Origin.Time = &item.History.Actions[0].DoneAt
-		}
 
 		_, err = it.dataOp.Save([]data.Item{item}, nil)
 		if err != nil {

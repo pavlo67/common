@@ -9,7 +9,6 @@ import (
 
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/crud"
-	"github.com/pavlo67/workshop/common/flow"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/types"
 	"github.com/pavlo67/workshop/components/tagger"
@@ -47,26 +46,21 @@ func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 			Operator: dataOp,
 			Cleaner:  cleanerOp,
 			ToSave: Item{
-				ID:       "",
-				TypeKey:  "test",
-				ExportID: "rtuy",
-				URL:      "111111",
-				Title:    "345456",
-				Summary:  "6578gj",
+				ID:      "",
+				TypeKey: "test",
+				URL:     "111111",
+				Title:   "345456",
+				Summary: "6578gj",
 				Embedded: []Item{{
-					ExportID: "wq3r",
-					Title:    "56567",
-					Summary:  "3333333",
-					Tags:     []tagger.Tag{{Label: "1"}, {Label: "332343"}},
+					Title:   "56567",
+					Summary: "3333333",
+					Tags:    []tagger.Tag{{Label: "1"}, {Label: "332343"}},
 				}},
 				Tags: []tagger.Tag{{Label: "1"}, {Label: "333"}},
-				History: crud.History{
-					Actions: []crud.Action{{
-						Key:    crud.CreatedAction,
-						DoneAt: time.Time{},
-					}},
-				},
-				Origin: flow.Origin{},
+				History: []crud.Action{{
+					Key:    crud.CreatedAction,
+					DoneAt: time.Time{},
+				}},
 			},
 			DetailsToSave: Test{
 				AAA: "aaa",
@@ -78,11 +72,9 @@ func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 				Title:   "345456rt",
 				Summary: "6578eegj",
 				Tags:    []tagger.Tag{{Label: "1"}, {Label: "333"}},
-				History: crud.History{
-					Actions: []crud.Action{
-						{Key: crud.CreatedAction, DoneAt: time.Time{}},
-						{Key: crud.UpdatedAction, DoneAt: time.Now().Add(time.Minute)},
-					},
+				History: []crud.Action{
+					{Key: crud.CreatedAction, DoneAt: time.Time{}},
+					{Key: crud.UpdatedAction, DoneAt: time.Now().Add(time.Minute)},
 				},
 			},
 			DetailsToUpdate: Test{
@@ -113,8 +105,8 @@ func Compare(t *testing.T, dataOp Operator, readed *Item, expectedItem Item, exp
 	l.Infof("readed: %#v", readed)
 	l.Infof("readed details: %#v", detailsToRead)
 
-	for i, action := range expectedItem.History.Actions {
-		expectedItem.History.Actions[i].DoneAt = action.DoneAt.UTC()
+	for i, action := range expectedItem.History {
+		expectedItem.History[i].DoneAt = action.DoneAt.UTC()
 	}
 
 	expectedItem.Details = nil
@@ -242,9 +234,6 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 
 		readedUpdated, err := tc.Read(id[toUpdateI], nil)
 		require.NoError(t, err)
-
-		tc.ToUpdate.ExportID = tc.ToSave.ExportID // unchanged!!!
-		tc.ToUpdate.Origin = tc.ToSave.Origin     // unchanged!!!
 
 		// tc.ToUpdate.History.CreatedAt = tc.ToSave.History.CreatedAt // unchanged!!!
 

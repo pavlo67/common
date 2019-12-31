@@ -3,6 +3,8 @@ package identity
 import (
 	"regexp"
 
+	"strings"
+
 	"github.com/pavlo67/workshop/common/libraries/strlib"
 )
 
@@ -10,6 +12,21 @@ type Item struct {
 	Domain string `bson:"domain,omitempty"  json:"domain,omitempty"`
 	Path   string `bson:"path,omitempty"    json:"path,omitempty"`
 	ID     string `bson:"id,omitempty"      json:"id,omitempty"`
+}
+
+var reProto = regexp.MustCompile(`^https?://`)
+var reSlash = regexp.MustCompile(`/.*`)
+
+func FromURLRaw(urlRaw string) Item {
+	urlWithoutProto := reProto.ReplaceAllString(strings.TrimSpace(urlRaw), "")
+	domain := reSlash.ReplaceAllString(urlWithoutProto, "")
+
+	// TODO!!! clean more
+
+	return Item{
+		Domain: domain,
+		Path:   urlWithoutProto[len(domain):],
+	}
 }
 
 // Key is a string representation of Item.

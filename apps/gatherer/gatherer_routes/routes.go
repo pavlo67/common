@@ -1,42 +1,35 @@
 package gatherer_routes
 
 import (
-	"github.com/pavlo67/workshop/common/server/server_http"
-
-	"io/ioutil"
+	"strconv"
 
 	"github.com/pavlo67/workshop/common/libraries/filelib"
-	"github.com/pavlo67/workshop/constructions/dataflow/flow_server_http_handler"
-	"github.com/pkg/errors"
+	"github.com/pavlo67/workshop/common/server/server_http"
+
+	"github.com/pavlo67/workshop/constructions/dataflow"
 )
 
-var srvCfg = server_http.Config{
-	Title:   "Pavlo's StorageIndex Gatherer REST API",
-	Version: "0.0.1",
-	Prefix:  "/gatherer",
-	Endpoints: []server_http.EndpointConfig{
-		{"flow", "/v1/export", []string{"flow"}, nil, flow_server_http_handler.ExportFlowEndpoint},
-	},
+var endpoints = server_http.Endpoints{
+	"flow": {Path: "/v1/export", Tags: []string{"flow"}, InterfaceKey: dataflow.ExportInterfaceKey},
 }
 
-func InitEndpoints(port string, srvOp server_http.Operator) error {
-	swaggerPath := filelib.CurrentPath() + "api-docs/"
-	swaggerFile := swaggerPath + "swagger.json"
+func Init(srvOp server_http.Operator, port int) error {
 
-	swagger, err := srvCfg.SwaggerV2(port)
-	if err != nil {
-		return errors.Errorf("on .SwaggerV2(%#v): %s", srvCfg, err)
+	cfg := server_http.Config{
+		Title:     "Pavlo's Gatherer REST API",
+		Version:   "0.0.1",
+		Prefix:    "/gatherer",
+		Endpoints: endpoints,
 	}
 
-	err = ioutil.WriteFile(swaggerFile, swagger, 0644)
-	if err != nil {
-		return errors.Errorf("on ioutil.WriteFile(%s, %s, 0755): %s", swaggerFile, swagger, err)
-	}
-	l.Infof("%d bytes are written into %s", len(swagger), swaggerFile)
+	return server_http.InitEndpointsWithSwaggerV2(
+		cfg,
+		":"+strconv.Itoa(port),
+		srvOp,
+		filelib.CurrentPath()+"api-docs/",
+		"swagger.json",
+		"api-docs",
+		l,
+	)
 
-	err = server_http.InitEndpoints(srvCfg, srvOp, l)
-	if err != nil {
-		return err
-	}
-	return srvOp.HandleFiles("swagger", srvCfg.Prefix+"/api-docs/*filepath", server_http.StaticPath{LocalPath: swaggerPath, MIMEType: nil})
 }
