@@ -94,7 +94,10 @@ func New(access config.Access, table string, interfaceKey joiner.InterfaceKey) (
 
 const onSave = "on packsPg.Save(): "
 
-func (packsOp *packsPg) Save(pack packs.Pack, _ *crud.SaveOptions) (common.ID, error) {
+func (packsOp *packsPg) Save(pack *packs.Pack, _ *crud.SaveOptions) (common.ID, error) {
+	if pack == nil {
+		return "", errors.New(onSave + "nothing to save")
+	}
 
 	var toBytes []byte
 	if len(pack.To) > 0 {
@@ -311,30 +314,30 @@ func (packsOp *packsPg) List(term *selectors.Term, options *crud.GetOptions) ([]
 
 const onAddHistory = "on packsPg.AddHistory(): "
 
-func (packsOp *packsPg) AddHistory(id common.ID, historyToAdd []crud.Action, _ *crud.SaveOptions) error {
+func (packsOp *packsPg) AddHistory(id common.ID, historyToAdd crud.History, _ *crud.SaveOptions) (crud.History, error) {
 
 	// nothing to do
 
 	if len(historyToAdd) < 1 {
-		return nil
+		return nil, nil
 	}
 
 	// reading old .History
 
 	if len(id) < 1 {
-		return errors.New(onAddHistory + "empty ID")
+		return nil, errors.New(onAddHistory + "empty ID")
 	}
 
 	idNum, err := strconv.ParseUint(string(id), 10, 64)
 	if err != nil {
-		return errors.Errorf(onAddHistory+"wrong ID (%s)", id)
+		return nil, errors.Errorf(onAddHistory+"wrong ID (%s)", id)
 	}
 
 	var historyBytes []byte
 
 	err = packsOp.stmReadToAddHistory.QueryRow(idNum).Scan(&historyBytes)
 	if err != nil {
-		return errors.Wrapf(err, onAddHistory+sqllib.CantScanQueryRow, packsOp.sqlReadToAddHistory, idNum)
+		return nil, errors.Wrapf(err, onAddHistory+sqllib.CantScanQueryRow, packsOp.sqlReadToAddHistory, idNum)
 	}
 
 	// adding the result ------------------------------------------------------------------------------
@@ -344,14 +347,14 @@ func (packsOp *packsPg) AddHistory(id common.ID, historyToAdd []crud.Action, _ *
 	if len(historyBytes) > 0 {
 		err = json.Unmarshal(historyBytes, &history)
 		if err != nil {
-			return errors.Wrapf(err, onAddHistory+"can't unmarshal .History (%s)", historyBytes)
+			return nil, errors.Wrapf(err, onAddHistory+"can't unmarshal .History (%s)", historyBytes)
 		}
 	}
 
 	historyNew := append(history, historyToAdd...)
 	historyBytesNew, err := json.Marshal(historyNew)
 	if err != nil {
-		return errors.Wrapf(err, onAddHistory+"can't .Marshal(%#v)", historyNew)
+		return historyNew, errors.Wrapf(err, onAddHistory+"can't .Marshal(%#v)", historyNew)
 	}
 
 	// saving the updates -----------------------------------------------------------------------------
@@ -359,10 +362,10 @@ func (packsOp *packsPg) AddHistory(id common.ID, historyToAdd []crud.Action, _ *
 	values := []interface{}{historyBytesNew, idNum}
 	_, err = packsOp.stmAddHistory.Exec(values...)
 	if err != nil {
-		return errors.Wrapf(err, onAddHistory+sqllib.CantExec, packsOp.sqlAddHistory, values)
+		return historyNew, errors.Wrapf(err, onAddHistory+sqllib.CantExec, packsOp.sqlAddHistory, values)
 	}
 
-	return nil
+	return historyNew, nil
 }
 
 func (packsOp *packsPg) Close() error {

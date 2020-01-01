@@ -8,23 +8,34 @@ import (
 	"github.com/pavlo67/workshop/common/libraries/strlib"
 )
 
+type Domain string
+
 type Item struct {
-	Domain string `bson:"domain,omitempty"  json:"domain,omitempty"`
+	Domain Domain `bson:"domain,omitempty"  json:"domain,omitempty"`
 	Path   string `bson:"path,omitempty"    json:"path,omitempty"`
 	ID     string `bson:"id,omitempty"      json:"id,omitempty"`
 }
 
+const PathDelim = `/`
+const IDDelim = `##`
+
 var reProto = regexp.MustCompile(`^https?://`)
-var reSlash = regexp.MustCompile(`/.*`)
+
+var reDomainDelim = regexp.MustCompile(PathDelim + `.*`)
+
+var rePathDelimFirst = regexp.MustCompile(`^(` + PathDelim + `)+`)
+var rePathDelim = regexp.MustCompile(IDDelim + `.*`)
+
+var reIDDelimFirst = regexp.MustCompile(`^(` + IDDelim + `)+`)
 
 func FromURLRaw(urlRaw string) Item {
 	urlWithoutProto := reProto.ReplaceAllString(strings.TrimSpace(urlRaw), "")
-	domain := reSlash.ReplaceAllString(urlWithoutProto, "")
+	domain := reDomainDelim.ReplaceAllString(urlWithoutProto, "")
 
 	// TODO!!! clean more
 
 	return Item{
-		Domain: domain,
+		Domain: Domain(domain),
 		Path:   urlWithoutProto[len(domain):],
 	}
 }
@@ -36,7 +47,7 @@ func (item *Item) IsValid() bool {
 	if item == nil {
 		return false
 	}
-	return strlib.ReSpaces.ReplaceAllString(item.Domain, "") != "" &&
+	return strlib.ReSpaces.ReplaceAllString(string(item.Domain), "") != "" &&
 		strlib.ReSpaces.ReplaceAllString(item.Path, "") != "" &&
 		strlib.ReSpaces.ReplaceAllString(item.ID, "") != ""
 }
@@ -46,14 +57,14 @@ func (item *Item) Key() Key {
 		return Key("")
 	}
 
-	domain := strlib.ReSpaces.ReplaceAllString(item.Domain, "")
+	domain := strlib.ReSpaces.ReplaceAllString(string(item.Domain), "")
 	path := strlib.ReSpaces.ReplaceAllString(item.Path, "")
 	id := strlib.ReSpaces.ReplaceAllString(item.ID, "")
 
 	if len(id) > 0 {
-		return Key(domain + "/" + path + "/" + id)
+		return Key(domain + PathDelim + path + IDDelim + id)
 	} else if len(path) > 0 {
-		return Key(domain + "/" + path)
+		return Key(domain + PathDelim + path)
 	} else if len(domain) > 0 {
 		return Key(domain)
 	} else {
@@ -65,42 +76,41 @@ func (item *Item) String() string {
 	return string(item.Key())
 }
 
-var reKeyDelim = regexp.MustCompile(`/`)
+func (key Key) Normalize() Key {
+	return Key(strings.TrimSpace(string(key)))
+}
 
-func (is Key) Identity() Item {
-	is0 := strlib.ReSpacesFin.ReplaceAllString(string(is), "")
-
-	indexes := reKeyDelim.FindAllStringIndex(is0, -1)
-	if len(indexes) < 1 {
-		return Item{Domain: is0}
+func (key Key) Identity() *Item {
+	keyTrimmed := strings.TrimSpace(string(key))
+	if len(keyTrimmed) < 1 {
+		return nil
 	}
 
-	if len(indexes) < 2 {
-		return Item{
-			Domain: is0[:indexes[0][0]],
-			Path:   is0[indexes[0][1]:],
-		}
-	}
+	domain := reDomainDelim.ReplaceAllString(keyTrimmed, "")
+	pathid := rePathDelimFirst.ReplaceAllString(strings.TrimSpace(keyTrimmed[len(domain):]), "")
 
-	return Item{
-		Domain: is0[:indexes[0][0]],
-		Path:   is0[indexes[0][1]:indexes[len(indexes)-1][0]],
-		ID:     is0[indexes[len(indexes)-1][1]:],
+	path := rePathDelim.ReplaceAllString(pathid, "")
+	id := reIDDelimFirst.ReplaceAllString(strings.TrimSpace(pathid[len(path):]), "")
+
+	return &Item{
+		Domain: Domain(domain),
+		Path:   path,
+		ID:     id,
 	}
 }
 
-func (is Key) Short(domain string) Key {
-	if len(is) > len(domain) && string(is[:len(domain)]) == domain && is[len(domain):len(domain)+1] == "/" {
-		return Key(is[len(domain):])
+func (key Key) Short(domain string) Key {
+	if len(key) > len(domain) && string(key[:len(domain)]) == domain && key[len(domain):len(domain)+1] == PathDelim {
+		return Key(key[len(domain):])
 	}
-	return is
+	return key
 }
 
-func (is Key) Full(domain string) Key {
-	if len(is) > 0 && is[:1] == "/" {
-		return Key(domain + string(is))
+func (key Key) Full(domain string) Key {
+	if len(key) > 0 && key[:1] == PathDelim {
+		return Key(domain + string(key))
 	}
-	return is
+	return key
 }
 
 func IsEqual(identity *Item, is Key, domain string) bool {

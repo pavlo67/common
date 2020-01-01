@@ -32,10 +32,10 @@ type Item struct {
 }
 
 type Operator interface {
-	Save(Pack, *crud.SaveOptions) (common.ID, error)
+	Save(*Pack, *crud.SaveOptions) (common.ID, error)
 	Remove(common.ID, *crud.RemoveOptions) error
 	Read(common.ID, *crud.GetOptions) (*Item, error)
 	List(*selectors.Term, *crud.GetOptions) ([]Item, error)
 
-	AddHistory(common.ID, []crud.Action, *crud.SaveOptions) error
+	AddHistory(common.ID, crud.History, *crud.SaveOptions) (crud.History, error)
 }

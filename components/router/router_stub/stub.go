@@ -2,6 +2,7 @@ package router_stub
 
 import (
 	"github.com/pavlo67/workshop/common/crud"
+
 	"github.com/pavlo67/workshop/components/router"
 )
 

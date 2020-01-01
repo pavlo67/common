@@ -16,8 +16,8 @@ func Identity(sourceURL, originalID string) *identity.Item {
 
 func SourceKey(history crud.History) string { //  , sourceTime time.Time
 	for _, action := range history {
-		if action.Key == ActionKey && action.Identity != nil {
-			return action.Identity.Domain + "/" + action.Identity.Path + "##" + action.Identity.ID // , action.DoneAt
+		if action.Key == ActionKey {
+			return string(action.Identity.Key()) // , action.DoneAt
 		}
 	}
 

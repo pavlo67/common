@@ -20,7 +20,7 @@ import (
 
 	"github.com/pavlo67/workshop/components/data"
 	"github.com/pavlo67/workshop/components/data/data_sqlite"
-	"github.com/pavlo67/workshop/components/data/data_tagged"
+	"github.com/pavlo67/workshop/components/data_tagged"
 	"github.com/pavlo67/workshop/constructions/dataflow"
 	"github.com/pavlo67/workshop/constructions/dataflow/flow_cleaner/flow_cleaner_sqlite"
 	"github.com/pavlo67/workshop/constructions/dataflow/flow_server_http_handler"

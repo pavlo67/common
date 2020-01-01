@@ -136,6 +136,8 @@ func (dataOp *dataSQLite) Save(items []data.Item, _ *crud.SaveOptions) ([]common
 			}
 		}
 
+		// TODO!!! append to .History
+
 		if len(item.History) > 0 {
 			history, err = json.Marshal(item.History)
 			if err != nil {

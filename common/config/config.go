@@ -14,15 +14,6 @@ type Config struct {
 	marshaler serializer.Marshaler
 }
 
-type Access struct {
-	Host    string
-	Port    int
-	User    string
-	Pass    string
-	Path    string
-	Options string
-}
-
 func (c Config) Value(key string, target interface{}) error {
 	if value, ok := c.data[key]; ok {
 		valueRaw, err := c.marshaler.Marshal(value)

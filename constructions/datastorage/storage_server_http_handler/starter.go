@@ -11,7 +11,7 @@ import (
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/starter"
 
-	"github.com/pavlo67/workshop/components/data/data_tagged"
+	"github.com/pavlo67/workshop/components/data_tagged"
 
 	"github.com/pavlo67/workshop/constructions/datastorage"
 )
