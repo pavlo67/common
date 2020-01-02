@@ -19,16 +19,16 @@ import (
 	"github.com/pavlo67/workshop/common/starter"
 
 	"github.com/pavlo67/workshop/components/data/data_sqlite"
-	"github.com/pavlo67/workshop/components/data_tagged"
+	"github.com/pavlo67/workshop/components/datatagged"
+	"github.com/pavlo67/workshop/components/flow"
+	"github.com/pavlo67/workshop/components/flowcleaner/flowcleaner_sqlite"
+	"github.com/pavlo67/workshop/components/flowcopier"
+	"github.com/pavlo67/workshop/components/flowserver_http"
+	"github.com/pavlo67/workshop/components/packs/packs_pg"
+	"github.com/pavlo67/workshop/components/storage"
+	"github.com/pavlo67/workshop/components/storageserver_http"
 	"github.com/pavlo67/workshop/components/tagger/tagger_sqlite"
-
-	"github.com/pavlo67/workshop/constructions/dataflow"
-	"github.com/pavlo67/workshop/constructions/dataflow/flow_cleaner/flow_cleaner_sqlite"
-	"github.com/pavlo67/workshop/constructions/dataflow/flow_server_http_handler"
-	"github.com/pavlo67/workshop/constructions/dataimporter/importer_tasks"
-	"github.com/pavlo67/workshop/constructions/datastorage"
-	"github.com/pavlo67/workshop/constructions/datastorage/storage_server_http_handler"
-	"github.com/pavlo67/workshop/constructions/taskscheduler/scheduler_timeout"
+	"github.com/pavlo67/workshop/components/taskscheduler/scheduler_timeout"
 
 	"github.com/pavlo67/workshop/apps/workspace/ws_routes"
 )
@@ -99,8 +99,8 @@ func main() {
 
 	// running starters
 
-	const storageTable = datastorage.CollectionDefault
-	const flowTable = dataflow.CollectionDefault
+	const storageTable = storage.CollectionDefault
+	const flowTable = flow.CollectionDefault
 
 	label := "WORKSPACE REST BUILD"
 
@@ -111,18 +111,18 @@ func main() {
 		{scheduler_timeout.Starter(), nil},
 		{server_http_jschmhr.Starter(), common.Map{"port": port}},
 
+		{packs_pg.Starter(), nil},
 		{tagger_sqlite.Starter(), nil},
 
-		{data_sqlite.Starter(), common.Map{"interface_key": datastorage.DataInterfaceKey, "table": storageTable}},
-		{data_tagged.Starter(), common.Map{"interface_key": datastorage.InterfaceKey, "data_key": datastorage.DataInterfaceKey}},
+		{data_sqlite.Starter(), common.Map{"interface_key": storage.DataInterfaceKey, "table": storageTable}},
+		{datatagged.Starter(), common.Map{"interface_key": storage.InterfaceKey, "data_key": storage.DataInterfaceKey}},
+		{storageserver_http.Starter(), nil},
 
-		{data_sqlite.Starter(), common.Map{"interface_key": dataflow.DataInterfaceKey, "table": flowTable}},
-		{data_tagged.Starter(), common.Map{"interface_key": dataflow.InterfaceKey, "data_key": dataflow.DataInterfaceKey}},
-
-		{storage_server_http_handler.Starter(), nil},
-		{flow_server_http_handler.Starter(), nil},
-		{flow_cleaner_sqlite.Starter(), common.Map{"table": flowTable}},
-		{importer_tasks.Starter(), nil},
+		{data_sqlite.Starter(), common.Map{"interface_key": flow.DataInterfaceKey, "table": flowTable}},
+		{datatagged.Starter(), common.Map{"interface_key": flow.InterfaceKey, "data_key": flow.DataInterfaceKey}},
+		{flowcopier.Starter(), common.Map{"client_http": true, "flow_key": flow.InterfaceKey}},
+		{flowcleaner_sqlite.Starter(), common.Map{"limit": 3000, "flow_key": flow.CleanerInterfaceKey}},
+		{flowserver_http.Starter(), nil},
 
 		{ws_routes.Starter(), nil},
 	}
@@ -135,9 +135,9 @@ func main() {
 
 	// scheduling importer task
 
-	//dataOp, ok := joiner.Interface(dataflow.DataInterfaceKey).(data.Operator)
+	//dataOp, ok := joiner.Interface(flow.DataInterfaceKey).(data.Operator)
 	//if !ok {
-	//	l.Fatalf("no data.Operator with key %s", dataflow.DataInterfaceKey)
+	//	l.Fatalf("no data.Operator with key %s", flow.DataInterfaceKey)
 	//}
 
 	// TODO!!!

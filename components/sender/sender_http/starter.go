@@ -31,9 +31,7 @@ func (sh *senderHTTPStarter) Name() string {
 
 func (sh *senderHTTPStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	l = lCommon
-
 	sh.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(sender.InterfaceKey)))
-
 	return nil, nil
 }
 
@@ -54,12 +52,12 @@ func (sh *senderHTTPStarter) Run(joinerOp joiner.Operator) error {
 
 	senderOp, err := New(packsOp, routerOp)
 	if err != nil {
-		return errors.Wrap(err, "can't init tagger.Operator")
+		return errors.Wrap(err, "can't init sender.Operator")
 	}
 
 	err = joinerOp.Join(senderOp, sh.interfaceKey)
 	if err != nil {
-		return errors.Wrapf(err, "can't join *tagsSQLite as tagger.Operator with key '%s'", sh.interfaceKey)
+		return errors.Wrapf(err, "can't join *senderHTTP as sender.Operator with key '%s'", sh.interfaceKey)
 	}
 
 	return nil

@@ -20,11 +20,11 @@ import (
 
 	"github.com/pavlo67/workshop/components/data"
 	"github.com/pavlo67/workshop/components/data/data_sqlite"
-	"github.com/pavlo67/workshop/components/data_tagged"
-	"github.com/pavlo67/workshop/constructions/dataflow"
+	"github.com/pavlo67/workshop/components/datatagged"
+	"github.com/pavlo67/workshop/components/flow"
 	"github.com/pavlo67/workshop/constructions/dataflow/flow_cleaner/flow_cleaner_sqlite"
 	"github.com/pavlo67/workshop/constructions/dataflow/flow_server_http_handler"
-	"github.com/pavlo67/workshop/constructions/dataimporter/importer_tasks"
+	"github.com/pavlo67/workshop/constructions/dataimporter/load_task"
 	"github.com/pavlo67/workshop/constructions/taskscheduler"
 	"github.com/pavlo67/workshop/constructions/taskscheduler/scheduler_timeout"
 
@@ -104,15 +104,15 @@ func main() {
 	// running starters
 
 	// TODO!!! vary it
-	const flowTable = dataflow.CollectionDefault
+	const flowTable = flow.CollectionDefault
 
 	label := "GATHERER/SQLITE CLI BUILD"
 
 	starters := []starter.Starter{
 		{control.Starter(), nil},
 
-		{data_sqlite.Starter(), common.Map{"table": flowTable, "interface_key": dataflow.DataInterfaceKey, "no_tagger": true}},
-		{data_tagged.Starter(), common.Map{"data_key": dataflow.DataInterfaceKey, "interface_key": dataflow.InterfaceKey, "no_tagger": true}},
+		{data_sqlite.Starter(), common.Map{"table": flowTable, "interface_key": flow.DataInterfaceKey, "no_tagger": true}},
+		{datatagged.Starter(), common.Map{"data_key": flow.DataInterfaceKey, "interface_key": flow.InterfaceKey, "no_tagger": true}},
 		{flow_server_http_handler.Starter(), nil},
 
 		{auth_ecdsa.Starter(), nil},
@@ -121,7 +121,7 @@ func main() {
 
 		{flow_cleaner_sqlite.Starter(), common.Map{"table": flowTable}},
 		{scheduler_timeout.Starter(), nil},
-		{importer_tasks.Starter(), nil},
+		{load_task.Starter(), nil},
 	}
 
 	joiner, err := starter.Run(starters, cfgCommon, cfgGatherer, os.Args[1:], label)
@@ -132,12 +132,12 @@ func main() {
 
 	// scheduling importer task
 
-	dataOp, ok := joiner.Interface(dataflow.DataInterfaceKey).(data.Operator)
+	dataOp, ok := joiner.Interface(flow.DataInterfaceKey).(data.Operator)
 	if !ok {
-		l.Fatalf("no data.Operator with key %s", dataflow.DataInterfaceKey)
+		l.Fatalf("no data.Operator with key %s", flow.DataInterfaceKey)
 	}
 
-	task, err := importer_tasks.NewLoader(dataOp)
+	task, err := load_task.NewLoader(dataOp)
 	if err != nil {
 		l.Fatal(err)
 	}

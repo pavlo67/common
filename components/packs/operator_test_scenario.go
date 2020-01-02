@@ -46,7 +46,6 @@ func TestCases(PacksOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 
 			ToAddHistory: []crud.Action{{
 				Key:    "action1",
-				Actor:  "actor1",
 				DoneAt: time.Now().UTC(),
 			}},
 		},
@@ -107,7 +106,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 
 		for i := 0; i < numRepeats; i++ {
 			toSave[i] = tc.ToSave
-			idI, err := tc.Save(toSave[i], nil)
+			idI, err := tc.Save(&toSave[i], nil)
 			require.NoError(t, err)
 			require.NotEqual(t, common.ID(""), idI)
 			id[i] = idI
@@ -122,7 +121,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 
 		// test .SetResults & .Read ----------------------------------------------------------------------
 
-		err = tc.AddHistory(id[toAddHistoryI], tc.ToAddHistory, nil)
+		_, err = tc.AddHistory(id[toAddHistoryI], tc.ToAddHistory, nil)
 		require.NoError(t, err)
 
 		readedUpdated, err := tc.Read(id[toAddHistoryI], nil)

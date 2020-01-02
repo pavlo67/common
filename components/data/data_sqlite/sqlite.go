@@ -15,15 +15,15 @@ import (
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/libraries/sqllib"
 	"github.com/pavlo67/workshop/common/libraries/sqllib/sqllib_sqlite"
+	"github.com/pavlo67/workshop/common/libraries/strlib"
 	"github.com/pavlo67/workshop/common/selectors"
 	"github.com/pavlo67/workshop/common/selectors/logic"
 	"github.com/pavlo67/workshop/common/selectors/selectors_sql"
-
-	"github.com/pavlo67/workshop/common/libraries/strlib"
 	"github.com/pavlo67/workshop/common/types"
+
 	"github.com/pavlo67/workshop/components/data"
+	"github.com/pavlo67/workshop/components/flowimporter"
 	"github.com/pavlo67/workshop/components/tagger"
-	"github.com/pavlo67/workshop/constructions/dataimporter"
 )
 
 var fieldsCore = []string{"url", "type", "title", "summary", "embedded", "tags", "details", "history"}
@@ -163,7 +163,7 @@ func (dataOp *dataSQLite) Save(items []data.Item, _ *crud.SaveOptions) ([]common
 			ids = append(ids, item.ID)
 
 		} else {
-			sourceKey := dataimporter.SourceKey(item.History)
+			sourceKey := flowimporter.SourceKey(item.History)
 
 			values := []interface{}{item.URL, item.TypeKey, item.Title, item.Summary, embedded, tags, details, history, sourceKey}
 

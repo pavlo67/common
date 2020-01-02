@@ -1,4 +1,4 @@
-package receiver
+package receiver_old
 
 import (
 	"github.com/pavlo67/partes/connector"

@@ -138,7 +138,7 @@ func (packsOp *packsPg) Save(pack *packs.Pack, _ *crud.SaveOptions) (common.ID, 
 	var createdAt time.Time
 	if len(pack.History) > 0 {
 		createdAt = pack.History[0].DoneAt
-		if pack.History[0].Key == crud.CreatedAction && pack.History[0].Actor == "" {
+		if pack.History[0].Key == crud.CreatedAction {
 			pack.History = pack.History[1:]
 		}
 	} else {

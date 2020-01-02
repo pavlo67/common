@@ -6,22 +6,22 @@ import (
 	"github.com/pavlo67/workshop/common/libraries/filelib"
 	"github.com/pavlo67/workshop/common/server/server_http"
 
-	"github.com/pavlo67/workshop/constructions/dataflow"
-	"github.com/pavlo67/workshop/constructions/datastorage"
+	"github.com/pavlo67/workshop/components/flow"
+	"github.com/pavlo67/workshop/components/storage"
 )
 
 var endpoints = server_http.Endpoints{
-	"read": {Path: "/v1/data/read", Tags: []string{"data"}, InterfaceKey: datastorage.ReadInterfaceKey},
-	"list": {Path: "/v1/data/list", Tags: []string{"data"}, InterfaceKey: datastorage.ListInterfaceKey},
+	"read": {Path: "/v1/data/read", Tags: []string{"data"}, InterfaceKey: storage.ReadInterfaceKey},
+	"list": {Path: "/v1/data/list", Tags: []string{"data"}, InterfaceKey: storage.ListInterfaceKey},
 
-	"save":   {Path: "/v1/data/save", Tags: []string{"data"}, InterfaceKey: datastorage.SaveInterfaceKey},
-	"remove": {Path: "/v1/data/remove", Tags: []string{"data"}, InterfaceKey: datastorage.RemoveInterfaceKey},
+	"save":   {Path: "/v1/data/save", Tags: []string{"data"}, InterfaceKey: storage.SaveInterfaceKey},
+	"remove": {Path: "/v1/data/remove", Tags: []string{"data"}, InterfaceKey: storage.RemoveInterfaceKey},
 
-	"tags":   {Path: "/v1/data/tags", Tags: []string{"data"}, InterfaceKey: datastorage.CountTagsInterfaceKey},
-	"tagged": {Path: "/v1/data/tagged", Tags: []string{"data"}, InterfaceKey: datastorage.ListWithTagInterfaceKey},
+	"tags":   {Path: "/v1/data/tags", Tags: []string{"data"}, InterfaceKey: storage.CountTagsInterfaceKey},
+	"tagged": {Path: "/v1/data/tagged", Tags: []string{"data"}, InterfaceKey: storage.ListWithTagInterfaceKey},
 
-	"flow_read": {Path: "/v1/flow/read", Tags: []string{"flow"}, InterfaceKey: dataflow.ReadInterfaceKey},
-	"flow_list": {Path: "/v1/flow/list", Tags: []string{"flow"}, InterfaceKey: dataflow.ListInterfaceKey},
+	"flow_read": {Path: "/v1/flow/read", Tags: []string{"flow"}, InterfaceKey: flow.ReadInterfaceKey},
+	"flow_list": {Path: "/v1/flow/list", Tags: []string{"flow"}, InterfaceKey: flow.ListInterfaceKey},
 }
 
 func Init(srvOp server_http.Operator, port int) error {

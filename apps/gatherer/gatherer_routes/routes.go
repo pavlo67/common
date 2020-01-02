@@ -5,12 +5,10 @@ import (
 
 	"github.com/pavlo67/workshop/common/libraries/filelib"
 	"github.com/pavlo67/workshop/common/server/server_http"
-
-	"github.com/pavlo67/workshop/constructions/dataflow"
 )
 
 var endpoints = server_http.Endpoints{
-	"flow": {Path: "/v1/export", Tags: []string{"flow"}, InterfaceKey: dataflow.ExportInterfaceKey},
+	"flow": {Path: "/v1/export", Tags: []string{"flow"}, InterfaceKey: flow.ExportInterfaceKey},
 }
 
 func Init(srvOp server_http.Operator, port int) error {
