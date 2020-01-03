@@ -38,7 +38,7 @@ var Prefix = "/confidence/"
 var _ starter.Operator = &confidenceStarter{}
 
 type confidenceStarter struct {
-	// interfaceKey joiner.InterfaceKey
+	// interfaceKey joiner.HandlerKey
 }
 
 func (ss *confidenceStarter) Name() string {
@@ -55,7 +55,7 @@ func (ss *confidenceStarter) Init(cfgCommon, cfg *config.Config, options common.
 		errs = append(errs, fmt.Errorf("no logger for %s:-(", Name))
 	}
 
-	// interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(server_http.InterfaceKey)))
+	// interfaceKey = joiner.HandlerKey(options.StringDefault("interface_key", string(server_http.HandlerKey)))
 
 	return nil, errs.Err()
 }
@@ -88,9 +88,9 @@ func (ss *confidenceStarter) Run(joinerOp joiner.Operator) error {
 		return errors.New("no auth_jwt.Operator")
 	}
 
-	//_, ok := joinerOp.Interface(server_http.InterfaceKey).(server_http.Operator)
+	//_, ok := joinerOp.Interface(server_http.HandlerKey).(server_http.Operator)
 	//if !ok {
-	//	return errors.Errorf("no server_http.Operator with key %s", server_http.InterfaceKey)
+	//	return errors.Errorf("no server_http.Operator with key %s", server_http.HandlerKey)
 	//}
 	//for _, ep := range Endpoints {
 	//	srvOp.HandleEndpoint(ep)

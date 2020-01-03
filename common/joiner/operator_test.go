@@ -28,14 +28,14 @@ func TestInterface(t *testing.T) {
 //	joiner := New()
 //
 //	const textA1 = "StructA.WorkerType()"
-//	const keyA1 InterfaceKey = "KeyA1"
+//	const keyA1 HandlerKey = "KeyA1"
 //	structA1 := &StructA{text: textA1}
 //	structA3 := &StructA{text: textA1}
 //
-//	const keyA2 InterfaceKey = "KeyA2"
+//	const keyA2 HandlerKey = "KeyA2"
 //	structA2 := &StructA{}
 //
-//	const keyB1 InterfaceKey = "KeyB1"
+//	const keyB1 HandlerKey = "KeyB1"
 //	structB1 := &StructB{}
 //
 //	joiner.Join(structA1, keyA1)

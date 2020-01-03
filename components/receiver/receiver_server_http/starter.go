@@ -22,6 +22,7 @@ var _ starter.Operator = &receiverHTTPStarter{}
 
 type receiverHTTPStarter struct {
 	interfaceKey joiner.InterfaceKey
+	handlerKey   joiner.InterfaceKey
 }
 
 func (sh *receiverHTTPStarter) Name() string {
@@ -32,6 +33,7 @@ func (sh *receiverHTTPStarter) Init(cfgCommon, cfg *config.Config, lCommon logge
 	l = lCommon
 
 	sh.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(receiver.InterfaceKey)))
+	sh.handlerKey = joiner.InterfaceKey(options.StringDefault("handler_key", string(receiver.HandlerInterfaceKey)))
 
 	return nil, nil
 }
@@ -46,15 +48,17 @@ func (sh *receiverHTTPStarter) Run(joinerOp joiner.Operator) error {
 		return errors.Errorf("no packs.Operator with key %s", packs.InterfaceKey)
 	}
 
-	err := joinerOp.Join(&receiveEndpoint, receiver.ActionInterfaceKey)
-	if err != nil {
-		return errors.Wrapf(err, "can't join receiveEndpoint as server_http.Endpoint with key '%s'", receiver.ActionInterfaceKey)
-	}
-
-	receiverOp, err := New(packsOp)
+	receiverOp, receiveEndpoint, err := New(packsOp)
 	if err != nil {
 		return errors.Wrap(err, "can't init receiver.Operator")
 	}
+
+	err = joinerOp.Join(receiveEndpoint, sh.handlerKey)
+	if err != nil {
+		return errors.Wrapf(err, "can't join receiveEndpoint as server_http.Endpoint with key '%s'", sh.handlerKey)
+	}
+
+	// l.Infof("")
 
 	err = joinerOp.Join(receiverOp, sh.interfaceKey)
 	if err != nil {

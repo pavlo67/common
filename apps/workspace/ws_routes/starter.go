@@ -24,7 +24,7 @@ var l logger.Operator
 var _ starter.Operator = &workspaceStarter{}
 
 type workspaceStarter struct {
-	// interfaceKey joiner.InterfaceKey
+	// interfaceKey joiner.HandlerKey
 }
 
 func (ss *workspaceStarter) Name() string {
@@ -39,7 +39,7 @@ func (ss *workspaceStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.O
 		errs = append(errs, fmt.Errorf("no logger for %s:-(", Name))
 	}
 
-	// interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(server_http.InterfaceKey)))
+	// interfaceKey = joiner.HandlerKey(options.StringDefault("interface_key", string(server_http.HandlerKey)))
 
 	return nil, errs.Err()
 }
@@ -60,9 +60,9 @@ func (ss *workspaceStarter) Run(joinerOp joiner.Operator) error {
 	}
 
 	for key, ep := range endpoints {
-		ep.Handler, ok = joinerOp.Interface(ep.InterfaceKey).(*server_http.Endpoint)
+		ep.Handler, ok = joinerOp.Interface(ep.HandlerKey).(*server_http.Endpoint)
 		if !ok {
-			return errors.Errorf("no server_http.Endpoint with key %s", ep.InterfaceKey)
+			return errors.Errorf("no server_http.Endpoint with key %s", ep.HandlerKey)
 		}
 		endpoints[key] = ep
 	}

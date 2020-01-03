@@ -1,4 +1,4 @@
-package taskscheduler
+package scheduler
 
 import (
 	"time"

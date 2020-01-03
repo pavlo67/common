@@ -12,7 +12,6 @@ import (
 	"github.com/pavlo67/workshop/common/selectors"
 	"github.com/pavlo67/workshop/common/selectors/logic"
 	"github.com/pavlo67/workshop/common/selectors/selectors_sql"
-	"github.com/pavlo67/workshop/components/flowcleaner"
 )
 
 var _ crud.Cleaner = &dataSQLite{}
@@ -99,40 +98,44 @@ func (dataOp *dataSQLite) Clean(term *selectors.Term, _ *crud.RemoveOptions) err
 	return err
 }
 
+const onSelectToClean = "on dataSQLite.SelectToClean(): "
+
 func (dataOp *dataSQLite) SelectToClean(options *crud.RemoveOptions) (*selectors.Term, error) {
-	var limit uint64 = flowcleaner.FlowLimitDefault
+	var limit uint64
 
 	if options != nil && options.Limit > 0 {
 		limit = options.Limit
+	} else {
+		return nil, errors.New(onSelectToClean + "no clean limit is defined")
 	}
 
-	queryMax := "SELECT MAX(id) from " + fcOp.table
+	queryMax := "SELECT MAX(id) from " + dataOp.table
 
 	var maxID uint64
-	row := fcOp.db.QueryRow(queryMax)
+	row := dataOp.db.QueryRow(queryMax)
 
 	err := row.Scan(&maxID)
 	if err != nil {
-		return errors.Errorf(onClean+": error on query (%s)", queryMax)
+		return nil, errors.Errorf(onSelectToClean+": error on query (%s)", queryMax)
 	}
 
-	queryDelete := "DELETE from " + fcOp.table + " WHERE id <= ?"
-	res, err := fcOp.db.Exec(queryDelete, maxID-limit)
-	if err != nil {
-		return errors.Errorf(onClean+": error on query (%s)", queryDelete)
-	}
-
-	rowsAffected, err := res.RowsAffected()
-	if err != nil {
-		return errors.Errorf(onClean+": error on res.RowsAffected(%s)", queryDelete)
-	}
-
-	l.Infof(onClean+": res.RowsAffected() = %d", rowsAffected)
-
-	if fcOp.tableTags != "" {
-		// TODO!!!
-	}
-
-	return nil
-
+	return selectors.Binary(selectors.Le, "id", selectors.Value{V: maxID - limit}), nil
 }
+
+//queryDelete := "DELETE from " + dataOp.table + " WHERE id <= ?"
+//res, err := dataOp.db.Exec(queryDelete, maxID-limit)
+//if err != nil {
+//return errors.Errorf(onClean+": error on query (%s)", queryDelete)
+//}
+//
+//rowsAffected, err := res.RowsAffected()
+//if err != nil {
+//return errors.Errorf(onClean+": error on res.RowsAffected(%s)", queryDelete)
+//}
+//
+//l.Infof(onClean+": res.RowsAffected() = %d", rowsAffected)
+//
+//if dataOp.tableTags != "" {
+//// TODO!!!
+//}
+//

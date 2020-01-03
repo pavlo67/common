@@ -75,7 +75,7 @@ func WildcardsForInsert(fields []string) string {
 
 func Connect(access config.Access) (*sql.DB, error) {
 	if strings.TrimSpace(access.Path) == "" {
-		return nil, errors.New("no path to SQLite database is defined")
+		return nil, errors.New("no path to Postgres database is defined")
 	}
 
 	address, err := AddressPostgres(access)

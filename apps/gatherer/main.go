@@ -13,19 +13,15 @@ import (
 	"github.com/pavlo67/workshop/common/control"
 	"github.com/pavlo67/workshop/common/libraries/filelib"
 	"github.com/pavlo67/workshop/common/logger"
+	"github.com/pavlo67/workshop/common/scheduler/scheduler_timeout"
 	"github.com/pavlo67/workshop/common/serializer"
 	"github.com/pavlo67/workshop/common/server/server_http/server_http_jschmhr"
 	"github.com/pavlo67/workshop/common/starter"
 
-	"github.com/pavlo67/workshop/components/dataimporter/flowimporter_task"
-	"github.com/pavlo67/workshop/components/datatagged"
 	"github.com/pavlo67/workshop/components/flow"
-	"github.com/pavlo67/workshop/components/flow/flowcleaner_task"
-	"github.com/pavlo67/workshop/components/flowcopier"
 	"github.com/pavlo67/workshop/components/packs/packs_pg"
 	"github.com/pavlo67/workshop/components/receiver"
 	"github.com/pavlo67/workshop/components/receiver/receiver_server_http"
-	"github.com/pavlo67/workshop/components/taskscheduler/scheduler_timeout"
 
 	"github.com/pavlo67/workshop/apps/gatherer/gatherer_actions"
 )
@@ -112,15 +108,15 @@ func main() {
 		{packs_pg.Starter(), nil},
 		{receiver_server_http.Starter(), common.Map{"handler_key": receiver.HandlerInterfaceKey}},
 
-		// database
-		{data_pg.Starter(), common.Map{"table": flow.CollectionDefault, "interface_key": flow.DataInterfaceKey, "cleaner_key": flow.CleanerInterfaceKey, "no_tagger": true}},
-		{datatagged.Starter(), common.Map{"data_key": flow.DataInterfaceKey, "interface_key": flow.InterfaceKey, "no_tagger": true}},
-
-		// flow actions
-		{flowimporter_task.Starter(), common.Map{"datatagged_key": flow.InterfaceKey, "interface_key": flow.ImporterTaskInterfaceKey}},
-		{flowcleaner_task.Starter(), common.Map{"cleaner_key": flow.CleanerInterfaceKey, "interface_key": flow.CleanerTaskInterfaceKey, "limit": 300000}},
-		{flowcopier.Starter(), common.Map{"datatagged_key": flow.InterfaceKey, "receiver_server_http": true}},
-
+		//// database
+		//{data_pg.Starter(), common.Map{"table": flow.CollectionDefault, "interface_key": flow.DataInterfaceKey, "cleaner_key": flow.CleanerInterfaceKey, "no_tagger": true}},
+		//{datatagged.Starter(), common.Map{"data_key": flow.DataInterfaceKey, "interface_key": flow.HandlerKey, "no_tagger": true}},
+		//
+		//// flow actions
+		//{flowimporter_task.Starter(), common.Map{"datatagged_key": flow.HandlerKey, "interface_key": flow.ImporterTaskInterfaceKey}},
+		//{flowcleaner_task.Starter(), common.Map{"cleaner_key": flow.CleanerInterfaceKey, "interface_key": flow.CleanerTaskInterfaceKey, "limit": 300000}},
+		//{flowcopier.Starter(), common.Map{"datatagged_key": flow.HandlerKey, "receiver_server_http": true}},
+		//
 		// actions starter (connecting specific actions to the corresponding action managers)
 		{gatherer_actions.Starter(), common.Map{
 			"importer_task_key":    flow.ImporterTaskInterfaceKey,
@@ -129,11 +125,11 @@ func main() {
 		}},
 	}
 
-	joiner, err := starter.Run(starters, cfgCommon, cfgGatherer, os.Args[1:], label)
+	joinerOp, err := starter.Run(starters, cfgCommon, cfgGatherer, os.Args[1:], label)
 	if err != nil {
 		l.Fatal(err)
 	}
-	defer joiner.CloseAll()
+	defer joinerOp.CloseAll()
 
 }
 

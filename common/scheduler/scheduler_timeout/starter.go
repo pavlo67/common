@@ -9,7 +9,7 @@ import (
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/starter"
 
-	"github.com/pavlo67/workshop/components/taskscheduler"
+	"github.com/pavlo67/workshop/common/scheduler"
 )
 
 const InterfaceKey joiner.InterfaceKey = "scheduler"
@@ -32,7 +32,7 @@ func (ss *schedulerStarter) Name() string {
 
 func (ss *schedulerStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	l = lCommon
-	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(taskscheduler.InterfaceKey)))
+	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(scheduler.InterfaceKey)))
 	return nil, nil
 }
 

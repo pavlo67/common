@@ -33,7 +33,7 @@ type Operator interface {
 	AddTags(joiner.InterfaceKey, common.ID, []Tag, *crud.SaveOptions) error
 	ReplaceTags(joiner.InterfaceKey, common.ID, []Tag, *crud.SaveOptions) error // or remove in particlar
 
-	ListTags(joiner.InterfaceKey, common.ID, *crud.GetOptions) ([]Tag, error) // i.e. parent sections if joiner.InterfaceKey == "tagger"
+	ListTags(joiner.InterfaceKey, common.ID, *crud.GetOptions) ([]Tag, error) // i.e. parent sections if joiner.HandlerKey == "tagger"
 	CountTags(*joiner.InterfaceKey, *crud.GetOptions) ([]TagCount, error)
 
 	IndexTagged(*joiner.InterfaceKey, string, *crud.GetOptions) (Index, error)

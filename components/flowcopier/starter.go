@@ -20,7 +20,7 @@ var _ starter.Operator = &importerTasksStarter{}
 type importerTasksStarter struct {
 	//config       config.Access
 	//table        string
-	//interfaceKey joiner.InterfaceKey
+	//interfaceKey joiner.HandlerKey
 }
 
 // ------------------------------------------------
@@ -42,7 +42,7 @@ func (ts *importerTasksStarter) Init(cfgCommon, cfg *config.Config, lCommon logg
 	//
 	//ts.config = cfgSQLite
 	//ts.table, _ = options.Key("table")
-	//ts.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(data.InterfaceKey)))
+	//ts.interfaceKey = joiner.HandlerKey(options.StringDefault("interface_key", string(data.HandlerKey)))
 
 	return nil, nil
 }

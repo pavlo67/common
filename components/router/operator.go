@@ -8,7 +8,7 @@ import (
 
 const InterfaceKey joiner.InterfaceKey = "router"
 
-// const CleanerInterfaceKey joiner.InterfaceKey = "route_cleaner"
+// const CleanerInterfaceKey joiner.HandlerKey = "route_cleaner"
 
 type Routes map[identity.Domain]config.Access
 

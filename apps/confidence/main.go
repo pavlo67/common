@@ -87,7 +87,7 @@ func main() {
 
 	starters := []starter.Starter{
 		{auth_stub.Starter(), common.Map{"interface_key": string(auth_stub.InterfaceKey)}},
-		// {auth_users_sqlite.Starter(), common.Map{"interface_key": string(auth_users_sqlite.InterfaceKey)}},
+		// {auth_users_sqlite.Starter(), common.Map{"interface_key": string(auth_users_sqlite.HandlerKey)}},
 		{auth_ecdsa.Starter(), common.Map{"interface_key": string(auth_ecdsa.InterfaceKey)}},
 		{auth_jwt.Starter(), common.Map{"interface_key": string(auth_jwt.InterfaceKey)}},
 		{kv_sqlite.Starter(), nil},

@@ -18,3 +18,4 @@ const ReadInterfaceKey joiner.InterfaceKey = "flow_read"
 const ExportInterfaceKey joiner.InterfaceKey = "flow_export"
 
 const CollectionDefault = "flow"
+const FlowLimitDefault = 3000

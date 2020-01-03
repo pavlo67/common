@@ -31,7 +31,6 @@ var fieldsToList = append([]string{"id"}, fieldsToRead...)
 var fieldsToListStr = strings.Join(fieldsToList, ",")
 
 var _ packs.Operator = &packsPg{}
-var _ crud.Cleaner = &packsPg{}
 
 type packsPg struct {
 	db    *sql.DB
@@ -370,25 +369,4 @@ func (packsOp *packsPg) AddHistory(id common.ID, historyToAdd crud.History, _ *c
 
 func (packsOp *packsPg) Close() error {
 	return errors.Wrap(packsOp.db.Close(), "on packsPg.Close()")
-}
-
-const onClean = "on packsPg.Clean(): "
-
-func (packsOp *packsPg) Clean(term *selectors.Term, _ *crud.RemoveOptions) error {
-	condition, values, err := selectors_sql.Use(term)
-	if err != nil {
-		return errors.Errorf(onClean+"wrong selector (%#v): %s", term, err)
-	}
-
-	query := packsOp.sqlClean
-	if strings.TrimSpace(condition) != "" {
-		query += " WHERE " + sqllib_postgres.CorrectWildcards(condition)
-	}
-
-	_, err = packsOp.db.Exec(query, values...)
-	if err != nil {
-		return errors.Wrapf(err, onClean+sqllib.CantExec, query, values)
-	}
-
-	return nil
 }

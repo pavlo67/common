@@ -34,6 +34,12 @@ func (access *Access) URL() string {
 
 	if url != "" {
 		proto := strings.TrimSpace(access.Proto)
+
+		// TODO!!! remove the kostyl
+		if proto == "" {
+			proto = "http://"
+		}
+
 		url = proto + url
 	}
 

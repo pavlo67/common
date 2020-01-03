@@ -20,7 +20,7 @@ var _ starter.Operator = &routerStubStarter{}
 
 type routerStubStarter struct {
 	interfaceKey joiner.InterfaceKey
-	// cleanerInterfaceKey joiner.InterfaceKey
+	// cleanerInterfaceKey joiner.HandlerKey
 
 	routes router.Routes
 }
@@ -32,13 +32,13 @@ func (rs *routerStubStarter) Name() string {
 func (rs *routerStubStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	l = lCommon
 
-	err := cfg.Value("routes", &rs.routes)
+	err := cfgCommon.Value("routes", &rs.routes)
 	if err != nil {
 		return nil, err
 	}
 
 	rs.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(router.InterfaceKey)))
-	// rs.cleanerInterfaceKey = joiner.InterfaceKey(options.StringDefault("cleaner_interface_key", string(router.CleanerInterfaceKey)))
+	// rs.cleanerInterfaceKey = joiner.HandlerKey(options.StringDefault("cleaner_interface_key", string(router.CleanerInterfaceKey)))
 
 	return nil, nil
 }

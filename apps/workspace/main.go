@@ -18,6 +18,7 @@ import (
 	"github.com/pavlo67/workshop/common/server/server_http/server_http_jschmhr"
 	"github.com/pavlo67/workshop/common/starter"
 
+	"github.com/pavlo67/workshop/common/scheduler/scheduler_timeout"
 	"github.com/pavlo67/workshop/components/data/data_sqlite"
 	"github.com/pavlo67/workshop/components/datatagged"
 	"github.com/pavlo67/workshop/components/flow"
@@ -28,7 +29,6 @@ import (
 	"github.com/pavlo67/workshop/components/storage"
 	"github.com/pavlo67/workshop/components/storage/storage_server_http"
 	"github.com/pavlo67/workshop/components/tagger/tagger_sqlite"
-	"github.com/pavlo67/workshop/components/taskscheduler/scheduler_timeout"
 
 	"github.com/pavlo67/workshop/apps/workspace/ws_routes"
 )
@@ -148,9 +148,9 @@ func main() {
 	//	l.Fatal(err)
 	//}
 	//
-	//schOp, ok := joiner.Interface(taskscheduler.InterfaceKey).(taskscheduler.Operator)
+	//schOp, ok := joiner.Interface(taskscheduler.HandlerKey).(taskscheduler.Operator)
 	//if !ok {
-	//	l.Fatalf("no scheduler.Operator with key %s", taskscheduler.InterfaceKey)
+	//	l.Fatalf("no scheduler.Operator with key %s", taskscheduler.HandlerKey)
 	//}
 	//
 	//taskID, err := schOp.Init(task)

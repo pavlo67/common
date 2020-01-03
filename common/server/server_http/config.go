@@ -13,8 +13,8 @@ type EndpointConfig struct {
 	Tags     []string
 	Produces []string
 
-	Handler      *Endpoint
-	InterfaceKey joiner.InterfaceKey // for init purposes only
+	Handler    *Endpoint
+	HandlerKey joiner.InterfaceKey // for init purposes only
 }
 
 type Endpoints map[string]EndpointConfig

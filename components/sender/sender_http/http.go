@@ -12,6 +12,8 @@ import (
 	"github.com/pavlo67/workshop/common/crud"
 	"github.com/pavlo67/workshop/common/identity"
 
+	"io/ioutil"
+
 	"github.com/pavlo67/workshop/components/packs"
 	"github.com/pavlo67/workshop/components/router"
 	"github.com/pavlo67/workshop/components/sender"
@@ -55,7 +57,7 @@ func New(packsOp packs.Operator, routerOp router.Operator) (sender.Operator, err
 
 const onSendOnly = "on senderHTTP.SendOne(): "
 
-func (senderOp *senderHTTP) SendOnly(pack *packs.Pack, to identity.Key) (response *packs.Pack, doneAt *time.Time, err error) {
+func (senderOp *senderHTTP) SendOnly(pack *packs.Pack, to identity.Key) (inPack *packs.Pack, doneAt *time.Time, err error) {
 	if pack == nil {
 		return nil, nil, errors.New(onSendOnly + "nothing to send")
 	}
@@ -89,26 +91,43 @@ func (senderOp *senderHTTP) SendOnly(pack *packs.Pack, to identity.Key) (respons
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(packBytes))
 	if err != nil {
 		errs = append(errs, errors.Wrapf(err, onSendOnly+"can't send to: '%s'", url))
+
 		return nil, &now, errs.Err()
 	}
+
+	if resp.StatusCode != http.StatusOK {
+		errs = append(errs, errors.Errorf(onSendOnly+"can't send to %s: status = %s", url, resp.Status))
+		return nil, &now, errs.Err()
+	}
+
 	defer resp.Body.Close()
 
-	response = &packs.Pack{} // TODO: is it necessarily???
-	return response, &now, errs.Append(json.NewDecoder(resp.Body).Decode(response)).Err()
+	inPack = &packs.Pack{} // TODO: is it necessarily???
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		errs = append(errs, errors.Wrap(err, onSendOnly+"can't read inPack.Body"))
+	}
+
+	err = json.Unmarshal(bodyBytes, inPack)
+	if err != nil {
+		errs = append(errs, errors.Wrapf(err, onSendOnly+"can't unmarshal inPack(%s)", bodyBytes))
+	}
+
+	return inPack, &now, errs.Err()
 }
 
 // TODO!!! be careful because "pack.History = ..." isn't a thread safe action
 
 const onSendOne = "on senderHTTP.SendOne(): "
 
-func (senderOp *senderHTTP) SendOne(pack *packs.Pack, to identity.Key, ignoreProblems bool) (response *packs.Pack, err error) {
-	if pack == nil {
+func (senderOp *senderHTTP) SendOne(outPack *packs.Pack, to identity.Key, ignoreProblems bool) (inPack *packs.Pack, err error) {
+	if outPack == nil {
 		return nil, errors.New(onSendOne + "nothing to send")
 	}
 
 	var errs common.Errors
 
-	id, err := senderOp.packsOp.Save(pack, nil)
+	id, err := senderOp.packsOp.Save(outPack, nil)
 	if err != nil {
 		if !ignoreProblems {
 			return nil, errors.Wrap(err, onSendOne+"can't .Save()")
@@ -118,7 +137,7 @@ func (senderOp *senderHTTP) SendOne(pack *packs.Pack, to identity.Key, ignorePro
 
 	var actionKey crud.ActionKey
 
-	response, doneAtPtr, err := senderOp.SendOnly(pack, to)
+	inPack, doneAtPtr, err := senderOp.SendOnly(outPack, to)
 	if err != nil {
 		errs = append(errs, err)
 		actionKey = sender.DidntSendKey
@@ -126,8 +145,9 @@ func (senderOp *senderHTTP) SendOne(pack *packs.Pack, to identity.Key, ignorePro
 		actionKey = sender.SentKey
 
 	}
+
 	var doneAt time.Time
-	if doneAtPtr == nil {
+	if doneAtPtr != nil {
 		doneAt = *doneAtPtr
 	}
 
@@ -138,18 +158,18 @@ func (senderOp *senderHTTP) SendOne(pack *packs.Pack, to identity.Key, ignorePro
 	}
 
 	if id == "" {
-		pack.History = append(pack.History, action)
+		outPack.History = append(outPack.History, action)
 
 	} else if historyHew, err := senderOp.packsOp.AddHistory(id, crud.History{action}, nil); err != nil {
 		errs = append(errs, err)
-		pack.History = append(pack.History, action)
+		outPack.History = append(outPack.History, action)
 
 	} else {
-		pack.History = historyHew
+		outPack.History = historyHew
 
 	}
 
-	return response, errs.Err()
+	return inPack, errs.Err()
 }
 
 const onSend = "on senderHTTP.Send(): "

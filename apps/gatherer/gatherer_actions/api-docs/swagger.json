@@ -1,18 +1,17 @@
 {
  "info": {
-  "title": "Pavlo's Storage Gatherer REST API",
+  "title": "Pavlo's Gatherer REST API",
   "version": "0.0.1"
  },
  "paths": {
-  "/gatherer/v1/export": {
-   "get": {
-    "operationId": "flow",
+  "/gatherer/v1/receive": {
+   "post": {
+    "operationId": "receive",
     "parameters": [
      {
-      "description": "",
-      "in": "query",
-      "name": "after_id",
-      "required": false,
+      "in": "body",
+      "name": "body_item",
+      "required": true,
       "type": "string"
      }
     ],
@@ -20,12 +19,12 @@
      "application/json"
     ],
     "tags": [
-     "flow"
+     "transport"
     ]
    }
   }
  },
- "port": ":3002",
+ "port": ":3092",
  "schemes": [
   "http",
   "https"

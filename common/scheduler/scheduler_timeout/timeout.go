@@ -10,10 +10,10 @@ import (
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/actor"
 
-	"github.com/pavlo67/workshop/components/taskscheduler"
+	"github.com/pavlo67/workshop/common/scheduler"
 )
 
-func New() taskscheduler.Operator {
+func New() scheduler.Operator {
 	return &schedulerTimeout{
 		tasks: map[common.ID]*taskWithSignals{},
 		mutex: &sync.RWMutex{},
@@ -24,7 +24,7 @@ var MaxSleep = time.Second * 3
 
 // implementation --------------------------------------------------------------------------------------
 
-var _ taskscheduler.Operator = &schedulerTimeout{}
+var _ scheduler.Operator = &schedulerTimeout{}
 
 type taskWithSignals struct {
 	actor.Operator
