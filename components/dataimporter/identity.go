@@ -1,4 +1,4 @@
-package flowimporter
+package dataimporter
 
 import (
 	"github.com/pavlo67/workshop/common/crud"

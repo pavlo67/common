@@ -1,4 +1,4 @@
-package flowimporter
+package dataimporter
 
 import (
 	"log"

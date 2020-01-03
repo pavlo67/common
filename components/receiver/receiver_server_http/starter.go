@@ -1,7 +1,7 @@
 package receiver_server_http
 
 import (
-	"fmt"
+	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
@@ -9,44 +9,57 @@ import (
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/starter"
 
+	"github.com/pavlo67/workshop/components/packs"
 	"github.com/pavlo67/workshop/components/receiver"
 )
 
+func Starter() starter.Operator {
+	return &receiverHTTPStarter{}
+}
+
 var l logger.Operator
+var _ starter.Operator = &receiverHTTPStarter{}
 
-const Name = "receiver_server_http"
-
-var _ starter.Operator = &receiverServerHTTPStarter{}
-
-type receiverServerHTTPStarter struct {
+type receiverHTTPStarter struct {
 	interfaceKey joiner.InterfaceKey
 }
 
-func Starter() starter.Operator {
-	return &receiverServerHTTPStarter{}
-}
-
-func (rs *receiverServerHTTPStarter) Name() string {
+func (sh *receiverHTTPStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (rs *receiverServerHTTPStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
-
-	rs.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(receiver.InterfaceKey)))
-
+func (sh *receiverHTTPStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	l = lCommon
-	if l == nil {
-		return nil, fmt.Errorf("no logger for %s:-(", Name)
-	}
+
+	sh.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(receiver.InterfaceKey)))
 
 	return nil, nil
 }
 
-func (rs *receiverServerHTTPStarter) Setup() error {
+func (sh *receiverHTTPStarter) Setup() error {
 	return nil
 }
 
-func (rs *receiverServerHTTPStarter) Run(joinerOp joiner.Operator) error {
+func (sh *receiverHTTPStarter) Run(joinerOp joiner.Operator) error {
+	packsOp, ok := joinerOp.Interface(packs.InterfaceKey).(packs.Operator)
+	if !ok {
+		return errors.Errorf("no packs.Operator with key %s", packs.InterfaceKey)
+	}
+
+	err := joinerOp.Join(&receiveEndpoint, receiver.ActionInterfaceKey)
+	if err != nil {
+		return errors.Wrapf(err, "can't join receiveEndpoint as server_http.Endpoint with key '%s'", receiver.ActionInterfaceKey)
+	}
+
+	receiverOp, err := New(packsOp)
+	if err != nil {
+		return errors.Wrap(err, "can't init receiver.Operator")
+	}
+
+	err = joinerOp.Join(receiverOp, sh.interfaceKey)
+	if err != nil {
+		return errors.Wrapf(err, "can't join *receiverHTTP as receiver.Operator with key '%s'", sh.interfaceKey)
+	}
 
 	return nil
 }

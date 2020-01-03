@@ -21,12 +21,12 @@ import (
 	"github.com/pavlo67/workshop/components/data/data_sqlite"
 	"github.com/pavlo67/workshop/components/datatagged"
 	"github.com/pavlo67/workshop/components/flow"
+	"github.com/pavlo67/workshop/components/flow/flow_server_http"
 	"github.com/pavlo67/workshop/components/flowcleaner/flowcleaner_sqlite"
 	"github.com/pavlo67/workshop/components/flowcopier"
-	"github.com/pavlo67/workshop/components/flowserver_http"
 	"github.com/pavlo67/workshop/components/packs/packs_pg"
 	"github.com/pavlo67/workshop/components/storage"
-	"github.com/pavlo67/workshop/components/storageserver_http"
+	"github.com/pavlo67/workshop/components/storage/storage_server_http"
 	"github.com/pavlo67/workshop/components/tagger/tagger_sqlite"
 	"github.com/pavlo67/workshop/components/taskscheduler/scheduler_timeout"
 
@@ -116,13 +116,13 @@ func main() {
 
 		{data_sqlite.Starter(), common.Map{"interface_key": storage.DataInterfaceKey, "table": storageTable}},
 		{datatagged.Starter(), common.Map{"interface_key": storage.InterfaceKey, "data_key": storage.DataInterfaceKey}},
-		{storageserver_http.Starter(), nil},
+		{storage_server_http.Starter(), nil},
 
 		{data_sqlite.Starter(), common.Map{"interface_key": flow.DataInterfaceKey, "table": flowTable}},
 		{datatagged.Starter(), common.Map{"interface_key": flow.InterfaceKey, "data_key": flow.DataInterfaceKey}},
 		{flowcopier.Starter(), common.Map{"client_http": true, "flow_key": flow.InterfaceKey}},
 		{flowcleaner_sqlite.Starter(), common.Map{"limit": 3000, "flow_key": flow.CleanerInterfaceKey}},
-		{flowserver_http.Starter(), nil},
+		{flow_server_http.Starter(), nil},
 
 		{ws_routes.Starter(), nil},
 	}

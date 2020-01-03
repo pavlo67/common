@@ -21,9 +21,11 @@ var l logger.Operator
 var _ starter.Operator = &dataSQLiteStarter{}
 
 type dataSQLiteStarter struct {
-	config       config.Access
-	table        string
+	config config.Access
+	table  string
+
 	interfaceKey joiner.InterfaceKey
+	cleanerKey   joiner.InterfaceKey
 
 	noTagger bool
 }
@@ -44,6 +46,7 @@ func (ts *dataSQLiteStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.
 	ts.config = cfgSQLite
 	ts.table, _ = options.String("table")
 	ts.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(data.InterfaceKey)))
+	ts.cleanerKey = joiner.InterfaceKey(options.StringDefault("cleaner_key", string(data.CleanerInterfaceKey)))
 
 	ts.noTagger, _ = options.Bool("no_tagger")
 
@@ -65,7 +68,7 @@ func (ts *dataSQLiteStarter) Setup() error {
 func (ts *dataSQLiteStarter) Run(joinerOp joiner.Operator) error {
 	var ok bool
 	var taggerOp tagger.Operator
-	var cleanerOp crud.Cleaner
+	var taggercleanerOp crud.Cleaner
 
 	if !ts.noTagger {
 		taggerOp, ok = joinerOp.Interface(tagger.InterfaceKey).(tagger.Operator)
@@ -73,13 +76,13 @@ func (ts *dataSQLiteStarter) Run(joinerOp joiner.Operator) error {
 			return errors.Errorf("no tagger.Operator with key %s", tagger.InterfaceKey)
 		}
 
-		cleanerOp, ok = joinerOp.Interface(tagger.CleanerInterfaceKey).(crud.Cleaner)
+		taggercleanerOp, ok = joinerOp.Interface(tagger.CleanerInterfaceKey).(crud.Cleaner)
 		if !ok {
 			return errors.Errorf("no tagger.Cleaner with key %s", tagger.InterfaceKey)
 		}
 	}
 
-	dataOp, _, err := New(ts.config, ts.table, ts.interfaceKey, taggerOp, cleanerOp)
+	dataOp, datacleanerOp, err := New(ts.config, ts.table, ts.interfaceKey, taggerOp, taggercleanerOp)
 	if err != nil {
 		return errors.Wrap(err, "can't init data.Operator")
 	}
@@ -87,6 +90,11 @@ func (ts *dataSQLiteStarter) Run(joinerOp joiner.Operator) error {
 	err = joinerOp.Join(dataOp, ts.interfaceKey)
 	if err != nil {
 		return errors.Wrapf(err, "can't join *dataSQLite as data.Operator with key '%s'", ts.interfaceKey)
+	}
+
+	err = joinerOp.Join(datacleanerOp, ts.cleanerKey)
+	if err != nil {
+		return errors.Wrapf(err, "can't join *dataSQLite as crud.Cleaner with key '%s'", ts.cleanerKey)
 	}
 
 	return nil

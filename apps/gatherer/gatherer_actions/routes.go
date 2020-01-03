@@ -1,10 +1,11 @@
-package gatherer_routes
+package gatherer_actions
 
 import (
 	"strconv"
 
 	"github.com/pavlo67/workshop/common/libraries/filelib"
 	"github.com/pavlo67/workshop/common/server/server_http"
+	"github.com/pavlo67/workshop/components/flow"
 )
 
 var endpoints = server_http.Endpoints{

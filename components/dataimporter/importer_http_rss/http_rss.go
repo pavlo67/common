@@ -1,16 +1,16 @@
 package importer_http_rss
 
 import (
+	"io/ioutil"
+	"net/http"
 	"time"
 
 	"github.com/mmcdole/gofeed"
 	"github.com/pkg/errors"
 
-	"io/ioutil"
-	"net/http"
-
 	"github.com/pavlo67/workshop/common/logger"
-	"github.com/pavlo67/workshop/constructions/dataimporter"
+
+	"github.com/pavlo67/workshop/components/dataimporter"
 )
 
 func New(l logger.Operator) (dataimporter.Operator, error) {

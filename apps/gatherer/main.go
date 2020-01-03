@@ -14,21 +14,20 @@ import (
 	"github.com/pavlo67/workshop/common/libraries/filelib"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/serializer"
-	"github.com/pavlo67/workshop/common/server/server_http"
 	"github.com/pavlo67/workshop/common/server/server_http/server_http_jschmhr"
 	"github.com/pavlo67/workshop/common/starter"
 
-	"github.com/pavlo67/workshop/components/data"
-	"github.com/pavlo67/workshop/components/data/data_sqlite"
+	"github.com/pavlo67/workshop/components/dataimporter/flowimporter_task"
 	"github.com/pavlo67/workshop/components/datatagged"
 	"github.com/pavlo67/workshop/components/flow"
-	"github.com/pavlo67/workshop/constructions/dataflow/flow_cleaner/flow_cleaner_sqlite"
-	"github.com/pavlo67/workshop/constructions/dataflow/flow_server_http_handler"
-	"github.com/pavlo67/workshop/constructions/dataimporter/load_task"
-	"github.com/pavlo67/workshop/constructions/taskscheduler"
-	"github.com/pavlo67/workshop/constructions/taskscheduler/scheduler_timeout"
+	"github.com/pavlo67/workshop/components/flow/flowcleaner_task"
+	"github.com/pavlo67/workshop/components/flowcopier"
+	"github.com/pavlo67/workshop/components/packs/packs_pg"
+	"github.com/pavlo67/workshop/components/receiver"
+	"github.com/pavlo67/workshop/components/receiver/receiver_server_http"
+	"github.com/pavlo67/workshop/components/taskscheduler/scheduler_timeout"
 
-	"github.com/pavlo67/workshop/apps/gatherer/gatherer_routes"
+	"github.com/pavlo67/workshop/apps/gatherer/gatherer_actions"
 )
 
 var (
@@ -95,33 +94,39 @@ func main() {
 		l.Fatal(err)
 	}
 
-	var cfgSQLite config.Access
-	err = cfgGatherer.Value("sqlite", &cfgSQLite)
-	if err != nil {
-		l.Fatal(err)
-	}
-
 	// running starters
-
-	// TODO!!! vary it
-	const flowTable = flow.CollectionDefault
 
 	label := "GATHERER/SQLITE CLI BUILD"
 
 	starters := []starter.Starter{
+
+		// general purposes components
 		{control.Starter(), nil},
-
-		{data_sqlite.Starter(), common.Map{"table": flowTable, "interface_key": flow.DataInterfaceKey, "no_tagger": true}},
-		{datatagged.Starter(), common.Map{"data_key": flow.DataInterfaceKey, "interface_key": flow.InterfaceKey, "no_tagger": true}},
-		{flow_server_http_handler.Starter(), nil},
-
 		{auth_ecdsa.Starter(), nil},
-		{server_http_jschmhr.Starter(), common.Map{"port": port}},
-		{gatherer_routes.Starter(), nil},
 
-		{flow_cleaner_sqlite.Starter(), common.Map{"table": flowTable}},
+		// action managers
 		{scheduler_timeout.Starter(), nil},
-		{load_task.Starter(), nil},
+		{server_http_jschmhr.Starter(), common.Map{"port": port}},
+
+		// transport system
+		{packs_pg.Starter(), nil},
+		{receiver_server_http.Starter(), common.Map{"handler_key": receiver.HandlerInterfaceKey}},
+
+		// database
+		{data_pg.Starter(), common.Map{"table": flow.CollectionDefault, "interface_key": flow.DataInterfaceKey, "cleaner_key": flow.CleanerInterfaceKey, "no_tagger": true}},
+		{datatagged.Starter(), common.Map{"data_key": flow.DataInterfaceKey, "interface_key": flow.InterfaceKey, "no_tagger": true}},
+
+		// flow actions
+		{flowimporter_task.Starter(), common.Map{"datatagged_key": flow.InterfaceKey, "interface_key": flow.ImporterTaskInterfaceKey}},
+		{flowcleaner_task.Starter(), common.Map{"cleaner_key": flow.CleanerInterfaceKey, "interface_key": flow.CleanerTaskInterfaceKey, "limit": 300000}},
+		{flowcopier.Starter(), common.Map{"datatagged_key": flow.InterfaceKey, "receiver_server_http": true}},
+
+		// actions starter (connecting specific actions to the corresponding action managers)
+		{gatherer_actions.Starter(), common.Map{
+			"importer_task_key":    flow.ImporterTaskInterfaceKey,
+			"cleaner_task_key":     flow.CopierTaskInterfaceKey,
+			"receiver_handler_key": receiver.HandlerInterfaceKey,
+		}},
 	}
 
 	joiner, err := starter.Run(starters, cfgCommon, cfgGatherer, os.Args[1:], label)
@@ -129,45 +134,6 @@ func main() {
 		l.Fatal(err)
 	}
 	defer joiner.CloseAll()
-
-	// scheduling importer task
-
-	dataOp, ok := joiner.Interface(flow.DataInterfaceKey).(data.Operator)
-	if !ok {
-		l.Fatalf("no data.Operator with key %s", flow.DataInterfaceKey)
-	}
-
-	task, err := load_task.NewLoader(dataOp)
-	if err != nil {
-		l.Fatal(err)
-	}
-
-	schOp, ok := joiner.Interface(taskscheduler.InterfaceKey).(taskscheduler.Operator)
-	if !ok {
-		l.Fatalf("no scheduler.Operator with key %s", taskscheduler.InterfaceKey)
-	}
-
-	taskID, err := schOp.Init(task)
-	if err != nil {
-		l.Fatalf("can't schOp.Init(%#v): %s", task, err)
-	}
-
-	err = schOp.Run(taskID, time.Hour, true)
-	if err != nil {
-		l.Fatalf("can't schOp.Run(%s, time.Hour, false): %s", taskID, err)
-	}
-
-	// http_server
-
-	srvOp, ok := joiner.Interface(server_http.InterfaceKey).(server_http.Operator)
-	if !ok {
-		l.Fatalf("no server_http.Operator with key %s", server_http.InterfaceKey)
-	}
-
-	err = srvOp.Start()
-	if err != nil {
-		l.Error(err)
-	}
 
 }
 

@@ -1,4 +1,4 @@
-package storageserver_http
+package storage_server_http
 
 import (
 	"fmt"

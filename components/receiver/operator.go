@@ -8,7 +8,7 @@ import (
 )
 
 const InterfaceKey joiner.InterfaceKey = "receiver"
-const ActionInterfaceKey joiner.InterfaceKey = "receiver_action"
+const HandlerInterfaceKey joiner.InterfaceKey = "receiver_handler"
 
 type Operator interface {
 	AddHandler(typeKey types.Key, handler packs.Handler) error

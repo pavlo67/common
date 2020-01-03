@@ -11,6 +11,8 @@ import (
 )
 
 const InterfaceKey joiner.InterfaceKey = "data"
+const CleanerInterfaceKey joiner.InterfaceKey = "datacleaner"
+
 const CollectionDefault = "data"
 
 type Item struct {

@@ -1,4 +1,4 @@
-package receiver_http
+package receiver_server_http
 
 import (
 	"encoding/json"

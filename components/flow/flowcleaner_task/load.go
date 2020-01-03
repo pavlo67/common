@@ -1,4 +1,4 @@
-package load_task
+package flowcleaner_task
 
 import (
 	"github.com/pkg/errors"
@@ -7,12 +7,14 @@ import (
 	"github.com/pavlo67/workshop/common/actor"
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/selectors"
+
 	"github.com/pavlo67/workshop/components/data"
-	"github.com/pavlo67/workshop/constructions/dataimporter"
-	"github.com/pavlo67/workshop/constructions/dataimporter/importer_http_rss"
+	"github.com/pavlo67/workshop/components/dataimporter"
+	"github.com/pavlo67/workshop/components/dataimporter/importer_http_rss"
+	"github.com/pavlo67/workshop/components/datatagged"
 )
 
-func NewLoader(dataOp data.Operator) (actor.Operator, error) {
+func NewLoader(dataOp datatagged.Operator) (actor.Operator, error) {
 
 	if dataOp == nil {
 		return nil, errors.New("on importer_task.NewLoader(): data.Operator == nil")
@@ -124,5 +126,5 @@ func Load(url string, dataOp data.Operator) (int, int, int, error) {
 		}
 	}
 
-	return numAll, numProcessed, numNew, fcOp.Clean(nil, nil)
+	return numAll, numProcessed, numNew, nil
 }

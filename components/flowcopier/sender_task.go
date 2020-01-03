@@ -8,7 +8,7 @@ import (
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/selectors"
 	"github.com/pavlo67/workshop/components/data"
-	"github.com/pavlo67/workshop/components/flowimporter"
+	"github.com/pavlo67/workshop/components/dataimporter"
 )
 
 // TODO: vary this parameter
@@ -41,7 +41,7 @@ var _ actor.Operator = &copyTask{}
 
 type copyTask struct {
 	url            string
-	impOp          flowimporter.Operator
+	impOp          dataimporter.Operator
 	lastImportedID string
 
 	dataOp    data.Operator
@@ -88,7 +88,7 @@ func (it *copyTask) Copy() (int, int, int, error) {
 
 		numProcessed++
 
-		sourceKey := flowimporter.SourceKey(item.History)
+		sourceKey := dataimporter.SourceKey(item.History)
 		// TODO!!! check if both are not empty
 
 		term := selectors.Binary(selectors.Eq, "source_key", selectors.Value{sourceKey})
