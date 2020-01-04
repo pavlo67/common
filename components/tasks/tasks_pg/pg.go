@@ -14,7 +14,7 @@ import (
 	"github.com/pavlo67/workshop/common/crud"
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/libraries/sqllib"
-	"github.com/pavlo67/workshop/common/libraries/sqllib/sqllib_postgres"
+	"github.com/pavlo67/workshop/common/libraries/sqllib/sqllib_pg"
 	"github.com/pavlo67/workshop/common/selectors"
 	"github.com/pavlo67/workshop/common/selectors/selectors_sql"
 
@@ -31,12 +31,12 @@ var fieldsToList = append([]string{"id"}, fieldsToRead...)
 var fieldsToListStr = strings.Join(fieldsToList, ",")
 
 var fieldsToStart = []string{"status", "updated_at"}
-var fieldsToStartStr = sqllib_postgres.WildcardsForUpdate(fieldsToStart)
+var fieldsToStartStr = sqllib_pg.WildcardsForUpdate(fieldsToStart)
 
 // var fieldsToReadToStartStr = strings.Join(fieldsToStart[:len(fieldsToStart)-1], ",")
 
 var fieldsToFinish = []string{"status", "results", "updated_at"}
-var fieldsToFinishStr = sqllib_postgres.WildcardsForUpdate(fieldsToFinish)
+var fieldsToFinishStr = sqllib_pg.WildcardsForUpdate(fieldsToFinish)
 var fieldsToReadToFinishStr = strings.Join(fieldsToFinish[:len(fieldsToFinish)-1], ",")
 
 var _ tasks.Operator = &tasksPostgres{}
@@ -55,7 +55,7 @@ type tasksPostgres struct {
 const onNew = "on tasksPostgres.New(): "
 
 func New(access config.Access, table string, interfaceKey joiner.InterfaceKey) (tasks.Operator, crud.Cleaner, error) {
-	db, err := sqllib_postgres.Connect(access)
+	db, err := sqllib_pg.Connect(access)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, onNew)
 	}
@@ -68,7 +68,7 @@ func New(access config.Access, table string, interfaceKey joiner.InterfaceKey) (
 		db:    db,
 		table: table,
 
-		sqlInsert: "INSERT INTO " + table + " (" + fieldsToInsertStr + ") VALUES (" + sqllib_postgres.WildcardsForInsert(fieldsToInsert) + ") RETURNING id",
+		sqlInsert: "INSERT INTO " + table + " (" + fieldsToInsertStr + ") VALUES (" + sqllib_pg.WildcardsForInsert(fieldsToInsert) + ") RETURNING id",
 		sqlRead:   "SELECT " + fieldsToReadStr + " FROM " + table + " WHERE id = $1",
 		sqlList:   sqllib.SQLList(table, fieldsToListStr, "", &crud.GetOptions{OrderBy: []string{"created_at"}}),
 
@@ -211,7 +211,7 @@ func (tasksOp *tasksPostgres) List(term *selectors.Term, options *crud.GetOption
 	stm := tasksOp.stmList
 
 	if condition != "" || options != nil {
-		query = sqllib_postgres.CorrectWildcards(sqllib.SQLList(tasksOp.table, fieldsToListStr, condition, options))
+		query = sqllib_pg.CorrectWildcards(sqllib.SQLList(tasksOp.table, fieldsToListStr, condition, options))
 
 		stm, err = tasksOp.db.Prepare(query)
 		if err != nil {
@@ -401,7 +401,7 @@ func (tasksOp *tasksPostgres) Clean(term *selectors.Term, _ *crud.RemoveOptions)
 
 	query := tasksOp.sqlClean
 	if strings.TrimSpace(condition) != "" {
-		query += " WHERE " + sqllib_postgres.CorrectWildcards(condition)
+		query += " WHERE " + sqllib_pg.CorrectWildcards(condition)
 	}
 
 	_, err = tasksOp.db.Exec(query, values...)

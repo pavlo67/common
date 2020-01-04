@@ -14,7 +14,7 @@ import (
 	"github.com/pavlo67/workshop/common/crud"
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/libraries/sqllib"
-	"github.com/pavlo67/workshop/common/libraries/sqllib/sqllib_postgres"
+	"github.com/pavlo67/workshop/common/libraries/sqllib/sqllib_pg"
 	"github.com/pavlo67/workshop/common/selectors"
 	"github.com/pavlo67/workshop/common/selectors/selectors_sql"
 
@@ -45,7 +45,7 @@ type packsPg struct {
 const onNew = "on packsPg.New(): "
 
 func New(access config.Access, table string, interfaceKey joiner.InterfaceKey) (packs.Operator, crud.Cleaner, error) {
-	db, err := sqllib_postgres.Connect(access)
+	db, err := sqllib_pg.Connect(access)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, onNew)
 	}
@@ -58,7 +58,7 @@ func New(access config.Access, table string, interfaceKey joiner.InterfaceKey) (
 		db:    db,
 		table: table,
 
-		sqlInsert: "INSERT INTO " + table + " (" + fieldsToInsertStr + ") VALUES (" + sqllib_postgres.WildcardsForInsert(fieldsToInsert) + ") RETURNING id",
+		sqlInsert: "INSERT INTO " + table + " (" + fieldsToInsertStr + ") VALUES (" + sqllib_pg.WildcardsForInsert(fieldsToInsert) + ") RETURNING id",
 
 		sqlRead: "SELECT " + fieldsToReadStr + " FROM " + table + " WHERE id = $1",
 		sqlList: sqllib.SQLList(table, fieldsToListStr, "", &crud.GetOptions{OrderBy: []string{"created_at"}}),
@@ -147,7 +147,6 @@ func (packsOp *packsPg) Save(pack *packs.Pack, _ *crud.SaveOptions) (common.ID, 
 	values := []interface{}{pack.IdentityKey, pack.From, toBytes, optionsBytes, pack.TypeKey, contentBytes, historyBytes, createdAt}
 
 	var lastInsertId uint64
-
 	err := packsOp.stmInsert.QueryRow(values...).Scan(&lastInsertId)
 	if err != nil {
 		return "", errors.Wrapf(err, onSave+sqllib.CantExec, packsOp.sqlInsert, values)
@@ -234,7 +233,7 @@ func (packsOp *packsPg) List(term *selectors.Term, options *crud.GetOptions) ([]
 	stm := packsOp.stmList
 
 	if condition != "" || options != nil {
-		query = sqllib_postgres.CorrectWildcards(sqllib.SQLList(packsOp.table, fieldsToListStr, condition, options))
+		query = sqllib_pg.CorrectWildcards(sqllib.SQLList(packsOp.table, fieldsToListStr, condition, options))
 
 		stm, err = packsOp.db.Prepare(query)
 		if err != nil {

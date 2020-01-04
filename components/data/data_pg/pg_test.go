@@ -1,4 +1,4 @@
-package packs_pg
+package data_pg
 
 import (
 	"os"
@@ -10,8 +10,7 @@ import (
 	"github.com/pavlo67/workshop/common/libraries/filelib"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/serializer"
-
-	"github.com/pavlo67/workshop/components/packs"
+	"github.com/pavlo67/workshop/components/data"
 )
 
 const serviceName = "workspace"
@@ -30,16 +29,21 @@ func TestCRUD(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, cfg)
 
-	cfgPostgres := config.Access{}
-	err = cfg.Value("postgres", &cfgPostgres)
+	cfgPg := config.Access{}
+	err = cfg.Value("pg", &cfgPg)
 	require.NoError(t, err)
 
-	l.Infof("%#v", cfgPostgres)
+	l.Infof("%#v", cfgPg)
 
-	packsOp, cleanerOp, err := New(cfgPostgres, "", "")
+	//taggerOp, taggerCleanerOp, err := tagger_sqlite.New(cfgPg, "")
+	//require.NoError(t, err)
+
+	dataOp, cleanerOp, err := New(cfgPg, "storage", "", nil, nil) // taggerOp, taggerCleanerOp
 	require.NoError(t, err)
+	require.NotNil(t, dataOp)
+	require.NotNil(t, cleanerOp)
 
-	testCases := packs.TestCases(packsOp, cleanerOp)
+	testCases := data.TestCases(dataOp, cleanerOp)
 
-	packs.OperatorTestScenario(t, testCases, l)
+	data.OperatorTestScenario(t, testCases, l)
 }

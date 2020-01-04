@@ -10,8 +10,8 @@ import (
 	"github.com/pavlo67/workshop/common/types"
 
 	"github.com/pavlo67/workshop/components/data"
+	"github.com/pavlo67/workshop/components/dataimporter"
 	"github.com/pavlo67/workshop/components/tagger"
-	"github.com/pavlo67/workshop/constructions/dataimporter"
 )
 
 var _ data.Convertor = &Item{}
@@ -74,6 +74,7 @@ func (item *Item) GetData() (*data.Item, error) {
 	}
 
 	return &data.Item{
+		DataKey:  dataimporter.SourceKey(history),
 		URL:      feedItem.Link,
 		TypeKey:  types.KeyString,
 		Title:    feedItem.Title,

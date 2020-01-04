@@ -14,10 +14,10 @@ func Identity(sourceURL, originalID string) *identity.Item {
 	return &ident
 }
 
-func SourceKey(history crud.History) string { //  , sourceTime time.Time
+func SourceKey(history crud.History) identity.Key { //  , sourceTime time.Time
 	for _, action := range history {
 		if action.Key == ActionKey {
-			return string(action.Identity.Key()) // , action.DoneAt
+			return action.Identity.Key() // , action.DoneAt
 		}
 	}
 

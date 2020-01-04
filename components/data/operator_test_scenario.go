@@ -9,6 +9,7 @@ import (
 
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/crud"
+	"github.com/pavlo67/workshop/common/identity"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/types"
 	"github.com/pavlo67/workshop/components/tagger"
@@ -30,7 +31,7 @@ type Test struct {
 	BBB int
 }
 
-const TypeKeyTest types.Key = "test"
+const TypeKeyTest identity.Key = "test"
 
 var TypeTest = types.Type{
 	Key:      TypeKeyTest,
@@ -331,7 +332,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		//
 		//	// TODO: selector.InStr(keyFields[0], ids...)
 
-		briefsAll, err := tc.List(nil, nil)
+		briefsAll, err := tc.List(nil, &crud.GetOptions{OrderBy: []string{"id"}})
 		require.NoError(t, err)
 		require.True(t, len(briefsAll) == numRepeats1+numRepeats2)
 

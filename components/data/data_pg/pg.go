@@ -1,11 +1,10 @@
-package data_sqlite
+package data_pg
 
 import (
 	"database/sql"
 	"encoding/json"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/pkg/errors"
 
@@ -14,7 +13,7 @@ import (
 	"github.com/pavlo67/workshop/common/crud"
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/libraries/sqllib"
-	"github.com/pavlo67/workshop/common/libraries/sqllib/sqllib_sqlite"
+	"github.com/pavlo67/workshop/common/libraries/sqllib/sqllib_pg"
 	"github.com/pavlo67/workshop/common/libraries/strlib"
 	"github.com/pavlo67/workshop/common/selectors"
 	"github.com/pavlo67/workshop/common/selectors/selectors_sql"
@@ -27,18 +26,17 @@ import (
 var fieldsToInsert = []string{"data_key", "url", "title", "summary", "embedded", "tags", "type_key", "details", "history"}
 var fieldsToInsertStr = strings.Join(fieldsToInsert, ", ")
 
-var fieldsToUpdate = append(fieldsToInsert, "updated_at")
-var fieldsToUpdateStr = strings.Join(fieldsToUpdate, " = ?, ") + " = ?"
+var fieldsToUpdate = fieldsToInsert
 
-var fieldsToRead = append(fieldsToUpdate, "created_at")
+var fieldsToRead = append(fieldsToUpdate, "updated_at", "created_at")
 var fieldsToReadStr = strings.Join(fieldsToRead, ", ")
 
 var fieldsToList = append([]string{"id"}, fieldsToRead...)
 var fieldsToListStr = strings.Join(fieldsToList, ", ")
 
-var _ data.Operator = &dataSQLite{}
+var _ data.Operator = &dataPg{}
 
-type dataSQLite struct {
+type dataPg struct {
 	db    *sql.DB
 	table string
 
@@ -50,10 +48,10 @@ type dataSQLite struct {
 	taggerCleaner crud.Cleaner
 }
 
-const onNew = "on dataSQLite.New(): "
+const onNew = "on dataPg.New(): "
 
 func New(access config.Access, table string, interfaceKey joiner.InterfaceKey, taggerOp tagger.Operator, taggerCleaner crud.Cleaner) (data.Operator, crud.Cleaner, error) {
-	db, err := sqllib_sqlite.Connect(access)
+	db, err := sqllib_pg.Connect(access)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, onNew)
 	}
@@ -62,15 +60,15 @@ func New(access config.Access, table string, interfaceKey joiner.InterfaceKey, t
 		table = data.CollectionDefault
 	}
 
-	dataOp := dataSQLite{
+	dataOp := dataPg{
 		db:    db,
 		table: table,
 
-		sqlInsert: "INSERT INTO " + table + " (" + fieldsToInsertStr + ") VALUES (" + strings.Repeat(",? ", len(fieldsToInsert))[1:] + ")",
-		sqlUpdate: "UPDATE " + table + " SET " + fieldsToUpdateStr + " WHERE id = ?",
-		sqlRemove: "DELETE FROM " + table + " where id = ?",
+		sqlInsert: "INSERT INTO " + table + " (" + fieldsToInsertStr + ") VALUES (" + sqllib_pg.WildcardsForInsert(fieldsToInsert) + ") RETURNING id",
+		sqlUpdate: "UPDATE " + table + " SET " + sqllib_pg.WildcardsForUpdate(fieldsToUpdate) + " WHERE id = $" + strconv.Itoa(len(fieldsToUpdate)+1),
+		sqlRemove: "DELETE FROM " + table + " where id = $1",
 
-		sqlRead: "SELECT " + fieldsToReadStr + " FROM " + table + " WHERE id = ?",
+		sqlRead: "SELECT " + fieldsToReadStr + " FROM " + table + " WHERE id = $1",
 		sqlList: sqllib.SQLList(table, fieldsToListStr, "", &crud.GetOptions{OrderBy: []string{"created_at DESC"}}),
 
 		sqlClean: "DELETE FROM " + table,
@@ -98,26 +96,22 @@ func New(access config.Access, table string, interfaceKey joiner.InterfaceKey, t
 	return &dataOp, &dataOp, nil
 }
 
-const onSave = "on dataSQLite.Save(): "
+const onSave = "on dataPg.Save(): "
 
-func (dataOp *dataSQLite) Save(items []data.Item, _ *crud.SaveOptions) ([]common.ID, error) {
+func (dataOp *dataPg) Save(items []data.Item, _ *crud.SaveOptions) ([]common.ID, error) {
 	var ids []common.ID
 
 	for _, item := range items {
 
-		//l.Info(item.SentAt.Format(time.RFC3339))
-
 		var err error
 
-		var embedded, tags, details, history interface{}
+		var embedded, tags, details, history []byte
 
 		if len(item.Embedded) > 0 {
 			embedded, err = json.Marshal(item.Embedded)
 			if err != nil {
 				return ids, errors.Wrapf(err, onSave+"can't marshal .Embedded(%#v)", item.Embedded)
 			}
-		} else {
-			embedded = "" // to satisfy "NOT NULL" constraint
 		}
 
 		if len(item.Tags) > 0 {
@@ -125,8 +119,6 @@ func (dataOp *dataSQLite) Save(items []data.Item, _ *crud.SaveOptions) ([]common
 			if err != nil {
 				return ids, errors.Wrapf(err, onSave+"can't marshal .Tags(%#v)", item.Tags)
 			}
-		} else {
-			tags = "" // to satisfy "NOT NULL" constraint
 		}
 
 		if item.Details != nil {
@@ -134,8 +126,6 @@ func (dataOp *dataSQLite) Save(items []data.Item, _ *crud.SaveOptions) ([]common
 			if err != nil {
 				return ids, errors.Wrapf(err, onSave+"can't marshal .Details(%#v)", item.Details)
 			}
-		} else {
-			details = "" // to satisfy "NOT NULL" constraint
 		}
 
 		// TODO!!! append to .History
@@ -145,24 +135,19 @@ func (dataOp *dataSQLite) Save(items []data.Item, _ *crud.SaveOptions) ([]common
 			if err != nil {
 				return ids, errors.Wrapf(err, onSave+"can't marshal .History(%#v)", item.History)
 			}
-		} else {
-			history = "" // to satisfy "NOT NULL" constraint
 		}
 
 		if item.ID == "" {
+			values := []interface{}{string(item.DataKey), item.URL, item.Title, item.Summary, embedded, tags, item.TypeKey, details, history}
 
-			values := []interface{}{item.DataKey, item.URL, item.Title, item.Summary, embedded, tags, item.TypeKey, details, history}
+			var lastInsertId uint64
 
-			res, err := dataOp.stmInsert.Exec(values...)
+			err := dataOp.stmInsert.QueryRow(values...).Scan(&lastInsertId)
 			if err != nil {
 				return ids, errors.Wrapf(err, onSave+sqllib.CantExec, dataOp.sqlInsert, strlib.Stringify(values))
 			}
 
-			idSQLite, err := res.LastInsertId()
-			if err != nil {
-				return ids, errors.Wrapf(err, onSave+sqllib.CantGetLastInsertId, dataOp.sqlInsert, strlib.Stringify(values))
-			}
-			id := common.ID(strconv.FormatInt(idSQLite, 10))
+			id := common.ID(strconv.FormatUint(lastInsertId, 10))
 
 			if dataOp.taggerOp != nil && len(item.Tags) > 0 {
 				err = dataOp.taggerOp.AddTags(dataOp.interfaceKey, id, item.Tags, nil)
@@ -175,7 +160,7 @@ func (dataOp *dataSQLite) Save(items []data.Item, _ *crud.SaveOptions) ([]common
 
 		} else {
 
-			values := []interface{}{item.DataKey, item.URL, item.Title, item.Summary, embedded, tags, item.TypeKey, details, history, time.Now().Format(time.RFC3339), item.ID}
+			values := []interface{}{item.DataKey, item.URL, item.Title, item.Summary, embedded, tags, item.TypeKey, details, history, item.ID}
 
 			_, err := dataOp.stmUpdate.Exec(values...)
 			if err != nil {
@@ -196,9 +181,9 @@ func (dataOp *dataSQLite) Save(items []data.Item, _ *crud.SaveOptions) ([]common
 	return ids, nil
 }
 
-const onRead = "on dataSQLite.Read(): "
+const onRead = "on dataPg.Read(): "
 
-func (dataOp *dataSQLite) Read(id common.ID, _ *crud.GetOptions) (*data.Item, error) {
+func (dataOp *dataPg) Read(id common.ID, _ *crud.GetOptions) (*data.Item, error) {
 	if len(id) < 1 {
 		return nil, errors.New(onRead + "empty ID")
 	}
@@ -215,7 +200,7 @@ func (dataOp *dataSQLite) Read(id common.ID, _ *crud.GetOptions) (*data.Item, er
 		&item.DataKey, &item.URL, &item.Title, &item.Summary, &embedded, &tags, &item.TypeKey, &item.DetailsRaw, &history, &updatedAt, &createdAt,
 	)
 
-	// TODO: read updated_at & created_at
+	// TODO!!! read updatedAt, createdAt
 
 	if err == sql.ErrNoRows {
 		return nil, common.ErrNotFound
@@ -248,9 +233,9 @@ func (dataOp *dataSQLite) Read(id common.ID, _ *crud.GetOptions) (*data.Item, er
 	return &item, nil
 }
 
-const onDetails = "on dataSQLite.Details(): "
+const onDetails = "on dataPg.Details(): "
 
-func (dataOp *dataSQLite) SetDetails(item *data.Item) error {
+func (dataOp *dataPg) SetDetails(item *data.Item) error {
 	if item == nil {
 		return errors.New(onDetails + "nil item")
 	}
@@ -287,9 +272,9 @@ func (dataOp *dataSQLite) SetDetails(item *data.Item) error {
 	return nil
 }
 
-const onRemove = "on dataSQLite.Remove()"
+const onRemove = "on dataPg.Remove()"
 
-func (dataOp *dataSQLite) Remove(id common.ID, _ *crud.RemoveOptions) error {
+func (dataOp *dataPg) Remove(id common.ID, _ *crud.RemoveOptions) error {
 	if len(id) < 1 {
 		return errors.New(onRemove + "empty ID")
 	}
@@ -314,9 +299,9 @@ func (dataOp *dataSQLite) Remove(id common.ID, _ *crud.RemoveOptions) error {
 	return nil
 }
 
-const onExport = "on dataSQLite.Export()"
+const onExport = "on dataPg.Export()"
 
-func (dataOp *dataSQLite) Export(afterIDStr string, options *crud.GetOptions) ([]data.Item, error) {
+func (dataOp *dataPg) Export(afterIDStr string, options *crud.GetOptions) ([]data.Item, error) {
 	// TODO: remove limits
 	// if options != nil {
 	//	options.Limits = nil
@@ -348,9 +333,9 @@ func (dataOp *dataSQLite) Export(afterIDStr string, options *crud.GetOptions) ([
 	return dataOp.List(term, options)
 }
 
-const onList = "on dataSQLite.ListTags()"
+const onList = "on dataPg.ListTags()"
 
-func (dataOp *dataSQLite) List(term *selectors.Term, options *crud.GetOptions) ([]data.Item, error) {
+func (dataOp *dataPg) List(term *selectors.Term, options *crud.GetOptions) ([]data.Item, error) {
 	condition, values, err := selectors_sql.Use(term)
 	if err != nil {
 		return nil, errors.Errorf(onList+"wrong selector (%#v): %s", term, err)
@@ -389,7 +374,7 @@ func (dataOp *dataSQLite) List(term *selectors.Term, options *crud.GetOptions) (
 			&idNum, &item.DataKey, &item.URL, &item.Title, &item.Summary, &embedded, &tags, &item.TypeKey, &item.DetailsRaw, &history, &updatedAt, &createdAt,
 		)
 
-		// TODO: read updated_at & created_at
+		// TODO: read updatedAt, createdAt
 
 		if err != nil {
 			return items, errors.Wrapf(err, onList+sqllib.CantScanQueryRow, query, values)
@@ -425,9 +410,9 @@ func (dataOp *dataSQLite) List(term *selectors.Term, options *crud.GetOptions) (
 	return items, nil
 }
 
-const onCount = "on dataSQLite.Count(): "
+const onCount = "on dataPg.Count(): "
 
-func (dataOp *dataSQLite) Count(term *selectors.Term, options *crud.GetOptions) (uint64, error) {
+func (dataOp *dataPg) Count(term *selectors.Term, options *crud.GetOptions) (uint64, error) {
 	condition, values, err := selectors_sql.Use(term)
 	if err != nil {
 		termStr, _ := json.Marshal(term)
@@ -450,6 +435,6 @@ func (dataOp *dataSQLite) Count(term *selectors.Term, options *crud.GetOptions) 
 	return num, nil
 }
 
-func (dataOp *dataSQLite) Close() error {
-	return errors.Wrap(dataOp.db.Close(), "on dataSQLite.Close()")
+func (dataOp *dataPg) Close() error {
+	return errors.Wrap(dataOp.db.Close(), "on dataPg.Close()")
 }

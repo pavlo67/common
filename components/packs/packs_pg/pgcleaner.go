@@ -7,7 +7,7 @@ import (
 
 	"github.com/pavlo67/workshop/common/crud"
 	"github.com/pavlo67/workshop/common/libraries/sqllib"
-	"github.com/pavlo67/workshop/common/libraries/sqllib/sqllib_postgres"
+	"github.com/pavlo67/workshop/common/libraries/sqllib/sqllib_pg"
 	"github.com/pavlo67/workshop/common/selectors"
 	"github.com/pavlo67/workshop/common/selectors/selectors_sql"
 )
@@ -24,7 +24,7 @@ func (packsOp *packsPg) Clean(term *selectors.Term, _ *crud.RemoveOptions) error
 
 	query := packsOp.sqlClean
 	if strings.TrimSpace(condition) != "" {
-		query += " WHERE " + sqllib_postgres.CorrectWildcards(condition)
+		query += " WHERE " + sqllib_pg.CorrectWildcards(condition)
 	}
 
 	_, err = packsOp.db.Exec(query, values...)

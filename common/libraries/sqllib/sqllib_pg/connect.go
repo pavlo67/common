@@ -1,4 +1,4 @@
-package sqllib_postgres
+package sqllib_pg
 
 import (
 	"database/sql"

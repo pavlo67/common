@@ -1,18 +1,18 @@
 package types
 
-type Key string
+import "github.com/pavlo67/workshop/common/identity"
 
 type Type struct {
-	Key      Key
+	Key      identity.Key
 	Exemplar interface{}
 }
 
-const KeyString Key = "string"
+const KeyString identity.Key = "/string"
 
 var TypeString = Type{
 	Key:      KeyString,
 	Exemplar: "",
 }
 
-const KeyHRefImage Key = "href_image"
-const KeyHRef Key = "href"
+const KeyHRefImage identity.Key = "/href_image"
+const KeyHRef identity.Key = "/href"

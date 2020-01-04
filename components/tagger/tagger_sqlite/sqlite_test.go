@@ -18,6 +18,8 @@ type Test struct {
 	BBB int
 }
 
+const serviceName = "workspace"
+
 func TestCRUD(t *testing.T) {
 	env := "test"
 	err := os.Setenv("ENV", env)
@@ -27,7 +29,7 @@ func TestCRUD(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, l)
 
-	configPath := filelib.CurrentPath() + "../../../environments/" + env + ".yaml"
+	configPath := filelib.CurrentPath() + "../../../environments/" + serviceName + "." + env + ".yaml"
 	cfg, err := config.Get(configPath, serializer.MarshalerYAML)
 	require.NoError(t, err)
 	require.NotNil(t, cfg)
