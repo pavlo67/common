@@ -14,7 +14,8 @@ const SentKey crud.ActionKey = "sent"
 const DidntSendKey crud.ActionKey = "didn't send"
 
 type Operator interface {
+	Handle(pack *packs.Pack) (*packs.Pack, error)
+
 	SendOne(pack *packs.Pack, to identity.Key, ignoreProblems bool) (response *packs.Pack, err error)
-	Send(pack *packs.Pack) (err error)
-	Trace(to identity.Key) (trace []crud.Action, err error)
+	History(packKey identity.Key) (trace []crud.Action, err error)
 }

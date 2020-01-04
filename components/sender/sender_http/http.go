@@ -174,7 +174,7 @@ func (senderOp *senderHTTP) SendOne(outPack *packs.Pack, to identity.Key, ignore
 
 const onSend = "on senderHTTP.Send(): "
 
-func (senderOp *senderHTTP) Send(pack *packs.Pack) (err error) {
+func (senderOp *senderHTTP) Handle(pack *packs.Pack) (*packs.Pack, error) {
 	//if pack == nil {
 	//	return nil, errors.New(onSend + "nothing to send")
 	//}
@@ -185,11 +185,11 @@ func (senderOp *senderHTTP) Send(pack *packs.Pack) (err error) {
 	//	senderOp.SendOne(Pack, to)
 	//}
 
-	return common.ErrNotImplemented
+	return nil, common.ErrNotImplemented
 }
 
-const onTrace = "on senderHTTP.Trace(): "
+const onHistory = "on senderHTTP.History(): "
 
-func (senderOp *senderHTTP) Trace(key identity.Key) (trace []crud.Action, err error) {
+func (senderOp *senderHTTP) History(packKey identity.Key) (trace []crud.Action, err error) {
 	return nil, common.ErrNotImplemented
 }

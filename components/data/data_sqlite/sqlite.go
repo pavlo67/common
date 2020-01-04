@@ -111,13 +111,16 @@ func (dataOp *dataSQLite) Save(items []data.Item, _ *crud.SaveOptions) ([]common
 		//l.Info(item.SentAt.Format(time.RFC3339))
 
 		var err error
-		var embedded, tags, details, history []byte
+
+		var embedded, tags, details, history interface{}
 
 		if len(item.Embedded) > 0 {
 			embedded, err = json.Marshal(item.Embedded)
 			if err != nil {
 				return ids, errors.Wrapf(err, onSave+"can't marshal .Embedded(%#v)", item.Embedded)
 			}
+		} else {
+			embedded = "" // to satisfy "NOT NULL" constraint
 		}
 
 		if len(item.Tags) > 0 {
@@ -125,6 +128,8 @@ func (dataOp *dataSQLite) Save(items []data.Item, _ *crud.SaveOptions) ([]common
 			if err != nil {
 				return ids, errors.Wrapf(err, onSave+"can't marshal .Tags(%#v)", item.Tags)
 			}
+		} else {
+			tags = "" // to satisfy "NOT NULL" constraint
 		}
 
 		if item.Details != nil {
@@ -132,6 +137,8 @@ func (dataOp *dataSQLite) Save(items []data.Item, _ *crud.SaveOptions) ([]common
 			if err != nil {
 				return ids, errors.Wrapf(err, onSave+"can't marshal .Details(%#v)", item.Details)
 			}
+		} else {
+			details = "" // to satisfy "NOT NULL" constraint
 		}
 
 		// TODO!!! append to .History
@@ -141,6 +148,8 @@ func (dataOp *dataSQLite) Save(items []data.Item, _ *crud.SaveOptions) ([]common
 			if err != nil {
 				return ids, errors.Wrapf(err, onSave+"can't marshal .History(%#v)", item.History)
 			}
+		} else {
+			history = "" // to satisfy "NOT NULL" constraint
 		}
 
 		if item.ID != "" {
@@ -246,6 +255,8 @@ func (dataOp *dataSQLite) SetDetails(item *data.Item) error {
 		return errors.New(onDetails + "nil item")
 	}
 
+	// l.Infof("11111111111 %s %s %t", item.DetailsRaw, item.TypeKey, item.TypeKey == data.TypeKeyTest)
+
 	if len(item.DetailsRaw) < 1 {
 		item.Details = nil
 		return nil
@@ -270,6 +281,8 @@ func (dataOp *dataSQLite) SetDetails(item *data.Item) error {
 		// return errors.Errorf(onDetails+"unknown item.TypeKey(%s) for item.DetailsRaw(%s)", item.TypeKey, item.DetailsRaw)
 
 	}
+
+	// l.Infof("11111111111 %#v", item.Details)
 
 	return nil
 }
@@ -318,7 +331,7 @@ func (dataOp *dataSQLite) Export(afterIDStr string, options *crud.GetOptions) ([
 		var err error
 		afterID, err = strconv.Atoi(afterIDStr)
 		if err != nil {
-			return nil, errors.Errorf("can't strconv.Atoi(%s) for after_id parameter", afterIDStr, err)
+			return nil, errors.Errorf("can't strconv.Atoi(%s) for after_id parameter: %s", afterIDStr, err)
 		}
 
 		// TODO!!! term with some item's autoincrement if original .ID isn't it (using .ID to find corresponding autoincrement value)

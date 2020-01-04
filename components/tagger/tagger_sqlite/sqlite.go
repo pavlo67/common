@@ -12,7 +12,6 @@ import (
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/libraries/sqllib"
 	"github.com/pavlo67/workshop/common/libraries/sqllib/sqllib_sqlite"
-	"github.com/pavlo67/workshop/common/selectors"
 
 	"github.com/pavlo67/workshop/components/tagger"
 )
@@ -27,7 +26,6 @@ var fieldsToSave = []string{"key", "id", "tag", "relation"}
 var fieldsToSaveStr = strings.Join(fieldsToSave, ", ")
 
 var _ tagger.Operator = &tagsSQLite{}
-var _ crud.Cleaner = &tagsSQLite{}
 
 type tagsSQLite struct {
 	db          *sql.DB
@@ -354,10 +352,4 @@ func (taggerOp *tagsSQLite) IndexTagged(key *joiner.InterfaceKey, label string, 
 
 func (taggerOp *tagsSQLite) Close() error {
 	return errors.Wrap(taggerOp.db.Close(), "on tagsSQLite.Close()")
-}
-
-func (taggerOp *tagsSQLite) Clean(*selectors.Term, *crud.RemoveOptions) error {
-	_, err := taggerOp.db.Exec("DELETE FROM " + taggerOp.table)
-
-	return err
 }

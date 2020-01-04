@@ -14,6 +14,8 @@ import (
 	"github.com/pavlo67/workshop/components/tagger/tagger_sqlite"
 )
 
+const serviceName = "workspace"
+
 func TestCRUD(t *testing.T) {
 	env := "test"
 	err := os.Setenv("ENV", env)
@@ -23,7 +25,7 @@ func TestCRUD(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, l)
 
-	configPath := filelib.CurrentPath() + "../../../environments/" + env + ".yaml"
+	configPath := filelib.CurrentPath() + "../../../environments/" + serviceName + "." + env + ".yaml"
 	cfg, err := config.Get(configPath, serializer.MarshalerYAML)
 	require.NoError(t, err)
 	require.NotNil(t, cfg)
@@ -32,12 +34,12 @@ func TestCRUD(t *testing.T) {
 	err = cfg.Value("sqlite", &cfgSQLite)
 	require.NoError(t, err)
 
-	l.Debugf("%#v", cfgSQLite)
+	l.Infof("%#v", cfgSQLite)
 
 	taggerOp, taggerCleanerOp, err := tagger_sqlite.New(cfgSQLite, "")
 	require.NoError(t, err)
 
-	dataOp, cleanerOp, err := New(cfgSQLite, "", "", taggerOp, taggerCleanerOp)
+	dataOp, cleanerOp, err := New(cfgSQLite, "storage", "", taggerOp, taggerCleanerOp)
 	require.NoError(t, err)
 
 	l.Debugf("%#v", dataOp)

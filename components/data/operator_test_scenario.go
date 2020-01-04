@@ -21,11 +21,8 @@ type OperatorTestCase struct {
 	ToSave   Item
 	ToUpdate Item
 
-	DetailsToSave      Test
-	DetailsToReadSaved Test
-
-	DetailsToUpdate      Test
-	DetailsToReadUpdated Test
+	//DetailsToSave      Test
+	//DetailsToUpdate    Test
 }
 
 type Test struct {
@@ -56,30 +53,27 @@ func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 					Summary: "3333333",
 					Tags:    []tagger.Tag{{Label: "1"}, {Label: "332343"}},
 				}},
+				Details: &Test{
+					AAA: "aaa",
+					BBB: 222,
+				},
 				Tags: []tagger.Tag{{Label: "1"}, {Label: "333"}},
 				History: []crud.Action{{
 					Key:    crud.CreatedAction,
 					DoneAt: time.Time{},
 				}},
 			},
-			DetailsToSave: Test{
-				AAA: "aaa",
-				BBB: 222,
-			},
 
 			ToUpdate: Item{
 				URL:     "22222222",
+				TypeKey: "test",
 				Title:   "345456rt",
 				Summary: "6578eegj",
-				Tags:    []tagger.Tag{{Label: "1"}, {Label: "333"}},
-				History: []crud.Action{
-					{Key: crud.CreatedAction, DoneAt: time.Time{}},
-					{Key: crud.UpdatedAction, DoneAt: time.Now().Add(time.Minute)},
+				Details: &Test{
+					AAA: "awraa",
+					BBB: 22552,
 				},
-			},
-			DetailsToUpdate: Test{
-				AAA: "awraa",
-				BBB: 22552,
+				Tags: []tagger.Tag{{Label: "1"}, {Label: "333"}},
 			},
 		},
 	}
@@ -95,7 +89,7 @@ const toReadI = 0   // must be < numRepeats1 + numRepeats2
 const toUpdateI = 1 // must be < numRepeats1 + numRepeats2
 const toDeleteI = 2 // must be < numRepeats1 + numRepeats2
 
-func Compare(t *testing.T, dataOp Operator, readed *Item, expectedItem Item, expectedDetails, detailsToRead Test, l logger.Operator) {
+func Compare(t *testing.T, dataOp Operator, readed *Item, expectedItem Item, l logger.Operator) {
 	require.NotNil(t, readed)
 
 	err := dataOp.SetDetails(readed)
@@ -103,15 +97,16 @@ func Compare(t *testing.T, dataOp Operator, readed *Item, expectedItem Item, exp
 
 	l.Infof("to be saved: %#v", expectedItem)
 	l.Infof("readed: %#v", readed)
-	l.Infof("readed details: %#v", detailsToRead)
 
 	for i, action := range expectedItem.History {
 		expectedItem.History[i].DoneAt = action.DoneAt.UTC()
 	}
 
+	expectedDetails := expectedItem.Details
 	expectedItem.Details = nil
 	expectedItem.DetailsRaw = nil
 
+	readedDetails := readed.Details
 	readed.Details = nil
 	readed.DetailsRaw = nil
 
@@ -120,7 +115,7 @@ func Compare(t *testing.T, dataOp Operator, readed *Item, expectedItem Item, exp
 	//readed.History.CreatedAt = expectedItem.History.CreatedAt
 
 	require.Equal(t, &expectedItem, readed)
-	require.Equal(t, expectedDetails, detailsToRead)
+	require.Equal(t, expectedDetails, readedDetails)
 
 }
 
@@ -184,7 +179,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 
 		for i := 0; i < numRepeats1; i++ {
 			toSave[i] = tc.ToSave
-			toSave[i].Details = &tc.DetailsToSave
+			//toSave[i].Details = &tc.DetailsToSave
 			idsI, err := tc.Save([]Item{toSave[i]}, nil)
 			require.NoError(t, err)
 			require.True(t, len(idsI) == 1)
@@ -192,7 +187,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		}
 
 		var toSavePack []Item
-		tc.ToSave.Details = &tc.DetailsToSave
+		//tc.ToSave.Details = &tc.DetailsToSave
 		for j := 0; j < numRepeats2; j++ {
 			toSavePack = append(toSavePack, tc.ToSave)
 		}
@@ -216,7 +211,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 
 		tc.ToSave.ID = id[toReadI]
 
-		Compare(t, tc, readedSaved, tc.ToSave, tc.DetailsToSave, tc.DetailsToReadSaved, l)
+		Compare(t, tc, readedSaved, tc.ToSave, l)
 
 		// test .Update & .Read -----------------------------------------------------------------------------------
 
@@ -227,7 +222,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		// }
 
 		tc.ToUpdate.ID = id[toUpdateI]
-		tc.ToUpdate.Details = &tc.DetailsToUpdate
+		// tc.ToUpdate.Details = &tc.DetailsToUpdate
 
 		_, err = tc.Save([]Item{tc.ToUpdate}, nil)
 		require.NoError(t, err)
@@ -237,7 +232,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 
 		// tc.ToUpdate.History.CreatedAt = tc.ToSave.History.CreatedAt // unchanged!!!
 
-		Compare(t, tc, readedUpdated, tc.ToUpdate, tc.DetailsToUpdate, tc.DetailsToReadUpdated, l)
+		Compare(t, tc, readedUpdated, tc.ToUpdate, l)
 
 		// TODO!!!
 		//	if !tc.ExcludeUpdateTest {
@@ -340,8 +335,8 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		require.NoError(t, err)
 		require.True(t, len(briefsAll) == numRepeats1+numRepeats2)
 
-		Compare(t, tc, &briefsAll[toReadI], tc.ToSave, tc.DetailsToSave, tc.DetailsToReadSaved, l)
-		Compare(t, tc, &briefsAll[toUpdateI], tc.ToUpdate, tc.DetailsToUpdate, tc.DetailsToReadUpdated, l)
+		Compare(t, tc, &briefsAll[toReadI], tc.ToSave, l)
+		Compare(t, tc, &briefsAll[toUpdateI], tc.ToUpdate, l)
 
 		// test .Delete --------------------------------------------------------------------------------------
 
@@ -397,40 +392,3 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 
 	}
 }
-
-//func testData(t *testing.T, keyFields, expectedID []string, expectedData, data Tag, onCreate bool, description Description, on string) {
-//	if expectedData == nil {
-//		require.Nil(t, data)
-//		return
-//	}
-//	require.NotNil(t, data)
-//
-//	require.Equal(t, len(keyFields), len(expectedID))
-//	for i, f := range keyFields {
-//		require.Equal(t, expectedID[i], data[f], on+": incorrect key value in field '%s'???", f)
-//	}
-//
-//	for _, field := range description.FieldsArr {
-//		key := field.ID
-//
-//		// TODO: check key field
-//
-//		if (onCreate && field.Creatable) || (!onCreate && field.Updatable) {
-//			if expectedData[key] == "" && field.NotEmpty {
-//				require.NotEmpty(t, data[key], on+": "+key+"???")
-//			} else {
-//				require.Equal(t, expectedData[key], data[key], on+": "+key+"???")
-//			}
-//
-//			//} else if !onCreate && field.Additable {
-//			//	if expectedData[key] == "" {
-//			//		require.Equal(t, expectedData[key], data[key], on+": "+key+"???")
-//			//	} else {
-//			//		require.True(t, len(data[key]) > len(expectedData[key]), on+": "+key+"???")
-//			//	}
-//
-//		} else if field.NotEmpty {
-//			require.NotEmpty(t, data[key], on+": "+key+"???")
-//		}
-//	}
-//}

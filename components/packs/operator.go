@@ -39,9 +39,3 @@ type Operator interface {
 
 	AddHistory(common.ID, crud.History, *crud.SaveOptions) (crud.History, error)
 }
-
-const HandleAction crud.ActionKey = "handle"
-
-type Handler interface {
-	Handle(pack *Pack) (*Pack, error)
-}
