@@ -144,7 +144,7 @@ func (packsOp *packsPg) Save(pack *packs.Pack, _ *crud.SaveOptions) (common.ID, 
 		createdAt = time.Now()
 	}
 
-	values := []interface{}{pack.IdentityKey, pack.From, toBytes, optionsBytes, pack.TypeKey, contentBytes, historyBytes, createdAt}
+	values := []interface{}{pack.Key, pack.From, toBytes, optionsBytes, pack.TypeKey, contentBytes, historyBytes, createdAt}
 
 	var lastInsertId uint64
 	err := packsOp.stmInsert.QueryRow(values...).Scan(&lastInsertId)
@@ -173,7 +173,7 @@ func (packsOp *packsPg) Read(id common.ID, _ *crud.GetOptions) (*packs.Item, err
 	var createdAtStr string
 
 	err = packsOp.stmRead.QueryRow(idNum).Scan(
-		&item.IdentityKey, &item.From, &toBytes, &optionsBytes, &item.TypeKey, &item.ContentRaw, &historyBytes, &createdAtStr,
+		&item.Key, &item.From, &toBytes, &optionsBytes, &item.TypeKey, &item.ContentRaw, &historyBytes, &createdAtStr,
 	)
 	if err == sql.ErrNoRows {
 		return nil, common.ErrNotFound
@@ -261,7 +261,7 @@ func (packsOp *packsPg) List(term *selectors.Term, options *crud.GetOptions) ([]
 		var createdAtStr string
 
 		err := rows.Scan(
-			&idNum, &item.IdentityKey, &item.From, &toBytes, &optionsBytes, &item.TypeKey, &item.ContentRaw, &historyBytes, &createdAtStr,
+			&idNum, &item.Key, &item.From, &toBytes, &optionsBytes, &item.TypeKey, &item.ContentRaw, &historyBytes, &createdAtStr,
 		)
 		if err != nil {
 			return items, errors.Wrapf(err, onList+sqllib.CantScanQueryRow, query, values)

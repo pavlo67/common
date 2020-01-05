@@ -1,4 +1,4 @@
-package sendersmtp
+package transport_smtp
 
 import (
 	"github.com/pkg/errors"

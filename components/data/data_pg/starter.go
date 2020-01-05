@@ -48,7 +48,7 @@ func (dp *dataPgStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Oper
 	dp.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(data.InterfaceKey)))
 	dp.cleanerKey = joiner.InterfaceKey(options.StringDefault("cleaner_key", string(data.CleanerInterfaceKey)))
 
-	dp.noTagger, _ = options.Bool("no_tagger")
+	dp.noTagger, _ = options.IsTrue("no_tagger")
 
 	// sqllib.CheckTables
 

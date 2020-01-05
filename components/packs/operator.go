@@ -6,22 +6,21 @@ import (
 	"github.com/pavlo67/workshop/common/identity"
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/selectors"
-	"github.com/pavlo67/workshop/common/types"
 )
 
 const InterfaceKey joiner.InterfaceKey = "packs"
 const CollectionDefault = "packs"
 
 type Pack struct {
-	IdentityKey identity.Key
+	Key identity.Key
 
-	From    identity.Key   `bson:",omitempty" json:",omitempty"`
-	To      []identity.Key `bson:",omitempty" json:",omitempty"`
-	Options common.Map     `bson:",omitempty" json:",omitempty"`
+	From    identity.Key `bson:",omitempty" json:",omitempty"`
+	To      identity.Key `bson:",omitempty" json:",omitempty"`
+	Options common.Map   `bson:",omitempty" json:",omitempty"`
 
-	TypeKey    types.Key   `bson:",omitempty" json:",omitempty"`
-	ContentRaw []byte      `bson:"-"          json:"-"`
-	Content    interface{} `bson:",omitempty" json:",omitempty"`
+	TypeKey    identity.Key `bson:",omitempty" json:",omitempty"`
+	ContentRaw []byte       `bson:"-"          json:"-"`
+	Content    interface{}  `bson:",omitempty" json:",omitempty"`
 
 	History []crud.Action `bson:",omitempty" json:",omitempty"`
 }

@@ -1,4 +1,4 @@
-package sender
+package transport
 
 import (
 	"github.com/pavlo67/workshop/common/crud"
@@ -8,14 +8,16 @@ import (
 	"github.com/pavlo67/workshop/components/packs"
 )
 
-const InterfaceKey joiner.InterfaceKey = "sender"
+const InterfaceKey joiner.InterfaceKey = "transport"
+const HandlerInterfaceKey joiner.InterfaceKey = "receiver_handler"
 
 const SentKey crud.ActionKey = "sent"
 const DidntSendKey crud.ActionKey = "didn't send"
 
 type Operator interface {
-	Handle(pack *packs.Pack) (*packs.Pack, error)
+	Send(pack *packs.Pack) (sentKey identity.Key, response *packs.Pack, err error)
+	AddHandler(receiverKey, typeKey identity.Key, handler packs.Handler) error
+	RemoveHandler(receiverKey, typeKey identity.Key)
 
-	SendOne(pack *packs.Pack, to identity.Key, ignoreProblems bool) (response *packs.Pack, err error)
 	History(packKey identity.Key) (trace []crud.Action, err error)
 }

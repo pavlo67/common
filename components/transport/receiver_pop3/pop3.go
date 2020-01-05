@@ -1,4 +1,4 @@
-package receiverpop3
+package transport_pop3
 
 import (
 	"io/ioutil"

@@ -1,4 +1,4 @@
-package receiver
+package transport
 
 import (
 	"os"
@@ -8,7 +8,7 @@ import (
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/types"
 	"github.com/pavlo67/workshop/components/packs"
-	"github.com/pavlo67/workshop/components/sender"
+	"github.com/pavlo67/workshop/components/transport"
 	"github.com/stretchr/testify/require"
 )
 
@@ -24,7 +24,7 @@ import (
 //			Operator: PacksOp,
 //			Cleaner:  cleanerOp,
 //			ToSave: Pack{
-//				IdentityKey: "test_key1",
+//				Key: "test_key1",
 //				From:        "test_key2",
 //				To:          []identity.Key{"qwerwqer", "!!!"},
 //				Options:     common.Map{"1": float64(2)},
@@ -44,7 +44,7 @@ import (
 //	}
 //}
 
-func OperatorTestScenario(t *testing.T, receiverOp Operator, senderOp sender.Operator, l logger.Operator) {
+func OperatorTestScenario(t *testing.T, receiverOp Operator, senderOp transport.Operator, l logger.Operator) {
 	if env, ok := os.LookupEnv("ENV"); !ok || env != "test" {
 		t.Fatal("No test environment!!!")
 	}
@@ -56,11 +56,11 @@ func OperatorTestScenario(t *testing.T, receiverOp Operator, senderOp sender.Ope
 	receiverOp.AddHandler(TestTypeKey, &handlerEcho{})
 
 	packOut := packs.Pack{
-		IdentityKey: "test1",
-		From:        "test2",
-		To:          []identity.Key{"gatherer_transport/aaa"},
-		TypeKey:     TestTypeKey,
-		Content:     map[string]interface{}{"aaa": "bbb"},
+		Key:     "test1",
+		From:    "test2",
+		To:      []identity.Key{"gatherer_transport/aaa"},
+		TypeKey: TestTypeKey,
+		Content: map[string]interface{}{"aaa": "bbb"},
 	}
 
 	packIn, err := senderOp.SendOne(&packOut, packOut.To[0], false)

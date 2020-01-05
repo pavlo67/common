@@ -1,4 +1,4 @@
-package receiver_server_http
+package transport_http
 
 import (
 	"os"
@@ -19,8 +19,8 @@ import (
 	"github.com/pavlo67/workshop/components/packs/packs_pg"
 	"github.com/pavlo67/workshop/components/receiver"
 	"github.com/pavlo67/workshop/components/router/router_stub"
-	"github.com/pavlo67/workshop/components/sender"
-	"github.com/pavlo67/workshop/components/sender/sender_http"
+	"github.com/pavlo67/workshop/components/transport"
+	"github.com/pavlo67/workshop/components/transport/transport_http"
 
 	"github.com/pavlo67/workshop/apps/gatherer/gatherer_actions"
 )
@@ -73,7 +73,7 @@ func TestReceiverServerHTTP(t *testing.T) {
 		// transport system
 		{packs_pg.Starter(), nil},
 		{router_stub.Starter(), nil},
-		{sender_http.Starter(), nil},
+		{transport_http.Starter(), nil},
 		{Starter(), common.Map{"handler_key": receiver.HandlerInterfaceKey}},
 
 		{gatherer_actions.Starter(), common.Map{
@@ -89,7 +89,7 @@ func TestReceiverServerHTTP(t *testing.T) {
 	require.True(t, ok)
 	require.NotNil(t, receiverOp)
 
-	senderOp, ok := joinerOp.Interface(sender.InterfaceKey).(sender.Operator)
+	senderOp, ok := joinerOp.Interface(transport.InterfaceKey).(transport.Operator)
 	require.True(t, ok)
 	require.NotNil(t, senderOp)
 

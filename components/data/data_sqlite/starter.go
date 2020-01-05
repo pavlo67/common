@@ -48,7 +48,7 @@ func (ts *dataSQLiteStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.
 	ts.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(data.InterfaceKey)))
 	ts.cleanerKey = joiner.InterfaceKey(options.StringDefault("cleaner_key", string(data.CleanerInterfaceKey)))
 
-	ts.noTagger, _ = options.Bool("no_tagger")
+	ts.noTagger, _ = options.IsTrue("no_tagger")
 
 	// sqllib.CheckTables
 

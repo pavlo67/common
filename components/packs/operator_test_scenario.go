@@ -32,12 +32,12 @@ func TestCases(PacksOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 			Operator: PacksOp,
 			Cleaner:  cleanerOp,
 			ToSave: Pack{
-				IdentityKey: "test_key1",
-				From:        "test_key2",
-				To:          []identity.Key{"qwerwqer", "!!!"},
-				Options:     common.Map{"1": float64(2)},
-				TypeKey:     "no_type",
-				Content:     map[string]string{"6": ";klj"},
+				Key:     "test_key1",
+				From:    "test_key2",
+				To:      []identity.Key{"qwerwqer", "!!!"},
+				Options: common.Map{"1": float64(2)},
+				TypeKey: "no_type",
+				Content: map[string]string{"6": ";klj"},
 				History: []crud.Action{{
 					Key:    crud.CreatedAction,
 					DoneAt: createdAt,

@@ -60,8 +60,8 @@ func Get(cfgFile string, marshaler serializer.Marshaler) (*Config, error) {
 //	return "", append(errs, errors.Wrapf(ErrNoValue, "no data for key '%s' in config.strings in %#v", key, c))
 //}
 //
-//// Bool ...
-//func (c *Config) Bool(key string, errs common.Errors) (bool, common.Errors) {
+//// IsTrue ...
+//func (c *Config) IsTrue(key string, errs common.Errors) (bool, common.Errors) {
 //	if c == nil {
 //		return false, append(errs, ErrNoConfig)
 //	}
