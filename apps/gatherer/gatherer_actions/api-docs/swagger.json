@@ -24,7 +24,7 @@
    }
   }
  },
- "port": ":3092",
+ "port": ":3002",
  "schemes": [
   "http",
   "https"

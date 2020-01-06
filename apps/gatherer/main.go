@@ -20,10 +20,11 @@ import (
 
 	"github.com/pavlo67/workshop/components/flow"
 	"github.com/pavlo67/workshop/components/packs/packs_pg"
-	"github.com/pavlo67/workshop/components/receiver"
-	"github.com/pavlo67/workshop/components/receiver/receiver_server_http"
+	"github.com/pavlo67/workshop/components/transport"
+	"github.com/pavlo67/workshop/components/transport/transport_http"
 
 	"github.com/pavlo67/workshop/apps/gatherer/gatherer_actions"
+	"github.com/pavlo67/workshop/components/transportrouter/transportrouter_stub"
 )
 
 var (
@@ -90,9 +91,11 @@ func main() {
 		l.Fatal(err)
 	}
 
+	// l.Infof("%#v", cfgGatherer)
+
 	// running starters
 
-	label := "GATHERER/SQLITE CLI BUILD"
+	label := "GATHERER/PG CLI BUILD"
 
 	starters := []starter.Starter{
 
@@ -105,10 +108,13 @@ func main() {
 		{server_http_jschmhr.Starter(), common.Map{"port": port}},
 
 		// transport system
+		{transportrouter_stub.Starter(), nil},
 		{packs_pg.Starter(), nil},
-		{receiver_server_http.Starter(), common.Map{"handler_key": receiver.HandlerInterfaceKey}},
+		{transport_http.Starter(), common.Map{"handler_key": transport.HandlerInterfaceKey, "domain": serviceName}},
 
-		//// database
+		// database
+		{tagger_pg.Starter(), nil},
+
 		//{data_pg.Starter(), common.Map{"table": flow.CollectionDefault, "interface_key": flow.DataInterfaceKey, "cleaner_key": flow.CleanerInterfaceKey, "no_tagger": true}},
 		//{datatagged.Starter(), common.Map{"data_key": flow.DataInterfaceKey, "interface_key": flow.HandlerKey, "no_tagger": true}},
 		//
@@ -121,7 +127,7 @@ func main() {
 		{gatherer_actions.Starter(), common.Map{
 			"importer_task_key":    flow.ImporterTaskInterfaceKey,
 			"cleaner_task_key":     flow.CopierTaskInterfaceKey,
-			"receiver_handler_key": receiver.HandlerInterfaceKey,
+			"receiver_handler_key": transport.HandlerInterfaceKey,
 		}},
 	}
 

@@ -1,10 +1,10 @@
 CREATE TABLE packs (
     id                BIGSERIAL                PRIMARY KEY,
-    identity_key      VARCHAR(255)             NOT NULL,
-    address_from      VARCHAR(255)             NOT NULL,
+    key               TEXT                     NOT NULL,
+    address_from      TEXT                     NOT NULL,
     address_to        TEXT                     NOT NULL,
     options           TEXT                     NOT NULL,
-    type_key          VARCHAR(255)             NOT NULL,
+    type_key          TEXT                     NOT NULL,
     content           TEXT                     NOT NULL,
     history           TEXT                     NOT NULL,
     created_at        TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP

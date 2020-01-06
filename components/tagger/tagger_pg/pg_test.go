@@ -1,4 +1,4 @@
-package packs_pg
+package tagger_pg
 
 import (
 	"os"
@@ -10,9 +10,13 @@ import (
 	"github.com/pavlo67/workshop/common/libraries/filelib"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/serializer"
-
-	"github.com/pavlo67/workshop/components/packs"
+	"github.com/pavlo67/workshop/components/tagger"
 )
+
+type Test struct {
+	AAA string
+	BBB int
+}
 
 const serviceName = "gatherer"
 
@@ -30,16 +34,18 @@ func TestCRUD(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, cfg)
 
-	cfgPostgres := config.Access{}
-	err = cfg.Value("pg", &cfgPostgres)
+	cfgPg := config.Access{}
+	err = cfg.Value("pg", &cfgPg)
 	require.NoError(t, err)
 
-	l.Infof("%#v", cfgPostgres)
+	l.Infof("%#v", cfgPg)
 
-	packsOp, cleanerOp, err := New(cfgPostgres, "", "")
+	taggerOp, cleanerOp, err := New(cfgPg, tagger.InterfaceKey)
 	require.NoError(t, err)
 
-	testCases := packs.TestCases(packsOp, cleanerOp)
+	l.Debugf("%#v", taggerOp)
 
-	packs.OperatorTestScenario(t, testCases, l)
+	testCases := tagger.QueryTagsTestCases(taggerOp)
+
+	tagger.OperatorTestScenario(t, testCases, cleanerOp, l)
 }

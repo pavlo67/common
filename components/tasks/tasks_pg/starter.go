@@ -33,7 +33,7 @@ func (ts *tasksPgStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Ope
 	l = lCommon
 
 	var cfgPg config.Access
-	err := cfg.Value("postgres", &cfgPg)
+	err := cfg.Value("pg", &cfgPg)
 	if err != nil {
 		return nil, err
 	}

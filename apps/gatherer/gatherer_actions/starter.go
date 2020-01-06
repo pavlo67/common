@@ -13,8 +13,7 @@ import (
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/server/server_http"
 	"github.com/pavlo67/workshop/common/starter"
-
-	"github.com/pavlo67/workshop/components/receiver"
+	"github.com/pavlo67/workshop/components/transport"
 )
 
 func Starter() starter.Operator {
@@ -39,7 +38,7 @@ func (ss *gathererStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Op
 		return nil, fmt.Errorf("no logger for %s:-(", ss.Name())
 	}
 
-	ss.receiverHandlerKey = joiner.InterfaceKey(options.StringDefault("receiver_handler_key", string(receiver.HandlerInterfaceKey)))
+	ss.receiverHandlerKey = joiner.InterfaceKey(options.StringDefault("receiver_handler_key", string(transport.HandlerInterfaceKey)))
 
 	return nil, nil
 }

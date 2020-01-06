@@ -39,7 +39,7 @@ var (
 	BuildCommit = "unknown"
 )
 
-const serviceName = "workspace"
+const domain = "workspace"
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
@@ -83,15 +83,15 @@ func main() {
 	}
 
 	var port int
-	if serviceAccess, ok := routesCfg[serviceName]; ok {
+	if serviceAccess, ok := routesCfg[domain]; ok {
 		port = serviceAccess.Port
 	} else {
-		l.Fatalf("no access config for key %s (%#v)", serviceName, routesCfg)
+		l.Fatalf("no access config for key %s (%#v)", domain, routesCfg)
 	}
 
 	// storage config
 
-	configWorkspacePath := currentPath + "../../environments/" + serviceName + "." + configEnv + ".yaml"
+	configWorkspacePath := currentPath + "../../environments/" + domain + "." + configEnv + ".yaml"
 	cfgWorkspace, err := config.Get(configWorkspacePath, serializer.MarshalerYAML)
 	if err != nil {
 		l.Fatal(err)

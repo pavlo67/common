@@ -79,7 +79,7 @@ func (dataOp *dataPg) Clean(term *selectors.Term, _ *crud.RemoveOptions) error {
 		query += " WHERE " + condition
 
 	} else {
-		termTags = selectors.In("key", dataOp.interfaceKey) // TODO!!! correct field key
+		termTags = selectors.In("joiner_key", dataOp.interfaceKey) // TODO!!! correct field key
 
 	}
 

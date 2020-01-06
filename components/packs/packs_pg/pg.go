@@ -21,7 +21,7 @@ import (
 	"github.com/pavlo67/workshop/components/packs"
 )
 
-var fieldsToInsert = []string{"identity_key", "address_from", "address_to", "options", "type_key", "content", "history", "created_at"}
+var fieldsToInsert = []string{"key", "address_from", "address_to", "options", "type_key", "content", "history", "created_at"}
 var fieldsToInsertStr = strings.Join(fieldsToInsert, ",")
 
 var fieldsToRead = fieldsToInsert

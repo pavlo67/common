@@ -6,9 +6,7 @@ import (
 
 	"github.com/pavlo67/workshop/common/identity"
 	"github.com/pavlo67/workshop/common/logger"
-	"github.com/pavlo67/workshop/common/types"
 	"github.com/pavlo67/workshop/components/packs"
-	"github.com/pavlo67/workshop/components/transport"
 	"github.com/stretchr/testify/require"
 )
 
@@ -44,7 +42,7 @@ import (
 //	}
 //}
 
-func OperatorTestScenario(t *testing.T, receiverOp Operator, senderOp transport.Operator, l logger.Operator) {
+func OperatorTestScenario(t *testing.T, transpOp Operator, l logger.Operator) {
 	if env, ok := os.LookupEnv("ENV"); !ok || env != "test" {
 		t.Fatal("No test environment!!!")
 	}
@@ -53,17 +51,17 @@ func OperatorTestScenario(t *testing.T, receiverOp Operator, senderOp transport.
 	//	l.Debug(i)
 	//}
 
-	receiverOp.AddHandler(TestTypeKey, &handlerEcho{})
+	transpOp.AddHandler("", TestTypeKey, &handlerEcho{})
 
 	packOut := packs.Pack{
 		Key:     "test1",
 		From:    "test2",
-		To:      []identity.Key{"gatherer_transport/aaa"},
+		To:      identity.Key("gatherer_transport/aaa"),
 		TypeKey: TestTypeKey,
 		Content: map[string]interface{}{"aaa": "bbb"},
 	}
 
-	packIn, err := senderOp.SendOne(&packOut, packOut.To[0], false)
+	_, packIn, err := transpOp.Send(&packOut)
 	require.NoError(t, err)
 	require.NotNil(t, packIn)
 
@@ -77,7 +75,7 @@ func OperatorTestScenario(t *testing.T, receiverOp Operator, senderOp transport.
 
 }
 
-const TestTypeKey types.Key = "test"
+const TestTypeKey identity.Key = "test"
 
 var _ packs.Handler = &handlerEcho{}
 

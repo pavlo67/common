@@ -29,7 +29,7 @@ func TestCRUD(t *testing.T) {
 	require.NotNil(t, cfg)
 
 	cfgPostgres := config.Access{}
-	err = cfg.Value("postgres", &cfgPostgres)
+	err = cfg.Value("pg", &cfgPostgres)
 	require.NoError(t, err)
 
 	l.Infof("%#v", cfgPostgres)

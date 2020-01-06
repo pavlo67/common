@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -18,17 +20,21 @@ import (
 	"github.com/pavlo67/workshop/common/server/server_http"
 
 	"github.com/pavlo67/workshop/components/packs"
-	"github.com/pavlo67/workshop/components/router"
 	"github.com/pavlo67/workshop/components/transport"
+	"github.com/pavlo67/workshop/components/transportrouter"
 )
 
 var _ transport.Operator = &transportHTTP{}
 
 type transportHTTP struct {
 	packsOp  packs.Operator
-	routerOp router.Operator
+	routerOp transportrouter.Operator
 
-	routes router.Routes
+	domain identity.Domain
+	path   string
+	id     uint64
+
+	routes transportrouter.Routes
 
 	handlers map[[2]identity.Key]packs.Handler
 	mutex    *sync.RWMutex
@@ -36,20 +42,24 @@ type transportHTTP struct {
 
 const onNew = "on sender_http.New(): "
 
-func New(packsOp packs.Operator, routerOp router.Operator) (transport.Operator, error) {
+func New(packsOp packs.Operator, routerOp transportrouter.Operator, domain identity.Domain) (transport.Operator, *server_http.Endpoint, error) {
 	if packsOp == nil {
-		return nil, errors.New(onNew + "no packs.Operator")
+		return nil, nil, errors.New(onNew + "no packs.Operator")
 	}
 
 	if routerOp == nil {
-		return nil, errors.New(onNew + "no router.Operator")
+		return nil, nil, errors.New(onNew + "no router.Operator")
+	}
+
+	if strings.TrimSpace(string(domain)) == "" {
+		return nil, nil, errors.New("domain is empty")
 	}
 
 	routes, err := routerOp.Routes()
 	if err != nil {
 		// TODO: get routes later
 
-		return nil, errors.Wrap(err, onNew+"can't get routes")
+		return nil, nil, errors.Wrap(err, onNew+"can't get routes")
 	}
 
 	handlers := map[[2]identity.Key]packs.Handler{}
@@ -59,12 +69,14 @@ func New(packsOp packs.Operator, routerOp router.Operator) (transport.Operator, 
 		routerOp: routerOp,
 
 		routes: routes,
+		domain: domain,
+		path:   strconv.FormatInt(time.Now().UnixNano(), 10),
 
 		handlers: handlers,
 		mutex:    &sync.RWMutex{},
 	}
 
-	return &transpOp, nil
+	return &transpOp, transpOp.receiveEndpoint(), nil
 }
 
 const onSendOnly = "on transportHTTP.Send(): "
@@ -135,6 +147,17 @@ const onSend = "on transportHTTP.Send(): "
 func (transpOp *transportHTTP) Send(outPack *packs.Pack) (sentKey identity.Key, inPack *packs.Pack, err error) {
 	if outPack == nil {
 		return "", nil, errors.New(onSend + "nothing to send")
+	}
+
+	if strings.TrimSpace(string(outPack.Key)) == "" {
+		transpOp.id++
+		item := identity.Item{
+			Domain: transpOp.domain,
+			Path:   transpOp.path,
+			ID:     strconv.FormatUint(transpOp.id, 10),
+		}
+
+		outPack.Key = item.Key()
 	}
 
 	ignoreProblems := outPack.Options.IsTrue("ignore_problens")

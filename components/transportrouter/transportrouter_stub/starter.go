@@ -1,4 +1,4 @@
-package router_stub
+package transportrouter_stub
 
 import (
 	"github.com/pkg/errors"
@@ -8,7 +8,7 @@ import (
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/starter"
-	"github.com/pavlo67/workshop/components/router"
+	"github.com/pavlo67/workshop/components/transportrouter"
 )
 
 func Starter() starter.Operator {
@@ -22,7 +22,7 @@ type routerStubStarter struct {
 	interfaceKey joiner.InterfaceKey
 	// cleanerInterfaceKey joiner.HandlerKey
 
-	routes router.Routes
+	routes transportrouter.Routes
 }
 
 func (rs *routerStubStarter) Name() string {
@@ -37,7 +37,7 @@ func (rs *routerStubStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.
 		return nil, err
 	}
 
-	rs.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(router.InterfaceKey)))
+	rs.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(transportrouter.InterfaceKey)))
 	// rs.cleanerInterfaceKey = joiner.HandlerKey(options.StringDefault("cleaner_interface_key", string(router.CleanerInterfaceKey)))
 
 	return nil, nil

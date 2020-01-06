@@ -18,9 +18,9 @@ import (
 
 	"github.com/pavlo67/workshop/components/packs/packs_pg"
 	"github.com/pavlo67/workshop/components/receiver"
-	"github.com/pavlo67/workshop/components/router/router_stub"
 	"github.com/pavlo67/workshop/components/transport"
 	"github.com/pavlo67/workshop/components/transport/transport_http"
+	"github.com/pavlo67/workshop/components/transportrouter/transportrouter_stub"
 
 	"github.com/pavlo67/workshop/apps/gatherer/gatherer_actions"
 )
@@ -72,7 +72,7 @@ func TestReceiverServerHTTP(t *testing.T) {
 
 		// transport system
 		{packs_pg.Starter(), nil},
-		{router_stub.Starter(), nil},
+		{transportrouter_stub.Starter(), nil},
 		{transport_http.Starter(), nil},
 		{Starter(), common.Map{"handler_key": receiver.HandlerInterfaceKey}},
 

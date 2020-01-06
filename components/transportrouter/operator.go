@@ -1,4 +1,4 @@
-package router
+package transportrouter
 
 import (
 	"github.com/pavlo67/workshop/common/config"
