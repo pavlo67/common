@@ -13,17 +13,20 @@ import (
 
 const onCountOnTag = "on tagsSQLite.countTag(): "
 
-func (taggerOp *tagsSQLite) countTag(tagLabel string, passedTags []string, labelsRemoved []string, stmCount, stmList, stmAddTag *sql.Stmt) ([]string, error) {
+func (taggerOp *tagsSQLite) countTag(tagLabel string, passedTags []string, labelsRemoved []string, stmPartedSize, stmList, stmAddTag *sql.Stmt) ([]string, error) {
 	if strlib.In(passedTags, tagLabel) {
 		return passedTags, nil
 	}
 
 	var partedSize uint64
-	partedSizePtr := &partedSize
-	values := []interface{}{taggerOp.ownInterfaceKey, tagLabel}
-	row := stmCount.QueryRow(values...)
+	var partedSizePtr *uint64
+	values := []interface{}{tagLabel}
+	row := stmPartedSize.QueryRow(values...)
 	if err := row.Scan(&partedSizePtr); err != nil && err != sql.ErrNoRows {
-		return passedTags, errors.Wrapf(err, onCountOnTag+": can't tx.QueryRow(%s, %#v)", taggerOp.sqlCountTagFull, values)
+		return passedTags, errors.Wrapf(err, onCountOnTag+": can't tx.QueryRow(%s, %#v)", taggerOp.sqlTagPartedSize, values)
+	}
+	if partedSizePtr != nil {
+		partedSize = *partedSizePtr
 	}
 
 	var labelsOnTag []string
@@ -46,7 +49,7 @@ func (taggerOp *tagsSQLite) countTag(tagLabel string, passedTags []string, label
 		return passedTags, errors.Wrapf(err, onCountOnTag+": "+sqllib.RowsError, taggerOp.sqlList, values)
 	}
 
-	values = []interface{}{tagLabel, len(labelsOnTag) > 0, partedSize}
+	values = []interface{}{tagLabel, len(labelsOnTag), partedSize}
 	if _, err := stmAddTag.Exec(values...); err != nil {
 		return passedTags, errors.Wrapf(err, onCountOnTag+": can't tx.Exec(%s, %#v)", taggerOp.sqlAddTag, values)
 	}
@@ -61,7 +64,7 @@ func (taggerOp *tagsSQLite) countTag(tagLabel string, passedTags []string, label
 	}
 
 	for _, labelToCount := range labelsToCount {
-		if passedTags, err = taggerOp.countTag(labelToCount, passedTags, nil, stmCount, stmList, stmAddTag); err != nil {
+		if passedTags, err = taggerOp.countTag(labelToCount, passedTags, nil, stmPartedSize, stmList, stmAddTag); err != nil {
 			return passedTags, errors.Wrapf(err, "on tag '%s'", tagLabel)
 		}
 	}
@@ -77,9 +80,9 @@ func (taggerOp *tagsSQLite) countTagChanged(key joiner.InterfaceKey, id common.I
 	}
 	tagLabel := string(id)
 
-	stmCount, err := tx.Prepare(taggerOp.sqlCountTagFull)
+	stmTagParterSize, err := tx.Prepare(taggerOp.sqlTagPartedSize)
 	if err != nil {
-		return errors.Wrapf(err, onCountChanged+": can't tx.Prepare(%s)", taggerOp.sqlCountTagFull)
+		return errors.Wrapf(err, onCountChanged+": can't tx.Prepare(%s)", taggerOp.sqlTagPartedSize)
 	}
 	stmList, err := tx.Prepare(taggerOp.sqlList)
 	if err != nil {
@@ -90,7 +93,7 @@ func (taggerOp *tagsSQLite) countTagChanged(key joiner.InterfaceKey, id common.I
 		return errors.Wrapf(err, onCountChanged+": can't tx.Prepare(%s)", taggerOp.sqlAddTag)
 	}
 
-	if _, err := taggerOp.countTag(tagLabel, nil, tagLabelsRemoved, stmCount, stmList, stmAddTag); err != nil {
+	if _, err := taggerOp.countTag(tagLabel, nil, tagLabelsRemoved, stmTagParterSize, stmList, stmAddTag); err != nil {
 		return errors.Wrapf(err, onCountChanged+": can't taggerOp.countTag(%s, ...)", tagLabel)
 	}
 

@@ -21,11 +21,13 @@ const tableTagsDefault = "tags"
 
 const joinerKeyTags = "tags"
 
-var fieldsToCount = []string{"tag", "is_internal", "parted_size"}
-var fieldsToCountStr = strings.Join(fieldsToCount, ", ")
+var fieldsToCountTags = []string{"tag", "is_internal", "parted_size"}
+var fieldsToCountTagsStr = strings.Join(fieldsToCountTags, ", ")
+var fieldsToUpdateTagsStr = sqllib_pg.WildcardsForUpdate(fieldsToCountTags)
 
 var fieldsToSave = []string{"joiner_key", "id", "tag", "relation"}
-var fieldsToSaveStr = strings.Join(fieldsToSave, ", ")
+var fieldsToInsertStr = strings.Join(fieldsToSave, ", ")
+var fieldsToUpdateStr = sqllib_pg.WildcardsForUpdate(fieldsToSave)
 
 var _ tagger.Operator = &tagsSQLite{}
 
@@ -35,11 +37,11 @@ type tagsSQLite struct {
 
 	ownInterfaceKey joiner.InterfaceKey
 
-	sqlList, sqlIndexTagged, sqlIndexTaggedAll, sqlCountJoinerKeys, sqlCountTags, sqlCountTagsAll string
-	stmList, stmIndexTagged, stmIndexTaggedAll, stmCountJoinerKeys, stmCountTags, stmCountTagsAll *sql.Stmt
+	sqlList, sqlIndexTagged, sqlIndexTaggedAll, sqlCountJoinerKeys, sqlCountTags, sqlCountTagsAll, sqlTagPartedSize string
+	stmList, stmIndexTagged, stmIndexTaggedAll, stmCountJoinerKeys, stmCountTags, stmCountTagsAll, stmTagPartedSize *sql.Stmt
 
 	// sqlSetTag, sqlGetTag
-	sqlAddTag, sqlCountTagFull, sqlAddTagged, sqlRemoveTagged string
+	sqlAddTag, sqlAddTagged, sqlRemoveTagged string
 }
 
 const onNew = "on tagsSQLite.New(): "
@@ -60,30 +62,32 @@ func New(access config.Access, ownInterfaceKey joiner.InterfaceKey) (tagger.Oper
 
 		ownInterfaceKey: ownInterfaceKey,
 
-		// TODO: on conflict REPLACE
-		sqlAddTagged: "INSERT INTO " + tableTagged + " (" + fieldsToSaveStr + ") VALUES (" + sqllib_pg.WildcardsForInsert(fieldsToSave) + ")",
+		sqlAddTagged: "INSERT INTO " + tableTagged + " (" + fieldsToInsertStr + ") VALUES (" + sqllib_pg.WildcardsForInsert(fieldsToSave) + ")" +
+			" ON CONFLICT (joiner_key, id, tag) DO UPDATE SET " + fieldsToUpdateStr,
 
 		sqlRemoveTagged:   "DELETE                          FROM " + tableTagged + " WHERE joiner_key = $1 AND id = $2",
 		sqlList:           "SELECT tag, relation            FROM " + tableTagged + " WHERE joiner_key = $1 AND id = $2 ORDER BY tag",
 		sqlIndexTagged:    "SELECT joiner_key, id, relation FROM " + tableTagged + " WHERE joiner_key = $1 AND tag = $2",
 		sqlIndexTaggedAll: "SELECT joiner_key, id, relation FROM " + tableTagged + " WHERE                     tag = $1                                   ORDER BY joiner_key",
 
-		// TODO: on conflict REPLACE
-		sqlAddTag:       "INSERT INTO " + tableTags + " (" + fieldsToCountStr + ") VALUES (" + sqllib_pg.WildcardsForInsert(fieldsToCount) + ")",
-		sqlCountTagFull: "SELECT SUM(parted_size) FROM " + tableJoined + " WHERE " + tableTagged + ".tag = $1",
+		sqlAddTag: "INSERT INTO " + tableTags + " (" + fieldsToCountTagsStr + ") VALUES (" + sqllib_pg.WildcardsForInsert(fieldsToCountTags) + ")" +
+			" ON CONFLICT (tag) DO UPDATE SET " + fieldsToUpdateTagsStr,
 
-		sqlCountJoinerKeys: "SELECT joiner_key, COUNT(*) AS cnt FROM " + tableTagged + " WHERE tag = $1        GROUP BY joiner_key ORDER BY cnt DESC",
-		sqlCountTags:       "SELECT tag,        COUNT(*) AS cnt FROM " + tableTagged + " WHERE joiner_key = $1 GROUP BY tag        ORDER BY cnt DESC",
-		sqlCountTagsAll:    "SELECT tag,        COUNT(*) AS cnt FROM " + tableTagged + "                       GROUP BY tag        ORDER BY cnt DESC",
+		sqlTagPartedSize: "SELECT SUM(parted_size) FROM " + tableJoined + " WHERE " + tableTagged + ".tag = $1",
+
+		sqlCountJoinerKeys: "SELECT joiner_key,              COUNT(*) AS cnt, SUM(parted_size) FROM " + tableJoined + " WHERE  " + tableTagged + ".tag = $1 GROUP BY joiner_key              ORDER BY cnt DESC",
+		sqlCountTags:       "SELECT " + tableTagged + ".tag, COUNT(*) AS cnt, SUM(parted_size) FROM " + tableJoined + " WHERE joiner_key = $1               GROUP BY " + tableTagged + ".tag ORDER BY cnt DESC",
+		sqlCountTagsAll:    "SELECT " + tableTagged + ".tag, COUNT(*) AS cnt, SUM(parted_size) FROM " + tableJoined + "                                     GROUP BY " + tableTagged + ".tag ORDER BY cnt DESC",
 	}
 
 	sqlStmts := []sqllib.SqlStmt{
-		{&taggerOp.stmList, taggerOp.sqlList},
-		{&taggerOp.stmIndexTagged, taggerOp.sqlIndexTagged},
-		{&taggerOp.stmIndexTaggedAll, taggerOp.sqlIndexTaggedAll},
-		{&taggerOp.stmCountJoinerKeys, taggerOp.sqlCountJoinerKeys},
-		{&taggerOp.stmCountTags, taggerOp.sqlCountTags},
-		{&taggerOp.stmCountTagsAll, taggerOp.sqlCountTagsAll},
+		{Stmt: &taggerOp.stmList, Sql: taggerOp.sqlList},
+		{Stmt: &taggerOp.stmIndexTagged, Sql: taggerOp.sqlIndexTagged},
+		{Stmt: &taggerOp.stmIndexTaggedAll, Sql: taggerOp.sqlIndexTaggedAll},
+		{Stmt: &taggerOp.stmCountJoinerKeys, Sql: taggerOp.sqlCountJoinerKeys},
+		{Stmt: &taggerOp.stmCountTags, Sql: taggerOp.sqlCountTags},
+		{Stmt: &taggerOp.stmCountTagsAll, Sql: taggerOp.sqlCountTagsAll},
+		{Stmt: &taggerOp.stmTagPartedSize, Sql: taggerOp.sqlTagPartedSize},
 	}
 
 	for _, sqlStmt := range sqlStmts {

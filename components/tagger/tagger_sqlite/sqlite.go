@@ -51,8 +51,12 @@ func New(access config.Access, ownInterfaceKey joiner.InterfaceKey) (tagger.Oper
 
 	table := tableDefault
 	tableTags := tableTagsDefault
-	tableJoined := table + "   LEFT JOIN " + tableTags + " ON " + table + ".tag = " + tableTags + ".tag"
-	tableJoinedUp := table + " LEFT JOIN " + tableTags + " ON " + table + ".id  = " + tableTags + ".tag AND key = ?"
+
+	// TODO: remove it
+	// tableJoined := table + "   LEFT JOIN " + tableTags + " ON " + table + ".tag = " + tableTags + ".tag"
+
+	// TODO: use like to tagger+pg
+	// tableJoinedUp := table + " LEFT JOIN " + tableTags + " ON " + table + ".id  = " + tableTags + ".tag AND key = ?"
 
 	taggerOp := tagsSQLite{
 		db:          db,
