@@ -18,6 +18,7 @@ type Action struct {
 	Key        ActionKey      `bson:",omitempty" json:",omitempty"`
 	DoneAt     time.Time      `bson:",omitempty" json:",omitempty"`
 	RelatedIDs []common.ID    `bson:",omitempty" json:",omitempty"`
+	Errors     common.Errors  `bson:",omitempty" json:",omitempty"`
 }
 
 type History []Action

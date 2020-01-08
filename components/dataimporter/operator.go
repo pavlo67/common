@@ -9,7 +9,6 @@ import (
 )
 
 const InterfaceKey joiner.InterfaceKey = "importer"
-const TaskInterfaceKey joiner.InterfaceKey = "importer_task"
 
 type DataSeries struct {
 	URL       string

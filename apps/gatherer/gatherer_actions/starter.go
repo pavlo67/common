@@ -115,8 +115,11 @@ func (ss *gathererStarter) Run(joinerOp joiner.Operator) error {
 		l,
 	)
 
+	WG.Add(1)
+
 	go func() {
-		srvOp.Start()
+		defer WG.Done()
+		_ = srvOp.Start()
 		if err != nil {
 			l.Error("on srvOp.Start(): ", err)
 		}

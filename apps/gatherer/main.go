@@ -7,6 +7,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/pavlo67/workshop/components/sources/sources_stub"
+
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/auth/auth_ecdsa"
 	"github.com/pavlo67/workshop/common/config"
@@ -18,13 +20,16 @@ import (
 	"github.com/pavlo67/workshop/common/server/server_http/server_http_jschmhr"
 	"github.com/pavlo67/workshop/common/starter"
 
+	"github.com/pavlo67/workshop/components/data/data_pg"
+	"github.com/pavlo67/workshop/components/dataimporter/flowimporter_task"
+	"github.com/pavlo67/workshop/components/datatagged"
 	"github.com/pavlo67/workshop/components/flow"
 	"github.com/pavlo67/workshop/components/packs/packs_pg"
 	"github.com/pavlo67/workshop/components/transport"
 	"github.com/pavlo67/workshop/components/transport/transport_http"
+	"github.com/pavlo67/workshop/components/transportrouter/transportrouter_stub"
 
 	"github.com/pavlo67/workshop/apps/gatherer/gatherer_actions"
-	"github.com/pavlo67/workshop/components/transportrouter/transportrouter_stub"
 )
 
 var (
@@ -91,8 +96,6 @@ func main() {
 		l.Fatal(err)
 	}
 
-	// l.Infof("%#v", cfgGatherer)
-
 	// running starters
 
 	label := "GATHERER/PG CLI BUILD"
@@ -113,20 +116,20 @@ func main() {
 		{transport_http.Starter(), common.Map{"handler_key": transport.HandlerInterfaceKey, "domain": serviceName}},
 
 		// database
-		{tagger_pg.Starter(), nil},
+		// {tagger_pg.Starter(), nil},
+		{data_pg.Starter(), common.Map{"table": flow.CollectionDefault, "interface_key": flow.DataInterfaceKey, "cleaner_key": flow.CleanerInterfaceKey, "no_tagger": true}},
+		{datatagged.Starter(), common.Map{"data_key": flow.DataInterfaceKey, "interface_key": flow.InterfaceKey, "no_tagger": true}},
 
-		//{data_pg.Starter(), common.Map{"table": flow.CollectionDefault, "interface_key": flow.DataInterfaceKey, "cleaner_key": flow.CleanerInterfaceKey, "no_tagger": true}},
-		//{datatagged.Starter(), common.Map{"data_key": flow.DataInterfaceKey, "interface_key": flow.HandlerKey, "no_tagger": true}},
-		//
-		//// flow actions
-		//{flowimporter_task.Starter(), common.Map{"datatagged_key": flow.HandlerKey, "interface_key": flow.ImporterTaskInterfaceKey}},
-		//{flowcleaner_task.Starter(), common.Map{"cleaner_key": flow.CleanerInterfaceKey, "interface_key": flow.CleanerTaskInterfaceKey, "limit": 300000}},
-		//{flowcopier.Starter(), common.Map{"datatagged_key": flow.HandlerKey, "receiver_server_http": true}},
-		//
+		// flow actions
+		{sources_stub.Starter(), nil},
+		{flowimporter_task.Starter(), common.Map{"datatagged_key": flow.InterfaceKey, "interface_key": flow.ImporterTaskInterfaceKey}},
+		// {flowcleaner_task.Starter(), common.Map{"cleaner_key": flow.CleanerInterfaceKey, "interface_key": flow.CleanerTaskInterfaceKey, "limit": 300000}},
+		// {flowcopier.Starter(), common.Map{"datatagged_key": flow.HandlerKey, "receiver_server_http": true}},
+
 		// actions starter (connecting specific actions to the corresponding action managers)
 		{gatherer_actions.Starter(), common.Map{
-			"importer_task_key":    flow.ImporterTaskInterfaceKey,
-			"cleaner_task_key":     flow.CopierTaskInterfaceKey,
+			"importer_task_key": flow.ImporterTaskInterfaceKey,
+			// "cleaner_task_key":     flow.CopierTaskInterfaceKey,
 			"receiver_handler_key": transport.HandlerInterfaceKey,
 		}},
 	}
@@ -136,6 +139,8 @@ func main() {
 		l.Fatal(err)
 	}
 	defer joinerOp.CloseAll()
+
+	gatherer_actions.WG.Wait()
 
 }
 

@@ -1,6 +1,8 @@
 package flowimporter_task
 
 import (
+	"strings"
+
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
@@ -12,63 +14,63 @@ import (
 	"github.com/pavlo67/workshop/components/dataimporter"
 	"github.com/pavlo67/workshop/components/dataimporter/importer_http_rss"
 	"github.com/pavlo67/workshop/components/datatagged"
+	"github.com/pavlo67/workshop/components/sources"
 )
 
-func NewLoader(dataOp datatagged.Operator) (actor.Operator, error) {
+func New(dataOp datatagged.Operator, sourcesOp sources.Operator) (actor.Operator, error) {
 
 	if dataOp == nil {
-		return nil, errors.New("on importer_task.NewLoader(): data.Operator == nil")
+		return nil, errors.New("on flowimporter_task.New(): data.Operator == nil")
+	}
+	if sourcesOp == nil {
+		return nil, errors.New("on flowimporter_task.New(): sources.Operator == nil")
 	}
 
-	return &loadTask{dataOp}, nil
+	return &loadTask{dataOp, sourcesOp}, nil
 }
 
 var _ actor.Operator = &loadTask{}
 
 type loadTask struct {
-	dataOp data.Operator
+	dataOp    data.Operator
+	sourcesOp sources.Operator
 }
 
 func (it *loadTask) Name() string {
 	return "loader"
 }
 
+const onRun = "on loadTask.Run(): "
+
 func (it *loadTask) Run(_ common.Map) (posterior []joiner.Link, info common.Map, err error) {
 	if it == nil {
 		return nil, nil, errors.New("on importer_task.Run(): loadTask == nil")
 	}
 
-	return nil, nil, LoadAll(it.dataOp)
-}
-
-func LoadAll(dataOp data.Operator) error {
-	urls := []string{
-		"https://rss.unian.net/site/news_ukr.rss",
-		"https://censor.net.ua/includes/news_uk.xml",
-		"http://texty.org.ua/mod/news/?view=rss",
-		"http://texty.org.ua/mod/article/?view=rss&ed=1",
-		"http://texty.org.ua/mod/blog/blog_list.php?view=rss",
-		"https://www.pravda.com.ua/rss/",
-		"http://k.img.com.ua/rss/ua/all_news2.0.xml",
-		"https://www.obozrevatel.com/rss.xml",
-		"https://lenta.ru/rss",
-		"https://www.gazeta.ru/export/rss/first.xml",
-		"https://www.gazeta.ru/export/rss/lenta.xml",
+	sourceItems, err := it.sourcesOp.List(nil, nil)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, onRun+"can't it.sourcesOp.List(nil, nil)")
 	}
 
-	for i, url := range urls {
-		l.Infof("%d f %d: %s", i+1, len(urls), url)
+	for i, sourceItem := range sourceItems {
+		url := strings.TrimSpace(sourceItem.URL)
+		if url == "" {
+			l.Errorf("no url in sources.Item(%#v)", sourceItem)
+			continue
+		}
 
-		numAll, numProcessed, numNew, err := Load(url, dataOp)
+		l.Infof("%d f %d: %s", i+1, len(sourceItems), url)
+
+		numAll, numProcessed, numNew, err := Load(url, it.dataOp)
 		l.Infof("numAll = %d, numProcessed = %d, numNew = %d", numAll, numProcessed, numNew)
 
 		if err != nil {
 			l.Error(err)
 		}
-
 	}
 
-	return nil
+	// TODO!!! return posterior
+	return nil, nil, nil
 }
 
 func Load(url string, dataOp data.Operator) (int, int, int, error) {
@@ -106,7 +108,6 @@ func Load(url string, dataOp data.Operator) (int, int, int, error) {
 
 		cnt, err = dataOp.Count(term, nil)
 		if err != nil {
-			err = errors.Errorf("can't dataOp.CountTags(%#v): %s", term, err)
 			break
 
 		} else if cnt > 0 {
@@ -118,7 +119,6 @@ func Load(url string, dataOp data.Operator) (int, int, int, error) {
 
 		_, err = dataOp.Save([]data.Item{item}, nil)
 		if err != nil {
-			err = errors.Errorf("can't adminOp.Save(%#v): %s", item, err)
 			break
 
 		} else {

@@ -12,32 +12,32 @@ import (
 )
 
 func Starter() starter.Operator {
-	return &taggerSQLiteStarter{}
+	return &taggerPgStarter{}
 }
 
 var l logger.Operator
-var _ starter.Operator = &taggerSQLiteStarter{}
+var _ starter.Operator = &taggerPgStarter{}
 
-type taggerSQLiteStarter struct {
+type taggerPgStarter struct {
 	config              config.Access
 	interfaceKey        joiner.InterfaceKey
 	cleanerInterfaceKey joiner.InterfaceKey
 }
 
-func (ts *taggerSQLiteStarter) Name() string {
+func (ts *taggerPgStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ts *taggerSQLiteStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
+func (ts *taggerPgStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	l = lCommon
 
-	cfgSQLite := config.Access{}
-	err := cfg.Value("sqlite", &cfgSQLite)
+	cfgPg := config.Access{}
+	err := cfg.Value("pg", &cfgPg)
 	if err != nil {
 		return nil, err
 	}
 
-	ts.config = cfgSQLite
+	ts.config = cfgPg
 	ts.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(tagger.InterfaceKey)))
 	ts.cleanerInterfaceKey = joiner.InterfaceKey(options.StringDefault("cleaner_interface_key", string(tagger.CleanerInterfaceKey)))
 
@@ -46,7 +46,7 @@ func (ts *taggerSQLiteStarter) Init(cfgCommon, cfg *config.Config, lCommon logge
 	return nil, nil
 }
 
-func (ts *taggerSQLiteStarter) Setup() error {
+func (ts *taggerPgStarter) Setup() error {
 	return nil
 
 	//return sqllib.SetupTables(
@@ -56,7 +56,7 @@ func (ts *taggerSQLiteStarter) Setup() error {
 	//)
 }
 
-func (ts *taggerSQLiteStarter) Run(joinerOp joiner.Operator) error {
+func (ts *taggerPgStarter) Run(joinerOp joiner.Operator) error {
 	taggerOp, taggerCleanerOp, err := New(ts.config, ts.interfaceKey)
 	if err != nil {
 		return errors.Wrap(err, "can't init tagger.Operator")
@@ -64,12 +64,12 @@ func (ts *taggerSQLiteStarter) Run(joinerOp joiner.Operator) error {
 
 	err = joinerOp.Join(taggerOp, ts.interfaceKey)
 	if err != nil {
-		return errors.Wrapf(err, "can't join *tagsSQLite as tagger.Operator with key '%s'", ts.interfaceKey)
+		return errors.Wrapf(err, "can't join *taggerPg as tagger.Operator with key '%s'", ts.interfaceKey)
 	}
 
 	err = joinerOp.Join(taggerCleanerOp, ts.cleanerInterfaceKey)
 	if err != nil {
-		return errors.Wrapf(err, "can't join *tagsSQLite as tagger.Cleaner with key '%s'", ts.cleanerInterfaceKey)
+		return errors.Wrapf(err, "can't join *taggerPg as tagger.Cleaner with key '%s'", ts.cleanerInterfaceKey)
 	}
 
 	return nil

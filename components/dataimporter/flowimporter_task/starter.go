@@ -9,7 +9,6 @@ import (
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/starter"
 
-	"github.com/pavlo67/workshop/components/dataimporter"
 	"github.com/pavlo67/workshop/components/datatagged"
 	"github.com/pavlo67/workshop/components/flow"
 )
@@ -36,7 +35,7 @@ func (ts *importerTasksStarter) Init(cfgCommon, cfg *config.Config, lCommon logg
 	l = lCommon
 
 	ts.datataggedKey = joiner.InterfaceKey(options.StringDefault("datatagged_key", string(flow.InterfaceKey)))
-	ts.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(dataimporter.TaskInterfaceKey)))
+	ts.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(flow.ImporterTaskInterfaceKey)))
 
 	return nil, nil
 }
@@ -51,9 +50,9 @@ func (ts *importerTasksStarter) Run(joinerOp joiner.Operator) error {
 		return errors.Errorf("no datatagged.Operator with key %s", ts.datataggedKey)
 	}
 
-	impOp, err := NewLoader(datataggedOp)
+	impOp, err := New(datataggedOp)
 	if err != nil {
-		return errors.Wrap(err, "can't init flowimporter.Operator")
+		return errors.Wrap(err, "can't init *loadTask")
 	}
 
 	err = joinerOp.Join(impOp, ts.interfaceKey)

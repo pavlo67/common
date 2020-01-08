@@ -6,8 +6,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/pkg/errors"
-
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/crud"
@@ -18,6 +16,7 @@ import (
 	"github.com/pavlo67/workshop/common/selectors"
 	"github.com/pavlo67/workshop/common/selectors/selectors_sql"
 	"github.com/pavlo67/workshop/common/types"
+	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/components/data"
 	"github.com/pavlo67/workshop/components/tagger"
@@ -138,7 +137,7 @@ func (dataOp *dataPg) Save(items []data.Item, _ *crud.SaveOptions) ([]common.ID,
 		}
 
 		if item.ID == "" {
-			values := []interface{}{string(item.DataKey), item.URL, item.Title, item.Summary, embedded, tags, item.TypeKey, details, history}
+			values := []interface{}{string(item.Key), item.URL, item.Title, item.Summary, embedded, tags, item.TypeKey, details, history}
 
 			var lastInsertId uint64
 
@@ -160,7 +159,7 @@ func (dataOp *dataPg) Save(items []data.Item, _ *crud.SaveOptions) ([]common.ID,
 
 		} else {
 
-			values := []interface{}{item.DataKey, item.URL, item.Title, item.Summary, embedded, tags, item.TypeKey, details, history, item.ID}
+			values := []interface{}{item.Key, item.URL, item.Title, item.Summary, embedded, tags, item.TypeKey, details, history, item.ID}
 
 			_, err := dataOp.stmUpdate.Exec(values...)
 			if err != nil {
@@ -197,7 +196,7 @@ func (dataOp *dataPg) Read(id common.ID, _ *crud.GetOptions) (*data.Item, error)
 	var embedded, tags, history, updatedAt, createdAt []byte
 
 	err = dataOp.stmRead.QueryRow(idNum).Scan(
-		&item.DataKey, &item.URL, &item.Title, &item.Summary, &embedded, &tags, &item.TypeKey, &item.DetailsRaw, &history, &updatedAt, &createdAt,
+		&item.Key, &item.URL, &item.Title, &item.Summary, &embedded, &tags, &item.TypeKey, &item.DetailsRaw, &history, &updatedAt, &createdAt,
 	)
 
 	// TODO!!! read updatedAt, createdAt
@@ -371,7 +370,7 @@ func (dataOp *dataPg) List(term *selectors.Term, options *crud.GetOptions) ([]da
 		var embedded, tags, history, updatedAt, createdAt []byte
 
 		err := rows.Scan(
-			&idNum, &item.DataKey, &item.URL, &item.Title, &item.Summary, &embedded, &tags, &item.TypeKey, &item.DetailsRaw, &history, &updatedAt, &createdAt,
+			&idNum, &item.Key, &item.URL, &item.Title, &item.Summary, &embedded, &tags, &item.TypeKey, &item.DetailsRaw, &history, &updatedAt, &createdAt,
 		)
 
 		// TODO: read updatedAt, createdAt

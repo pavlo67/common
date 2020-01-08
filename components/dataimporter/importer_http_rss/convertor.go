@@ -74,7 +74,7 @@ func (item *Item) GetData() (*data.Item, error) {
 	}
 
 	return &data.Item{
-		DataKey:  dataimporter.SourceKey(history),
+		Key:  dataimporter.SourceKey(history),
 		URL:      feedItem.Link,
 		TypeKey:  types.KeyString,
 		Title:    feedItem.Title,

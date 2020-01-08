@@ -151,7 +151,7 @@ func (dataOp *dataSQLite) Save(items []data.Item, _ *crud.SaveOptions) ([]common
 
 		if item.ID == "" {
 
-			values := []interface{}{item.DataKey, item.URL, item.Title, item.Summary, embedded, tags, item.TypeKey, details, history}
+			values := []interface{}{item.Key, item.URL, item.Title, item.Summary, embedded, tags, item.TypeKey, details, history}
 
 			res, err := dataOp.stmInsert.Exec(values...)
 			if err != nil {
@@ -175,7 +175,7 @@ func (dataOp *dataSQLite) Save(items []data.Item, _ *crud.SaveOptions) ([]common
 
 		} else {
 
-			values := []interface{}{item.DataKey, item.URL, item.Title, item.Summary, embedded, tags, item.TypeKey, details, history, time.Now().Format(time.RFC3339), item.ID}
+			values := []interface{}{item.Key, item.URL, item.Title, item.Summary, embedded, tags, item.TypeKey, details, history, time.Now().Format(time.RFC3339), item.ID}
 
 			_, err := dataOp.stmUpdate.Exec(values...)
 			if err != nil {
@@ -212,7 +212,7 @@ func (dataOp *dataSQLite) Read(id common.ID, _ *crud.GetOptions) (*data.Item, er
 	var embedded, tags, history, updatedAt, createdAt []byte
 
 	err = dataOp.stmRead.QueryRow(idNum).Scan(
-		&item.DataKey, &item.URL, &item.Title, &item.Summary, &embedded, &tags, &item.TypeKey, &item.DetailsRaw, &history, &updatedAt, &createdAt,
+		&item.Key, &item.URL, &item.Title, &item.Summary, &embedded, &tags, &item.TypeKey, &item.DetailsRaw, &history, &updatedAt, &createdAt,
 	)
 
 	// TODO: read updated_at & created_at
@@ -386,7 +386,7 @@ func (dataOp *dataSQLite) List(term *selectors.Term, options *crud.GetOptions) (
 		var embedded, tags, history, updatedAt, createdAt []byte
 
 		err := rows.Scan(
-			&idNum, &item.DataKey, &item.URL, &item.Title, &item.Summary, &embedded, &tags, &item.TypeKey, &item.DetailsRaw, &history, &updatedAt, &createdAt,
+			&idNum, &item.Key, &item.URL, &item.Title, &item.Summary, &embedded, &tags, &item.TypeKey, &item.DetailsRaw, &history, &updatedAt, &createdAt,
 		)
 
 		// TODO: read updated_at & created_at

@@ -65,7 +65,7 @@ func (wsOp *ws) ListWithTag(key *joiner.InterfaceKey, tagLabel string, selector 
 	// TODO: check if all item.TypeKey are correct in the result of wsOp.ListTags
 }
 
-const onListWithText = "on ws.ListWithText(): "
+// const onListWithText = "on ws.ListWithText(): "
 
 func (wsOp *ws) ListWithText(*joiner.InterfaceKey, hypertext.ToSearch, *selectors.Term, *crud.GetOptions) ([]data.Item, error) {
 	return nil, common.ErrNotImplemented

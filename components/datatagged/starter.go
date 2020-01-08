@@ -34,7 +34,7 @@ func (ws *workspaceStarter) Init(_, _ *config.Config, lCommon logger.Operator, o
 
 	ws.dataKey = joiner.InterfaceKey(options.StringDefault("data_key", string(data.InterfaceKey)))
 	ws.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
-	ws.noTagger, _ = options.IsTrue("no_tagger")
+	ws.noTagger = options.IsTrue("no_tagger")
 
 	return nil, nil
 }
