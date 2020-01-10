@@ -3,6 +3,8 @@ package flowimporter_task
 import (
 	"strings"
 
+	"github.com/pavlo67/workshop/components/tasks"
+
 	"github.com/pavlo67/workshop/components/runner"
 
 	"github.com/pkg/errors"
@@ -46,7 +48,7 @@ func (it *loadTask) Init(_ common.Map) (*runner.Estimate, error) {
 
 const onRun = "on loadTask.Run(): "
 
-func (it *loadTask) Run() (posterior []joiner.Link, info common.Map, err error) {
+func (it *loadTask) Run() (response *tasks.Task, posterior []joiner.Link, err error) {
 	if it == nil {
 		return nil, nil, errors.New("on importer_task.Run(): loadTask == nil")
 	}
@@ -75,6 +77,10 @@ func (it *loadTask) Run() (posterior []joiner.Link, info common.Map, err error) 
 
 	// TODO!!! return posterior
 	return nil, nil, nil
+}
+
+func (it *loadTask) Report() (*tasks.Task, error) {
+	return nil, common.ErrNotImplemented
 }
 
 func Load(url string, dataOp data.Operator) (int, int, int, error) {

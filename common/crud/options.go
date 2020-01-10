@@ -4,6 +4,7 @@ import "github.com/pavlo67/workshop/common"
 
 type SaveOptions struct {
 	AuthID    common.ID
+	History   History
 	Replace   bool
 	ReturnIDs bool
 }

@@ -3,8 +3,9 @@ package transport_http
 import (
 	"strconv"
 	"strings"
-	"sync"
 	"time"
+
+	"github.com/pavlo67/workshop/components/runner"
 
 	"github.com/pkg/errors"
 
@@ -19,8 +20,9 @@ import (
 var _ transport.Operator = &transportHTTP{}
 
 type transportHTTP struct {
-	packsOp  packs.Operator
-	routerOp transportrouter.Operator
+	packsOp       packs.Operator
+	runnerFactory runner.Factory
+	routerOp      transportrouter.Operator
 
 	domain identity.Domain
 	path   string
@@ -28,15 +30,24 @@ type transportHTTP struct {
 
 	routes transportrouter.Routes
 
-	handlers map[[2]identity.Key]packs.Handler
-	mutex    *sync.RWMutex
+	maxResponseDuration time.Duration
+
+	//handlers map[[2]identity.Key]packs.Handler
+	//mutex    *sync.RWMutex
 }
+
+// TODO!!! customize it
+const maxResponseDuration = time.Second * 30
 
 const onNew = "on sender_http.New(): "
 
-func New(packsOp packs.Operator, routerOp transportrouter.Operator, domain identity.Domain) (transport.Operator, *server_http.Endpoint, error) {
+func New(packsOp packs.Operator, runnerFactory runner.Factory, routerOp transportrouter.Operator, domain identity.Domain) (transport.Operator, *server_http.Endpoint, error) {
 	if packsOp == nil {
 		return nil, nil, errors.New(onNew + "no packs.Actor")
+	}
+
+	if runnerFactory == nil {
+		return nil, nil, errors.New(onNew + "no runner.Factory")
 	}
 
 	if routerOp == nil {
@@ -54,18 +65,20 @@ func New(packsOp packs.Operator, routerOp transportrouter.Operator, domain ident
 		return nil, nil, errors.Wrap(err, onNew+"can't get routes")
 	}
 
-	handlers := map[[2]identity.Key]packs.Handler{}
+	//handlers := map[[2]identity.Key]packs.Handler{}
 
 	transpOp := transportHTTP{
-		packsOp:  packsOp,
-		routerOp: routerOp,
+		packsOp:       packsOp,
+		runnerFactory: runnerFactory,
+		routerOp:      routerOp,
 
 		routes: routes,
 		domain: domain,
 		path:   strconv.FormatInt(time.Now().UnixNano(), 10),
 
-		handlers: handlers,
-		mutex:    &sync.RWMutex{},
+		maxResponseDuration: maxResponseDuration,
+		//handlers: handlers,
+		//mutex:    &sync.RWMutex{},
 	}
 
 	return &transpOp, transpOp.receiveEndpoint(), nil

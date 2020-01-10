@@ -80,7 +80,7 @@ func (transpOp *transportHTTP) SendOnly(pack *packs.Pack, to identity.Key) (inPa
 
 const onSend = "on transportHTTP.Send(): "
 
-func (transpOp *transportHTTP) Send(outPack *packs.Pack) (sentKey identity.Key, inPack *packs.Pack, err error) {
+func (transpOp *transportHTTP) Send(outPack *packs.Pack) (sentKey identity.Key, targetTaskID common.ID, err error) {
 	if outPack == nil {
 		return "", nil, errors.New(onSend + "nothing to send")
 	}

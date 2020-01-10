@@ -2,6 +2,7 @@ package flowcleaner_task
 
 import (
 	"github.com/pavlo67/workshop/components/runner"
+	"github.com/pavlo67/workshop/components/tasks"
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
@@ -37,7 +38,7 @@ func (it *cleanTask) Init(_ common.Map) (*runner.Estimate, error) {
 	return nil, nil
 }
 
-func (it *cleanTask) Run() (posterior []joiner.Link, info common.Map, err error) {
+func (it *cleanTask) Run() (response *tasks.Task, posterior []joiner.Link, err error) {
 	if it == nil {
 		return nil, nil, errors.New("on importer_task.Run(): cleanTask == nil")
 	}

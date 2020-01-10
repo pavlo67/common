@@ -19,8 +19,8 @@ type Timing struct {
 
 type Result struct {
 	Timing    `              bson:",inline"    json:",inline"`
-	Success   bool          `bson:",omitempty" json:",omitempty"`
-	Info      common.Map    `bson:",omitempty" json:",omitempty"`
+	Error     error         `bson:",omitempty" json:",omitempty"`
+	Response  *Task         `bson:",omitempty" json:",omitempty"`
 	Posterior []joiner.Link `bson:",omitempty" json:",omitempty"`
 }
 

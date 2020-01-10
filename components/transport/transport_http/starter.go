@@ -1,6 +1,7 @@
 package transport_http
 
 import (
+	"github.com/pavlo67/workshop/components/runner"
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
@@ -57,7 +58,12 @@ func (th *transportHTTPStarter) Run(joinerOp joiner.Operator) error {
 		return errors.Errorf("no packs.Actor with key %s", packs.InterfaceKey)
 	}
 
-	transpOp, receiveEndpoint, err := New(packsOp, routerOp, th.domain)
+	runnerFactory, ok := joinerOp.Interface(runner.FactoryInterfaceKey).(runner.Factory)
+	if !ok {
+		return errors.Errorf("no runner.Factory with key %s", runner.FactoryInterfaceKey)
+	}
+
+	transpOp, receiveEndpoint, err := New(packsOp, runnerFactory, routerOp, th.domain)
 	if err != nil {
 		return errors.Wrap(err, "can'th init transport.Actor")
 	}

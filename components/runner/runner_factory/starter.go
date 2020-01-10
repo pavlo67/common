@@ -2,6 +2,7 @@ package runner_factory
 
 import (
 	"github.com/pavlo67/workshop/components/runner"
+	"github.com/pavlo67/workshop/components/tasks"
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
@@ -39,7 +40,12 @@ func (rfs *runnerFactoryStarter) Setup() error {
 }
 
 func (rfs *runnerFactoryStarter) Run(joinerOp joiner.Operator) error {
-	runnerFactory, err := New(joinerOp)
+	tasksOp, ok := joinerOp.Interface(tasks.InterfaceKey).(tasks.Operator)
+	if !ok {
+		return errors.Errorf("no tasks.Operator with key %s", tasks.InterfaceKey)
+	}
+
+	runnerFactory, err := New(tasksOp, joinerOp)
 	if err != nil {
 		return errors.Wrap(err, "can't init runner.factory")
 	}

@@ -2,6 +2,7 @@ package flowcopier
 
 import (
 	"github.com/pavlo67/workshop/components/runner"
+	"github.com/pavlo67/workshop/components/tasks"
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
@@ -56,7 +57,7 @@ func (it *copyTask) Init(_ common.Map) (*runner.Estimate, error) {
 	return nil, nil
 }
 
-func (it *copyTask) Run() (posterior []joiner.Link, info common.Map, err error) {
+func (it *copyTask) Run() (response *tasks.Task, posterior []joiner.Link, err error) {
 	if it == nil {
 		return nil, nil, errors.New("on copyTask.Run(): it == nil")
 	}
@@ -65,6 +66,10 @@ func (it *copyTask) Run() (posterior []joiner.Link, info common.Map, err error) 
 	l.Infof("numAll = %d, numProcessed = %d, numNew = %d", numAll, numProcessed, numNew)
 
 	return nil, nil, err
+}
+
+func (it *copyTask) Report() (*tasks.Task, error) {
+	return nil, common.ErrNotImplemented
 }
 
 func (it *copyTask) Copy() (int, int, int, error) {
