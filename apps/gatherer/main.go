@@ -21,9 +21,9 @@ import (
 	"github.com/pavlo67/workshop/common/starter"
 
 	"github.com/pavlo67/workshop/components/data/data_pg"
-	"github.com/pavlo67/workshop/components/dataimporter/flowimporter_task"
 	"github.com/pavlo67/workshop/components/datatagged"
 	"github.com/pavlo67/workshop/components/flow"
+	"github.com/pavlo67/workshop/components/flow/flowimporter_task"
 	"github.com/pavlo67/workshop/components/packs/packs_pg"
 	"github.com/pavlo67/workshop/components/transport"
 	"github.com/pavlo67/workshop/components/transport/transport_http"

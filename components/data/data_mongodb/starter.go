@@ -57,7 +57,7 @@ func (cm *dataMongoDBStarter) Run(joinerOp joiner.Operator) error {
 
 	err = joinerOp.Join(dataOp, cm.interfaceKey)
 	if err != nil {
-		return errors.Wrapf(err, "can't join *flowSQLite as flow.Operator with key '%s'", cm.interfaceKey)
+		return errors.Wrapf(err, "can't join *flowSQLite as flow.Actor with key '%s'", cm.interfaceKey)
 	}
 
 	return nil

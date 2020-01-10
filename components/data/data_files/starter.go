@@ -84,12 +84,12 @@ func (nms *contentFilesStarter) Run(joiner joiner.Operator) error {
 	//
 	//err = joiner.Join(notesOp, nms.interfaceKey)
 	//if err != nil {
-	//	return errors.Wrap(err, "can't join notes_mysql as notes.Operator interface")
+	//	return errors.Wrap(err, "can't join notes_mysql as notes.Actor interface")
 	//}
 
 	//err = joiner.Join(dataOp.Clean, ds.cleanerInterfaceKey)
 	//if err != nil {
-	//	return errors.Wrapf(err, "can't join datastoremysql.Operator.Clean as %s", ds.cleanerInterfaceKey)
+	//	return errors.Wrapf(err, "can't join datastoremysql.Actor.Clean as %s", ds.cleanerInterfaceKey)
 	//}
 
 	return nil

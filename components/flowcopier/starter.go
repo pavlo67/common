@@ -55,7 +55,7 @@ func (ts *importerTasksStarter) Run(joinerOp joiner.Operator) error {
 
 	fcOp, _ = joinerOp.Interface(flowcleaner.InterfaceKey).(crud.Cleaner)
 	if fcOp == nil {
-		l.Fatalf("no flow_cleaner.Operator with key %s", flowcleaner.InterfaceKey)
+		l.Fatalf("no flow_cleaner.Actor with key %s", flowcleaner.InterfaceKey)
 	}
 
 	return nil

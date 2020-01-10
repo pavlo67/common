@@ -3,10 +3,11 @@ package flowimporter_task
 import (
 	"strings"
 
+	"github.com/pavlo67/workshop/components/runner"
+
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
-	"github.com/pavlo67/workshop/common/actor"
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/selectors"
 
@@ -17,19 +18,18 @@ import (
 	"github.com/pavlo67/workshop/components/sources"
 )
 
-func New(dataOp datatagged.Operator, sourcesOp sources.Operator) (actor.Operator, error) {
-
+func New(dataOp datatagged.Operator, sourcesOp sources.Operator) (runner.Actor, error) {
 	if dataOp == nil {
-		return nil, errors.New("on flowimporter_task.New(): data.Operator == nil")
+		return nil, errors.New("on flowimporter_task.New(): data.Actor == nil")
 	}
 	if sourcesOp == nil {
-		return nil, errors.New("on flowimporter_task.New(): sources.Operator == nil")
+		return nil, errors.New("on flowimporter_task.New(): sources.Actor == nil")
 	}
 
 	return &loadTask{dataOp, sourcesOp}, nil
 }
 
-var _ actor.Operator = &loadTask{}
+var _ runner.Actor = &loadTask{}
 
 type loadTask struct {
 	dataOp    data.Operator
@@ -40,9 +40,13 @@ func (it *loadTask) Name() string {
 	return "loader"
 }
 
+func (it *loadTask) Init(_ common.Map) (*runner.Estimate, error) {
+	return nil, nil
+}
+
 const onRun = "on loadTask.Run(): "
 
-func (it *loadTask) Run(_ common.Map) (posterior []joiner.Link, info common.Map, err error) {
+func (it *loadTask) Run() (posterior []joiner.Link, info common.Map, err error) {
 	if it == nil {
 		return nil, nil, errors.New("on importer_task.Run(): loadTask == nil")
 	}

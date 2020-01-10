@@ -18,7 +18,7 @@ func (item Item) PrepareToEdit() ([]editor.Field, error) {
 	if item.Details != nil {
 		editDetailsOp, ok := item.Details.(editor.Operator)
 		if !ok {
-			return nil, errors.Errorf("item.Details (%#v) isn't editor.Operator", item.Details)
+			return nil, errors.Errorf("item.Details (%#v) isn't editor.Actor", item.Details)
 		}
 
 		detailsFields, err := editDetailsOp.PrepareToEdit()

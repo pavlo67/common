@@ -70,17 +70,17 @@ func (ss *server_http_jschmhrStarter) Run(joinerOp joiner.Operator) error {
 
 	srvOp, err := New(ss.port, ss.config.TLSCertFile, ss.config.TLSKeyFile, authOps)
 	if err != nil {
-		return errors.Wrap(err, "can't init serverHTTPJschmhr.Operator")
+		return errors.Wrap(err, "can't init serverHTTPJschmhr.Actor")
 	}
 
 	err = joinerOp.Join(srvOp, ss.interfaceKey)
 	if err != nil {
-		return errors.Wrapf(err, "can't join serverHTTPJschmhr srvOp as server.Operator with key '%s'", ss.interfaceKey)
+		return errors.Wrapf(err, "can't join serverHTTPJschmhr srvOp as server.Actor with key '%s'", ss.interfaceKey)
 	}
 
 	err = joinerOp.Join(ss.port, ss.portInterfaceKey)
 	if err != nil {
-		return errors.Wrapf(err, "can't join serverHTTPJschmhr srvOp as server.Operator with key '%s'", ss.interfaceKey)
+		return errors.Wrapf(err, "can't join serverHTTPJschmhr srvOp as server.Actor with key '%s'", ss.interfaceKey)
 	}
 
 	return nil

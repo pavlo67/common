@@ -13,7 +13,7 @@ import (
 
 const InterfaceKey joiner.InterfaceKey = "senderreceiverstub"
 
-// starter.Operator -------------------------------------------------------------------------------------------
+// starter.Actor -------------------------------------------------------------------------------------------
 
 var _ starter.Operator = &senderstubStarter{}
 
@@ -39,17 +39,17 @@ func (sc *senderstubStarter) Init() error {
 
 	senderOp, err := New()
 	if err != nil {
-		return errors.Wrap(err, "can't init senderreceiverstub.Operator")
+		return errors.Wrap(err, "can't init senderreceiverstub.Actor")
 	}
 
 	err = joiner.JoinInterface(senderOp, sender.InterfaceKey)
 	if err != nil {
-		return errors.Wrap(err, "can't join senderreceiverstub as sender.Operator")
+		return errors.Wrap(err, "can't join senderreceiverstub as sender.Actor")
 	}
 
 	err = joiner.JoinInterface(senderOp, receiver.InterfaceKey)
 	if err != nil {
-		return errors.Wrap(err, "can't join senderreceiverstub as receiver.Operator")
+		return errors.Wrap(err, "can't join senderreceiverstub as receiver.Actor")
 	}
 
 	return nil

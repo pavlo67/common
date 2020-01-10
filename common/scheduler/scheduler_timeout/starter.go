@@ -44,7 +44,7 @@ func (ss *schedulerStarter) Run(joinerOp joiner.Operator) error {
 	schOp := New()
 	err := joinerOp.Join(schOp, ss.interfaceKey)
 	if err != nil {
-		return errors.Wrapf(err, "can't join scheduler_timeout.Operator as scheduler.Operator with key '%s'", ss.interfaceKey)
+		return errors.Wrapf(err, "can't join scheduler_timeout.Actor as scheduler.Actor with key '%s'", ss.interfaceKey)
 	}
 
 	return nil

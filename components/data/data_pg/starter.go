@@ -73,7 +73,7 @@ func (dp *dataPgStarter) Run(joinerOp joiner.Operator) error {
 	if !dp.noTagger {
 		taggerOp, ok = joinerOp.Interface(tagger.InterfaceKey).(tagger.Operator)
 		if !ok {
-			return errors.Errorf("no tagger.Operator with key %s", tagger.InterfaceKey)
+			return errors.Errorf("no tagger.Actor with key %s", tagger.InterfaceKey)
 		}
 
 		taggercleanerOp, ok = joinerOp.Interface(tagger.CleanerInterfaceKey).(crud.Cleaner)
@@ -84,12 +84,12 @@ func (dp *dataPgStarter) Run(joinerOp joiner.Operator) error {
 
 	dataOp, datacleanerOp, err := New(dp.config, dp.table, dp.interfaceKey, taggerOp, taggercleanerOp)
 	if err != nil {
-		return errors.Wrap(err, "can't init *dataPG as data.Operator")
+		return errors.Wrap(err, "can't init *dataPG as data.Actor")
 	}
 
 	err = joinerOp.Join(dataOp, dp.interfaceKey)
 	if err != nil {
-		return errors.Wrapf(err, "can't join *dataPG as data.Operator with key '%s'", dp.interfaceKey)
+		return errors.Wrapf(err, "can't join *dataPG as data.Actor with key '%s'", dp.interfaceKey)
 	}
 
 	err = joinerOp.Join(datacleanerOp, dp.cleanerKey)

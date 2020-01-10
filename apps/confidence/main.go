@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/pavlo67/workshop/apps/confidence/confidence_routes"
-	"github.com/pavlo67/workshop/apps/confidence/confidence_routes/v1/auth"
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/auth/auth_ecdsa"
 	"github.com/pavlo67/workshop/common/auth/auth_jwt"
@@ -106,7 +105,7 @@ func main() {
 
 	srvOp, ok := joiner.Interface(server_http.InterfaceKey).(server_http.Operator)
 	if !ok {
-		log.Fatalf("no server_http.Operator with key %s", server_http.InterfaceKey)
+		log.Fatalf("no server_http.Actor with key %s", server_http.InterfaceKey)
 	}
 
 	srvOp.HandleFiles("/confidence/api-docs/*filepath", filelib.CurrentPath()+"api-docs/", nil)

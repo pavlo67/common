@@ -118,7 +118,7 @@ func (tasksOp *tasksPostgres) Save(task tasks.Task, _ *crud.SaveOptions) (common
 		}
 	}
 
-	values := []interface{}{task.WorkerType, string(paramsBytes), "", ""}
+	values := []interface{}{task.ActorKey, string(paramsBytes), "", ""}
 
 	var lastInsertId uint64
 
@@ -147,7 +147,7 @@ func (tasksOp *tasksPostgres) Read(id common.ID, _ *crud.GetOptions) (*tasks.Ite
 	var updatedAtPtr *string
 
 	err = tasksOp.stmRead.QueryRow(idNum).Scan(
-		&item.WorkerType, &params, &status, &results, &createdAt, &updatedAtPtr,
+		&item.ActorKey, &params, &status, &results, &createdAt, &updatedAtPtr,
 	)
 	if err == sql.ErrNoRows {
 		return nil, common.ErrNotFound
@@ -238,7 +238,7 @@ func (tasksOp *tasksPostgres) List(term *selectors.Term, options *crud.GetOption
 		var updatedAtPtr *string
 
 		err := rows.Scan(
-			&idNum, &item.WorkerType, &params, &status, &results, &createdAt, &updatedAtPtr,
+			&idNum, &item.ActorKey, &params, &status, &results, &createdAt, &updatedAtPtr,
 		)
 		if err != nil {
 			return items, errors.Wrapf(err, onList+sqllib.CantScanQueryRow, query, values)

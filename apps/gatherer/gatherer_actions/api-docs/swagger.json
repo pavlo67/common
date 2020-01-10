@@ -4,7 +4,7 @@
   "version": "0.0.1"
  },
  "paths": {
-  "/gatherer/v1/receive": {
+  "/gatherer/transport": {
    "post": {
     "operationId": "receive",
     "parameters": [

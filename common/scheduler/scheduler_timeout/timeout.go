@@ -5,11 +5,11 @@ import (
 	"sync"
 	"time"
 
+	"github.com/pavlo67/workshop/components/runner"
+
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
-	"github.com/pavlo67/workshop/common/actor"
-
 	"github.com/pavlo67/workshop/common/scheduler"
 )
 
@@ -27,7 +27,7 @@ var MaxSleep = time.Second * 3
 var _ scheduler.Operator = &schedulerTimeout{}
 
 type taskWithSignals struct {
-	actor.Operator
+	runner.Actor
 	isRunning            bool
 	nextInterval         time.Duration
 	nextStartImmediately bool
@@ -39,7 +39,7 @@ type schedulerTimeout struct {
 	mutex *sync.RWMutex
 }
 
-func (st *schedulerTimeout) Init(task actor.Operator) (common.ID, error) {
+func (st *schedulerTimeout) Init(task runner.Actor) (common.ID, error) {
 	if st.tasks == nil {
 		return "", errors.New("schedulerTimeout.tasks == nil")
 	}
@@ -48,8 +48,8 @@ func (st *schedulerTimeout) Init(task actor.Operator) (common.ID, error) {
 
 	st.mutex.Lock()
 	st.tasks[id] = &taskWithSignals{
-		Operator: task,
-		mutex:    &sync.Mutex{},
+		Actor: task,
+		mutex: &sync.Mutex{},
 	}
 	st.mutex.Unlock()
 
@@ -113,7 +113,14 @@ func (st *schedulerTimeout) run(task *taskWithSignals) {
 		// run immediately if it's necessary
 
 		if startImmediately {
-			_, _, err := task.Run(common.Map{"label": label(now)})
+			params := common.Map{"label": label(now)}
+
+			_, err := task.Init(params)
+			if err != nil {
+				l.Errorf("on task(%s).Init(%#v): %s", task.Name(), params, err)
+			}
+
+			_, _, err = task.Run()
 			if err != nil {
 				l.Errorf("on task(%s).Run(): %s", task.Name(), err)
 			}
@@ -154,7 +161,14 @@ func (st *schedulerTimeout) run(task *taskWithSignals) {
 		if rest > -interval {
 			l.Infof("%s: task (%s) started...", timeScheduled.Format(time.RFC3339), task.Name())
 
-			_, _, err := task.Run(common.Map{"label": label(timeScheduled)})
+			params := common.Map{"label": label(timeScheduled)}
+
+			_, err := task.Init(params)
+			if err != nil {
+				l.Errorf("on task(%s).Init(%#v): %s", task.Name(), params, err)
+			}
+
+			_, _, err = task.Run()
 			if err != nil {
 				l.Errorf("on task(%s).Run(): %s", task.Name(), err)
 			}

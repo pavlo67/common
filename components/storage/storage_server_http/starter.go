@@ -54,7 +54,7 @@ func (ss *dataTaggedServerHTTPStarter) Run(joinerOp joiner.Operator) error {
 	var ok bool
 	dataTaggedOp, ok = joinerOp.Interface(storage.InterfaceKey).(datatagged.Operator)
 	if !ok {
-		return errors.Errorf("no data_tagged.Operator with key %s", storage.InterfaceKey)
+		return errors.Errorf("no data_tagged.Actor with key %s", storage.InterfaceKey)
 	}
 
 	err := joinerOp.Join(&listEndpoint, storage.ListInterfaceKey)

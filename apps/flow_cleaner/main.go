@@ -97,7 +97,7 @@ func main() {
 
 	fcOp, _ := joiner.Interface(flow_cleaner.InterfaceKey).(flow_cleaner.Operator)
 	if fcOp == nil {
-		l.Fatalf("no flow_cleaner.Operator with key %s", flow_cleaner.InterfaceKey)
+		l.Fatalf("no flow_cleaner.Actor with key %s", flow_cleaner.InterfaceKey)
 	}
 
 	err = fcOp.Clean(2850)

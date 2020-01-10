@@ -1,6 +1,7 @@
 package flowimporter_task
 
 import (
+	"github.com/pavlo67/workshop/components/sources"
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
@@ -47,17 +48,22 @@ func (ts *importerTasksStarter) Setup() error {
 func (ts *importerTasksStarter) Run(joinerOp joiner.Operator) error {
 	datataggedOp, ok := joinerOp.Interface(ts.datataggedKey).(datatagged.Operator)
 	if !ok {
-		return errors.Errorf("no datatagged.Operator with key %s", ts.datataggedKey)
+		return errors.Errorf("no datatagged.Actor with key %s", ts.datataggedKey)
 	}
 
-	impOp, err := New(datataggedOp)
+	sourcesOp, ok := joinerOp.Interface(sources.InterfaceKey).(sources.Operator)
+	if !ok {
+		return errors.Errorf("no sources.Actor with key %s", sources.InterfaceKey)
+	}
+
+	impOp, err := New(datataggedOp, sourcesOp)
 	if err != nil {
 		return errors.Wrap(err, "can't init *loadTask")
 	}
 
 	err = joinerOp.Join(impOp, ts.interfaceKey)
 	if err != nil {
-		return errors.Wrapf(err, "can't join *loadTask as actor.Operator with key '%s'", ts.interfaceKey)
+		return errors.Wrapf(err, "can't join *loadTask as actor.Actor with key '%s'", ts.interfaceKey)
 	}
 
 	return nil

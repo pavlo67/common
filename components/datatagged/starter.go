@@ -46,7 +46,7 @@ func (ws *workspaceStarter) Setup() error {
 func (ws *workspaceStarter) Run(joinerOp joiner.Operator) error {
 	dataOp, ok := joinerOp.Interface(ws.dataKey).(data.Operator)
 	if !ok {
-		return errors.Errorf("no data.Operator with key %s", ws.dataKey)
+		return errors.Errorf("no data.Actor with key %s", ws.dataKey)
 	}
 
 	var taggerOp tagger.Operator
@@ -54,18 +54,18 @@ func (ws *workspaceStarter) Run(joinerOp joiner.Operator) error {
 	if !ws.noTagger {
 		taggerOp, ok = joinerOp.Interface(tagger.InterfaceKey).(tagger.Operator)
 		if !ok {
-			return errors.Errorf("no tagger.Operator with key %s", tagger.InterfaceKey)
+			return errors.Errorf("no tagger.Actor with key %s", tagger.InterfaceKey)
 		}
 	}
 
 	wsOp, _, err := New(dataOp, taggerOp)
 	if err != nil {
-		return errors.Wrap(err, "can't init storage.Operator")
+		return errors.Wrap(err, "can't init storage.Actor")
 	}
 
 	err = joinerOp.Join(wsOp, ws.interfaceKey)
 	if err != nil {
-		return errors.Wrapf(err, "can't join *ws as storage.Operator with key '%s'", ws.interfaceKey)
+		return errors.Wrapf(err, "can't join *ws as storage.Actor with key '%s'", ws.interfaceKey)
 	}
 
 	return nil

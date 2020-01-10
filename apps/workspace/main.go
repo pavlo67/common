@@ -135,22 +135,22 @@ func main() {
 
 	// scheduling importer task
 
-	//dataOp, ok := joiner.Interface(flow.DataInterfaceKey).(data.Operator)
+	//dataOp, ok := joiner.Interface(flow.DataInterfaceKey).(data.Actor)
 	//if !ok {
-	//	l.Fatalf("no data.Operator with key %s", flow.DataInterfaceKey)
+	//	l.Fatalf("no data.Actor with key %s", flow.DataInterfaceKey)
 	//}
 
 	// TODO!!!
-	//url := "http://localhost:" + cfgEnvs["gatherer_port"] + "/gatherer/v1/export"
+	//url := "http://localhost:" + cfgEnvs["gatherer_port"] + "/gatherer/export"
 	//
 	//task, err := importer_tasks.NewCopyTask(url, dataOp)
 	//if err != nil {
 	//	l.Fatal(err)
 	//}
 	//
-	//schOp, ok := joiner.Interface(taskscheduler.HandlerKey).(taskscheduler.Operator)
+	//schOp, ok := joiner.Interface(taskscheduler.HandlerKey).(taskscheduler.Actor)
 	//if !ok {
-	//	l.Fatalf("no scheduler.Operator with key %s", taskscheduler.HandlerKey)
+	//	l.Fatalf("no scheduler.Actor with key %s", taskscheduler.HandlerKey)
 	//}
 	//
 	//taskID, err := schOp.Init(task)
@@ -167,7 +167,7 @@ func main() {
 
 	srvOp, ok := joiner.Interface(server_http.InterfaceKey).(server_http.Operator)
 	if !ok {
-		l.Fatalf("no server_http.Operator with key %s", server_http.InterfaceKey)
+		l.Fatalf("no server_http.Actor with key %s", server_http.InterfaceKey)
 	}
 
 	err = srvOp.Start()

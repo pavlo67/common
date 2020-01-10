@@ -1,10 +1,10 @@
 package flowcleaner_task
 
 import (
+	"github.com/pavlo67/workshop/components/runner"
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
-	"github.com/pavlo67/workshop/common/actor"
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/selectors"
 
@@ -14,28 +14,32 @@ import (
 	"github.com/pavlo67/workshop/components/datatagged"
 )
 
-func NewLoader(dataOp datatagged.Operator) (actor.Operator, error) {
+func NewLoader(dataOp datatagged.Operator) (runner.Actor, error) {
 
 	if dataOp == nil {
-		return nil, errors.New("on importer_task.NewLoader(): data.Operator == nil")
+		return nil, errors.New("on importer_task.NewLoader(): data.Actor == nil")
 	}
 
-	return &loadTask{dataOp}, nil
+	return &cleanTask{dataOp}, nil
 }
 
-var _ actor.Operator = &loadTask{}
+var _ runner.Actor = &cleanTask{}
 
-type loadTask struct {
+type cleanTask struct {
 	dataOp data.Operator
 }
 
-func (it *loadTask) Name() string {
+func (it *cleanTask) Name() string {
 	return "loader"
 }
 
-func (it *loadTask) Run(_ common.Map) (posterior []joiner.Link, info common.Map, err error) {
+func (it *cleanTask) Init(_ common.Map) (*runner.Estimate, error) {
+	return nil, nil
+}
+
+func (it *cleanTask) Run() (posterior []joiner.Link, info common.Map, err error) {
 	if it == nil {
-		return nil, nil, errors.New("on importer_task.Run(): loadTask == nil")
+		return nil, nil, errors.New("on importer_task.Run(): cleanTask == nil")
 	}
 
 	return nil, nil, LoadAll(it.dataOp)

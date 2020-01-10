@@ -3,6 +3,12 @@ package gatherer_actions
 import (
 	"fmt"
 	"strconv"
+	"time"
+
+	"github.com/pavlo67/workshop/components/runner"
+
+	"github.com/pavlo67/workshop/common/scheduler"
+	"github.com/pavlo67/workshop/components/flow"
 
 	"github.com/pkg/errors"
 
@@ -25,60 +31,70 @@ var l logger.Operator
 var _ starter.Operator = &gathererStarter{}
 
 type gathererStarter struct {
+	importerTaskKey    joiner.InterfaceKey
+	cleanerTaskKey     joiner.InterfaceKey
 	receiverHandlerKey joiner.InterfaceKey
+	schKey             joiner.InterfaceKey
 }
 
-func (ss *gathererStarter) Name() string {
+func (gs *gathererStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *gathererStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
+// TODO!!! customize it
+const importPeriod = time.Hour
+
+func (gs *gathererStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	l = lCommon
 	if l == nil {
-		return nil, fmt.Errorf("no logger for %s:-(", ss.Name())
+		return nil, fmt.Errorf("no logger for %s:-(", gs.Name())
 	}
 
-	ss.receiverHandlerKey = joiner.InterfaceKey(options.StringDefault("receiver_handler_key", string(transport.HandlerInterfaceKey)))
+	gs.receiverHandlerKey = joiner.InterfaceKey(options.StringDefault("receiver_handler_key", string(transport.HandlerInterfaceKey)))
+	gs.importerTaskKey = joiner.InterfaceKey(options.StringDefault("importer_task_key", string(flow.ImporterTaskInterfaceKey)))
+	gs.cleanerTaskKey = joiner.InterfaceKey(options.StringDefault("cleaner_task_key", string(flow.CleanerTaskInterfaceKey)))
+	gs.schKey = joiner.InterfaceKey(options.StringDefault("scheduler_key", string(scheduler.InterfaceKey)))
 
 	return nil, nil
 }
 
-func (ss *gathererStarter) Setup() error {
+func (gs *gathererStarter) Setup() error {
 	return nil
 }
 
-func (ss *gathererStarter) Run(joinerOp joiner.Operator) error {
+func (gs *gathererStarter) Run(joinerOp joiner.Operator) error {
 
-	//// scheduling importer task
-	//
-	//dataOp, ok := joiner.Interface(flow.DataInterfaceKey).(data.Operator)
-	//if !ok {
-	//	l.Fatalf("no data.Operator with key %s", flow.DataInterfaceKey)
-	//}
-	//
-	//task, err := flowimporter_task.NewLoader(dataOp)
-	//if err != nil {
-	//	l.Fatal(err)
-	//}
-	//
-	//schOp, ok := joiner.Interface(taskscheduler.HandlerKey).(taskscheduler.Operator)
-	//if !ok {
-	//	l.Fatalf("no scheduler.Operator with key %s", taskscheduler.HandlerKey)
-	//}
-	//
-	//taskID, err := schOp.Init(task)
-	//if err != nil {
-	//	l.Fatalf("can't schOp.Init(%#v): %s", task, err)
-	//}
-	//
-	//err = schOp.Run(taskID, time.Hour, true)
-	//if err != nil {
-	//	l.Fatalf("can't schOp.Run(%s, time.Hour, false): %s", taskID, err)
-	//}
+	// scheduling importer task
+
+	impTaskOp, ok := joinerOp.Interface(gs.importerTaskKey).(runner.Actor)
+	if !ok {
+		l.Fatalf("no actor.Actor with key %s", gs.importerTaskKey)
+	}
+
+	schOp, ok := joinerOp.Interface(scheduler.InterfaceKey).(scheduler.Operator)
+	if !ok {
+		l.Fatalf("no scheduler.Actor with key %s", scheduler.InterfaceKey)
+	}
+
+	taskID, err := schOp.Init(impTaskOp)
+	if err != nil {
+		l.Fatalf("can't schOp.Init(%#v): %s", impTaskOp, err)
+	}
+
+	err = schOp.Run(taskID, importPeriod, false)
+	if err != nil {
+		l.Fatalf("can't schOp.Run(%s, %d, false): %s", taskID, importPeriod, err)
+	}
+
+	// scheduling cleaner task
+
+	// TODO!!!
+
+	// handling transport receiver
 
 	srvOp, ok := joinerOp.Interface(server_http.InterfaceKey).(server_http.Operator)
 	if !ok {
-		return errors.Errorf("no server_http.Operator with key %s", server_http.InterfaceKey)
+		return errors.Errorf("no server_http.Actor with key %s", server_http.InterfaceKey)
 	}
 
 	srvPort, ok := joinerOp.Interface(server_http.PortInterfaceKey).(int)
@@ -87,7 +103,7 @@ func (ss *gathererStarter) Run(joinerOp joiner.Operator) error {
 	}
 
 	var endpoints = server_http.Endpoints{
-		"receive": {Path: "/v1/receive", Tags: []string{"transport"}, HandlerKey: ss.receiverHandlerKey},
+		"receive": {Path: "/transport", Tags: []string{"transport"}, HandlerKey: gs.receiverHandlerKey},
 	}
 
 	for key, ep := range endpoints {
@@ -105,7 +121,7 @@ func (ss *gathererStarter) Run(joinerOp joiner.Operator) error {
 		Endpoints: endpoints,
 	}
 
-	err := server_http.InitEndpointsWithSwaggerV2(
+	err = server_http.InitEndpointsWithSwaggerV2(
 		cfg,
 		":"+strconv.Itoa(srvPort),
 		srvOp,

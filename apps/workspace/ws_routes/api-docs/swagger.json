@@ -4,7 +4,7 @@
   "version": "0.0.1"
  },
  "paths": {
-  "/storage/v1/data/list": {
+  "/storage/data/list": {
    "get": {
     "operationId": "list",
     "produces": [
@@ -15,7 +15,7 @@
     ]
    }
   },
-  "/storage/v1/data/read/{id}": {
+  "/storage/data/read/{id}": {
    "get": {
     "operationId": "read",
     "parameters": [
@@ -35,7 +35,7 @@
     ]
    }
   },
-  "/storage/v1/data/remove/{id}": {
+  "/storage/data/remove/{id}": {
    "delete": {
     "operationId": "remove",
     "parameters": [
@@ -55,7 +55,7 @@
     ]
    }
   },
-  "/storage/v1/data/save": {
+  "/storage/data/save": {
    "post": {
     "operationId": "save",
     "parameters": [
@@ -74,7 +74,7 @@
     ]
    }
   },
-  "/storage/v1/data/tagged": {
+  "/storage/data/tagged": {
    "get": {
     "operationId": "tagged",
     "parameters": [
@@ -101,7 +101,7 @@
     ]
    }
   },
-  "/storage/v1/data/tags": {
+  "/storage/data/tags": {
    "get": {
     "operationId": "tags",
     "parameters": [
@@ -121,7 +121,7 @@
     ]
    }
   },
-  "/storage/v1/flow/list": {
+  "/storage/flow/list": {
    "get": {
     "operationId": "flow_list",
     "produces": [
@@ -132,7 +132,7 @@
     ]
    }
   },
-  "/storage/v1/flow/read/{id}": {
+  "/storage/flow/read/{id}": {
    "get": {
     "operationId": "flow_read",
     "parameters": [

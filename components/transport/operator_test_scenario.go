@@ -11,15 +11,15 @@ import (
 )
 
 //type OperatorTestCase struct {
-//	Operator
+//	Actor
 //}
 //
 //var createdAt = time.Now().UTC()
 //
-//func TestCases(PacksOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
+//func TestCases(PacksOp Actor, cleanerOp crud.Cleaner) []OperatorTestCase {
 //	return []OperatorTestCase{
 //		{
-//			Operator: PacksOp,
+//			Actor: PacksOp,
 //			Cleaner:  cleanerOp,
 //			ToSave: Pack{
 //				Key: "test_key1",

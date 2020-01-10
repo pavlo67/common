@@ -50,12 +50,12 @@ func (rs *routerStubStarter) Setup() error {
 func (rs *routerStubStarter) Run(joinerOp joiner.Operator) error {
 	routerOp, _, err := New(rs.routes)
 	if err != nil {
-		return errors.Wrap(err, "can't init router.Operator")
+		return errors.Wrap(err, "can't init router.Actor")
 	}
 
 	err = joinerOp.Join(routerOp, rs.interfaceKey)
 	if err != nil {
-		return errors.Wrapf(err, "can't join *tagsSQLite as router.Operator with key '%s'", rs.interfaceKey)
+		return errors.Wrapf(err, "can't join *tagsSQLite as router.Actor with key '%s'", rs.interfaceKey)
 	}
 
 	return nil

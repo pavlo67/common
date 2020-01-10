@@ -3,12 +3,13 @@ package taskqueue
 import (
 	"time"
 
+	"github.com/pavlo67/workshop/components/runner"
+
 	"github.com/pavlo67/workshop/common/crud"
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/selectors"
 
-	"github.com/pavlo67/workshop/common/actor"
 	"github.com/pavlo67/workshop/components/tasks"
 )
 
@@ -41,9 +42,9 @@ func Process(tasksOp tasks.Operator, joinerOp joiner.Operator, l logger.Operator
 		numOmitted = 0
 
 		for _, item := range items {
-			workerOp, ok := joinerOp.Interface(item.WorkerType).(actor.Operator)
+			workerOp, ok := joinerOp.Interface(item.ActorKey).(runner.Actor)
 			if !ok {
-				l.Errorf("no worker.Operator for task (%#v)", item)
+				l.Errorf("no worker.Actor for task (%#v)", item)
 				time.Sleep(timeToWait)
 				continue
 			}

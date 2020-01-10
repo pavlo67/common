@@ -54,7 +54,7 @@ func NewData(access *config.Access, timeout time.Duration, dbName, collectionNam
 //func (mgoOp dataMongoDB) Exemplar() crud.Item {
 //	if reflect.TypeOf(mgoOp.exemplar.Details).Kind() == reflect.Ptr {
 //		// Pointer:
-//		return crud.Item{Details: reflect.New(reflect.ValueOf(mgoOp.exemplar.Details).Elem().WorkerType()).Interface()}
+//		return crud.Item{Details: reflect.New(reflect.ValueOf(mgoOp.exemplar.Details).Elem().ActorKey()).Interface()}
 //	}
 //
 //	// Not pointer:

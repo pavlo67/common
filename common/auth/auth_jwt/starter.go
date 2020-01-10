@@ -45,12 +45,12 @@ func (ss *identity_jwtStarter) Setup() error {
 func (ss *identity_jwtStarter) Run(joiner joiner.Operator) error {
 	identOp, err := New()
 	if err != nil {
-		return errors.Wrap(err, "can't init identity_jwt.Operator")
+		return errors.Wrap(err, "can't init identity_jwt.Actor")
 	}
 
 	err = joiner.Join(identOp, ss.interfaceKey)
 	if err != nil {
-		return errors.Wrapf(err, "can't join identity_jwt identOp as identity.Operator with key '%s'", ss.interfaceKey)
+		return errors.Wrapf(err, "can't join identity_jwt identOp as identity.Actor with key '%s'", ss.interfaceKey)
 	}
 
 	return nil

@@ -17,7 +17,7 @@ package sources
 // )
 
 // type OperatorTestCase struct {
-// 	Operator
+// 	Actor
 // 	crud.Cleaner
 
 // 	ToSave       Pack
@@ -26,10 +26,10 @@ package sources
 
 // var createdAt = time.Now().UTC()
 
-// func TestCases(PacksOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
+// func TestCases(PacksOp Actor, cleanerOp crud.Cleaner) []OperatorTestCase {
 // 	return []OperatorTestCase{
 // 		{
-// 			Operator: PacksOp,
+// 			Actor: PacksOp,
 // 			Cleaner:  cleanerOp,
 // 			ToSave: Pack{
 // 				Key:     "test_key1",
@@ -57,7 +57,7 @@ package sources
 // const toAddHistoryI = 1 // must be < numRepeats
 // const toDeleteI = 2     // must be < numRepeats
 
-// func ChechReaded(t *testing.T, readedPtr *Item, expectedID common.ID, expected Pack, l logger.Operator) {
+// func ChechReaded(t *testing.T, readedPtr *Item, expectedID common.ID, expected Pack, l logger.Actor) {
 // 	require.NotNil(t, readedPtr)
 
 // 	readed := *readedPtr
@@ -86,7 +86,7 @@ package sources
 
 // }
 
-// func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.Operator) {
+// func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.Actor) {
 // 	if env, ok := os.LookupEnv("ENV"); !ok || env != "test" {
 // 		t.Fatal("No test environment!!!")
 // 	}

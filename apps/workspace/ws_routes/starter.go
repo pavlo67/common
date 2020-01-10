@@ -51,7 +51,7 @@ func (ss *workspaceStarter) Setup() error {
 func (ss *workspaceStarter) Run(joinerOp joiner.Operator) error {
 	srvOp, ok := joinerOp.Interface(server_http.InterfaceKey).(server_http.Operator)
 	if !ok {
-		return errors.Errorf("no server_http.Operator with key %s", server_http.InterfaceKey)
+		return errors.Errorf("no server_http.Actor with key %s", server_http.InterfaceKey)
 	}
 
 	srvPort, ok := joinerOp.Interface(server_http.PortInterfaceKey).(int)

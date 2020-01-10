@@ -79,7 +79,7 @@ func (sc *auth_stubStarter) Run(joiner joiner.Operator) error {
 
 	err = joiner.Join(u, sc.interfaceKey)
 	if err != nil {
-		return errors.Wrap(err, "can't join auth_stubStarter as identity.Operator interface")
+		return errors.Wrap(err, "can't join auth_stubStarter as identity.Actor interface")
 	}
 
 	return nil

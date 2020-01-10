@@ -73,7 +73,7 @@ func (ts *dataSQLiteStarter) Run(joinerOp joiner.Operator) error {
 	if !ts.noTagger {
 		taggerOp, ok = joinerOp.Interface(tagger.InterfaceKey).(tagger.Operator)
 		if !ok {
-			return errors.Errorf("no tagger.Operator with key %s", tagger.InterfaceKey)
+			return errors.Errorf("no tagger.Actor with key %s", tagger.InterfaceKey)
 		}
 
 		taggercleanerOp, ok = joinerOp.Interface(tagger.CleanerInterfaceKey).(crud.Cleaner)
@@ -84,12 +84,12 @@ func (ts *dataSQLiteStarter) Run(joinerOp joiner.Operator) error {
 
 	dataOp, datacleanerOp, err := New(ts.config, ts.table, ts.interfaceKey, taggerOp, taggercleanerOp)
 	if err != nil {
-		return errors.Wrap(err, "can't init data.Operator")
+		return errors.Wrap(err, "can't init data.Actor")
 	}
 
 	err = joinerOp.Join(dataOp, ts.interfaceKey)
 	if err != nil {
-		return errors.Wrapf(err, "can't join *dataSQLite as data.Operator with key '%s'", ts.interfaceKey)
+		return errors.Wrapf(err, "can't join *dataSQLite as data.Actor with key '%s'", ts.interfaceKey)
 	}
 
 	err = joinerOp.Join(datacleanerOp, ts.cleanerKey)

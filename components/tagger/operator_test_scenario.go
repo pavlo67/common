@@ -122,7 +122,7 @@ func OperatorTestScenario(t *testing.T, testCases []TestCase, cleanerOp crud.Cle
 			case "add":
 				err = tc.Operator.AddTags(step.Key, step.ID, step.Tags, nil)
 			//case "remove":
-			//	err = tc.Operator.RemoveTags(step.ID, step.ID, step.Tags, nil)
+			//	err = tc.Actor.RemoveTags(step.ID, step.ID, step.Tags, nil)
 			case "replace":
 				err = tc.Operator.ReplaceTags(step.Key, step.ID, step.Tags, nil)
 			case "tags":
@@ -157,10 +157,10 @@ func OperatorTestScenario(t *testing.T, testCases []TestCase, cleanerOp crud.Cle
 	}
 }
 
-//func prepareTest(t *testing.T, operator Operator, settaggerSteps []SettaggerStep) {
+//func prepareTest(t *testing.T, operator Actor, settaggerSteps []SettaggerStep) {
 //	// ClearDatabase ------------------------------------------------------------------------------------
 //
-//	//err := operator.go.Clean()
+//	//err := factory.go.Clean()
 //	//require.NoError(t, err, "what is the error on .Clean()?")
 //
 //	// test Settagger --------------------------------------------------------------------------------------
@@ -201,22 +201,22 @@ func OperatorTestScenario(t *testing.T, testCases []TestCase, cleanerOp crud.Cle
 //	for i, tc := range testCases {
 //		fmt.Println("QueryByObjectIDTest: ", i)
 //
-//		prepareTest(t, tc.Operator, tc.SettaggerSteps)
+//		prepareTest(t, tc.Actor, tc.SettaggerSteps)
 //
 //		// test QueryByObjectID --------------------------------------------------------------------------------------
 //
 //		if tc.ExpectedErr != nil {
-//			_, err := tc.Operator.QueryByObjectID(tc.IS, tc.ObjectID)
+//			_, err := tc.Actor.QueryByObjectID(tc.IS, tc.ObjectID)
 //			require.Error(t, err, "where is an error on .QueryByObjectID(%#v, %s)?", tc.IS, tc.ObjectID)
 //			continue
 //		}
 //
 //		if tc.ISBad != nil {
-//			_, err := tc.Operator.QueryByObjectID(*tc.ISBad, tc.ObjectID)
+//			_, err := tc.Actor.QueryByObjectID(*tc.ISBad, tc.ObjectID)
 //			require.Error(t, err, "where is an error on .QueryByObjectID(%#v, %s)?", *tc.ISBad, tc.ObjectID)
 //		}
 //
-//		linked, err := tc.Operator.QueryByObjectID(tc.IS, tc.ObjectID)
+//		linked, err := tc.Actor.QueryByObjectID(tc.IS, tc.ObjectID)
 //		require.NoError(t, err, "what is an error on .QueryByObjectID(%#v, %s)?", tc.IS, tc.ObjectID)
 //		require.Equal(t, len(tc.ExpectedLinked), len(linked), "len(tc.ExpectedLinked = %#v) != len(linked = %#v)", tc.ExpectedLinked, linked)
 //
@@ -249,7 +249,7 @@ func OperatorTestScenario(t *testing.T, testCases []TestCase, cleanerOp crud.Cle
 //}
 //
 //func Hash(li Linked) string {
-//	return li.ObjectID + " " + li.WorkerType + " " + li.LinkedID + " " + li.LinkedType + " " + li.Tag
+//	return li.ObjectID + " " + li.ActorKey + " " + li.LinkedID + " " + li.LinkedType + " " + li.Tag
 //}
 //
 //type byLinked []Linked

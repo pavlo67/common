@@ -85,12 +85,12 @@ func (ss *confidenceStarter) Run(joinerOp joiner.Operator) error {
 	}
 
 	if AuthOpToSetToken == nil {
-		return errors.New("no auth_jwt.Operator")
+		return errors.New("no auth_jwt.Actor")
 	}
 
-	//_, ok := joinerOp.Interface(server_http.HandlerKey).(server_http.Operator)
+	//_, ok := joinerOp.Interface(server_http.HandlerKey).(server_http.Actor)
 	//if !ok {
-	//	return errors.Errorf("no server_http.Operator with key %s", server_http.HandlerKey)
+	//	return errors.Errorf("no server_http.Actor with key %s", server_http.HandlerKey)
 	//}
 	//for _, ep := range Endpoints {
 	//	srvOp.HandleEndpoint(ep)

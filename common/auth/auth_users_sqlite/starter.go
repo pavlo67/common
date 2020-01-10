@@ -80,7 +80,7 @@ func (sc *auth_user_sqliteStarter) Run(joiner joiner.Operator) error {
 
 	err = joiner.Join(u, sc.interfaceKey)
 	if err != nil {
-		return errors.Wrap(err, "can't join auth_user_sqliteStarter as identity.Operator interface")
+		return errors.Wrap(err, "can't join auth_user_sqliteStarter as identity.Actor interface")
 	}
 
 	return nil

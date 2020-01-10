@@ -11,17 +11,17 @@ import (
 )
 
 var endpoints = server_http.Endpoints{
-	"read": {Path: "/v1/data/read", Tags: []string{"data"}, HandlerKey: storage.ReadInterfaceKey},
-	"list": {Path: "/v1/data/list", Tags: []string{"data"}, HandlerKey: storage.ListInterfaceKey},
+	"read": {Path: "/data/read", Tags: []string{"data"}, HandlerKey: storage.ReadInterfaceKey},
+	"list": {Path: "/data/list", Tags: []string{"data"}, HandlerKey: storage.ListInterfaceKey},
 
-	"save":   {Path: "/v1/data/save", Tags: []string{"data"}, HandlerKey: storage.SaveInterfaceKey},
-	"remove": {Path: "/v1/data/remove", Tags: []string{"data"}, HandlerKey: storage.RemoveInterfaceKey},
+	"save":   {Path: "/data/save", Tags: []string{"data"}, HandlerKey: storage.SaveInterfaceKey},
+	"remove": {Path: "/data/remove", Tags: []string{"data"}, HandlerKey: storage.RemoveInterfaceKey},
 
-	"tags":   {Path: "/v1/data/tags", Tags: []string{"data"}, HandlerKey: storage.CountTagsInterfaceKey},
-	"tagged": {Path: "/v1/data/tagged", Tags: []string{"data"}, HandlerKey: storage.ListWithTagInterfaceKey},
+	"tags":   {Path: "/data/tags", Tags: []string{"data"}, HandlerKey: storage.CountTagsInterfaceKey},
+	"tagged": {Path: "/data/tagged", Tags: []string{"data"}, HandlerKey: storage.ListWithTagInterfaceKey},
 
-	"flow_read": {Path: "/v1/flow/read", Tags: []string{"flow"}, HandlerKey: flow.ReadInterfaceKey},
-	"flow_list": {Path: "/v1/flow/list", Tags: []string{"flow"}, HandlerKey: flow.ListInterfaceKey},
+	"flow_read": {Path: "/flow/read", Tags: []string{"flow"}, HandlerKey: flow.ReadInterfaceKey},
+	"flow_list": {Path: "/flow/list", Tags: []string{"flow"}, HandlerKey: flow.ListInterfaceKey},
 }
 
 func Init(srvOp server_http.Operator, port int) error {

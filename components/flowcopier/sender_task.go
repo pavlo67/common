@@ -1,10 +1,10 @@
 package flowcopier
 
 import (
+	"github.com/pavlo67/workshop/components/runner"
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
-	"github.com/pavlo67/workshop/common/actor"
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/selectors"
 	"github.com/pavlo67/workshop/components/data"
@@ -14,7 +14,7 @@ import (
 // TODO: vary this parameter
 const copyLimit = 500
 
-func NewCopyTask(url string, dataOp data.Operator) (actor.Operator, error) {
+func NewCopyTask(url string, dataOp data.Operator) (runner.Actor, error) {
 	//url = strings.TrimSpace(url)
 	//
 	//if url == "" {
@@ -22,7 +22,7 @@ func NewCopyTask(url string, dataOp data.Operator) (actor.Operator, error) {
 	//}
 	//
 	//if dataOp == nil {
-	//	return nil, errors.New("on importer_task.NewCopyTask(): data.Operator == nil")
+	//	return nil, errors.New("on importer_task.NewCopyTask(): data.Actor == nil")
 	//}
 	//
 	//impOp, err := importer_http_series.NewSeriesHTTP(url, l)
@@ -37,7 +37,7 @@ func NewCopyTask(url string, dataOp data.Operator) (actor.Operator, error) {
 	return nil, nil
 }
 
-var _ actor.Operator = &copyTask{}
+var _ runner.Actor = &copyTask{}
 
 type copyTask struct {
 	url            string
@@ -52,7 +52,11 @@ func (it *copyTask) Name() string {
 	return "copier from series_http"
 }
 
-func (it *copyTask) Run(_ common.Map) (posterior []joiner.Link, info common.Map, err error) {
+func (it *copyTask) Init(_ common.Map) (*runner.Estimate, error) {
+	return nil, nil
+}
+
+func (it *copyTask) Run() (posterior []joiner.Link, info common.Map, err error) {
 	if it == nil {
 		return nil, nil, errors.New("on copyTask.Run(): it == nil")
 	}

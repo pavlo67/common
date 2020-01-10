@@ -19,7 +19,7 @@
 
     // getUserFromAuth -------------------------------------------------------
     function getUserFromAuth(login, password, cb) {
-        fetch('http://localhost:3333/confidence/v1/auth/auth', { 
+        fetch('http://localhost:3333/confidence/auth/auth', {
             method: 'POST', // *GET, POST, PUT, DELETE, etc.
             headers: {
                 'Content-Type': 'application/json',

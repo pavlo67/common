@@ -25,13 +25,14 @@ type Result struct {
 }
 
 type Status struct {
-	StartedAt *time.Time `bson:",omitempty" json:",omitempty"`
+	StartedAt  *time.Time `bson:",omitempty" json:",omitempty"`
+	FinishedAt *time.Time `bson:",omitempty" json:",omitempty"`
 }
 
 type Task struct {
-	WorkerType joiner.InterfaceKey `bson:",omitempty" json:",omitempty"`
-	Params     common.Map          `bson:"-"          json:",omitempty"`
-	ParamsRaw  []byte              `bson:",omitempty" json:",omitempty"` // shouldn't be used directly
+	ActorKey  joiner.InterfaceKey `bson:",omitempty" json:",omitempty"`
+	Params    common.Map          `bson:"-"          json:",omitempty"`
+	ParamsRaw []byte              `bson:",omitempty" json:",omitempty"` // shouldn't be used directly
 }
 
 type Item struct {
