@@ -42,29 +42,31 @@ func (transpOp *transportHTTP) receiveEndpoint() *server_http.Endpoint {
 				return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on POST ...ReceivePack (%#v): '%s'", inPack, errors.Wrap(err, "can't transpOp.packsOp.Save(&inPack, nil)")))
 			}
 
-			runnerOp, taskID, err := transpOp.runnerFactory.NewRunnerFromTask(
+			runnerOp, taskID, err := transpOp.runnerFactory.TaskRunner(
 				inPack.Task,
 				&crud.SaveOptions{History: crud.History{{Key: crud.ProducedAction, DoneAt: time.Now(), RelatedIDs: []common.ID{idIn}}}},
 				transpOp,
 				inPack.From)
 			if err != nil {
-				return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on POST ...ReceivePack (%#v): '%s'", inPack, errors.Wrap(err, "can't transpOp.runnerFactory.NewRunnerFromTask(inPack.Task)")))
+				return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on POST ...ReceivePack (%#v): '%s'", inPack, errors.Wrap(err, "can't transpOp.runnerFactory.TaskRunner(inPack.Task)")))
+			}
+
+			if taskID != "" {
+				_, err = transpOp.packsOp.AddHistory(idIn, crud.History{{
+					Key:        packs.TaskAction,
+					DoneAt:     time.Now(),
+					RelatedIDs: []common.ID{taskID},
+					Errors:     nil,
+				}}, nil)
+				if err != nil {
+					l.Error(err) // TODO!!! wrap the error
+				}
 			}
 
 			_, err = runnerOp.Run()
 			if err != nil {
 				return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on POST ...ReceivePack (%#v): '%s'", inPack, errors.Wrap(err, "can't runnerOp.Run()")))
 			}
-
-			// TODO: is it necessary???
-			//_, err = transpOp.packsOp.AddHistory(idIn, crud.History{{
-			//	Key:        packs.HandleAction,
-			//	DoneAt:     now,
-			//	RelatedIDs: producedIDs,
-			//}}, nil)
-			//if err != nil {
-			//	l.Error(err) // !!! wrap the error
-			//}
 
 			return server.ResponseRESTOk(common.Map{"target_task_id": taskID})
 		},

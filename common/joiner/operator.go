@@ -33,13 +33,13 @@ var _ Operator = &joiner{}
 func New() Operator {
 	return &joiner{
 		components: map[InterfaceKey]interface{}{},
-		mutex:      &sync.Mutex{},
+		mutex:      &sync.RWMutex{},
 	}
 }
 
 type joiner struct {
 	components map[InterfaceKey]interface{}
-	mutex      *sync.Mutex
+	mutex      *sync.RWMutex
 }
 
 var ErrJoiningNil = errors.New("can't join nil interface")
@@ -70,8 +70,8 @@ func (j *joiner) Interface(interfaceKey InterfaceKey) interface{} {
 		log.Printf("on Actor.Component(%s): null Actor item", interfaceKey)
 	}
 
-	j.mutex.Lock()
-	defer j.mutex.Unlock()
+	j.mutex.RLock()
+	defer j.mutex.RUnlock()
 
 	if intrfc, ok := j.components[interfaceKey]; ok {
 		return intrfc
@@ -81,8 +81,8 @@ func (j *joiner) Interface(interfaceKey InterfaceKey) interface{} {
 }
 
 func (j *joiner) InterfacesAll(ptrToInterface interface{}) []Component {
-	j.mutex.Lock()
-	defer j.mutex.Unlock()
+	j.mutex.RLock()
+	defer j.mutex.RUnlock()
 
 	var components []Component
 

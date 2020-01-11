@@ -32,6 +32,6 @@ type Operator interface {
 }
 
 type Factory interface {
-	NewRunner(item tasks.Item, transportOp transport.Operator, listener identity.Key) (Operator, error)
-	NewRunnerFromTask(task tasks.Task, saveOptions *crud.SaveOptions, transportOp transport.Operator, listener identity.Key) (Operator, common.ID, error)
+	ItemRunner(item tasks.Item, saveOptions *crud.SaveOptions, transportOp transport.Operator, listener identity.Key) (Operator, error)
+	TaskRunner(task tasks.Task, saveOptions *crud.SaveOptions, transportOp transport.Operator, listener identity.Key) (Operator, common.ID, error)
 }

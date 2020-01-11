@@ -12,6 +12,8 @@ import (
 const InterfaceKey joiner.InterfaceKey = "packs"
 const CollectionDefault = "packs"
 
+const TaskAction crud.ActionKey = "task"
+
 type Pack struct {
 	Key identity.Key
 

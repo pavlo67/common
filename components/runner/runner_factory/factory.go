@@ -34,16 +34,16 @@ type runnerFactory struct {
 	tasksOp  tasks.Operator
 }
 
-func (rf runnerFactory) NewRunner(item tasks.Item, transportOp transport.Operator, listener identity.Key) (runner.Operator, error) {
+func (rf runnerFactory) ItemRunner(item tasks.Item, saveOptions *crud.SaveOptions, transportOp transport.Operator, listener identity.Key) (runner.Operator, error) {
 	if transportOp == nil {
-		return nil, errors.Errorf("on runnerFactory.NewRunner(): no transport.Operator for task(%#v)", item)
+		return nil, errors.Errorf("on runnerFactory.ItemRunner(): no transport.Operator for task(%#v)", item)
 	}
 
 	// TODO!!! check if listener is valid
 
 	actor, ok := rf.joinerOp.Interface(item.ActorKey).(runner.Actor)
 	if !ok {
-		return nil, errors.Errorf("on runnerFactory.NewRunner(): no runner.Actor with key %s to init new runner for task(%#v)", item.ActorKey, item)
+		return nil, errors.Errorf("on runnerFactory.ItemRunner(): no runner.Actor with key %s to init new runner for task(%#v)", item.ActorKey, item)
 	}
 
 	return &runnerOp{
@@ -58,22 +58,22 @@ func (rf runnerFactory) NewRunner(item tasks.Item, transportOp transport.Operato
 
 }
 
-func (rf runnerFactory) NewRunnerFromTask(task tasks.Task, saveOptions *crud.SaveOptions, transportOp transport.Operator, listener identity.Key) (runner.Operator, common.ID,
+func (rf runnerFactory) TaskRunner(task tasks.Task, saveOptions *crud.SaveOptions, transportOp transport.Operator, listener identity.Key) (runner.Operator, common.ID,
 	error) {
 	if transportOp == nil {
-		return nil, "", errors.Errorf("on runnerFactory.NewRunnerFromTask(): no transport.Operator for task(%#v)", task)
+		return nil, "", errors.Errorf("on runnerFactory.TaskRunner(): no transport.Operator for task(%#v)", task)
 	}
 
 	// TODO!!! check if listener is valid
 
 	actor, ok := rf.joinerOp.Interface(task.ActorKey).(runner.Actor)
 	if !ok {
-		return nil, "", errors.Errorf("on runnerFactory.NewRunnerFromTask(): no runner.Actor with key %s to init new runner for task(%#v)", task.ActorKey, task)
+		return nil, "", errors.Errorf("on runnerFactory.TaskRunner(): no runner.Actor with key %s to init new runner for task(%#v)", task.ActorKey, task)
 	}
 
 	id, err := rf.tasksOp.Save(task, saveOptions)
 	if err != nil {
-		return nil, "", errors.Errorf("on runnerFactory.NewRunnerFromTask(): can'trf.tasksOp.Save(%#v, nil): %s", task, err)
+		return nil, "", errors.Errorf("on runnerFactory.TaskRunner(): can'trf.tasksOp.Save(%#v, nil): %s", task, err)
 	}
 	return &runnerOp{
 		tasksOp: rf.tasksOp,
