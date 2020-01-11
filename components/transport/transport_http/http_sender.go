@@ -82,7 +82,7 @@ const onSend = "on transportHTTP.Send(): "
 
 func (transpOp *transportHTTP) Send(outPack *packs.Pack) (sentKey identity.Key, targetTaskID common.ID, err error) {
 	if outPack == nil {
-		return "", nil, errors.New(onSend + "nothing to send")
+		return "", "", errors.New(onSend + "nothing to send")
 	}
 
 	if strings.TrimSpace(string(outPack.Key)) == "" {
@@ -103,14 +103,14 @@ func (transpOp *transportHTTP) Send(outPack *packs.Pack) (sentKey identity.Key, 
 	id, err := transpOp.packsOp.Save(outPack, nil)
 	if err != nil {
 		if !ignoreProblems {
-			return "", nil, errors.Wrap(err, onSend+"can't .Save()")
+			return "", "", errors.Wrap(err, onSend+"can't .Save()")
 		}
 		errs = append(errs, err)
 	}
 
 	var actionKey crud.ActionKey
 
-	inPack, doneAtPtr, err := transpOp.SendOnly(outPack, outPack.To)
+	_, doneAtPtr, err := transpOp.SendOnly(outPack, outPack.To)
 	if err != nil {
 		errs = append(errs, err)
 		actionKey = transport.DidntSendKey
@@ -125,7 +125,7 @@ func (transpOp *transportHTTP) Send(outPack *packs.Pack) (sentKey identity.Key, 
 	}
 
 	action := crud.Action{
-		// Identity: nil,
+		// Actor: nil,
 		Key:    actionKey,
 		DoneAt: doneAt,
 	}
@@ -142,7 +142,8 @@ func (transpOp *transportHTTP) Send(outPack *packs.Pack) (sentKey identity.Key, 
 
 	}
 
-	return "", inPack, errs.Err()
+	// TODO!!! targetTaskID
+	return "", "", errs.Err()
 }
 
 const onHistory = "on transportHTTP.History(): "

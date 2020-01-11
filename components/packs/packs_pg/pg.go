@@ -21,10 +21,10 @@ import (
 	"github.com/pavlo67/workshop/components/packs"
 )
 
-var fieldsToInsert = []string{"key", "address_from", "address_to", "options", "type_key", "content", "history", "created_at"}
+var fieldsToInsert = []string{"identity_key", "address_from", "address_to", "options", "actor_key", "params", "history"}
 var fieldsToInsertStr = strings.Join(fieldsToInsert, ",")
 
-var fieldsToRead = fieldsToInsert
+var fieldsToRead = append(fieldsToInsert, "created_at")
 var fieldsToReadStr = strings.Join(fieldsToRead, ",")
 
 var fieldsToList = append([]string{"id"}, fieldsToRead...)
@@ -116,12 +116,12 @@ func (packsOp *packsPg) Save(pack *packs.Pack, _ *crud.SaveOptions) (common.ID, 
 		}
 	}
 
-	var contentBytes []byte
-	if pack.Content != nil {
+	var paramsBytes []byte
+	if len(pack.Task.Params) > 0 {
 		var err error
-		contentBytes, err = json.Marshal(pack.Content)
+		paramsBytes, err = json.Marshal(pack.Task.Params)
 		if err != nil {
-			return "", errors.Wrapf(err, onSave+"can't .Marshal(.Content == %#v)", pack.Content)
+			return "", errors.Wrapf(err, onSave+"can't .Marshal(.Task.Params == %#v)", pack.Task.Params)
 		}
 	}
 
@@ -134,17 +134,7 @@ func (packsOp *packsPg) Save(pack *packs.Pack, _ *crud.SaveOptions) (common.ID, 
 		}
 	}
 
-	var createdAt time.Time
-	if len(pack.History) > 0 {
-		createdAt = pack.History[0].DoneAt
-		if pack.History[0].Key == crud.CreatedAction {
-			pack.History = pack.History[1:]
-		}
-	} else {
-		createdAt = time.Now()
-	}
-
-	values := []interface{}{pack.Key, pack.From, toBytes, optionsBytes, pack.TypeKey, contentBytes, historyBytes, createdAt}
+	values := []interface{}{pack.Key, pack.From, toBytes, optionsBytes, pack.Task.ActorKey, paramsBytes, historyBytes}
 
 	var lastInsertId uint64
 	err := packsOp.stmInsert.QueryRow(values...).Scan(&lastInsertId)
@@ -169,11 +159,11 @@ func (packsOp *packsPg) Read(id common.ID, _ *crud.GetOptions) (*packs.Item, err
 
 	item := packs.Item{ID: id}
 
-	var toBytes, optionsBytes, historyBytes []byte
+	var toBytes, optionsBytes, paramsBytes, historyBytes []byte
 	var createdAtStr string
 
 	err = packsOp.stmRead.QueryRow(idNum).Scan(
-		&item.Key, &item.From, &toBytes, &optionsBytes, &item.TypeKey, &item.ContentRaw, &historyBytes, &createdAtStr,
+		&item.Key, &item.From, &toBytes, &optionsBytes, &item.Task.ActorKey, &paramsBytes, &historyBytes, &createdAtStr,
 	)
 	if err == sql.ErrNoRows {
 		return nil, common.ErrNotFound
@@ -196,6 +186,13 @@ func (packsOp *packsPg) Read(id common.ID, _ *crud.GetOptions) (*packs.Item, err
 		}
 	}
 
+	if len(paramsBytes) > 0 {
+		err = json.Unmarshal(paramsBytes, &item.Task.Params)
+		if err != nil {
+			return &item, errors.Wrapf(err, onRead+"can't unmarshal .Task.Params (%s)", paramsBytes)
+		}
+	}
+
 	if len(historyBytes) > 0 {
 		err = json.Unmarshal(historyBytes, &item.History)
 		if err != nil {
@@ -203,13 +200,11 @@ func (packsOp *packsPg) Read(id common.ID, _ *crud.GetOptions) (*packs.Item, err
 		}
 	}
 
-	if !(len(item.History) > 0 && item.History[0].Key == crud.CreatedAction) {
-		createdAt, err := time.Parse(time.RFC3339, createdAtStr)
-		if err != nil {
-			return &item, errors.Wrapf(err, onRead+"can't parse .CreatedAt (%s)", createdAtStr)
-		}
-
-		item.History = append([]crud.Action{{Key: crud.CreatedAction, DoneAt: createdAt}}, item.History...)
+	createdAt, err := time.Parse(time.RFC3339, createdAtStr)
+	if err != nil {
+		// TODO??? return &item, errors.Wrapf(err, onRead+"can't parse .CreatedAt (%s)", createdAtStr)
+	} else {
+		item.History = item.History.SaveAction(crud.Action{Key: crud.CreatedAction, DoneAt: createdAt, Related: &joiner.Link{InterfaceKey: packs.InterfaceKey, ID: id}})
 	}
 
 	return &item, nil
@@ -257,11 +252,11 @@ func (packsOp *packsPg) List(term *selectors.Term, options *crud.GetOptions) ([]
 		var idNum int64
 		var item packs.Item
 
-		var toBytes, optionsBytes, historyBytes []byte
+		var toBytes, optionsBytes, historyBytes, paramsBytes []byte
 		var createdAtStr string
 
 		err := rows.Scan(
-			&idNum, &item.Key, &item.From, &toBytes, &optionsBytes, &item.TypeKey, &item.ContentRaw, &historyBytes, &createdAtStr,
+			&idNum, &item.Key, &item.From, &toBytes, &optionsBytes, &item.Task.ActorKey, &paramsBytes, &historyBytes, &createdAtStr,
 		)
 		if err != nil {
 			return items, errors.Wrapf(err, onList+sqllib.CantScanQueryRow, query, values)
@@ -283,6 +278,13 @@ func (packsOp *packsPg) List(term *selectors.Term, options *crud.GetOptions) ([]
 			}
 		}
 
+		if len(paramsBytes) > 0 {
+			err = json.Unmarshal(paramsBytes, &item.Task.Params)
+			if err != nil {
+				return items, errors.Wrapf(err, onList+"can't unmarshal .Task.Params (%s)", paramsBytes)
+			}
+		}
+
 		if len(historyBytes) > 0 {
 			err = json.Unmarshal(historyBytes, &item.History)
 			if err != nil {
@@ -290,13 +292,11 @@ func (packsOp *packsPg) List(term *selectors.Term, options *crud.GetOptions) ([]
 			}
 		}
 
-		if !(len(item.History) > 0 && item.History[0].Key == crud.CreatedAction) {
-			createdAt, err := time.Parse(time.RFC3339, createdAtStr)
-			if err != nil {
-				return items, errors.Wrapf(err, onList+"can't parse .CreatedAt (%s)", createdAtStr)
-			}
-
-			item.History = append([]crud.Action{{Key: crud.CreatedAction, DoneAt: createdAt}}, item.History...)
+		createdAt, err := time.Parse(time.RFC3339, createdAtStr)
+		if err != nil {
+			// TODO??? return &item, errors.Wrapf(err, onRead+"can't parse .CreatedAt (%s)", createdAtStr)
+		} else {
+			item.History = item.History.SaveAction(crud.Action{Key: crud.CreatedAction, DoneAt: createdAt, Related: &joiner.Link{InterfaceKey: packs.InterfaceKey, ID: item.ID}})
 		}
 
 		items = append(items, item)

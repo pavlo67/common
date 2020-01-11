@@ -41,9 +41,10 @@ func (item *Item) GetData() (*data.Item, error) {
 
 	// origin, _ := json.Marshal(feedItem)
 
+	key := dataimporter.Identity(item.sourceURL, originalID).Key()
 	history := []crud.Action{
 		{Key: crud.CreatedAction, DoneAt: sourceTime},
-		{Key: dataimporter.ActionKey, DoneAt: time.Now(), Identity: dataimporter.Identity(item.sourceURL, originalID)},
+		{Key: dataimporter.ActionKey, DoneAt: time.Now(), Actor: &key},
 	}
 
 	var embedded []data.Item
@@ -73,8 +74,8 @@ func (item *Item) GetData() (*data.Item, error) {
 		items = append(items, tagger.Tag{Label: c})
 	}
 
-	return &data.Item{
-		Key:  dataimporter.SourceKey(history),
+	var dataItem = data.Item{
+		Key:      key,
 		URL:      feedItem.Link,
 		TypeKey:  types.KeyString,
 		Title:    feedItem.Title,
@@ -83,7 +84,14 @@ func (item *Item) GetData() (*data.Item, error) {
 		Tags:     items,
 		Details:  feedItem.Content,
 		History:  history,
-	}, nil
+	}
+
+	sourceKey := dataimporter.SourceKey(history)
+	if sourceKey != nil {
+		dataItem.Key = *sourceKey
+	}
+
+	return &dataItem, nil
 
 }
 

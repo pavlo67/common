@@ -170,13 +170,13 @@ func OperatorTestScenario(t *testing.T, testCases []TestCase, cleanerOp crud.Cle
 //
 //		if sl.ExpectedErr != nil {
 //			_, err := operator.Settagger(sl.IS, sl.LinkedKey, sl.LinkedID, sl.Tags)
-//			require.Error(t, err, "where is an error on .Seltagger(%#v, %s, %s, %#v)?", sl.IS, sl.LinkedKey, sl.LinkedID, sl.Tags)
+//			require.ErrStr(t, err, "where is an error on .Seltagger(%#v, %s, %s, %#v)?", sl.IS, sl.LinkedKey, sl.LinkedID, sl.Tags)
 //			continue
 //		}
 //
 //		if sl.ISBad != nil {
 //			_, err := operator.Settagger(*sl.ISBad, sl.LinkedKey, sl.LinkedID, sl.Tags)
-//			require.Error(t, err, "where is an error on .Seltagger(%#v, %s, %s, %#v)?", *sl.ISBad, sl.LinkedKey, sl.LinkedID, sl.Tags)
+//			require.ErrStr(t, err, "where is an error on .Seltagger(%#v, %s, %s, %#v)?", *sl.ISBad, sl.LinkedKey, sl.LinkedID, sl.Tags)
 //		}
 //
 //		res, err := operator.Settagger(sl.IS, sl.LinkedKey, sl.LinkedID, sl.Tags)
@@ -207,13 +207,13 @@ func OperatorTestScenario(t *testing.T, testCases []TestCase, cleanerOp crud.Cle
 //
 //		if tc.ExpectedErr != nil {
 //			_, err := tc.Actor.QueryByObjectID(tc.IS, tc.ObjectID)
-//			require.Error(t, err, "where is an error on .QueryByObjectID(%#v, %s)?", tc.IS, tc.ObjectID)
+//			require.ErrStr(t, err, "where is an error on .QueryByObjectID(%#v, %s)?", tc.IS, tc.ObjectID)
 //			continue
 //		}
 //
 //		if tc.ISBad != nil {
 //			_, err := tc.Actor.QueryByObjectID(*tc.ISBad, tc.ObjectID)
-//			require.Error(t, err, "where is an error on .QueryByObjectID(%#v, %s)?", *tc.ISBad, tc.ObjectID)
+//			require.ErrStr(t, err, "where is an error on .QueryByObjectID(%#v, %s)?", *tc.ISBad, tc.ObjectID)
 //		}
 //
 //		linked, err := tc.Actor.QueryByObjectID(tc.IS, tc.ObjectID)

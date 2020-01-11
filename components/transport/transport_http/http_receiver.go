@@ -6,6 +6,10 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/pavlo67/workshop/common/joiner"
+	"github.com/pavlo67/workshop/components/tasks"
+	"github.com/pavlo67/workshop/components/transport"
+
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
@@ -44,19 +48,22 @@ func (transpOp *transportHTTP) receiveEndpoint() *server_http.Endpoint {
 
 			runnerOp, taskID, err := transpOp.runnerFactory.TaskRunner(
 				inPack.Task,
-				&crud.SaveOptions{History: crud.History{{Key: crud.ProducedAction, DoneAt: time.Now(), RelatedIDs: []common.ID{idIn}}}},
+				&crud.SaveOptions{History: crud.History{{Key: crud.ProducedAction, DoneAt: time.Now(), Related: &joiner.Link{InterfaceKey: packs.InterfaceKey, ID: idIn}}}},
 				transpOp,
-				inPack.From)
+				&transport.Listener{
+					SenderKey: inPack.From,
+					PackKey:   inPack.Key,
+				})
 			if err != nil {
 				return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on POST ...ReceivePack (%#v): '%s'", inPack, errors.Wrap(err, "can't transpOp.runnerFactory.TaskRunner(inPack.Task)")))
 			}
 
 			if taskID != "" {
 				_, err = transpOp.packsOp.AddHistory(idIn, crud.History{{
-					Key:        packs.TaskAction,
-					DoneAt:     time.Now(),
-					RelatedIDs: []common.ID{taskID},
-					Errors:     nil,
+					Key:     packs.TaskAction,
+					DoneAt:  time.Now(),
+					Related: &joiner.Link{InterfaceKey: tasks.InterfaceKey, ID: taskID},
+					Errors:  nil,
 				}}, nil)
 				if err != nil {
 					l.Error(err) // TODO!!! wrap the error

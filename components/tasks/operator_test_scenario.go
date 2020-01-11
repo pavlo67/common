@@ -39,12 +39,12 @@ func TestCases(tasksOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 
 			ToSetResults: Result{
 				Timing: Timing{
-					StartedAt:  startedAt,
-					FinishedAt: finishedAt,
+					StartedAt:  &startedAt,
+					FinishedAt: &finishedAt,
 				},
-				Success:   true,
-				Info:      common.Map{"1": float64(4)},
-				Posterior: []joiner.Link{{"6", "8"}},
+				ErrStr:    "wtf?",
+				Info:      common.Map{"aaa": "@!wer"},
+				Posterior: []joiner.Link{{InterfaceKey: "6", ID: "8"}},
 			},
 		},
 	}
@@ -112,8 +112,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		require.NoError(t, err)
 		require.NotNil(t, readedUpdated)
 		for i, r := range readedUpdated.Results {
-			readedUpdated.Results[i].StartedAt = r.StartedAt.UTC()
-			readedUpdated.Results[i].FinishedAt = r.FinishedAt.UTC()
+			readedUpdated.Results[i].Timing = r.Timing.UTC()
 		}
 
 		ChechReaded(t, readedUpdated, id[toSetResultsI], tc.ToSave, l)
@@ -129,8 +128,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		require.NoError(t, err)
 		require.NotNil(t, readedUpdated2)
 		for i, r := range readedUpdated2.Results {
-			readedUpdated2.Results[i].StartedAt = r.StartedAt.UTC()
-			readedUpdated2.Results[i].FinishedAt = r.FinishedAt.UTC()
+			readedUpdated2.Results[i].Timing = r.Timing.UTC()
 		}
 
 		ChechReaded(t, readedUpdated2, id[toSetResultsI], tc.ToSave, l)
@@ -174,7 +172,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		//require.NoError(t, err)
 		//
 		//readDeleted, err := tc.Read(id[toDeleteI], nil)
-		//require.Error(t, err)
+		//require.ErrStr(t, err)
 		//require.Nil(t, readDeleted)
 		//
 		//itemsAll, err = tc.ListTags(nil, nil)

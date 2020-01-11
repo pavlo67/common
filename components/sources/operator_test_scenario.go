@@ -195,7 +195,7 @@ package sources
 // 		//require.NoError(t, err)
 // 		//
 // 		//readDeleted, err := tc.Read(id[toDeleteI], nil)
-// 		//require.Error(t, err)
+// 		//require.ErrStr(t, err)
 // 		//require.Nil(t, readDeleted)
 // 		//
 // 		//itemsAll, err = tc.ListTags(nil, nil)

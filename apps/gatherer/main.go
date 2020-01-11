@@ -7,6 +7,11 @@ import (
 	"os"
 	"time"
 
+	"github.com/pavlo67/workshop/components/runner/runner_factory"
+
+	"github.com/pavlo67/workshop/components/packs/packs_pg"
+	"github.com/pavlo67/workshop/components/tasks/tasks_pg"
+
 	"github.com/pavlo67/workshop/components/sources/sources_stub"
 
 	"github.com/pavlo67/workshop/common"
@@ -24,7 +29,6 @@ import (
 	"github.com/pavlo67/workshop/components/datatagged"
 	"github.com/pavlo67/workshop/components/flow"
 	"github.com/pavlo67/workshop/components/flow/flowimporter_task"
-	"github.com/pavlo67/workshop/components/packs/packs_pg"
 	"github.com/pavlo67/workshop/components/transport"
 	"github.com/pavlo67/workshop/components/transport/transport_http"
 	"github.com/pavlo67/workshop/components/transportrouter/transportrouter_stub"
@@ -107,12 +111,14 @@ func main() {
 		{auth_ecdsa.Starter(), nil},
 
 		// action managers
+		{tasks_pg.Starter(), nil},
+		{runner_factory.Starter(), nil},
 		{scheduler_timeout.Starter(), nil},
 		{server_http_jschmhr.Starter(), common.Map{"port": port}},
 
 		// transport system
-		{transportrouter_stub.Starter(), nil},
 		{packs_pg.Starter(), nil},
+		{transportrouter_stub.Starter(), nil},
 		{transport_http.Starter(), common.Map{"handler_key": transport.HandlerInterfaceKey, "domain": serviceName}},
 
 		// database

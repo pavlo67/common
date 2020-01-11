@@ -57,7 +57,7 @@ func (it *copyTask) Init(_ common.Map) (*runner.Estimate, error) {
 	return nil, nil
 }
 
-func (it *copyTask) Run() (response *tasks.Task, posterior []joiner.Link, err error) {
+func (it *copyTask) Run() (info common.Map, posterior []joiner.Link, err error) {
 	if it == nil {
 		return nil, nil, errors.New("on copyTask.Run(): it == nil")
 	}

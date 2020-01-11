@@ -111,9 +111,9 @@ func Compare(t *testing.T, dataOp Operator, readed *Item, expectedItem Item, l l
 	readed.Details = nil
 	readed.DetailsRaw = nil
 
-	// kostyl!!!
-	//require.Equal(t, expectedItem.History.CreatedAt.Format(time.RFC3339), readed.History.CreatedAt.Format(time.RFC3339))
-	//readed.History.CreatedAt = expectedItem.History.CreatedAt
+	// TODO!!! check it carefully
+	readed.History = nil
+	expectedItem.History = nil
 
 	require.Equal(t, &expectedItem, readed)
 	require.Equal(t, expectedDetails, readedDetails)
@@ -174,7 +174,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 
 		//if !tc.ExpectedSaveOk {
 		//	_, err = tc.Save([]Tag{tc.ToSave}, nil)
-		//	require.Error(t, err, "where is an error on .Save()?")
+		//	require.ErrStr(t, err, "where is an error on .Save()?")
 		//	continue
 		//}
 
@@ -203,7 +203,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 
 		// if !tc.ExpectedReadOk {
 		// 	 _, err = tc.Read(id[toReadI], nil)
-		//	 require.Error(t, err)
+		//	 require.ErrStr(t, err)
 		//	 continue
 		// }
 
@@ -218,7 +218,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 
 		// if !tc.ExpectedUpdateOk {
 		//	 err = tc.Update(tc.ISToUpdate, id[toUpdateI], nativeToUpdate)
-		//	 require.Error(t, err, "where is an error on .Update()?")
+		//	 require.ErrStr(t, err, "where is an error on .Update()?")
 		//	 continue
 		// }
 
@@ -252,7 +252,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		//
 		//		if tc.ISToUpdateBad != nil {
 		//			err = tc.Update(*tc.ISToUpdateBad, id[toUpdateI], nativeToUpdate)
-		//			require.Error(t, err)
+		//			require.ErrStr(t, err)
 		//		}
 		//
 		//		// update 1: ok
@@ -284,7 +284,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		//			nativeToUpdate, err := tc.ItemToNative(toUpdate)
 		//			require.NoError(t, err)
 		//			err = tc.Update(tc.ISToUpdate, id[toUpdateI], nativeToUpdate)
-		//			require.Error(t, err)
+		//			require.ErrStr(t, err)
 		//			toUpdate[key] = toUpdateResult[key]
 		//		}
 		//
@@ -302,7 +302,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		//		nativeToUpdate, err = tc.ItemToNative(toUpdate)
 		//		require.NoError(t, err)
 		//		err = tc.Update(tc.ISToUpdate, id[toUpdateI], nativeToUpdate)
-		//		require.Error(t, err)
+		//		require.ErrStr(t, err)
 		//	}
 		//
 
@@ -326,7 +326,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		//		briefsAll, err := tc.ListTags(nil, nil)
 		//
 		//		require.Equal(t, 0, len(briefsAll), "why len(dataAll) is not zero after .ListTags()?")
-		//		require.Error(t, err)
+		//		require.ErrStr(t, err)
 		//		continue
 		//	}
 		//
@@ -361,7 +361,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		//
 		//		if tc.ExpectedRemoveErr != nil {
 		//			err = tc.Delete(tc.ISToDelete, id[toDeleteI])
-		//			require.Error(t, err, "where is an error on .DeleteList()?")
+		//			require.ErrStr(t, err, "where is an error on .DeleteList()?")
 		//			nativeToRead, err = tc.Read(tc.ISToRead, id[toDeleteI])
 		//			require.NoError(t, err, "what is the error on .Read() after Update()?")
 		//			data, err = tc.NativeToItem(nativeToRead)
@@ -372,7 +372,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		//
 		//		if tc.ISToDeleteBad != nil {
 		//			err = tc.Delete(*tc.ISToDeleteBad, id[toDeleteI])
-		//			require.Error(t, err, "where is an error on .DeleteList()?")
+		//			require.ErrStr(t, err, "where is an error on .DeleteList()?")
 		//			nativeToRead, err = tc.Read(tc.ISToRead, id[toDeleteI])
 		//			require.NoError(t, err, "what is the error on .Read() after Update()?")
 		//			data, err = tc.NativeToItem(nativeToRead)
@@ -386,7 +386,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		//		nativeToRead, err = tc.Read(tc.ISToRead, id[toDeleteI])
 		//
 		//		// it depends on implementation
-		//		// require.Error(t, err, "where is an error on .Read() after DeleteList()?")
+		//		// require.ErrStr(t, err, "where is an error on .Read() after DeleteList()?")
 		//
 		//		require.Nil(t, nativeToRead)
 		//	}

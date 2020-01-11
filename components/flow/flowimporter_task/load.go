@@ -48,7 +48,7 @@ func (it *loadTask) Init(_ common.Map) (*runner.Estimate, error) {
 
 const onRun = "on loadTask.Run(): "
 
-func (it *loadTask) Run() (response *tasks.Task, posterior []joiner.Link, err error) {
+func (it *loadTask) Run() (info common.Map, posterior []joiner.Link, err error) {
 	if it == nil {
 		return nil, nil, errors.New("on importer_task.Run(): loadTask == nil")
 	}

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
@@ -193,10 +194,12 @@ func (dataOp *dataPg) Read(id common.ID, _ *crud.GetOptions) (*data.Item, error)
 	}
 
 	item := data.Item{ID: id}
-	var embedded, tags, history, updatedAt, createdAt []byte
+	var embedded, tags, history []byte
+	var createdAtStr string
+	var updatedAtPtr *string
 
 	err = dataOp.stmRead.QueryRow(idNum).Scan(
-		&item.Key, &item.URL, &item.Title, &item.Summary, &embedded, &tags, &item.TypeKey, &item.DetailsRaw, &history, &updatedAt, &createdAt,
+		&item.Key, &item.URL, &item.Title, &item.Summary, &embedded, &tags, &item.TypeKey, &item.DetailsRaw, &history, &updatedAtPtr, &createdAtStr,
 	)
 
 	// TODO!!! read updatedAt, createdAt
@@ -227,6 +230,21 @@ func (dataOp *dataPg) Read(id common.ID, _ *crud.GetOptions) (*data.Item, error)
 		if err != nil {
 			return &item, errors.Wrapf(err, onRead+"can't unmarshal .History (%s)", history)
 		}
+	}
+
+	createdAt, err := time.Parse(time.RFC3339, createdAtStr)
+	if err != nil {
+		// TODO??? return &item, errors.Wrapf(err, onRead+"can't parse .CreatedAt (%s)", createdAtStr)
+	} else {
+		item.History = item.History.SaveAction(crud.Action{Key: crud.CreatedAction, DoneAt: createdAt, Related: &joiner.Link{InterfaceKey: data.InterfaceKey, ID: id}})
+	}
+
+	if updatedAtPtr != nil {
+		updatedAt, err := time.Parse(time.RFC3339, *updatedAtPtr)
+		if err != nil {
+			// TODO??? return &item, errors.Wrapf(err, onRead+"can't parse .UpdatedAt (%s)", *updatedAtPtr)
+		}
+		item.History = item.History.SaveAction(crud.Action{Key: crud.UpdatedAction, DoneAt: updatedAt, Related: &joiner.Link{InterfaceKey: data.InterfaceKey, ID: id}})
 	}
 
 	return &item, nil
@@ -367,10 +385,12 @@ func (dataOp *dataPg) List(term *selectors.Term, options *crud.GetOptions) ([]da
 	for rows.Next() {
 		var idNum int64
 		var item data.Item
-		var embedded, tags, history, updatedAt, createdAt []byte
+		var embedded, tags, history []byte
+		var createdAtStr string
+		var updatedAtPtr *string
 
 		err := rows.Scan(
-			&idNum, &item.Key, &item.URL, &item.Title, &item.Summary, &embedded, &tags, &item.TypeKey, &item.DetailsRaw, &history, &updatedAt, &createdAt,
+			&idNum, &item.Key, &item.URL, &item.Title, &item.Summary, &embedded, &tags, &item.TypeKey, &item.DetailsRaw, &history, &updatedAtPtr, &createdAtStr,
 		)
 
 		// TODO: read updatedAt, createdAt
@@ -391,6 +411,8 @@ func (dataOp *dataPg) List(term *selectors.Term, options *crud.GetOptions) ([]da
 			}
 		}
 
+		item.ID = common.ID(strconv.FormatInt(idNum, 10))
+
 		if len(history) > 0 {
 			err = json.Unmarshal(history, &item.History)
 			if err != nil {
@@ -398,7 +420,21 @@ func (dataOp *dataPg) List(term *selectors.Term, options *crud.GetOptions) ([]da
 			}
 		}
 
-		item.ID = common.ID(strconv.FormatInt(idNum, 10))
+		createdAt, err := time.Parse(time.RFC3339, createdAtStr)
+		if err != nil {
+			// TODO??? return &item, errors.Wrapf(err, onList+"can't parse .CreatedAt (%s)", createdAtStr)
+		} else {
+			item.History = item.History.SaveAction(crud.Action{Key: crud.CreatedAction, DoneAt: createdAt, Related: &joiner.Link{InterfaceKey: data.InterfaceKey, ID: item.ID}})
+		}
+
+		if updatedAtPtr != nil {
+			updatedAt, err := time.Parse(time.RFC3339, *updatedAtPtr)
+			if err != nil {
+				// TODO??? return &item, errors.Wrapf(err, onList+"can't parse .UpdatedAt (%s)", *updatedAtPtr)
+			}
+			item.History = item.History.SaveAction(crud.Action{Key: crud.UpdatedAction, DoneAt: updatedAt, Related: &joiner.Link{InterfaceKey: data.InterfaceKey, ID: item.ID}})
+		}
+
 		items = append(items, item)
 	}
 	err = rows.Err()

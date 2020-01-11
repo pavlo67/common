@@ -135,7 +135,7 @@ func (s *serverHTTPJschmhr) HandleFiles(key, serverPath string, staticPath serve
 
 // mimeTypeToSet, err = inspector.MIME(localPath+"/"+r.ExportID.PathWithParams, nil)
 // if err != nil {
-//	l.Error("can't read MIMEType for file: ", localPath+"/"+r.ExportID.PathWithParams, err)
+//	l.ErrStr("can't read MIMEType for file: ", localPath+"/"+r.ExportID.PathWithParams, err)
 // }
 
 //func (s *serverHTTPJschmhr) HandleGetString(serverRoute, str string, mimeType *string) {
@@ -167,7 +167,7 @@ func (s *serverHTTPJschmhr) HandleEndpoint(key, serverPath string, endpoint serv
 
 		//ok, err := auth.HasRights(user, s.identOpsMap, endpoint.AllowedIDs)
 		//if err != nil {
-		//	l.Error(err)
+		//	l.ErrStr(err)
 		//}
 		//if !ok {
 		//	w.WriteHeader(http.StatusNotFound)

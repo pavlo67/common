@@ -5,8 +5,6 @@ import (
 
 	"github.com/pavlo67/workshop/common/crud"
 
-	"github.com/pavlo67/workshop/common/identity"
-
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/components/transport"
@@ -23,7 +21,7 @@ type Estimate struct {
 type Actor interface {
 	Name() string
 	Init(params common.Map) (estimate *Estimate, err error)
-	Run() (response *tasks.Task, posterior []joiner.Link, err error)
+	Run() (info common.Map, posterior []joiner.Link, err error)
 }
 
 type Operator interface {
@@ -32,6 +30,6 @@ type Operator interface {
 }
 
 type Factory interface {
-	ItemRunner(item tasks.Item, saveOptions *crud.SaveOptions, transportOp transport.Operator, listener identity.Key) (Operator, error)
-	TaskRunner(task tasks.Task, saveOptions *crud.SaveOptions, transportOp transport.Operator, listener identity.Key) (Operator, common.ID, error)
+	ItemRunner(item tasks.Item, saveOptions *crud.SaveOptions, transportOp transport.Operator, listener *transport.Listener) (Operator, error)
+	TaskRunner(task tasks.Task, saveOptions *crud.SaveOptions, transportOp transport.Operator, listener *transport.Listener) (Operator, common.ID, error)
 }

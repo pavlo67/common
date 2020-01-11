@@ -1,11 +1,12 @@
 package runner_factory
 
 import (
-	"github.com/pavlo67/workshop/common/crud"
+	"time"
+
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
-	"github.com/pavlo67/workshop/common/identity"
+	"github.com/pavlo67/workshop/common/crud"
 	"github.com/pavlo67/workshop/common/joiner"
 
 	"github.com/pavlo67/workshop/components/packs"
@@ -34,7 +35,7 @@ type runnerFactory struct {
 	tasksOp  tasks.Operator
 }
 
-func (rf runnerFactory) ItemRunner(item tasks.Item, saveOptions *crud.SaveOptions, transportOp transport.Operator, listener identity.Key) (runner.Operator, error) {
+func (rf runnerFactory) ItemRunner(item tasks.Item, saveOptions *crud.SaveOptions, transportOp transport.Operator, listener *transport.Listener) (runner.Operator, error) {
 	if transportOp == nil {
 		return nil, errors.Errorf("on runnerFactory.ItemRunner(): no transport.Operator for task(%#v)", item)
 	}
@@ -58,10 +59,10 @@ func (rf runnerFactory) ItemRunner(item tasks.Item, saveOptions *crud.SaveOption
 
 }
 
-func (rf runnerFactory) TaskRunner(task tasks.Task, saveOptions *crud.SaveOptions, transportOp transport.Operator, listener identity.Key) (runner.Operator, common.ID,
+func (rf runnerFactory) TaskRunner(task tasks.Task, saveOptions *crud.SaveOptions, transportOp transport.Operator, listener *transport.Listener) (runner.Operator, common.ID,
 	error) {
-	if transportOp == nil {
-		return nil, "", errors.Errorf("on runnerFactory.TaskRunner(): no transport.Operator for task(%#v)", task)
+	if transportOp == nil && listener != nil {
+		return nil, "", errors.Errorf("on runnerFactory.TaskRunner(): no transport.Operator for task(%#v) with listener (%#v)", task, *listener)
 	}
 
 	// TODO!!! check if listener is valid
@@ -97,7 +98,7 @@ type runnerOp struct {
 	actor   runner.Actor
 
 	transportOp transport.Operator
-	listener    identity.Key
+	listener    *transport.Listener
 }
 
 const onRun = "on runnerOp.Run(): "
@@ -109,7 +110,7 @@ func (r runnerOp) Run() (estimate *runner.Estimate, err error) {
 
 	estimate, err = r.actor.Init(r.task.Params)
 	if err != nil {
-		err1 := r.tasksOp.Finish(r.taskID, tasks.Result{Error: err}, nil)
+		err1 := r.tasksOp.Finish(r.taskID, tasks.Result{ErrStr: err.Error()}, nil)
 		if err1 != nil {
 			err = errors.Wrap(err, err1.Error())
 		}
@@ -127,16 +128,36 @@ func (r runnerOp) Run() (estimate *runner.Estimate, err error) {
 }
 
 func (r runnerOp) runOnly() {
-	response, posterior, err := r.actor.Run()
-	if err1 := r.tasksOp.Finish(r.taskID, tasks.Result{Response: response, Posterior: posterior, Error: err}, nil); err1 != nil {
+	info, posterior, err := r.actor.Run()
+	var errStr string
+	if err != nil {
+		errStr = err.Error()
+	}
+
+	if err1 := r.tasksOp.Finish(r.taskID, tasks.Result{Info: info, Posterior: posterior, ErrStr: errStr}, nil); err1 != nil {
 		l.Error(err1) // TODO: wrap it
 	}
 
-	if response != nil {
+	var task *tasks.Task
+
+	response := info["response"]
+	switch v := response.(type) {
+	case tasks.Task:
+		task = &v
+	case *tasks.Task:
+		task = v
+	}
+
+	if task != nil && r.transportOp != nil && r.listener != nil {
 		_, _, err := r.transportOp.Send(&packs.Pack{
-			// TODO: join with original task pack
-			To:   r.listener,
-			Task: *response,
+			From:    "", // TODO ???
+			To:      r.listener.SenderKey,
+			Options: nil,
+			Task:    *task,
+			History: crud.History{
+				{Key: crud.ProducedAction, Related: &joiner.Link{InterfaceKey: packs.InterfaceKey, Key: r.listener.PackKey}},
+				{Key: crud.ProducedAction, Related: &joiner.Link{InterfaceKey: tasks.InterfaceKey, ID: r.taskID}, DoneAt: time.Now()},
+			},
 		})
 		if err != nil {
 			l.Error(err) // TODO: wrap it

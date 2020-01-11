@@ -143,11 +143,12 @@ func (tasksOp *tasksPostgres) Read(id common.ID, _ *crud.GetOptions) (*tasks.Ite
 	}
 
 	item := tasks.Item{ID: id}
-	var status, results, params, createdAt string
+	var status, results, params []byte
+	var createdAtStr string
 	var updatedAtPtr *string
 
 	err = tasksOp.stmRead.QueryRow(idNum).Scan(
-		&item.ActorKey, &params, &status, &results, &createdAt, &updatedAtPtr,
+		&item.ActorKey, &params, &status, &results, &createdAtStr, &updatedAtPtr,
 	)
 	if err == sql.ErrNoRows {
 		return nil, common.ErrNotFound
@@ -157,37 +158,39 @@ func (tasksOp *tasksPostgres) Read(id common.ID, _ *crud.GetOptions) (*tasks.Ite
 	}
 
 	if len(params) > 0 {
-		err = json.Unmarshal([]byte(params), &item.Params)
+		err = json.Unmarshal(params, &item.Params)
 		if err != nil {
 			return &item, errors.Wrapf(err, onRead+"can't unmarshal .Params (%s)", params)
 		}
 	}
 
 	if len(status) > 0 {
-		err = json.Unmarshal([]byte(status), &item.Status)
+		err = json.Unmarshal(status, &item.Status)
 		if err != nil {
 			return &item, errors.Wrapf(err, onRead+"can't unmarshal .History (%s)", status)
 		}
 	}
 
 	if len(results) > 0 {
-		err = json.Unmarshal([]byte(results), &item.Results)
+		err = json.Unmarshal(results, &item.Results)
 		if err != nil {
 			return &item, errors.Wrapf(err, onRead+"can't unmarshal .Results (%s)", results)
 		}
 	}
 
-	item.History.CreatedAt, err = time.Parse(time.RFC3339, createdAt)
+	createdAt, err := time.Parse(time.RFC3339, createdAtStr)
 	if err != nil {
-		return &item, errors.Wrapf(err, onRead+"can't parse .SentAt (%s)", createdAt)
+		// TODO??? return &item, errors.Wrapf(err, onRead+"can't parse .CreatedAt (%s)", createdAtStr)
+	} else {
+		item.History = item.History.SaveAction(crud.Action{Key: crud.CreatedAction, DoneAt: createdAt, Related: &joiner.Link{InterfaceKey: tasks.InterfaceKey, ID: id}})
 	}
 
 	if updatedAtPtr != nil {
 		updatedAt, err := time.Parse(time.RFC3339, *updatedAtPtr)
 		if err != nil {
-			return &item, errors.Wrapf(err, onRead+"can't parse .UpdatedAt (%s)", *updatedAtPtr)
+			// TODO??? return &item, errors.Wrapf(err, onRead+"can't parse .UpdatedAt (%s)", *updatedAtPtr)
 		}
-		item.History.UpdatedAt = &updatedAt
+		item.History = item.History.SaveAction(crud.Action{Key: crud.UpdatedAction, DoneAt: updatedAt, Related: &joiner.Link{InterfaceKey: tasks.InterfaceKey, ID: id}})
 	}
 
 	return &item, nil
@@ -219,8 +222,6 @@ func (tasksOp *tasksPostgres) List(term *selectors.Term, options *crud.GetOption
 		}
 	}
 
-	// l.Infof("%s / %#v\n%s", condition, values, query)
-
 	rows, err := stm.Query(values...)
 	if err == sql.ErrNoRows {
 		return nil, nil
@@ -234,51 +235,55 @@ func (tasksOp *tasksPostgres) List(term *selectors.Term, options *crud.GetOption
 	for rows.Next() {
 		var idNum int64
 		var item tasks.Item
-		var status, results, params, createdAt string
+		var status, results, params []byte
+		var createdAtStr string
 		var updatedAtPtr *string
 
 		err := rows.Scan(
-			&idNum, &item.ActorKey, &params, &status, &results, &createdAt, &updatedAtPtr,
+			&idNum, &item.ActorKey, &params, &status, &results, &createdAtStr, &updatedAtPtr,
 		)
 		if err != nil {
 			return items, errors.Wrapf(err, onList+sqllib.CantScanQueryRow, query, values)
 		}
 
 		if len(params) > 0 {
-			err = json.Unmarshal([]byte(params), &item.Params)
+			err = json.Unmarshal(params, &item.Params)
 			if err != nil {
-				return items, errors.Wrapf(err, onRead+"can't unmarshal .Params (%s)", params)
+				return items, errors.Wrapf(err, onList+"can't unmarshal .Params (%s)", params)
 			}
 		}
 
 		if len(status) > 0 {
-			err = json.Unmarshal([]byte(status), &item.Status)
+			err = json.Unmarshal(status, &item.Status)
 			if err != nil {
-				return items, errors.Wrapf(err, onRead+"can't unmarshal .History (%s)", status)
+				return items, errors.Wrapf(err, onList+"can't unmarshal .History (%s)", status)
 			}
 		}
 
 		if len(results) > 0 {
-			err = json.Unmarshal([]byte(results), &item.Results)
+			err = json.Unmarshal(results, &item.Results)
 			if err != nil {
-				return items, errors.Wrapf(err, onRead+"can't unmarshal .Results (%s)", results)
+				return items, errors.Wrapf(err, onList+"can't unmarshal .Results (%s)", results)
 			}
 		}
 
-		item.History.CreatedAt, err = time.Parse(time.RFC3339, createdAt)
+		item.ID = common.ID(strconv.FormatInt(idNum, 10))
+
+		createdAt, err := time.Parse(time.RFC3339, createdAtStr)
 		if err != nil {
-			return items, errors.Wrapf(err, onRead+"can't parse .SentAt (%s)", createdAt)
+			// TODO???  return &item, errors.Wrapf(err, onRead+"can't parse .CreatedAt (%s)", createdAtStr)
+		} else {
+			item.History = item.History.SaveAction(crud.Action{Key: crud.CreatedAction, DoneAt: createdAt, Related: &joiner.Link{InterfaceKey: tasks.InterfaceKey, ID: item.ID}})
 		}
 
 		if updatedAtPtr != nil {
 			updatedAt, err := time.Parse(time.RFC3339, *updatedAtPtr)
 			if err != nil {
-				return items, errors.Wrapf(err, onRead+"can't parse .UpdatedAt (%s)", *updatedAtPtr)
+				// TODO??? return &item, errors.Wrapf(err, onRead+"can't parse .UpdatedAt (%s)", *updatedAtPtr)
 			}
-			item.History.UpdatedAt = &updatedAt
+			item.History = item.History.SaveAction(crud.Action{Key: crud.UpdatedAction, DoneAt: updatedAt, Related: &joiner.Link{InterfaceKey: tasks.InterfaceKey, ID: item.ID}})
 		}
 
-		item.ID = common.ID(strconv.FormatInt(idNum, 10))
 		items = append(items, item)
 	}
 	err = rows.Err()
@@ -309,7 +314,7 @@ func (tasksOp *tasksPostgres) Start(id common.ID, _ *crud.SaveOptions) error {
 	// setting status ---------------------------------------------------------------------------------
 
 	startedAt := time.Now()
-	status := tasks.Status{StartedAt: &startedAt}
+	status := tasks.Status{tasks.Timing{StartedAt: &startedAt}}
 	statusBytes, err := json.Marshal(status)
 	if err != nil {
 		return errors.Wrapf(err, onStart+"can't marshal .History (%#v)", status)
@@ -354,9 +359,8 @@ func (tasksOp *tasksPostgres) Finish(id common.ID, result tasks.Result, _ *crud.
 			return errors.Wrapf(err, onFinish+"can't unmarshal .History (%s)", statusStr)
 		}
 	}
-	if status.StartedAt != nil {
-		// TODO!!! be careful
-		result.StartedAt = *status.StartedAt
+	if result.StartedAt == nil && status.StartedAt != nil {
+		result.StartedAt = status.StartedAt
 	}
 	statusStr = ""
 
@@ -369,7 +373,12 @@ func (tasksOp *tasksPostgres) Finish(id common.ID, result tasks.Result, _ *crud.
 			return errors.Wrapf(err, onFinish+"can't unmarshal .Results (%s)", resultsStr)
 		}
 	}
-	result.FinishedAt = time.Now()
+
+	if result.FinishedAt == nil {
+		now := time.Now()
+		result.FinishedAt = &now
+	}
+
 	results = append(results, result)
 	resultsBytes, err := json.Marshal(results)
 	if err != nil {
@@ -410,4 +419,8 @@ func (tasksOp *tasksPostgres) Clean(term *selectors.Term, _ *crud.RemoveOptions)
 	}
 
 	return nil
+}
+
+func (tasksOp *tasksPostgres) SelectToClean(*crud.RemoveOptions) (*selectors.Term, error) {
+	return nil, common.ErrNotImplemented
 }

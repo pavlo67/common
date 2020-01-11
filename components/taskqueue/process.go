@@ -56,16 +56,20 @@ func Process(tasksOp tasks.Operator, joinerOp joiner.Operator, l logger.Operator
 				continue
 			}
 
+			_, err := workerOp.Init(item.Task.Params)
+			if err != nil {
+				l.Errorf("on workerOp.Init(item.Task.Params) for item (%#v): %s", item, err)
+			}
+
 			// TODO!!! use goroutines
-			posterior, info, err := workerOp.Run(&item.Task, time.Now().Format(time.RFC3339))
+			posterior, err := workerOp.Run()
 			if err != nil {
 				l.Errorf("on workerOp.Run() for task (%#v): %s", item, err)
 			}
 
 			result := tasks.Result{
 				// Timing: will be set automatically
-				Success:   err == nil,
-				Info:      info,
+				ErrStr:    err,
 				Posterior: posterior,
 			}
 			err = tasksOp.Finish(item.ID, result, nil)

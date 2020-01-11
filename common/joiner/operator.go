@@ -5,6 +5,8 @@ import (
 	"reflect"
 	"sync"
 
+	"github.com/pavlo67/workshop/common/identity"
+
 	"github.com/pavlo67/workshop/common"
 	"github.com/pkg/errors"
 )
@@ -24,8 +26,9 @@ type Operator interface {
 }
 
 type Link struct {
-	InterfaceKey
-	common.ID
+	InterfaceKey `bson:",omitempty" json:",omitempty"`
+	common.ID    `bson:",omitempty" json:",omitempty"`
+	identity.Key `bson:",omitempty" json:",omitempty"`
 }
 
 var _ Operator = &joiner{}

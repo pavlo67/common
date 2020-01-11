@@ -14,6 +14,11 @@ const HandlerInterfaceKey joiner.InterfaceKey = "transport_handler"
 const SentKey crud.ActionKey = "sent"
 const DidntSendKey crud.ActionKey = "didn't send"
 
+type Listener struct {
+	SenderKey identity.Key
+	PackKey   identity.Key
+}
+
 type Operator interface {
 	Send(pack *packs.Pack) (sentKey identity.Key, targetTaskID common.ID, err error)
 	History(packKey identity.Key) (history []crud.Action, err error)

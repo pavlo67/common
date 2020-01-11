@@ -30,7 +30,7 @@ type Errors []error
 
 // it's would be not good to use Errors as an error interface directly because of:
 
-// func (errs Errors) Error() string {
+// func (errs Errors) ErrStr() string {
 //    return errs.Key()
 // }
 // var errs basis.Errors; log.Println(errs == nil) // true
@@ -113,7 +113,7 @@ func (errs Errors) MarshalJSON() ([]byte, error) {
 //}
 //
 //func (errs Errors) ForUser() Errors {
-//	if len(errs) > 0 && errs[0].Error() == ForUser {
+//	if len(errs) > 0 && errs[0].ErrStr() == ForUser {
 //		return errs[1:]
 //	}
 //	return nil

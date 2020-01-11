@@ -6,8 +6,6 @@ import (
 
 	"github.com/pavlo67/workshop/common/identity"
 	"github.com/pavlo67/workshop/common/logger"
-	"github.com/pavlo67/workshop/components/packs"
-	"github.com/stretchr/testify/require"
 )
 
 //type OperatorTestCase struct {
@@ -47,40 +45,40 @@ func OperatorTestScenario(t *testing.T, transpOp Operator, l logger.Operator) {
 		t.Fatal("No test environment!!!")
 	}
 
-	//for i, tc := range testCases {
-	//	l.Debug(i)
+	////for i, tc := range testCases {
+	////	l.Debug(i)
+	////}
+	//
+	//transpOp.AddHandler("", TestTypeKey, &handlerEcho{})
+	//
+	//packOut := packs.Pack{
+	//	Key:     "test1",
+	//	From:    "test2",
+	//	To:      identity.Key("gatherer_transport/aaa"),
+	//	TypeKey: TestTypeKey,
+	//	Content: map[string]interface{}{"aaa": "bbb"},
 	//}
-
-	transpOp.AddHandler("", TestTypeKey, &handlerEcho{})
-
-	packOut := packs.Pack{
-		Key:     "test1",
-		From:    "test2",
-		To:      identity.Key("gatherer_transport/aaa"),
-		TypeKey: TestTypeKey,
-		Content: map[string]interface{}{"aaa": "bbb"},
-	}
-
-	_, packIn, err := transpOp.Send(&packOut)
-	require.NoError(t, err)
-	require.NotNil(t, packIn)
-
-	l.Infof("--> %#v", packOut)
-	l.Infof("<-- %#v", *packIn)
-
-	packOut.History = nil
-	packIn.History = nil
-
-	require.Equal(t, packOut, *packIn)
+	//
+	//_, packIn, err := transpOp.Send(&packOut)
+	//require.NoError(t, err)
+	//require.NotNil(t, packIn)
+	//
+	//l.Infof("--> %#v", packOut)
+	//l.Infof("<-- %#v", *packIn)
+	//
+	//packOut.History = nil
+	//packIn.History = nil
+	//
+	//require.Equal(t, packOut, *packIn)
 
 }
 
 const TestTypeKey identity.Key = "test"
 
-var _ packs.Handler = &handlerEcho{}
-
-type handlerEcho struct{}
-
-func (_ handlerEcho) Handle(pack *packs.Pack) (*packs.Pack, error) {
-	return pack, nil
-}
+//var _ packs.Handler = &handlerEcho{}
+//
+//type handlerEcho struct{}
+//
+//func (_ handlerEcho) Handle(pack *packs.Pack) (*packs.Pack, error) {
+//	return pack, nil
+//}

@@ -23,11 +23,7 @@ type Pack struct {
 
 	Task tasks.Task `bson:",omitempty" json:",omitempty"`
 
-	//TypeKey    identity.Key `bson:",omitempty" json:",omitempty"`
-	//ContentRaw []byte       `bson:"-"          json:"-"`
-	//Content    interface{}  `bson:",omitempty" json:",omitempty"`
-
-	History []crud.Action `bson:",omitempty" json:",omitempty"`
+	History crud.History `bson:",omitempty" json:",omitempty"`
 }
 
 type Item struct {

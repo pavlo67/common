@@ -13,26 +13,38 @@ const InterfaceKey joiner.InterfaceKey = "tasks"
 const CollectionDefault = "tasks"
 
 type Timing struct {
-	StartedAt  time.Time
-	FinishedAt time.Time
+	StartedAt  *time.Time
+	FinishedAt *time.Time
+}
+
+func (timing Timing) UTC() Timing {
+	if timing.StartedAt != nil {
+		startedAt := timing.StartedAt.UTC()
+		timing.StartedAt = &startedAt
+	}
+
+	if timing.FinishedAt != nil {
+		finishedAt := timing.FinishedAt.UTC()
+		timing.FinishedAt = &finishedAt
+	}
+
+	return timing
 }
 
 type Result struct {
 	Timing    `              bson:",inline"    json:",inline"`
-	Error     error         `bson:",omitempty" json:",omitempty"`
-	Response  *Task         `bson:",omitempty" json:",omitempty"`
+	ErrStr    string        `bson:",omitempty" json:",omitempty"`
+	Info      common.Map    `bson:",omitempty" json:",omitempty"`
 	Posterior []joiner.Link `bson:",omitempty" json:",omitempty"`
 }
 
 type Status struct {
-	StartedAt  *time.Time `bson:",omitempty" json:",omitempty"`
-	FinishedAt *time.Time `bson:",omitempty" json:",omitempty"`
+	Timing `bson:",inline" json:",inline"`
 }
 
 type Task struct {
-	ActorKey  joiner.InterfaceKey `bson:",omitempty" json:",omitempty"`
-	Params    common.Map          `bson:"-"          json:",omitempty"`
-	ParamsRaw []byte              `bson:",omitempty" json:",omitempty"` // shouldn't be used directly
+	ActorKey joiner.InterfaceKey `bson:",omitempty" json:",omitempty"`
+	Params   common.Map          `bson:"-"          json:",omitempty"`
 }
 
 type Item struct {
