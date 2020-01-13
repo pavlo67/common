@@ -407,7 +407,7 @@ func (dataOp *dataPg) Count(term *selectors.Term, options *crud.GetOptions) (uin
 		return 0, errors.Wrapf(err, onCount+": can't selectors_sql.Use(%s)", termStr)
 	}
 
-	query := sqllib.SQLCount(dataOp.table, condition, options)
+	query := sqllib_pg.CorrectWildcards(sqllib.SQLCount(dataOp.table, condition, options))
 	stm, err := dataOp.db.Prepare(query)
 	if err != nil {
 		return 0, errors.Wrapf(err, onCount+": can't db.Prepare(%s)", query)

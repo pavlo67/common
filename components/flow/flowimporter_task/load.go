@@ -14,7 +14,6 @@ import (
 	"github.com/pavlo67/workshop/common/selectors"
 
 	"github.com/pavlo67/workshop/components/data"
-	"github.com/pavlo67/workshop/components/dataimporter"
 	"github.com/pavlo67/workshop/components/dataimporter/importer_http_rss"
 	"github.com/pavlo67/workshop/components/datatagged"
 	"github.com/pavlo67/workshop/components/sources"
@@ -65,7 +64,7 @@ func (it *loadTask) Run() (info common.Map, posterior []joiner.Link, err error) 
 			continue
 		}
 
-		l.Infof("%d f %d: %s", i+1, len(sourceItems), url)
+		l.Infof("%d of %d: %s", i+1, len(sourceItems), url)
 
 		numAll, numProcessed, numNew, err := Load(url, it.dataOp)
 		l.Infof("numAll = %d, numProcessed = %d, numNew = %d", numAll, numProcessed, numNew)
@@ -105,10 +104,9 @@ func Load(url string, dataOp data.Operator) (int, int, int, error) {
 
 		numProcessed++
 
-		sourceKey := dataimporter.SourceKey(item.History)
-		// TODO!!! check if both are not empty
+		// l.Info("sourceKey: ", item.Key)
 
-		term := selectors.Binary(selectors.Eq, "source_key", selectors.Value{sourceKey})
+		term := selectors.Binary(selectors.Eq, "data_key", selectors.Value{item.Key})
 
 		//itemStr, _ := json.Marshal(item)
 		//l.Infof("%s ", itemStr)
@@ -136,5 +134,5 @@ func Load(url string, dataOp data.Operator) (int, int, int, error) {
 		}
 	}
 
-	return numAll, numProcessed, numNew, nil
+	return numAll, numProcessed, numNew, err
 }

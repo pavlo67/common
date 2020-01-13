@@ -31,10 +31,11 @@ var l logger.Operator
 var _ starter.Operator = &gathererStarter{}
 
 type gathererStarter struct {
-	importerTaskKey    joiner.InterfaceKey
-	cleanerTaskKey     joiner.InterfaceKey
-	receiverHandlerKey joiner.InterfaceKey
-	schKey             joiner.InterfaceKey
+	importerTaskKey     joiner.InterfaceKey
+	importerImmediately bool
+	cleanerTaskKey      joiner.InterfaceKey
+	receiverHandlerKey  joiner.InterfaceKey
+	schKey              joiner.InterfaceKey
 }
 
 func (gs *gathererStarter) Name() string {
@@ -50,8 +51,9 @@ func (gs *gathererStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Op
 		return nil, fmt.Errorf("no logger for %s:-(", gs.Name())
 	}
 
-	gs.receiverHandlerKey = joiner.InterfaceKey(options.StringDefault("receiver_handler_key", string(transport.HandlerInterfaceKey)))
 	gs.importerTaskKey = joiner.InterfaceKey(options.StringDefault("importer_task_key", string(flow.ImporterTaskInterfaceKey)))
+	gs.importerImmediately = options.IsTrue("import_immediately")
+	gs.receiverHandlerKey = joiner.InterfaceKey(options.StringDefault("receiver_handler_key", string(transport.HandlerInterfaceKey)))
 	gs.cleanerTaskKey = joiner.InterfaceKey(options.StringDefault("cleaner_task_key", string(flow.CleanerTaskInterfaceKey)))
 	gs.schKey = joiner.InterfaceKey(options.StringDefault("scheduler_key", string(scheduler.InterfaceKey)))
 
@@ -81,9 +83,9 @@ func (gs *gathererStarter) Run(joinerOp joiner.Operator) error {
 		l.Fatalf("can't schOp.Init(%#v): %s", impTaskOp, err)
 	}
 
-	err = schOp.Run(taskID, importPeriod, false)
+	err = schOp.Run(taskID, importPeriod, gs.importerImmediately)
 	if err != nil {
-		l.Fatalf("can't schOp.Run(%s, %d, false): %s", taskID, importPeriod, err)
+		l.Fatalf("can't schOp.Run(%s, %d, %t): %s", taskID, importPeriod, gs.importerImmediately, err)
 	}
 
 	// scheduling cleaner task

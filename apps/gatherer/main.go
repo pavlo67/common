@@ -47,8 +47,9 @@ const serviceName = "gatherer"
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
-	var versionOnly bool
-	flag.BoolVar(&versionOnly, "version", false, "show build vars only")
+	var versionOnly, importImmediately bool
+	flag.BoolVar(&versionOnly, "version_only", false, "show build vars only")
+	flag.BoolVar(&importImmediately, "import_immediately", false, "immediately import flow data")
 	flag.Parse()
 
 	log.Printf("builded: %s, tag: %s, commit: %s\n", BuildDate, BuildTag, BuildCommit)
@@ -134,8 +135,11 @@ func main() {
 
 		// actions starter (connecting specific actions to the corresponding action managers)
 		{gatherer_actions.Starter(), common.Map{
-			"importer_task_key": flow.ImporterTaskInterfaceKey,
+			"import_immediately": importImmediately,
+			"importer_task_key":  flow.ImporterTaskInterfaceKey,
+
 			// "cleaner_task_key":     flow.CopierTaskInterfaceKey,
+
 			"receiver_handler_key": transport.HandlerInterfaceKey,
 		}},
 	}
