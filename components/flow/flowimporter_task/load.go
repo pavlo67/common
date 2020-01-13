@@ -3,7 +3,7 @@ package flowimporter_task
 import (
 	"strings"
 
-	"github.com/pavlo67/workshop/components/tasks"
+	"github.com/pavlo67/workshop/common/crud"
 
 	"github.com/pavlo67/workshop/components/runner"
 
@@ -79,7 +79,7 @@ func (it *loadTask) Run() (info common.Map, posterior []joiner.Link, err error) 
 	return nil, nil, nil
 }
 
-func (it *loadTask) Report() (*tasks.Task, error) {
+func (it *loadTask) Report() (*crud.Data, error) {
 	return nil, common.ErrNotImplemented
 }
 

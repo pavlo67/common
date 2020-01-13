@@ -7,7 +7,7 @@ CREATE TABLE storage (
   embedded     TEXT       NOT NULL,
   tags         TEXT       NOT NULL,
   type_key     TEXT       NOT NULL,
-  details      TEXT       NOT NULL,
+  content      TEXT       NOT NULL,
   history      TEXT       NOT NULL,
   created_at   TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at   TIMESTAMP
@@ -28,7 +28,7 @@ CREATE TABLE flow (
   embedded     TEXT       NOT NULL,
   tags         TEXT       NOT NULL,
   type_key     TEXT       NOT NULL,
-  details      TEXT       NOT NULL,
+  content      TEXT       NOT NULL,
   history      TEXT       NOT NULL,
   created_at   TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at   TIMESTAMP

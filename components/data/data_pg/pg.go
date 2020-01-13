@@ -16,14 +16,13 @@ import (
 	"github.com/pavlo67/workshop/common/libraries/strlib"
 	"github.com/pavlo67/workshop/common/selectors"
 	"github.com/pavlo67/workshop/common/selectors/selectors_sql"
-	"github.com/pavlo67/workshop/common/types"
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/components/data"
 	"github.com/pavlo67/workshop/components/tagger"
 )
 
-var fieldsToInsert = []string{"data_key", "url", "title", "summary", "embedded", "tags", "type_key", "details", "history"}
+var fieldsToInsert = []string{"data_key", "url", "title", "summary", "embedded", "tags", "type_key", "content", "history"}
 var fieldsToInsertStr = strings.Join(fieldsToInsert, ", ")
 
 var fieldsToUpdate = fieldsToInsert
@@ -105,7 +104,7 @@ func (dataOp *dataPg) Save(items []data.Item, _ *crud.SaveOptions) ([]common.ID,
 
 		var err error
 
-		var embedded, tags, details, history []byte
+		var embedded, tags, history []byte
 
 		if len(item.Embedded) > 0 {
 			embedded, err = json.Marshal(item.Embedded)
@@ -121,13 +120,6 @@ func (dataOp *dataPg) Save(items []data.Item, _ *crud.SaveOptions) ([]common.ID,
 			}
 		}
 
-		if item.Details != nil {
-			details, err = json.Marshal(item.Details)
-			if err != nil {
-				return ids, errors.Wrapf(err, onSave+"can't marshal .Details(%#v)", item.Details)
-			}
-		}
-
 		// TODO!!! append to .History
 
 		if len(item.History) > 0 {
@@ -138,7 +130,7 @@ func (dataOp *dataPg) Save(items []data.Item, _ *crud.SaveOptions) ([]common.ID,
 		}
 
 		if item.ID == "" {
-			values := []interface{}{string(item.Key), item.URL, item.Title, item.Summary, embedded, tags, item.TypeKey, details, history}
+			values := []interface{}{string(item.Key), item.URL, item.Title, item.Summary, embedded, tags, item.Data.TypeKey, item.Data.Content, history}
 
 			var lastInsertId uint64
 
@@ -160,7 +152,7 @@ func (dataOp *dataPg) Save(items []data.Item, _ *crud.SaveOptions) ([]common.ID,
 
 		} else {
 
-			values := []interface{}{item.Key, item.URL, item.Title, item.Summary, embedded, tags, item.TypeKey, details, history, item.ID}
+			values := []interface{}{item.Key, item.URL, item.Title, item.Summary, embedded, tags, item.Data.TypeKey, item.Data.Content, history, item.ID}
 
 			_, err := dataOp.stmUpdate.Exec(values...)
 			if err != nil {
@@ -199,7 +191,7 @@ func (dataOp *dataPg) Read(id common.ID, _ *crud.GetOptions) (*data.Item, error)
 	var updatedAtPtr *string
 
 	err = dataOp.stmRead.QueryRow(idNum).Scan(
-		&item.Key, &item.URL, &item.Title, &item.Summary, &embedded, &tags, &item.TypeKey, &item.DetailsRaw, &history, &updatedAtPtr, &createdAtStr,
+		&item.Key, &item.URL, &item.Title, &item.Summary, &embedded, &tags, &item.Data.TypeKey, &item.Data.Content, &history, &updatedAtPtr, &createdAtStr,
 	)
 
 	// TODO!!! read updatedAt, createdAt
@@ -248,45 +240,6 @@ func (dataOp *dataPg) Read(id common.ID, _ *crud.GetOptions) (*data.Item, error)
 	}
 
 	return &item, nil
-}
-
-const onDetails = "on dataPg.Details(): "
-
-func (dataOp *dataPg) SetDetails(item *data.Item) error {
-	if item == nil {
-		return errors.New(onDetails + "nil item")
-	}
-
-	// l.Infof("11111111111 %s %s %t", item.DetailsRaw, item.TypeKey, item.TypeKey == data.TypeKeyTest)
-
-	if len(item.DetailsRaw) < 1 {
-		item.Details = nil
-		return nil
-	}
-
-	switch item.TypeKey {
-	case types.KeyString:
-		item.Details = string(item.DetailsRaw)
-
-	case data.TypeKeyTest:
-		item.Details = &data.Test{}
-		err := json.Unmarshal(item.DetailsRaw, item.Details)
-		if err != nil {
-			return errors.Wrapf(err, onDetails+"can't .Unmarshal(%#v)", item.DetailsRaw)
-		}
-
-	default:
-
-		// TODO: remove the kostyl
-		item.Details = string(item.DetailsRaw)
-
-		// return errors.Errorf(onDetails+"unknown item.TypeKey(%s) for item.DetailsRaw(%s)", item.TypeKey, item.DetailsRaw)
-
-	}
-
-	// l.Infof("11111111111 %#v", item.Details)
-
-	return nil
 }
 
 const onRemove = "on dataPg.Remove()"
@@ -390,7 +343,7 @@ func (dataOp *dataPg) List(term *selectors.Term, options *crud.GetOptions) ([]da
 		var updatedAtPtr *string
 
 		err := rows.Scan(
-			&idNum, &item.Key, &item.URL, &item.Title, &item.Summary, &embedded, &tags, &item.TypeKey, &item.DetailsRaw, &history, &updatedAtPtr, &createdAtStr,
+			&idNum, &item.Key, &item.URL, &item.Title, &item.Summary, &embedded, &tags, &item.Data.TypeKey, &item.Data.Content, &history, &updatedAtPtr, &createdAtStr,
 		)
 
 		// TODO: read updatedAt, createdAt

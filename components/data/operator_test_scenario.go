@@ -9,9 +9,7 @@ import (
 
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/crud"
-	"github.com/pavlo67/workshop/common/identity"
 	"github.com/pavlo67/workshop/common/logger"
-	"github.com/pavlo67/workshop/common/types"
 	"github.com/pavlo67/workshop/components/tagger"
 )
 
@@ -26,18 +24,6 @@ type OperatorTestCase struct {
 	//DetailsToUpdate    Test
 }
 
-type Test struct {
-	AAA string
-	BBB int
-}
-
-const TypeKeyTest identity.Key = "test"
-
-var TypeTest = types.Type{
-	Key:      TypeKeyTest,
-	Exemplar: Test{},
-}
-
 func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 	return []OperatorTestCase{
 		{
@@ -45,7 +31,6 @@ func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 			Cleaner:  cleanerOp,
 			ToSave: Item{
 				ID:      "",
-				TypeKey: "test",
 				URL:     "111111",
 				Title:   "345456",
 				Summary: "6578gj",
@@ -54,9 +39,9 @@ func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 					Summary: "3333333",
 					Tags:    []tagger.Tag{{Label: "1"}, {Label: "332343"}},
 				}},
-				Details: &Test{
-					AAA: "aaa",
-					BBB: 222,
+				Data: crud.Data{
+					TypeKey: "test",
+					Content: []byte(`{"AAA": "aaa", "BBB": 222}`),
 				},
 				Tags: []tagger.Tag{{Label: "1"}, {Label: "333"}},
 				History: []crud.Action{{
@@ -67,12 +52,11 @@ func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 
 			ToUpdate: Item{
 				URL:     "22222222",
-				TypeKey: "test",
 				Title:   "345456rt",
 				Summary: "6578eegj",
-				Details: &Test{
-					AAA: "awraa",
-					BBB: 22552,
+				Data: crud.Data{
+					TypeKey: "test",
+					Content: []byte(`{"AAA": "awraa", "BBB": 22552}`),
 				},
 				Tags: []tagger.Tag{{Label: "1"}, {Label: "333"}},
 			},
@@ -93,9 +77,6 @@ const toDeleteI = 2 // must be < numRepeats1 + numRepeats2
 func Compare(t *testing.T, dataOp Operator, readed *Item, expectedItem Item, l logger.Operator) {
 	require.NotNil(t, readed)
 
-	err := dataOp.SetDetails(readed)
-	require.NoError(t, err)
-
 	l.Infof("to be saved: %#v", expectedItem)
 	l.Infof("readed: %#v", readed)
 
@@ -103,13 +84,11 @@ func Compare(t *testing.T, dataOp Operator, readed *Item, expectedItem Item, l l
 		expectedItem.History[i].DoneAt = action.DoneAt.UTC()
 	}
 
-	expectedDetails := expectedItem.Details
-	expectedItem.Details = nil
-	expectedItem.DetailsRaw = nil
+	expectedDetails := expectedItem.Data.Content
+	expectedItem.Data.Content = nil
 
-	readedDetails := readed.Details
-	readed.Details = nil
-	readed.DetailsRaw = nil
+	readedDetails := readed.Data.Content
+	readed.Data.Content = nil
 
 	// TODO!!! check it carefully
 	readed.History = nil

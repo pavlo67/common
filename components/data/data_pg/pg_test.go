@@ -14,7 +14,7 @@ import (
 	"github.com/pavlo67/workshop/components/data"
 )
 
-const serviceName = "workspace"
+const serviceName = "gatherer"
 
 func TestCRUD(t *testing.T) {
 	env := "test"

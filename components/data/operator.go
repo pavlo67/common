@@ -24,10 +24,7 @@ type Item struct {
 	Summary  string       `bson:",omitempty"    json:",omitempty"`
 	Embedded []Item       `bson:",omitempty"    json:",omitempty"`
 	Tags     []tagger.Tag `bson:",omitempty"    json:",omitempty"`
-
-	TypeKey    identity.Key `bson:",omitempty"    json:",omitempty"`
-	DetailsRaw []byte       `bson:",omitempty"    json:",omitempty"`
-	Details    interface{}  `bson:",omitempty"    json:",omitempty"`
+	Data     crud.Data    `bson:",omitempty"    json:",omitempty"`
 
 	History crud.History `bson:",omitempty"    json:",omitempty"`
 }
@@ -37,8 +34,6 @@ type Operator interface {
 	Remove(common.ID, *crud.RemoveOptions) error
 
 	Read(common.ID, *crud.GetOptions) (*Item, error)
-	SetDetails(item *Item) error
-
 	List(*selectors.Term, *crud.GetOptions) ([]Item, error)
 	Count(*selectors.Term, *crud.GetOptions) (uint64, error)
 

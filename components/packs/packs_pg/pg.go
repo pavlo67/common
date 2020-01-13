@@ -21,7 +21,7 @@ import (
 	"github.com/pavlo67/workshop/components/packs"
 )
 
-var fieldsToInsert = []string{"identity_key", "address_from", "address_to", "options", "actor_key", "params", "history"}
+var fieldsToInsert = []string{"identity_key", "address_from", "address_to", "options", "type_key", "content", "history"}
 var fieldsToInsertStr = strings.Join(fieldsToInsert, ",")
 
 var fieldsToRead = append(fieldsToInsert, "created_at")
@@ -116,13 +116,11 @@ func (packsOp *packsPg) Save(pack *packs.Pack, _ *crud.SaveOptions) (common.ID, 
 		}
 	}
 
-	var paramsBytes []byte
-	if len(pack.Task.Params) > 0 {
-		var err error
-		paramsBytes, err = json.Marshal(pack.Task.Params)
-		if err != nil {
-			return "", errors.Wrapf(err, onSave+"can't .Marshal(.Task.Params == %#v)", pack.Task.Params)
-		}
+	var content interface{}
+	if len(pack.Data.Content) > 0 {
+		content = pack.Data.Content
+	} else {
+		content = ""
 	}
 
 	var historyBytes []byte
@@ -134,7 +132,7 @@ func (packsOp *packsPg) Save(pack *packs.Pack, _ *crud.SaveOptions) (common.ID, 
 		}
 	}
 
-	values := []interface{}{pack.Key, pack.From, toBytes, optionsBytes, pack.Task.ActorKey, paramsBytes, historyBytes}
+	values := []interface{}{pack.Key, pack.From, toBytes, optionsBytes, pack.Data.TypeKey, content, historyBytes}
 
 	var lastInsertId uint64
 	err := packsOp.stmInsert.QueryRow(values...).Scan(&lastInsertId)
@@ -159,11 +157,11 @@ func (packsOp *packsPg) Read(id common.ID, _ *crud.GetOptions) (*packs.Item, err
 
 	item := packs.Item{ID: id}
 
-	var toBytes, optionsBytes, paramsBytes, historyBytes []byte
+	var toBytes, optionsBytes, historyBytes []byte
 	var createdAtStr string
 
 	err = packsOp.stmRead.QueryRow(idNum).Scan(
-		&item.Key, &item.From, &toBytes, &optionsBytes, &item.Task.ActorKey, &paramsBytes, &historyBytes, &createdAtStr,
+		&item.Key, &item.From, &toBytes, &optionsBytes, &item.Data.TypeKey, &item.Data.Content, &historyBytes, &createdAtStr,
 	)
 	if err == sql.ErrNoRows {
 		return nil, common.ErrNotFound
@@ -183,13 +181,6 @@ func (packsOp *packsPg) Read(id common.ID, _ *crud.GetOptions) (*packs.Item, err
 		err = json.Unmarshal(optionsBytes, &item.Options)
 		if err != nil {
 			return &item, errors.Wrapf(err, onRead+"can't unmarshal .Options (%s)", optionsBytes)
-		}
-	}
-
-	if len(paramsBytes) > 0 {
-		err = json.Unmarshal(paramsBytes, &item.Task.Params)
-		if err != nil {
-			return &item, errors.Wrapf(err, onRead+"can't unmarshal .Task.Params (%s)", paramsBytes)
 		}
 	}
 
@@ -252,11 +243,11 @@ func (packsOp *packsPg) List(term *selectors.Term, options *crud.GetOptions) ([]
 		var idNum int64
 		var item packs.Item
 
-		var toBytes, optionsBytes, historyBytes, paramsBytes []byte
+		var toBytes, optionsBytes, historyBytes []byte
 		var createdAtStr string
 
 		err := rows.Scan(
-			&idNum, &item.Key, &item.From, &toBytes, &optionsBytes, &item.Task.ActorKey, &paramsBytes, &historyBytes, &createdAtStr,
+			&idNum, &item.Key, &item.From, &toBytes, &optionsBytes, &item.Data.TypeKey, &item.Data.Content, &historyBytes, &createdAtStr,
 		)
 		if err != nil {
 			return items, errors.Wrapf(err, onList+sqllib.CantScanQueryRow, query, values)
@@ -275,13 +266,6 @@ func (packsOp *packsPg) List(term *selectors.Term, options *crud.GetOptions) ([]
 			err = json.Unmarshal(optionsBytes, &item.Options)
 			if err != nil {
 				return items, errors.Wrapf(err, onList+"can't unmarshal .Options (%s)", optionsBytes)
-			}
-		}
-
-		if len(paramsBytes) > 0 {
-			err = json.Unmarshal(paramsBytes, &item.Task.Params)
-			if err != nil {
-				return items, errors.Wrapf(err, onList+"can't unmarshal .Task.Params (%s)", paramsBytes)
 			}
 		}
 

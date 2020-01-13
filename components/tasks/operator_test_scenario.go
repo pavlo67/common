@@ -20,7 +20,7 @@ type OperatorTestCase struct {
 	Operator
 	crud.Cleaner
 
-	ToSave       Task
+	ToSave       crud.Data
 	ToSetResults Result
 }
 
@@ -32,9 +32,9 @@ func TestCases(tasksOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 		{
 			Operator: tasksOp,
 			Cleaner:  cleanerOp,
-			ToSave: Task{
-				ActorKey: "wt0",
-				Params:   common.Map{"1": float64(2), "3": "4"},
+			ToSave: crud.Data{
+				TypeKey: "wt0",
+				Content: []byte(`{"1": float64(2), "3": "4"}`),
 			},
 
 			ToSetResults: Result{
@@ -55,14 +55,14 @@ const toReadI = 0       // must be < numRepeats
 const toSetResultsI = 1 // must be < numRepeats
 const toDeleteI = 2     // must be < numRepeats
 
-func ChechReaded(t *testing.T, readed *Item, expectedID common.ID, expectedTask Task, l logger.Operator) {
+func ChechReaded(t *testing.T, readed *Item, expectedID common.ID, expectedTask crud.Data, l logger.Operator) {
 	require.NotNil(t, readed)
 
 	l.Infof("was saved: %#v", expectedTask)
 	l.Infof("is readed: %#v", readed)
 
-	require.Equal(t, expectedTask, readed.Task)
-	require.Equal(t, expectedTask.Params, readed.Task.Params)
+	require.Equal(t, expectedTask, readed.Data)
+	require.Equal(t, expectedTask.Content, readed.Data.Content)
 	require.Equal(t, expectedID, readed.ID)
 	//require.True(t, readed.History.CreatedAt.After(time.Time{}))
 	//require.True(t, readed.History.CreatedAt.Before(time.Now()))
@@ -79,7 +79,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		l.Debug(i)
 
 		var id [numRepeats]common.ID
-		var toSave [numRepeats]Task
+		var toSave [numRepeats]crud.Data
 
 		// ClearDatabase ---------------------------------------------------------------------------------
 

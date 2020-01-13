@@ -47,7 +47,7 @@ func (transpOp *transportHTTP) receiveEndpoint() *server_http.Endpoint {
 			}
 
 			runnerOp, taskID, err := transpOp.runnerFactory.TaskRunner(
-				inPack.Task,
+				inPack.Data,
 				&crud.SaveOptions{History: crud.History{{Key: crud.ProducedAction, DoneAt: time.Now(), Related: &joiner.Link{InterfaceKey: packs.InterfaceKey, ID: idIn}}}},
 				transpOp,
 				&transport.Listener{
@@ -55,7 +55,7 @@ func (transpOp *transportHTTP) receiveEndpoint() *server_http.Endpoint {
 					PackKey:   inPack.Key,
 				})
 			if err != nil {
-				return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on POST ...ReceivePack (%#v): '%s'", inPack, errors.Wrap(err, "can't transpOp.runnerFactory.TaskRunner(inPack.Task)")))
+				return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on POST ...ReceivePack (%#v): '%s'", inPack, errors.Wrap(err, "can't transpOp.runnerFactory.TaskRunner(inPack.Data)")))
 			}
 
 			if taskID != "" {

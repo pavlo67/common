@@ -108,17 +108,15 @@ func New(access config.Access, table string, interfaceKey joiner.InterfaceKey) (
 
 const onSave = "on tasksPostgres.Save(): "
 
-func (tasksOp *tasksPostgres) Save(task tasks.Task, _ *crud.SaveOptions) (common.ID, error) {
-	var paramsBytes []byte
-	if task.Params != nil {
-		var err error
-		paramsBytes, err = json.Marshal(task.Params)
-		if err != nil {
-			return "", errors.Wrapf(err, onSave+"can't .Marshal(%#v)", task.Params)
-		}
+func (tasksOp *tasksPostgres) Save(task crud.Data, _ *crud.SaveOptions) (common.ID, error) {
+	var content interface{}
+	if task.Content != nil {
+		content = task.Content
+	} else {
+		content = ""
 	}
 
-	values := []interface{}{task.ActorKey, string(paramsBytes), "", ""}
+	values := []interface{}{task.TypeKey, content, "", ""}
 
 	var lastInsertId uint64
 
@@ -143,25 +141,18 @@ func (tasksOp *tasksPostgres) Read(id common.ID, _ *crud.GetOptions) (*tasks.Ite
 	}
 
 	item := tasks.Item{ID: id}
-	var status, results, params []byte
+	var status, results []byte
 	var createdAtStr string
 	var updatedAtPtr *string
 
 	err = tasksOp.stmRead.QueryRow(idNum).Scan(
-		&item.ActorKey, &params, &status, &results, &createdAtStr, &updatedAtPtr,
+		&item.TypeKey, &item.Content, &status, &results, &createdAtStr, &updatedAtPtr,
 	)
 	if err == sql.ErrNoRows {
 		return nil, common.ErrNotFound
 	}
 	if err != nil {
 		return nil, errors.Wrapf(err, onRead+sqllib.CantScanQueryRow, tasksOp.sqlRead, idNum)
-	}
-
-	if len(params) > 0 {
-		err = json.Unmarshal(params, &item.Params)
-		if err != nil {
-			return &item, errors.Wrapf(err, onRead+"can't unmarshal .Params (%s)", params)
-		}
 	}
 
 	if len(status) > 0 {
@@ -235,22 +226,15 @@ func (tasksOp *tasksPostgres) List(term *selectors.Term, options *crud.GetOption
 	for rows.Next() {
 		var idNum int64
 		var item tasks.Item
-		var status, results, params []byte
+		var status, results []byte
 		var createdAtStr string
 		var updatedAtPtr *string
 
 		err := rows.Scan(
-			&idNum, &item.ActorKey, &params, &status, &results, &createdAtStr, &updatedAtPtr,
+			&idNum, &item.TypeKey, &item.Content, &status, &results, &createdAtStr, &updatedAtPtr,
 		)
 		if err != nil {
 			return items, errors.Wrapf(err, onList+sqllib.CantScanQueryRow, query, values)
-		}
-
-		if len(params) > 0 {
-			err = json.Unmarshal(params, &item.Params)
-			if err != nil {
-				return items, errors.Wrapf(err, onList+"can't unmarshal .Params (%s)", params)
-			}
 		}
 
 		if len(status) > 0 {

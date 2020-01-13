@@ -31,5 +31,9 @@ type Operator interface {
 
 type Factory interface {
 	ItemRunner(item tasks.Item, saveOptions *crud.SaveOptions, transportOp transport.Operator, listener *transport.Listener) (Operator, error)
-	TaskRunner(task tasks.Task, saveOptions *crud.SaveOptions, transportOp transport.Operator, listener *transport.Listener) (Operator, common.ID, error)
+	TaskRunner(task crud.Data, saveOptions *crud.SaveOptions, transportOp transport.Operator, listener *transport.Listener) (Operator, common.ID, error)
+}
+
+func DataInterfaceKey(key crud.TypeKey) joiner.InterfaceKey {
+	return joiner.InterfaceKey("actor for " + string(key))
 }

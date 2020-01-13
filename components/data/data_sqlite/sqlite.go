@@ -1,5 +1,7 @@
 package data_sqlite
 
+// TODO!!! fix according to new data structures
+
 import (
 	"database/sql"
 	"encoding/json"

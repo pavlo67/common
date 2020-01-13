@@ -42,21 +42,16 @@ type Status struct {
 	Timing `bson:",inline" json:",inline"`
 }
 
-type Task struct {
-	ActorKey joiner.InterfaceKey `bson:",omitempty" json:",omitempty"`
-	Params   common.Map          `bson:"-"          json:",omitempty"`
-}
-
 type Item struct {
-	Task    `             bson:",inline"       json:",inline"`
-	Status  `             bson:",inline"       json:",inline"`
-	ID      common.ID    `bson:"_id,omitempty" json:",omitempty"`
-	Results []Result     `bson:",omitempty"    json:",omitempty"`
-	History crud.History `bson:",omitempty"    json:",omitempty"`
+	crud.Data `             bson:",inline"       json:",inline"`
+	Status    `             bson:",inline"       json:",inline"`
+	ID        common.ID    `bson:"_id,omitempty" json:",omitempty"`
+	Results   []Result     `bson:",omitempty"    json:",omitempty"`
+	History   crud.History `bson:",omitempty"    json:",omitempty"`
 }
 
 type Operator interface {
-	Save(Task, *crud.SaveOptions) (common.ID, error)
+	Save(crud.Data, *crud.SaveOptions) (common.ID, error)
 	Remove(common.ID, *crud.RemoveOptions) error
 	Read(common.ID, *crud.GetOptions) (*Item, error)
 	List(*selectors.Term, *crud.GetOptions) ([]Item, error)

@@ -249,7 +249,7 @@ func OperatorTestScenario(t *testing.T, testCases []TestCase, cleanerOp crud.Cle
 //}
 //
 //func Hash(li Linked) string {
-//	return li.ObjectID + " " + li.ActorKey + " " + li.LinkedID + " " + li.LinkedType + " " + li.Tag
+//	return li.ObjectID + " " + li.TypeKey + " " + li.LinkedID + " " + li.LinkedType + " " + li.Tag
 //}
 //
 //type byLinked []Linked

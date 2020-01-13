@@ -5,8 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/pavlo67/workshop/components/tasks"
-
 	"github.com/stretchr/testify/require"
 
 	"github.com/pavlo67/workshop/common"
@@ -36,9 +34,9 @@ func TestCases(PacksOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 				From:    "test_key2",
 				To:      identity.Key("qwerwqer"),
 				Options: common.Map{"1": float64(2)},
-				Task: tasks.Task{
-					ActorKey: "no_type",
-					Params:   common.Map{"6": ";klj"},
+				Data: crud.Data{
+					TypeKey: "no_type",
+					Content: []byte(`{"6": ";klj"}`),
 				},
 				History: crud.History{},
 			},

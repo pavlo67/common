@@ -6,7 +6,6 @@ import (
 	"github.com/pavlo67/workshop/common/identity"
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/selectors"
-	"github.com/pavlo67/workshop/components/tasks"
 )
 
 const InterfaceKey joiner.InterfaceKey = "packs"
@@ -21,7 +20,7 @@ type Pack struct {
 	To      identity.Key `bson:",omitempty" json:",omitempty"`
 	Options common.Map   `bson:",omitempty" json:",omitempty"`
 
-	Task tasks.Task `bson:",omitempty" json:",omitempty"`
+	Data crud.Data `bson:",omitempty" json:",omitempty"`
 
 	History crud.History `bson:",omitempty" json:",omitempty"`
 }

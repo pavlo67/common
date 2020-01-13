@@ -1,8 +1,8 @@
 package flowcopier
 
 import (
+	"github.com/pavlo67/workshop/common/crud"
 	"github.com/pavlo67/workshop/components/runner"
-	"github.com/pavlo67/workshop/components/tasks"
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
@@ -68,7 +68,7 @@ func (it *copyTask) Run() (info common.Map, posterior []joiner.Link, err error) 
 	return nil, nil, err
 }
 
-func (it *copyTask) Report() (*tasks.Task, error) {
+func (it *copyTask) Report() (*crud.Data, error) {
 	return nil, common.ErrNotImplemented
 }
 

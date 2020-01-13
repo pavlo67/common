@@ -1,7 +1,10 @@
 package taskqueue
 
 import (
+	"encoding/json"
 	"time"
+
+	"github.com/pavlo67/workshop/common"
 
 	"github.com/pavlo67/workshop/components/runner"
 
@@ -42,7 +45,7 @@ func Process(tasksOp tasks.Operator, joinerOp joiner.Operator, l logger.Operator
 		numOmitted = 0
 
 		for _, item := range items {
-			workerOp, ok := joinerOp.Interface(item.ActorKey).(runner.Actor)
+			workerOp, ok := joinerOp.Interface(item.TypeKey).(runner.Actor)
 			if !ok {
 				l.Errorf("no worker.Actor for task (%#v)", item)
 				time.Sleep(timeToWait)
@@ -56,20 +59,32 @@ func Process(tasksOp tasks.Operator, joinerOp joiner.Operator, l logger.Operator
 				continue
 			}
 
-			_, err := workerOp.Init(item.Task.Params)
+			var params common.Map
+			err = json.Unmarshal(item.Data.Content, &params)
 			if err != nil {
-				l.Errorf("on workerOp.Init(item.Task.Params) for item (%#v): %s", item, err)
+				l.Errorf("on json.Unmarshal(item.Data.Content, &params) for item (%#v): %s", item, err)
+			}
+
+			_, err := workerOp.Init(params)
+			if err != nil {
+				l.Errorf("on workerOp.Init(item.Data.Content) for item (%#v): %s", item, err)
 			}
 
 			// TODO!!! use goroutines
-			posterior, err := workerOp.Run()
+			info, posterior, err := workerOp.Run()
 			if err != nil {
 				l.Errorf("on workerOp.Run() for task (%#v): %s", item, err)
 			}
 
+			var errStr string
+			if err != nil {
+				errStr = err.Error()
+			}
+
 			result := tasks.Result{
 				// Timing: will be set automatically
-				ErrStr:    err,
+				ErrStr:    errStr,
+				Info:      info,
 				Posterior: posterior,
 			}
 			err = tasksOp.Finish(item.ID, result, nil)

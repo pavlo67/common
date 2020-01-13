@@ -116,7 +116,7 @@ func (s *serverHTTPJschmhr) HandleFiles(key, serverPath string, staticPath serve
 		w.Header().Set("Access-Control-Allow-Headers", server_http.CORSAllowHeaders)
 		w.Header().Set("Access-Control-Allow-Methods", server_http.CORSAllowMethods)
 		w.Header().Set("Access-Control-Allow-Credentials", server_http.CORSAllowCredentials)
-		w.Header().Set("Content-ActorKey", *staticPath.MIMEType)
+		w.Header().Set("Content-TypeKey", *staticPath.MIMEType)
 		OpenFile, err := os.Open(staticPath.LocalPath + "/" + p.ByName("filepath"))
 		defer OpenFile.Close()
 		if err != nil {
@@ -139,10 +139,10 @@ func (s *serverHTTPJschmhr) HandleFiles(key, serverPath string, staticPath serve
 // }
 
 //func (s *serverHTTPJschmhr) HandleGetString(serverRoute, str string, mimeType *string) {
-//	s.handleFunc("GET", serverRoute, func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+//	s.handleFunc("GET", serverRoute, func(w http.ResponseWriter, r *http.Request, params httprouter.Content) {
 //		if mimeType != nil {
 //			// "application/javascript"
-//			w.Header().Set("Content-ActorKey", *mimeType)
+//			w.Header().Set("Content-TypeKey", *mimeType)
 //		}
 //		w.Write([]byte(str))
 //	})
@@ -182,7 +182,7 @@ func (s *serverHTTPJschmhr) HandleEndpoint(key, serverPath string, endpoint serv
 			}
 		}
 
-		//var params server_http.Params
+		//var params server_http.Content
 		//if len(paramsHR) > 0 {
 		//	for _, p := range paramsHR {
 		//		params = append(params, server_http.Param{Name: p.ID, Left: p.Left})
@@ -200,7 +200,7 @@ func (s *serverHTTPJschmhr) HandleEndpoint(key, serverPath string, endpoint serv
 			http.Error(w, err.Error(), responseData.Status)
 			return
 		}
-		w.Header().Set("Content-ActorKey", responseData.MIMEType)
+		w.Header().Set("Content-TypeKey", responseData.MIMEType)
 		w.Header().Set("Content-Length", strconv.Itoa(len(responseData.Data)))
 		if responseData.FileName != "" {
 			w.Header().Set("Content-Disposition", "attachment; filename="+responseData.FileName)

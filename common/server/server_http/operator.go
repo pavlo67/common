@@ -31,9 +31,9 @@ type Operator interface {
 //	Left string
 //}
 //
-//type Params []Param
+//type Content []Param
 //
-//func (p Params) ByName(name string) string {
+//func (p Content) ByName(name string) string {
 //	for i := range p {
 //		if p[i].Name == name {
 //			return p[i].Left
@@ -42,7 +42,7 @@ type Operator interface {
 //	return ""
 //}
 //
-//func (p Params) ByNum(num uint) string {
+//func (p Content) ByNum(num uint) string {
 //	if int(num) >= len(p) {
 //		return ""
 //	}

@@ -27,7 +27,7 @@ func TestInterface(t *testing.T) {
 //func TestComponentsAll(t *testing.T) {
 //	joiner := New()
 //
-//	const textA1 = "StructA.ActorKey()"
+//	const textA1 = "StructA.TypeKey()"
 //	const keyA1 HandlerKey = "KeyA1"
 //	structA1 := &StructA{text: textA1}
 //	structA3 := &StructA{text: textA1}
@@ -65,7 +65,7 @@ func TestInterface(t *testing.T) {
 func TestComponentsAllWithSignature(t *testing.T) {
 	joiner := New()
 
-	const textA1 = "StructA.ActorKey()"
+	const textA1 = "StructA.TypeKey()"
 	const keyA1 InterfaceKey = "KeyA1"
 	structA1 := &StructA{text: textA1}
 
@@ -103,7 +103,7 @@ func TestComponentsAllWithSignature(t *testing.T) {
 func TestCloseAll(t *testing.T) {
 	joiner := New()
 
-	const textA1 = "StructA.ActorKey()"
+	const textA1 = "StructA.TypeKey()"
 	const keyA1 InterfaceKey = "KeyA1"
 	structA1 := &StructA{text: textA1}
 
@@ -145,7 +145,7 @@ var _ Closer = &StructA{}
 
 func (s *StructA) ActionA() string {
 	s.NumActionA++
-	fmt.Println("StructA.ActorKey()")
+	fmt.Println("StructA.TypeKey()")
 	return s.text
 }
 
@@ -170,8 +170,8 @@ var _ Closer = &StructB{}
 
 func (s *StructB) ActionB() string {
 	s.NumActionB++
-	fmt.Println("StructB.ActorKey()")
-	return "StructB.ActorKey()"
+	fmt.Println("StructB.TypeKey()")
+	return "StructB.TypeKey()"
 }
 
 func (s *StructB) Close() error {

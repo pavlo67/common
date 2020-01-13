@@ -1,6 +1,7 @@
 package runner_factory
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/pkg/errors"
@@ -37,20 +38,20 @@ type runnerFactory struct {
 
 func (rf runnerFactory) ItemRunner(item tasks.Item, saveOptions *crud.SaveOptions, transportOp transport.Operator, listener *transport.Listener) (runner.Operator, error) {
 	if transportOp == nil {
-		return nil, errors.Errorf("on runnerFactory.ItemRunner(): no transport.Operator for task(%#v)", item)
+		return nil, errors.Errorf("on runnerFactory.ItemRunner(): no transport.Operator for data(%#v)", item)
 	}
 
 	// TODO!!! check if listener is valid
 
-	actor, ok := rf.joinerOp.Interface(item.ActorKey).(runner.Actor)
+	actor, ok := rf.joinerOp.Interface(runner.DataInterfaceKey(item.TypeKey)).(runner.Actor)
 	if !ok {
-		return nil, errors.Errorf("on runnerFactory.ItemRunner(): no runner.Actor with key %s to init new runner for task(%#v)", item.ActorKey, item)
+		return nil, errors.Errorf("on runnerFactory.ItemRunner(): no runner.Actor with key %s to init new runner for data(%#v)", item.TypeKey, item)
 	}
 
 	return &runnerOp{
 		tasksOp: rf.tasksOp,
 		taskID:  item.ID,
-		task:    item.Task,
+		data:    item.Data,
 		actor:   actor,
 
 		transportOp: transportOp,
@@ -59,27 +60,27 @@ func (rf runnerFactory) ItemRunner(item tasks.Item, saveOptions *crud.SaveOption
 
 }
 
-func (rf runnerFactory) TaskRunner(task tasks.Task, saveOptions *crud.SaveOptions, transportOp transport.Operator, listener *transport.Listener) (runner.Operator, common.ID,
+func (rf runnerFactory) TaskRunner(data crud.Data, saveOptions *crud.SaveOptions, transportOp transport.Operator, listener *transport.Listener) (runner.Operator, common.ID,
 	error) {
 	if transportOp == nil && listener != nil {
-		return nil, "", errors.Errorf("on runnerFactory.TaskRunner(): no transport.Operator for task(%#v) with listener (%#v)", task, *listener)
+		return nil, "", errors.Errorf("on runnerFactory.TaskRunner(): no transport.Operator for data(%#v) with listener (%#v)", data, *listener)
 	}
 
 	// TODO!!! check if listener is valid
 
-	actor, ok := rf.joinerOp.Interface(task.ActorKey).(runner.Actor)
+	actor, ok := rf.joinerOp.Interface(runner.DataInterfaceKey(data.TypeKey)).(runner.Actor)
 	if !ok {
-		return nil, "", errors.Errorf("on runnerFactory.TaskRunner(): no runner.Actor with key %s to init new runner for task(%#v)", task.ActorKey, task)
+		return nil, "", errors.Errorf("on runnerFactory.TaskRunner(): no runner.Actor with key %s to init new runner for data(%#v)", data.TypeKey, data)
 	}
 
-	id, err := rf.tasksOp.Save(task, saveOptions)
+	id, err := rf.tasksOp.Save(data, saveOptions)
 	if err != nil {
-		return nil, "", errors.Errorf("on runnerFactory.TaskRunner(): can'trf.tasksOp.Save(%#v, nil): %s", task, err)
+		return nil, "", errors.Errorf("on runnerFactory.TaskRunner(): can'trf.tasksOp.Save(%#v, nil): %s", data, err)
 	}
 	return &runnerOp{
 		tasksOp: rf.tasksOp,
 		taskID:  id,
-		task:    task,
+		data:    data,
 		actor:   actor,
 
 		transportOp: transportOp,
@@ -94,7 +95,7 @@ var _ runner.Operator = &runnerOp{}
 type runnerOp struct {
 	tasksOp tasks.Operator
 	taskID  common.ID
-	task    tasks.Task
+	data    crud.Data
 	actor   runner.Actor
 
 	transportOp transport.Operator
@@ -108,9 +109,18 @@ func (r runnerOp) Run() (estimate *runner.Estimate, err error) {
 		return nil, errors.New(onRun + "no runnerOp.actor")
 	}
 
-	estimate, err = r.actor.Init(r.task.Params)
+	var params common.Map
+	err = json.Unmarshal(r.data.Content, &params)
 	if err != nil {
-		err1 := r.tasksOp.Finish(r.taskID, tasks.Result{ErrStr: err.Error()}, nil)
+		err1 := r.tasksOp.Finish(r.taskID, tasks.Result{ErrStr: "on json.Unmarshal(r.data.Content, &params): " + err.Error()}, nil)
+		if err1 != nil {
+			err = errors.Wrap(err, err1.Error())
+		}
+	}
+
+	estimate, err = r.actor.Init(params)
+	if err != nil {
+		err1 := r.tasksOp.Finish(r.taskID, tasks.Result{ErrStr: "on r.actor.Init(params): " + err.Error()}, nil)
 		if err1 != nil {
 			err = errors.Wrap(err, err1.Error())
 		}
@@ -138,13 +148,13 @@ func (r runnerOp) runOnly() {
 		l.Error(err1) // TODO: wrap it
 	}
 
-	var task *tasks.Task
+	var task *crud.Data
 
 	response := info["response"]
 	switch v := response.(type) {
-	case tasks.Task:
+	case crud.Data:
 		task = &v
-	case *tasks.Task:
+	case *crud.Data:
 		task = v
 	}
 
@@ -153,7 +163,7 @@ func (r runnerOp) runOnly() {
 			From:    "", // TODO ???
 			To:      r.listener.SenderKey,
 			Options: nil,
-			Task:    *task,
+			Data:    *task,
 			History: crud.History{
 				{Key: crud.ProducedAction, Related: &joiner.Link{InterfaceKey: packs.InterfaceKey, Key: r.listener.PackKey}},
 				{Key: crud.ProducedAction, Related: &joiner.Link{InterfaceKey: tasks.InterfaceKey, ID: r.taskID}, DoneAt: time.Now()},

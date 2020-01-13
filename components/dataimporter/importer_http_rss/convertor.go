@@ -7,7 +7,6 @@ import (
 
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/crud"
-	"github.com/pavlo67/workshop/common/types"
 
 	"github.com/pavlo67/workshop/components/data"
 	"github.com/pavlo67/workshop/components/dataimporter"
@@ -51,7 +50,7 @@ func (item *Item) GetData() (*data.Item, error) {
 
 	if feedItem.Image != nil {
 		embedded = append(embedded, data.Item{
-			TypeKey: types.KeyHRefImage,
+			Data:    crud.Data{TypeKey: crud.KeyHRefImage},
 			URL:     feedItem.Image.URL,
 			Title:   feedItem.Image.Title,
 			History: history,
@@ -61,7 +60,7 @@ func (item *Item) GetData() (*data.Item, error) {
 	if len(feedItem.Enclosures) > 0 {
 		for _, p := range feedItem.Enclosures {
 			embedded = append(embedded, data.Item{
-				TypeKey: types.KeyHRef,
+				Data:    crud.Data{TypeKey: crud.KeyHRef},
 				URL:     p.URL,
 				Title:   p.Type + ": " + p.Length,
 				History: history,
@@ -77,12 +76,11 @@ func (item *Item) GetData() (*data.Item, error) {
 	var dataItem = data.Item{
 		Key:      key,
 		URL:      feedItem.Link,
-		TypeKey:  types.KeyString,
+		Data:     crud.Data{TypeKey: crud.KeyString, Content: []byte(feedItem.Content)},
 		Title:    feedItem.Title,
 		Summary:  feedItem.Description,
 		Embedded: embedded,
 		Tags:     items,
-		Details:  feedItem.Content,
 		History:  history,
 	}
 
