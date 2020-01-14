@@ -1,8 +1,10 @@
-package runner_factory
+package runner_factory_goroutine
 
 import (
 	"encoding/json"
 	"time"
+
+	"github.com/pavlo67/workshop/components/runner_factory"
 
 	"github.com/pkg/errors"
 
@@ -16,7 +18,7 @@ import (
 	"github.com/pavlo67/workshop/components/transport"
 )
 
-func New(tasksOp tasks.Operator, joinerOp joiner.Operator) (runner.Factory, error) {
+func New(tasksOp tasks.Operator, joinerOp joiner.Operator) (runner_factory.Factory, error) {
 	if joinerOp == nil {
 		return nil, errors.New("no joiner.Operator to create runner.Factory")
 	}
@@ -29,15 +31,15 @@ func New(tasksOp tasks.Operator, joinerOp joiner.Operator) (runner.Factory, erro
 
 // runner.Factory -------------------------------------------------------------------
 
-var _ runner.Factory = &runnerFactory{}
+var _ runner_factory.Factory = &runnerFactory{}
 
 type runnerFactory struct {
 	joinerOp joiner.Operator
 	tasksOp  tasks.Operator
 }
 
-func (rf runnerFactory) ItemRunner(item tasks.Item, saveOptions *crud.SaveOptions, transportOp transport.Operator, listener *transport.Listener) (runner.Operator, error) {
-	if transportOp == nil {
+func (rf runnerFactory) ItemRunner(item tasks.Item, saveOptions *crud.SaveOptions, transpOp transport.Operator, listener *transport.Listener) (runner.Operator, error) {
+	if transpOp == nil {
 		return nil, errors.Errorf("on runnerFactory.ItemRunner(): no transport.Operator for data(%#v)", item)
 	}
 
@@ -54,15 +56,15 @@ func (rf runnerFactory) ItemRunner(item tasks.Item, saveOptions *crud.SaveOption
 		data:    item.Data,
 		actor:   actor,
 
-		transportOp: transportOp,
+		transportOp: transpOp,
 		listener:    listener,
 	}, nil
 
 }
 
-func (rf runnerFactory) TaskRunner(data crud.Data, saveOptions *crud.SaveOptions, transportOp transport.Operator, listener *transport.Listener) (runner.Operator, common.ID,
+func (rf runnerFactory) TaskRunner(data crud.Data, saveOptions *crud.SaveOptions, transpOp transport.Operator, listener *transport.Listener) (runner.Operator, common.ID,
 	error) {
-	if transportOp == nil && listener != nil {
+	if transpOp == nil && listener != nil {
 		return nil, "", errors.Errorf("on runnerFactory.TaskRunner(): no transport.Operator for data(%#v) with listener (%#v)", data, *listener)
 	}
 
@@ -83,7 +85,7 @@ func (rf runnerFactory) TaskRunner(data crud.Data, saveOptions *crud.SaveOptions
 		data:    data,
 		actor:   actor,
 
-		transportOp: transportOp,
+		transportOp: transpOp,
 		listener:    listener,
 	}, id, nil
 }
@@ -117,6 +119,8 @@ func (r runnerOp) Run() (estimate *runner.Estimate, err error) {
 			err = errors.Wrap(err, err1.Error())
 		}
 	}
+
+	l.Info("at runnerOp.Run(): %s --> %#v", r.data.Content, params)
 
 	estimate, err = r.actor.Init(params)
 	if err != nil {

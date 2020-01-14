@@ -160,7 +160,7 @@ func OperatorTestScenario(t *testing.T, testCases []TestCase, cleanerOp crud.Cle
 //func prepareTest(t *testing.T, operator Actor, settaggerSteps []SettaggerStep) {
 //	// ClearDatabase ------------------------------------------------------------------------------------
 //
-//	//err := factory.go.Clean()
+//	//err := goroutine.go.Clean()
 //	//require.NoError(t, err, "what is the error on .Clean()?")
 //
 //	// test Settagger --------------------------------------------------------------------------------------

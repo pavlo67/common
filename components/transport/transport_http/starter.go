@@ -2,6 +2,7 @@ package transport_http
 
 import (
 	"github.com/pavlo67/workshop/components/runner"
+	"github.com/pavlo67/workshop/components/runner_factory"
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
@@ -58,7 +59,7 @@ func (th *transportHTTPStarter) Run(joinerOp joiner.Operator) error {
 		return errors.Errorf("no packs.Actor with key %s", packs.InterfaceKey)
 	}
 
-	runnerFactory, ok := joinerOp.Interface(runner.FactoryInterfaceKey).(runner.Factory)
+	runnerFactory, ok := joinerOp.Interface(runner.FactoryInterfaceKey).(runner_factory.Factory)
 	if !ok {
 		return errors.Errorf("no runner.Factory with key %s", runner.FactoryInterfaceKey)
 	}

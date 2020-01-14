@@ -31,20 +31,24 @@ func (transpOp *transportHTTP) receiveEndpoint() *server_http.Endpoint {
 		WorkerHTTP: func(_ *auth.User, _ server_http.Params, req *http.Request) (server.Response, error) {
 			var inPack packs.Pack
 
-			packJSON, err := ioutil.ReadAll(req.Body)
+			// TODO??? use request path
+
+			inPackBytes, err := ioutil.ReadAll(req.Body)
 			if err != nil {
 				return server.ResponseRESTError(http.StatusBadRequest, errors.Errorf("ERROR on POST ...ReceivePack: reading body: %s", err))
 			}
 
-			err = json.Unmarshal(packJSON, &inPack)
+			err = json.Unmarshal(inPackBytes, &inPack)
 			if err != nil {
-				return server.ResponseRESTError(http.StatusBadRequest, errors.Errorf("ERROR on POST ...ReceivePack: can't json.Unmarshal(%s): %s", packJSON, err))
+				return server.ResponseRESTError(http.StatusBadRequest, errors.Errorf("ERROR on POST ...ReceivePack: can't json.Unmarshal(%s): %s", inPackBytes, err))
 			}
 
 			idIn, err := transpOp.packsOp.Save(&inPack, nil)
 			if err != nil {
 				return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on POST ...ReceivePack (%#v): '%s'", inPack, errors.Wrap(err, "can't transpOp.packsOp.Save(&inPack, nil)")))
 			}
+
+			l.Infof("RECEIVER received: %s --> %#v / %s", inPackBytes, inPack, inPack.Data.Content)
 
 			runnerOp, taskID, err := transpOp.runnerFactory.TaskRunner(
 				inPack.Data,

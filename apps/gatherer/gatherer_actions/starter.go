@@ -51,7 +51,7 @@ func (gs *gathererStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Op
 		return nil, fmt.Errorf("no logger for %s:-(", gs.Name())
 	}
 
-	gs.importerTaskKey = joiner.InterfaceKey(options.StringDefault("importer_task_key", string(flow.ImporterTaskInterfaceKey)))
+	gs.importerTaskKey = joiner.InterfaceKey(options.StringDefault("importer_task_key", "")) // string(flow.ImporterTaskInterfaceKey)
 	gs.importerImmediately = options.IsTrue("import_immediately")
 	gs.receiverHandlerKey = joiner.InterfaceKey(options.StringDefault("receiver_handler_key", string(transport.HandlerInterfaceKey)))
 	gs.cleanerTaskKey = joiner.InterfaceKey(options.StringDefault("cleaner_task_key", string(flow.CleanerTaskInterfaceKey)))
@@ -68,24 +68,29 @@ func (gs *gathererStarter) Run(joinerOp joiner.Operator) error {
 
 	// scheduling importer task
 
-	impTaskOp, ok := joinerOp.Interface(gs.importerTaskKey).(runner.Actor)
-	if !ok {
-		l.Fatalf("no actor.Actor with key %s", gs.importerTaskKey)
-	}
+	var ok bool
+	var impTaskOp runner.Actor
 
-	schOp, ok := joinerOp.Interface(scheduler.InterfaceKey).(scheduler.Operator)
-	if !ok {
-		l.Fatalf("no scheduler.Actor with key %s", scheduler.InterfaceKey)
-	}
+	if gs.importerTaskKey != "" {
+		impTaskOp, ok = joinerOp.Interface(gs.importerTaskKey).(runner.Actor)
+		if !ok {
+			l.Fatalf("no actor.Actor with key %s", gs.importerTaskKey)
+		}
 
-	taskID, err := schOp.Init(impTaskOp)
-	if err != nil {
-		l.Fatalf("can't schOp.Init(%#v): %s", impTaskOp, err)
-	}
+		schOp, ok := joinerOp.Interface(scheduler.InterfaceKey).(scheduler.Operator)
+		if !ok {
+			l.Fatalf("no scheduler.Actor with key %s", scheduler.InterfaceKey)
+		}
 
-	err = schOp.Run(taskID, importPeriod, gs.importerImmediately)
-	if err != nil {
-		l.Fatalf("can't schOp.Run(%s, %d, %t): %s", taskID, importPeriod, gs.importerImmediately, err)
+		taskID, err := schOp.Init(impTaskOp)
+		if err != nil {
+			l.Fatalf("can't schOp.Init(%#v): %s", impTaskOp, err)
+		}
+
+		err = schOp.Run(taskID, importPeriod, gs.importerImmediately)
+		if err != nil {
+			l.Fatalf("can't schOp.Run(%s, %d, %t): %s", taskID, importPeriod, gs.importerImmediately, err)
+		}
 	}
 
 	// scheduling cleaner task
@@ -119,11 +124,11 @@ func (gs *gathererStarter) Run(joinerOp joiner.Operator) error {
 	cfg := server_http.Config{
 		Title:     "Pavlo's Gatherer REST API",
 		Version:   "0.0.1",
-		Prefix:    "/gatherer",
+		Prefix:    "",
 		Endpoints: endpoints,
 	}
 
-	err = server_http.InitEndpointsWithSwaggerV2(
+	err := server_http.InitEndpointsWithSwaggerV2(
 		cfg,
 		":"+strconv.Itoa(srvPort),
 		srvOp,

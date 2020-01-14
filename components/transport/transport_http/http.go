@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pavlo67/workshop/components/runner"
+	"github.com/pavlo67/workshop/components/runner_factory"
 
 	"github.com/pkg/errors"
 
@@ -21,7 +21,7 @@ var _ transport.Operator = &transportHTTP{}
 
 type transportHTTP struct {
 	packsOp       packs.Operator
-	runnerFactory runner.Factory
+	runnerFactory runner_factory.Factory
 	routerOp      transportrouter.Operator
 
 	domain identity.Domain
@@ -41,7 +41,7 @@ const maxResponseDuration = time.Second * 30
 
 const onNew = "on sender_http.New(): "
 
-func New(packsOp packs.Operator, runnerFactory runner.Factory, routerOp transportrouter.Operator, domain identity.Domain) (transport.Operator, *server_http.Endpoint, error) {
+func New(packsOp packs.Operator, runnerFactory runner_factory.Factory, routerOp transportrouter.Operator, domain identity.Domain) (transport.Operator, *server_http.Endpoint, error) {
 	if packsOp == nil {
 		return nil, nil, errors.New(onNew + "no packs.Actor")
 	}

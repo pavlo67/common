@@ -4,6 +4,10 @@ import (
 	"os"
 	"testing"
 
+	"github.com/pavlo67/workshop/common/scheduler/scheduler_timeout"
+	"github.com/pavlo67/workshop/components/runner_factory/runner_factory_goroutine"
+	"github.com/pavlo67/workshop/components/tasks/tasks_pg"
+
 	"github.com/stretchr/testify/require"
 
 	"github.com/pavlo67/workshop/common"
@@ -17,9 +21,7 @@ import (
 	"github.com/pavlo67/workshop/common/starter"
 
 	"github.com/pavlo67/workshop/components/packs/packs_pg"
-	"github.com/pavlo67/workshop/components/receiver"
 	"github.com/pavlo67/workshop/components/transport"
-	"github.com/pavlo67/workshop/components/transport/transport_http"
 	"github.com/pavlo67/workshop/components/transportrouter/transportrouter_stub"
 
 	"github.com/pavlo67/workshop/apps/gatherer/gatherer_actions"
@@ -68,16 +70,18 @@ func TestReceiverServerHTTP(t *testing.T) {
 		{auth_ecdsa.Starter(), nil},
 
 		// action managers
+		{tasks_pg.Starter(), nil},
+		{runner_factory_goroutine.Starter(), nil},
+		{scheduler_timeout.Starter(), nil},
 		{server_http_jschmhr.Starter(), common.Map{"port": port}},
 
 		// transport system
 		{packs_pg.Starter(), nil},
 		{transportrouter_stub.Starter(), nil},
-		{transport_http.Starter(), nil},
-		{Starter(), common.Map{"handler_key": receiver.HandlerInterfaceKey}},
+		{Starter(), common.Map{"handler_key": transport.HandlerInterfaceKey, "domain": serviceName}},
 
 		{gatherer_actions.Starter(), common.Map{
-			"receiver_handler_key": receiver.HandlerInterfaceKey,
+			"receiver_handler_key": transport.HandlerInterfaceKey,
 		}},
 	}
 
@@ -85,13 +89,11 @@ func TestReceiverServerHTTP(t *testing.T) {
 	require.NoError(t, err)
 	defer joinerOp.CloseAll()
 
-	receiverOp, ok := joinerOp.Interface(receiver.InterfaceKey).(receiver.Operator)
+	transpOp, ok := joinerOp.Interface(transport.InterfaceKey).(transport.Operator)
 	require.True(t, ok)
-	require.NotNil(t, receiverOp)
+	require.NotNil(t, transpOp)
 
-	senderOp, ok := joinerOp.Interface(transport.InterfaceKey).(transport.Operator)
-	require.True(t, ok)
-	require.NotNil(t, senderOp)
+	transport.OperatorTestScenario(t, joinerOp, transpOp, l)
 
-	receiver.OperatorTestScenario(t, receiverOp, senderOp, l)
+	gatherer_actions.WG.Wait()
 }

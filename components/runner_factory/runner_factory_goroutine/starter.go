@@ -1,8 +1,6 @@
-package runner_factory
+package runner_factory_goroutine
 
 import (
-	"github.com/pavlo67/workshop/components/runner"
-	"github.com/pavlo67/workshop/components/tasks"
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
@@ -10,6 +8,9 @@ import (
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/starter"
+
+	"github.com/pavlo67/workshop/components/runner"
+	"github.com/pavlo67/workshop/components/tasks"
 )
 
 func Starter() starter.Operator {

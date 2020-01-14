@@ -49,6 +49,8 @@ func (transpOp *transportHTTP) SendOnly(pack *packs.Pack, to identity.Key) (inPa
 		return nil, nil, errs.Err()
 	}
 
+	l.Infof("SENDER sent: %s", packBytes)
+
 	now := time.Now()
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(packBytes))
 	if err != nil {

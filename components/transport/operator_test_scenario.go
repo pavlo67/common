@@ -1,19 +1,29 @@
 package transport
 
 import (
+	"encoding/json"
+	"errors"
 	"os"
+	"reflect"
 	"testing"
+	"time"
 
-	"github.com/pavlo67/workshop/common/identity"
+	"github.com/stretchr/testify/require"
+
+	"github.com/pavlo67/workshop/common"
+	"github.com/pavlo67/workshop/common/crud"
+	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/logger"
+
+	"github.com/pavlo67/workshop/components/packs"
+	"github.com/pavlo67/workshop/components/runner"
 )
 
 //type OperatorTestCase struct {
-//	Actor
 //}
-//
-//var createdAt = time.Now().UTC()
-//
+
+var createdAt = time.Now().UTC()
+
 //func TestCases(PacksOp Actor, cleanerOp crud.Cleaner) []OperatorTestCase {
 //	return []OperatorTestCase{
 //		{
@@ -40,45 +50,118 @@ import (
 //	}
 //}
 
-func OperatorTestScenario(t *testing.T, transpOp Operator, l logger.Operator) {
+const typeKeyTest crud.TypeKey = "test"
+const typeKeyTestResponse crud.TypeKey = "test_response"
+
+var paramsToTest = common.Map{
+	"aa": "bb",
+	"cc": float64(5),
+}
+
+var paramsToTestBytes, _ = json.Marshal(paramsToTest)
+
+func OperatorTestScenario(t *testing.T, joinerOp joiner.Operator, transpOp Operator, l logger.Operator) {
 	if env, ok := os.LookupEnv("ENV"); !ok || env != "test" {
 		t.Fatal("No test environment!!!")
 	}
 
-	////for i, tc := range testCases {
-	////	l.Debug(i)
-	////}
-	//
-	//transpOp.AddHandler("", TestTypeKey, &handlerEcho{})
-	//
-	//packOut := packs.Pack{
-	//	Key:     "test1",
-	//	From:    "test2",
-	//	To:      identity.Key("gatherer_transport/aaa"),
-	//	TypeKey: TestTypeKey,
-	//	Content: map[string]interface{}{"aaa": "bbb"},
+	//for i, tc := range testCases {
+	//	l.Debug(i)
 	//}
-	//
-	//_, packIn, err := transpOp.Send(&packOut)
-	//require.NoError(t, err)
-	//require.NotNil(t, packIn)
-	//
-	//l.Infof("--> %#v", packOut)
-	//l.Infof("<-- %#v", *packIn)
-	//
-	//packOut.History = nil
-	//packIn.History = nil
-	//
-	//require.Equal(t, packOut, *packIn)
+
+	packOut := packs.Pack{
+		Key:  "test1",
+		From: "gatherer",
+		To:   "gatherer",
+		Data: crud.Data{
+			TypeKey: typeKeyTest,
+			Content: paramsToTestBytes,
+		},
+	}
+
+	receiver := &actorReceiverEcho{l: l, t: t}
+	err := joinerOp.Join(receiver, runner.DataInterfaceKey(typeKeyTest))
+	require.NoError(t, err)
+
+	receiverSender := &actorReceiverEchoTest{l: l, t: t}
+	err = joinerOp.Join(receiverSender, runner.DataInterfaceKey(typeKeyTestResponse))
+	require.NoError(t, err)
+
+	_, packIn, err := transpOp.Send(&packOut)
+	require.NoError(t, err)
+	require.NotNil(t, packIn)
 
 }
 
-const TestTypeKey identity.Key = "test"
+// receiver
 
-//var _ packs.Handler = &handlerEcho{}
-//
-//type handlerEcho struct{}
-//
-//func (_ handlerEcho) Handle(pack *packs.Pack) (*packs.Pack, error) {
-//	return pack, nil
-//}
+var _ runner.Actor = &actorReceiverEcho{}
+
+type actorReceiverEcho struct {
+	l      logger.Operator
+	t      *testing.T
+	params common.Map
+}
+
+func (_ actorReceiverEcho) Name() string {
+	return "actorReceiverEcho"
+}
+
+func (r *actorReceiverEcho) Init(params common.Map) (estimate *runner.Estimate, err error) {
+	if r == nil {
+		return nil, errors.New("no runner to init")
+	}
+	r.params = params
+	return nil, nil
+}
+
+func (r actorReceiverEcho) Run() (info common.Map, posterior []joiner.Link, err error) {
+	r.l.Infof("RECEIVER with params %#v", r.params)
+
+	responseContent, _ := json.Marshal(r.params)
+
+	info = common.Map{
+		"response": crud.Data{
+			TypeKey: typeKeyTestResponse,
+			Content: responseContent,
+		},
+	}
+	return info, nil, nil
+}
+
+// receiver/sender
+
+var _ runner.Actor = &actorReceiverEchoTest{}
+
+type actorReceiverEchoTest struct {
+	l      logger.Operator
+	t      *testing.T
+	params common.Map
+}
+
+func (_ actorReceiverEchoTest) Name() string {
+	return "actorReceiverEchoTest"
+}
+
+func (r *actorReceiverEchoTest) Init(params common.Map) (estimate *runner.Estimate, err error) {
+	if r == nil {
+		return nil, errors.New("no runner to init")
+	}
+	r.params = params
+	return nil, nil
+}
+
+func (r actorReceiverEchoTest) Run() (info common.Map, posterior []joiner.Link, err error) {
+	r.l.Infof("RECEIVER/SENDER with params %#v", r.params)
+
+	// require.True(r.t, reflect.DeepEqual(paramsToTest, r.params))
+
+	if reflect.DeepEqual(paramsToTest, r.params) {
+		r.l.Info("!!!!!!!!!!!!!!!!!!!!")
+	} else {
+		r.l.Fatal("???????????????????")
+	}
+
+	// TODO: close HTTP server
+	return nil, nil, nil
+}

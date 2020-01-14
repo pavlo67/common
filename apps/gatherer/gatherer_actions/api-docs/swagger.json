@@ -4,7 +4,7 @@
   "version": "0.0.1"
  },
  "paths": {
-  "/gatherer/transport": {
+  "/transport": {
    "post": {
     "operationId": "receive",
     "parameters": [
@@ -24,7 +24,7 @@
    }
   }
  },
- "port": ":3002",
+ "port": ":3092",
  "schemes": [
   "http",
   "https"

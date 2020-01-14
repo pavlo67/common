@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/pavlo67/workshop/components/runner/runner_factory"
+	"github.com/pavlo67/workshop/components/runner_factory/runner_factory_goroutine"
 
 	"github.com/pavlo67/workshop/components/packs/packs_pg"
 	"github.com/pavlo67/workshop/components/tasks/tasks_pg"
@@ -113,7 +113,7 @@ func main() {
 
 		// action managers
 		{tasks_pg.Starter(), nil},
-		{runner_factory.Starter(), nil},
+		{runner_factory_goroutine.Starter(), nil},
 		{scheduler_timeout.Starter(), nil},
 		{server_http_jschmhr.Starter(), common.Map{"port": port}},
 
