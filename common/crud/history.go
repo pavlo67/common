@@ -12,6 +12,7 @@ import (
 type ActionKey string
 
 const ProducedAction ActionKey = "produced_from"
+const SavedAction ActionKey = "saved"
 const CreatedAction ActionKey = "created"
 const UpdatedAction ActionKey = "updated"
 

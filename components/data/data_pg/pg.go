@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pavlo67/workshop/common/identity"
+
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/crud"
@@ -97,38 +99,45 @@ func New(access config.Access, table string, interfaceKey joiner.InterfaceKey, t
 
 const onSave = "on dataPg.Save(): "
 
-func (dataOp *dataPg) Save(item data.Item, _ *crud.SaveOptions) (common.ID, error) {
-	var err error
+func (dataOp *dataPg) Save(item data.Item, options *crud.SaveOptions) (common.ID, error) {
 
-	var embedded, tags, history []byte
+	var actor *identity.Key
+	if options != nil {
+		actor = options.Actor
+	}
+
+	item.History = append(item.History, crud.Action{
+		Actor:  actor,
+		Key:    crud.SavedAction,
+		DoneAt: time.Now(),
+	})
+
+	history, err := json.Marshal(item.History)
+	if err != nil {
+		return "", errors.Wrapf(err, onSave+"can't marshal .History(%#v)", item)
+	}
+
+	var embedded, tags []byte
 
 	if len(item.Embedded) > 0 {
 		embedded, err = json.Marshal(item.Embedded)
 		if err != nil {
-			return "", errors.Wrapf(err, onSave+"can't marshal .Embedded(%#v)", item.Embedded)
+			return "", errors.Wrapf(err, onSave+"can't marshal .Embedded(%#v)", item)
 		}
 	}
 
 	if len(item.Tags) > 0 {
 		tags, err = json.Marshal(item.Tags)
 		if err != nil {
-			return "", errors.Wrapf(err, onSave+"can't marshal .Tags(%#v)", item.Tags)
+			return "", errors.Wrapf(err, onSave+"can't marshal .Tags(%#v)", item)
 		}
 	}
 
-	// TODO!!! append to .History
-
-	if len(item.History) > 0 {
-		history, err = json.Marshal(item.History)
-		if err != nil {
-			return "", errors.Wrapf(err, onSave+"can't marshal .History(%#v)", item.History)
-		}
-	}
+	values := []interface{}{item.Key, item.URL, item.Title, item.Summary, embedded, tags, item.Data.TypeKey, item.Data.Content, history}
 
 	var id common.ID
 
 	if item.ID == "" {
-		values := []interface{}{string(item.Key), item.URL, item.Title, item.Summary, embedded, tags, item.Data.TypeKey, item.Data.Content, history}
 
 		var lastInsertId uint64
 
@@ -140,7 +149,7 @@ func (dataOp *dataPg) Save(item data.Item, _ *crud.SaveOptions) (common.ID, erro
 		id = common.ID(strconv.FormatUint(lastInsertId, 10))
 
 		if dataOp.taggerOp != nil && len(item.Tags) > 0 {
-			err = dataOp.taggerOp.AddTags(dataOp.interfaceKey, id, item.Tags, nil)
+			err = dataOp.taggerOp.AddTags(joiner.Link{dataOp.interfaceKey, id}, item.Tags, nil)
 			if err != nil {
 				return "", errors.Wrapf(err, onSave+": can't .AddTags(%#v)", item.Tags)
 			}
@@ -149,7 +158,7 @@ func (dataOp *dataPg) Save(item data.Item, _ *crud.SaveOptions) (common.ID, erro
 	} else {
 		id = item.ID
 
-		values := []interface{}{item.Key, item.URL, item.Title, item.Summary, embedded, tags, item.Data.TypeKey, item.Data.Content, history, item.ID}
+		values := append(values, item.ID)
 
 		_, err := dataOp.stmUpdate.Exec(values...)
 		if err != nil {
@@ -157,11 +166,12 @@ func (dataOp *dataPg) Save(item data.Item, _ *crud.SaveOptions) (common.ID, erro
 		}
 
 		if dataOp.taggerOp != nil {
-			err = dataOp.taggerOp.ReplaceTags(dataOp.interfaceKey, item.ID, item.Tags, nil)
+			err = dataOp.taggerOp.ReplaceTags(joiner.Link{dataOp.interfaceKey, item.ID}, item.Tags, nil)
 			if err != nil {
 				return "", errors.Wrapf(err, onSave+": can't .ReplaceTags(%#v)", item.Tags)
 			}
 		}
+
 	}
 
 	return id, nil
@@ -187,8 +197,6 @@ func (dataOp *dataPg) Read(id common.ID, _ *crud.GetOptions) (*data.Item, error)
 	err = dataOp.stmRead.QueryRow(idNum).Scan(
 		&item.Key, &item.URL, &item.Title, &item.Summary, &embedded, &tags, &item.Data.TypeKey, &item.Data.Content, &history, &updatedAtPtr, &createdAtStr,
 	)
-
-	// TODO!!! read updatedAt, createdAt
 
 	if err == sql.ErrNoRows {
 		return nil, common.ErrNotFound
@@ -254,7 +262,7 @@ func (dataOp *dataPg) Remove(id common.ID, _ *crud.RemoveOptions) error {
 	}
 
 	if dataOp.taggerOp != nil {
-		err = dataOp.taggerOp.ReplaceTags(dataOp.interfaceKey, id, nil, nil)
+		err = dataOp.taggerOp.ReplaceTags(joiner.Link{dataOp.interfaceKey, id}, nil, nil)
 		if err != nil {
 			return errors.Wrapf(err, onRemove+": can't .ReplaceTags(%#v)", nil)
 		}
@@ -305,8 +313,6 @@ func (dataOp *dataPg) List(term *selectors.Term, options *crud.GetOptions) ([]da
 		err := rows.Scan(
 			&idNum, &item.Key, &item.URL, &item.Title, &item.Summary, &embedded, &tags, &item.Data.TypeKey, &item.Data.Content, &history, &updatedAtPtr, &createdAtStr,
 		)
-
-		// TODO: read updatedAt, createdAt
 
 		if err != nil {
 			return items, errors.Wrapf(err, onList+sqllib.CantScanQueryRow, query, values)

@@ -125,7 +125,7 @@ func Load(url string, dataOp data.Operator) (int, int, int, error) {
 
 		item.ID = ""
 
-		_, err = dataOp.Save([]data.Item{item}, nil)
+		_, err = dataOp.Save(item, nil)
 		if err != nil {
 			break
 

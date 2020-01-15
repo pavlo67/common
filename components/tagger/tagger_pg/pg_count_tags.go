@@ -5,15 +5,14 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/libraries/sqllib"
 	"github.com/pavlo67/workshop/common/libraries/strlib"
 )
 
-const onCountOnTag = "on tagsSQLite.countTag(): "
+const onCountOnTag = "on tagsPg.countTag(): "
 
-func (taggerOp *tagsSQLite) countTag(tagLabel string, passedTags []string, labelsRemoved []string, stmPartedSize, stmList, stmAddTag *sql.Stmt) ([]string, error) {
+func (taggerOp *tagsPg) countTag(tagLabel string, passedTags []string, labelsRemoved []string, stmPartedSize, stmList, stmAddTag *sql.Stmt) ([]string, error) {
 	if strlib.In(passedTags, tagLabel) {
 		return passedTags, nil
 	}
@@ -72,13 +71,13 @@ func (taggerOp *tagsSQLite) countTag(tagLabel string, passedTags []string, label
 	return passedTags, nil
 }
 
-const onCountChanged = "on tagsSQLite.countTagChanged(): "
+const onCountChanged = "on tagsPg.countTagChanged(): "
 
-func (taggerOp *tagsSQLite) countTagChanged(key joiner.InterfaceKey, id common.ID, tagLabelsRemoved []string, tx *sql.Tx) error {
-	if key != taggerOp.ownInterfaceKey {
+func (taggerOp *tagsPg) countTagChanged(link joiner.Link, tagLabelsRemoved []string, tx *sql.Tx) error {
+	if link.InterfaceKey != taggerOp.ownInterfaceKey {
 		return nil
 	}
-	tagLabel := string(id)
+	tagLabel := string(link.ID)
 
 	stmTagParterSize, err := tx.Prepare(taggerOp.sqlTagPartedSize)
 	if err != nil {
@@ -94,7 +93,7 @@ func (taggerOp *tagsSQLite) countTagChanged(key joiner.InterfaceKey, id common.I
 	}
 
 	if _, err := taggerOp.countTag(tagLabel, nil, tagLabelsRemoved, stmTagParterSize, stmList, stmAddTag); err != nil {
-		return errors.Wrapf(err, onCountChanged+": can't taggerOp.countTag(%s, ...)", tagLabel)
+		return errors.Wrap(err, onCountChanged)
 	}
 
 	return nil

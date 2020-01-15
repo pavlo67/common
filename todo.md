@@ -40,6 +40,11 @@
 * вибір джерел для користувача
 
 
+## tasks
+
+* check .Results after Start/Finish()
+
+
 ## sqlite
 
 * заблокувати конкурентні записи

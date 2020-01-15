@@ -10,8 +10,8 @@ const InterfaceKey joiner.InterfaceKey = "tagger"
 const CleanerInterfaceKey joiner.InterfaceKey = "tag_cleaner"
 
 type Tag struct {
-	Label    string
-	Relation string
+	Label  string
+	Params common.Map
 }
 
 type TagCount struct {
@@ -21,8 +21,8 @@ type TagCount struct {
 }
 
 type Tagged struct {
-	ID       common.ID
-	Relation string
+	ID     common.ID
+	Params common.Map
 }
 
 type Index map[joiner.InterfaceKey][]Tagged
@@ -30,12 +30,11 @@ type Index map[joiner.InterfaceKey][]Tagged
 // TODO: don't remove "...Tags", it's necessary to resolve conflict in data_tagged.Actor
 
 type Operator interface {
-	AddTags(joiner.InterfaceKey, common.ID, []Tag, *crud.SaveOptions) error
-	ReplaceTags(joiner.InterfaceKey, common.ID, []Tag, *crud.SaveOptions) error // or remove in particlar
+	AddTags(joiner.Link, []Tag, *crud.SaveOptions) error
+	ReplaceTags(joiner.Link, []Tag, *crud.SaveOptions) error // or remove in particlar
+	ListTags(joiner.Link, *crud.GetOptions) ([]Tag, error)   // i.e. parent sections if joiner.HandlerKey == "tagger"
 
-	ListTags(joiner.InterfaceKey, common.ID, *crud.GetOptions) ([]Tag, error) // i.e. parent sections if joiner.HandlerKey == "tagger"
 	CountTags(*joiner.InterfaceKey, *crud.GetOptions) ([]TagCount, error)
-
 	IndexTagged(*joiner.InterfaceKey, string, *crud.GetOptions) (Index, error)
 }
 

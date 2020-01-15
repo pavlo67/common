@@ -1,5 +1,7 @@
 package tagger_sqlite
 
+// TODO!!! fix according to the data structures changes
+
 import (
 	"database/sql"
 	"strings"

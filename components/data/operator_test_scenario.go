@@ -19,9 +19,6 @@ type OperatorTestCase struct {
 
 	ToSave   Item
 	ToUpdate Item
-
-	//DetailsToSave      Test
-	//DetailsToUpdate    Test
 }
 
 func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
@@ -68,11 +65,10 @@ func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 // TODO: test created_at, updated_at
 // TODO: test GetOptions
 
-const numRepeats1 = 2
-const numRepeats2 = 3
-const toReadI = 0   // must be < numRepeats1 + numRepeats2
-const toUpdateI = 1 // must be < numRepeats1 + numRepeats2
-const toDeleteI = 2 // must be < numRepeats1 + numRepeats2
+const numRepeats = 3
+const toReadI = 0   // must be < numRepeats
+const toUpdateI = 1 // must be < numRepeats
+const toDeleteI = 2 // must be < numRepeats
 
 func Compare(t *testing.T, dataOp Operator, readed *Item, expectedItem Item, l logger.Operator) {
 	require.NotNil(t, readed)
@@ -108,8 +104,8 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 	for i, tc := range testCases {
 		l.Debug(i)
 
-		var id [numRepeats1 + numRepeats2]common.ID
-		var toSave [numRepeats1 + numRepeats2]Item
+		var id [numRepeats]common.ID
+		var toSave [numRepeats]Item
 		// var data Tag
 
 		// ClearDatabase ------------------------------------------------------------------------------------
@@ -157,25 +153,13 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		//	continue
 		//}
 
-		for i := 0; i < numRepeats1; i++ {
+		for i := 0; i < numRepeats; i++ {
 			toSave[i] = tc.ToSave
 			//toSave[i].Details = &tc.DetailsToSave
-			idsI, err := tc.Save([]Item{toSave[i]}, nil)
+			idI, err := tc.Save(toSave[i], nil)
 			require.NoError(t, err)
-			require.True(t, len(idsI) == 1)
-			id[i] = idsI[0]
-		}
-
-		var toSavePack []Item
-		//tc.ToSave.Details = &tc.DetailsToSave
-		for j := 0; j < numRepeats2; j++ {
-			toSavePack = append(toSavePack, tc.ToSave)
-		}
-		idsI, err := tc.Save(toSavePack, nil)
-		require.NoError(t, err)
-		require.True(t, len(idsI) == numRepeats2)
-		for j := 0; j < numRepeats2; j++ {
-			id[numRepeats1+i] = idsI[i]
+			require.NotEmpty(t, idI)
+			id[i] = idI
 		}
 
 		// test .Read ----------------------------------------------------------------------------------------
@@ -189,9 +173,9 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		readedSaved, err := tc.Read(id[toReadI], nil)
 		require.NoError(t, err)
 
-		tc.ToSave.ID = id[toReadI]
+		toSave[i].ID = id[toReadI]
 
-		Compare(t, tc, readedSaved, tc.ToSave, l)
+		Compare(t, tc, readedSaved, toSave[i], l)
 
 		// test .Update & .Read -----------------------------------------------------------------------------------
 
@@ -204,7 +188,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		tc.ToUpdate.ID = id[toUpdateI]
 		// tc.ToUpdate.Details = &tc.DetailsToUpdate
 
-		_, err = tc.Save([]Item{tc.ToUpdate}, nil)
+		_, err = tc.Save(tc.ToUpdate, nil)
 		require.NoError(t, err)
 
 		readedUpdated, err := tc.Read(id[toUpdateI], nil)
@@ -313,9 +297,9 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 
 		briefsAll, err := tc.List(nil, &crud.GetOptions{OrderBy: []string{"id"}})
 		require.NoError(t, err)
-		require.True(t, len(briefsAll) == numRepeats1+numRepeats2)
+		require.True(t, len(briefsAll) == numRepeats)
 
-		Compare(t, tc, &briefsAll[toReadI], tc.ToSave, l)
+		Compare(t, tc, &briefsAll[toReadI], toSave[i], l)
 		Compare(t, tc, &briefsAll[toUpdateI], tc.ToUpdate, l)
 
 		// test .Delete --------------------------------------------------------------------------------------
@@ -329,7 +313,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 
 		briefsAll, err = tc.List(nil, nil)
 		require.NoError(t, err)
-		require.True(t, len(briefsAll) == numRepeats1+numRepeats2-1)
+		require.True(t, len(briefsAll) == numRepeats-1)
 
 		//	if !tc.ExcludeRemoveTest {
 		//		nativeToRead, err = tc.Read(tc.ISToRead, id[toDeleteI])

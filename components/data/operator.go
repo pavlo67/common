@@ -3,10 +3,10 @@ package data
 import (
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/crud"
+	"github.com/pavlo67/workshop/common/identity"
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/selectors"
 
-	"github.com/pavlo67/workshop/common/identity"
 	"github.com/pavlo67/workshop/components/tagger"
 )
 
@@ -42,17 +42,3 @@ type Convertor interface {
 	GetData() (*Item, error)
 	SaveData(Item) error
 }
-
-// TODO: .History, etc...
-
-//	ID        dataspace.ID `bson:"id"                   json:"id"`
-//	Version   vcs.Version  `bson:"version,omitempty"    json:"version,omitempty"`
-//
-//	Title   string       `bson:"title"             json:"title"`
-//	Tag   string       `bson:"brief,omitempty"   json:"brief,omitempty"`
-//	Author  string       `bson:"author,omitempty"  json:"author,omitempty"`
-//	Tag content.Tag `bson:"content,omitempty" json:"content,omitempty"`
-//	Tags   links.Tags  `bson:"links,omitempty"   json:"links,omitempty"`
-//
-//	RView  common.ID `bson:"r_view,omitempty"  json:"r_view,omitempty"`
-//	ROwner common.ID `bson:"r_owner,omitempty" json:"r_owner,omitempty"`

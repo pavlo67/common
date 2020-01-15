@@ -2,11 +2,11 @@ package tagger_pg
 
 import (
 	"database/sql"
+	"encoding/json"
 	"strings"
 
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/crud"
 	"github.com/pavlo67/workshop/common/joiner"
@@ -29,9 +29,9 @@ var fieldsToSave = []string{"joiner_key", "id", "tag", "relation"}
 var fieldsToInsertStr = strings.Join(fieldsToSave, ", ")
 var fieldsToUpdateStr = sqllib_pg.WildcardsForUpdate(fieldsToSave)
 
-var _ tagger.Operator = &tagsSQLite{}
+var _ tagger.Operator = &tagsPg{}
 
-type tagsSQLite struct {
+type tagsPg struct {
 	db    *sql.DB
 	table string
 
@@ -44,7 +44,7 @@ type tagsSQLite struct {
 	sqlAddTag, sqlAddTagged, sqlRemoveTagged string
 }
 
-const onNew = "on tagsSQLite.New(): "
+const onNew = "on tagsPg.New(): "
 
 func New(access config.Access, ownInterfaceKey joiner.InterfaceKey) (tagger.Operator, crud.Cleaner, error) {
 	db, err := sqllib_pg.Connect(access)
@@ -56,7 +56,7 @@ func New(access config.Access, ownInterfaceKey joiner.InterfaceKey) (tagger.Oper
 	tableTags := tableTagsDefault
 	tableJoined := tableTagged + " LEFT JOIN " + tableTags + " ON joiner_key = '" + joinerKeyTags + "' AND " + tableTagged + ".id  = " + tableTags + ".tag"
 
-	taggerOp := tagsSQLite{
+	taggerOp := tagsPg{
 		db:    db,
 		table: tableTagged,
 
@@ -99,9 +99,9 @@ func New(access config.Access, ownInterfaceKey joiner.InterfaceKey) (tagger.Oper
 	return &taggerOp, &taggerOp, nil
 }
 
-const onAddTags = "on tagsSQLite.AddTags(): "
+const onAddTags = "on tagsPg.AddTags(): "
 
-func (taggerOp *tagsSQLite) AddTags(key joiner.InterfaceKey, id common.ID, items []tagger.Tag, _ *crud.SaveOptions) error {
+func (taggerOp *tagsPg) AddTags(toTag joiner.Link, items []tagger.Tag, _ *crud.SaveOptions) error {
 	var tagsFiltered []tagger.Tag
 	for _, tag := range items {
 		tag.Label = strings.TrimSpace(tag.Label)
@@ -127,7 +127,15 @@ func (taggerOp *tagsSQLite) AddTags(key joiner.InterfaceKey, id common.ID, items
 	// var add []string
 
 	for _, tag := range tagsFiltered {
-		values := []interface{}{key, id, tag.Label, tag.Relation}
+		var params []byte
+		if len(tag.Params) > 0 {
+			params, err = json.Marshal(tag.Params)
+			if err != nil {
+				return errors.Wrapf(err, onAddTags+"can't marshal .Params(%#v)", tag)
+			}
+		}
+
+		values := []interface{}{toTag.InterfaceKey, toTag.ID, tag.Label, params}
 
 		if _, err = stmAddTags.Exec(values...); err != nil {
 			err = errors.Wrapf(err, onAddTags+": on stmAddTags(%s).Exec(%#v)", taggerOp.sqlAddTagged, values)
@@ -137,8 +145,8 @@ func (taggerOp *tagsSQLite) AddTags(key joiner.InterfaceKey, id common.ID, items
 		// add = append(add, tag.Label)
 	}
 
-	if err = taggerOp.countTagChanged(key, id, nil, tx); err != nil {
-		err = errors.Wrapf(err, onAddTags+": on taggerOp.countTagChanged(%s, %s, nil, tx)", key, id)
+	if err = taggerOp.countTagChanged(toTag, nil, tx); err != nil {
+		err = errors.Wrap(err, onAddTags)
 		goto ROLLBACK
 	}
 
@@ -155,9 +163,9 @@ ROLLBACK:
 	return err
 }
 
-const onReplaceTags = "on tagsSQLite.ReplaceTags(): "
+const onReplaceTags = "on tagsPg.ReplaceTags(): "
 
-func (taggerOp *tagsSQLite) ReplaceTags(key joiner.InterfaceKey, id common.ID, items []tagger.Tag, options *crud.SaveOptions) error {
+func (taggerOp *tagsPg) ReplaceTags(toTag joiner.Link, items []tagger.Tag, options *crud.SaveOptions) error {
 
 	var tagsFiltered []tagger.Tag
 	for _, tag := range items {
@@ -167,9 +175,9 @@ func (taggerOp *tagsSQLite) ReplaceTags(key joiner.InterfaceKey, id common.ID, i
 		}
 	}
 
-	tagsOld, err := taggerOp.ListTags(key, id, nil) // TODO!!! use correct options
+	tagsOld, err := taggerOp.ListTags(toTag, nil) // TODO!!! use correct options
 	if err != nil {
-		return errors.Wrapf(err, onReplaceTags+": on taggerOp.ListTags(%s, %s, nil)", key, id)
+		return errors.Wrap(err, onReplaceTags)
 	}
 	var tagLabelsRemoved []string
 	for _, tag := range tagsOld {
@@ -192,7 +200,7 @@ func (taggerOp *tagsSQLite) ReplaceTags(key joiner.InterfaceKey, id common.ID, i
 
 	//var add []string
 
-	values := []interface{}{key, id}
+	values := []interface{}{toTag.InterfaceKey, toTag.ID}
 	_, err = tx.Exec(taggerOp.sqlRemoveTagged, values...)
 	if err != nil {
 		err = errors.Wrapf(err, onReplaceTags+": on tx.Exec(%s, %#v)", taggerOp.sqlRemoveTagged, values)
@@ -200,7 +208,16 @@ func (taggerOp *tagsSQLite) ReplaceTags(key joiner.InterfaceKey, id common.ID, i
 	}
 
 	for _, tag := range tagsFiltered {
-		values := []interface{}{key, id, tag.Label, tag.Relation}
+
+		var params []byte
+		if len(tag.Params) > 0 {
+			params, err = json.Marshal(tag.Params)
+			if err != nil {
+				return errors.Wrapf(err, onAddTags+"can't marshal .Params(%#v)", tag)
+			}
+		}
+
+		values := []interface{}{toTag.InterfaceKey, toTag.ID, tag.Label, params}
 
 		_, err = stmAddTags.Exec(values...)
 		if err != nil {
@@ -209,8 +226,8 @@ func (taggerOp *tagsSQLite) ReplaceTags(key joiner.InterfaceKey, id common.ID, i
 		}
 	}
 
-	if err = taggerOp.countTagChanged(key, id, tagLabelsRemoved, tx); err != nil {
-		err = errors.Wrapf(err, onReplaceTags+": on taggerOp.countTagChanged(%s, %s, %#v, tx)", key, id, tagLabelsRemoved)
+	if err = taggerOp.countTagChanged(toTag, tagLabelsRemoved, tx); err != nil {
+		err = errors.Wrap(err, onReplaceTags)
 		goto ROLLBACK
 	}
 
@@ -228,10 +245,10 @@ ROLLBACK:
 	return err
 }
 
-const onListTags = "on tagsSQLite.ListTags(): "
+const onListTags = "on tagsPg.ListTags(): "
 
-func (taggerOp *tagsSQLite) ListTags(key joiner.InterfaceKey, id common.ID, _ *crud.GetOptions) ([]tagger.Tag, error) {
-	values := []interface{}{key, id}
+func (taggerOp *tagsPg) ListTags(toTag joiner.Link, _ *crud.GetOptions) ([]tagger.Tag, error) {
+	values := []interface{}{toTag.InterfaceKey, toTag.ID}
 
 	rows, err := taggerOp.stmList.Query(values...)
 	if err == sql.ErrNoRows {
@@ -245,10 +262,17 @@ func (taggerOp *tagsSQLite) ListTags(key joiner.InterfaceKey, id common.ID, _ *c
 
 	for rows.Next() {
 		var tag tagger.Tag
+		var params []byte
 
-		err = rows.Scan(&tag.Label, &tag.Relation)
+		err = rows.Scan(&tag.Label, &params)
 		if err != nil {
 			return items, errors.Wrapf(err, onListTags+sqllib.CantScanQueryRow, taggerOp.sqlList, values)
+		}
+
+		if len(params) > 0 {
+			if err = json.Unmarshal(params, &tag.Params); err != nil {
+				return items, errors.Wrapf(err, onListTags+"can't unmarshal .Params (%s)", params)
+			}
 		}
 
 		items = append(items, tag)
@@ -261,9 +285,9 @@ func (taggerOp *tagsSQLite) ListTags(key joiner.InterfaceKey, id common.ID, _ *c
 	return items, nil
 }
 
-const onCountTags = "on tagsSQLite.CountTags(): "
+const onCountTags = "on tagsPg.CountTags(): "
 
-func (taggerOp *tagsSQLite) CountTags(key *joiner.InterfaceKey, _ *crud.GetOptions) ([]tagger.TagCount, error) {
+func (taggerOp *tagsPg) CountTags(key *joiner.InterfaceKey, _ *crud.GetOptions) ([]tagger.TagCount, error) {
 	var values []interface{}
 	var query string
 	var stm *sql.Stmt
@@ -310,9 +334,9 @@ func (taggerOp *tagsSQLite) CountTags(key *joiner.InterfaceKey, _ *crud.GetOptio
 	return counter, nil
 }
 
-const onIndexTagged = "on tagsSQLite.IndexTagged()"
+const onIndexTagged = "on tagsPg.IndexTagged()"
 
-func (taggerOp *tagsSQLite) IndexTagged(key *joiner.InterfaceKey, label string, _ *crud.GetOptions) (tagger.Index, error) {
+func (taggerOp *tagsPg) IndexTagged(key *joiner.InterfaceKey, label string, _ *crud.GetOptions) (tagger.Index, error) {
 	var values []interface{}
 	var query string
 	var stm *sql.Stmt
@@ -342,10 +366,17 @@ func (taggerOp *tagsSQLite) IndexTagged(key *joiner.InterfaceKey, label string, 
 	for rows.Next() {
 		var key string
 		var tagged tagger.Tagged
+		var params []byte
 
-		err = rows.Scan(&key, &tagged.ID, &tagged.Relation)
+		err = rows.Scan(&key, &tagged.ID, &params)
 		if err != nil {
 			return index, errors.Wrapf(err, onIndexTagged+sqllib.CantScanQueryRow, query, values)
+		}
+
+		if len(params) > 0 {
+			if err = json.Unmarshal(params, &tagged.Params); err != nil {
+				return index, errors.Wrapf(err, onIndexTagged+"can't unmarshal .Params (%s)", params)
+			}
 		}
 
 		index[joiner.InterfaceKey(key)] = append(index[joiner.InterfaceKey(key)], tagged)
@@ -358,6 +389,6 @@ func (taggerOp *tagsSQLite) IndexTagged(key *joiner.InterfaceKey, label string, 
 	return index, nil
 }
 
-func (taggerOp *tagsSQLite) Close() error {
-	return errors.Wrap(taggerOp.db.Close(), "on tagsSQLite.Close()")
+func (taggerOp *tagsPg) Close() error {
+	return errors.Wrap(taggerOp.db.Close(), "on tagsPg.Close()")
 }

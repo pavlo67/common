@@ -1,14 +1,14 @@
 package crud
 
-import "github.com/pavlo67/workshop/common"
+import "github.com/pavlo67/workshop/common/identity"
 
 type SaveOptions struct {
-	AuthID common.ID
+	Actor *identity.Key
 	// TODO??? check if .ID exists and if it should be existing (insert vs. replace)
 }
 
 type GetOptions struct {
-	AuthID  common.ID
+	Actor   *identity.Key
 	GroupBy []string
 	OrderBy []string
 	Limit0  uint64
@@ -16,7 +16,7 @@ type GetOptions struct {
 }
 
 type RemoveOptions struct {
+	Actor  *identity.Key
 	Limit  uint64
-	AuthID common.ID
 	Delete bool
 }

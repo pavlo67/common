@@ -38,12 +38,14 @@ type Result struct {
 	Posterior []joiner.Link `bson:",omitempty" json:",omitempty"`
 }
 
-type Task struct {
-}
+type Status string
+
+const StatusStarted Status = "started"
 
 type Item struct {
 	ID        common.ID `   bson:"_id,omitempty" json:",omitempty"`
 	crud.Data `             bson:",inline"       json:",inline"`
+	Status    Status       `bson:",omitempty" json:",omitempty"`
 	Results   []Result     `bson:",omitempty" json:",omitempty"`
 	History   crud.History `bson:",omitempty"    json:",omitempty"`
 }

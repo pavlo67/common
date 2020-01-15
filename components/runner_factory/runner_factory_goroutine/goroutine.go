@@ -147,7 +147,7 @@ func (r runnerOp) runOnly() {
 			Options: nil,
 			Data:    *task,
 			History: crud.History{
-				{Key: crud.ProducedAction, Related: &joiner.Link{InterfaceKey: packs.InterfaceKey, Key: r.listener.PackKey}},
+				{Key: crud.ProducedAction, Actor: &r.listener.PackKey},
 				{Key: crud.ProducedAction, Related: &joiner.Link{InterfaceKey: tasks.InterfaceKey, ID: r.item.ID}, DoneAt: time.Now()},
 			},
 		})
