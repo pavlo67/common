@@ -1,0 +1,105 @@
+package server_http
+
+import (
+	"regexp"
+	"strings"
+
+	"io/ioutil"
+
+	"github.com/pavlo67/workshop/common/logger"
+	"github.com/pkg/errors"
+)
+
+func InitEndpointsWithSwaggerV2(cfg Config, host string, srvOp Operator, swaggerPath, swaggerFile, swaggerSubpath string, l logger.Operator) error {
+	swaggerFilePath := swaggerPath + swaggerFile
+
+	swagger, err := cfg.SwaggerV2(host)
+	if err != nil {
+		return errors.Errorf("on .SwaggerV2(%#v): %s", cfg, err)
+	}
+
+	err = ioutil.WriteFile(swaggerFilePath, swagger, 0644)
+	if err != nil {
+		return errors.Errorf("on ioutil.WriteFile(%s, %s, 0755): %s", swaggerFilePath, swagger, err)
+	}
+	l.Infof("%d bytes are written into %s", len(swagger), swaggerFilePath)
+
+	err = InitEndpoints(cfg, srvOp, l)
+	if err != nil {
+		return err
+	}
+	return srvOp.HandleFiles("swagger", cfg.Prefix+"/"+swaggerSubpath+"/*filepath", StaticPath{LocalPath: swaggerPath, MIMEType: nil})
+}
+
+func InitEndpoints(cfg Config, srvOp Operator, l logger.Operator) error {
+	if srvOp == nil {
+		return errors.New("on .InitEndpoints(): srvOp == nil")
+	}
+
+	for key, ep := range cfg.Endpoints {
+		if ep.Handler == nil {
+			return errors.Errorf("on InitEndpoints: no .Handler %#v", ep)
+		}
+
+		err := srvOp.HandleEndpoint(key, cfg.Prefix+ep.Path, *ep.Handler)
+		if err != nil {
+			return errors.Errorf("on srvOp.HandleEndpoint(%s, %s, %#v): %s", key, ep.Path, ep.Handler, err)
+		}
+	}
+
+	return nil
+}
+
+type Endpoint struct {
+	Method      string   `json:"method,omitempty"`
+	PathParams  []string `json:"path_params,omitempty"`
+	QueryParams []string `json:"query_params,omitempty"`
+
+	WorkerHTTP
+
+	// AllowedIDs []common.ID `json:"allowed_ids,omitempty"`
+	// DataItem   interface{} `json:"data_item,omitempty"` // for Interface
+	// SwaggerDescription string
+}
+
+var rePathParam = regexp.MustCompile(":[^/]+")
+
+//func (ep Endpoint) PathWithParams(params ...string) string {
+//	matches := rePathParam.FindAllStringSubmatchIndex(ep.Path, -1)
+//
+//	numMatches := len(matches)
+//	if len(params) < numMatches {
+//		numMatches = len(params)
+//	}
+//
+//	path := ep.Path
+//	for nm := numMatches - 1; nm >= 0; nm-- {
+//		path = path[:matches[nm][0]] + url.PathEscape(strings.ReplaceTags(params[nm], "/", "%2F", -1)) + path[matches[nm][1]:]
+//	}
+//
+//	return path
+//}
+
+func (ep Endpoint) PathTemplate(serverPath string) string {
+	if len(serverPath) == 0 || serverPath[0] != '/' {
+		serverPath = "/" + serverPath
+	}
+
+	if len(ep.PathParams) < 1 {
+		return serverPath
+	}
+
+	return serverPath + "/:" + strings.Join(ep.PathParams, "/:")
+}
+
+func (ep Endpoint) PathTemplateBraced(serverPath string) string {
+	if len(serverPath) == 0 || serverPath[0] != '/' {
+		serverPath = "/" + serverPath
+	}
+
+	if len(ep.PathParams) < 1 {
+		return serverPath
+	}
+
+	return serverPath + "/{" + strings.Join(ep.PathParams, "}/{") + "}"
+}
