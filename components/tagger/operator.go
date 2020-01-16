@@ -38,7 +38,7 @@ type Operator interface {
 	IndexTagged(*joiner.InterfaceKey, string, *crud.GetOptions) (Index, error)
 }
 
-//func CheckCycle(userIS auth.ID, operator Actor, id string, passedIDs []string) ([]string, error) {
+//func CheckCycle(userIS auth.Key, operator Actor, id string, passedIDs []string) ([]string, error) {
 //	for _, passedID := range passedIDs {
 //		if id == passedID {
 //			return nil, ErrSectionCycle

@@ -181,12 +181,12 @@ const onRead = "on dataPg.Read(): "
 
 func (dataOp *dataPg) Read(id common.ID, _ *crud.GetOptions) (*data.Item, error) {
 	if len(id) < 1 {
-		return nil, errors.New(onRead + "empty ID")
+		return nil, errors.New(onRead + "empty Key")
 	}
 
 	idNum, err := strconv.ParseUint(string(id), 10, 64)
 	if err != nil {
-		return nil, errors.Errorf(onRead+"wrong ID (%s)", id)
+		return nil, errors.Errorf(onRead+"wrong Key (%s)", id)
 	}
 
 	item := data.Item{ID: id}
@@ -248,12 +248,12 @@ const onRemove = "on dataPg.Remove()"
 
 func (dataOp *dataPg) Remove(id common.ID, _ *crud.RemoveOptions) error {
 	if len(id) < 1 {
-		return errors.New(onRemove + "empty ID")
+		return errors.New(onRemove + "empty Key")
 	}
 
 	idNum, err := strconv.ParseUint(string(id), 10, 64)
 	if err != nil {
-		return errors.Errorf(onRemove+"wrong ID (%s)", id)
+		return errors.Errorf(onRemove+"wrong Key (%s)", id)
 	}
 
 	_, err = dataOp.stmRemove.Exec(idNum)

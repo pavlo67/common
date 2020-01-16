@@ -20,7 +20,7 @@ const Proto addrlib.Proto = "jwt://"
 
 var _ auth.Operator = &authJWT{}
 
-//var errEmptyPublicKeyAddress = errors.New("empty public ID address")
+//var errEmptyPublicKeyAddress = errors.New("empty public Key address")
 //var errEmptyPrivateKeyGenerated = errors.New("empty private key generated")
 
 type authJWT struct {
@@ -54,14 +54,22 @@ type jwtCreds struct {
 	Creds auth.Creds `json:"creds,omitempty"`
 }
 
+func (_ *authJWT) GetSessionKeys() (common.Map, error) {
+	return nil, nil
+}
+
 // 	SetCreds ignores all input parameters, creates new "BTC identity" and returns it
-func (authOp *authJWT) SetCreds(user auth.User, creds auth.Creds) (*auth.Creds, error) {
+func (authOp *authJWT) SetCreds(user *auth.User, creds auth.Creds) (*auth.Creds, error) {
+	if user == nil {
+		return nil, auth.ErrNoUser
+	}
+
 	jc := jwtCreds{
 		Claims: &jwt.Claims{
 			//Issuer:   "issuer1",
 			//Subject:  "subject1",
 			// Audience: jwt.Audience{"aud1", "aud2"},
-			ID:       string(user.ID),
+			ID:       string(user.Key),
 			IssuedAt: jwt.NewNumericDate(time.Now()),
 			// Expiry:   jwt.NewNumericDate(time.Date(2017, 1, 1, 0, 8, 0, 0, time.UTC)),
 		},
@@ -107,7 +115,7 @@ func (authOp *authJWT) Authorize(toAuth auth.Creds) (*auth.User, error) {
 	}
 
 	return &auth.User{
-		ID:       common.ID(res.ID),
+		Key:      common.ID(res.ID),
 		Nickname: nick,
 		Creds:    res.Creds,
 	}, nil

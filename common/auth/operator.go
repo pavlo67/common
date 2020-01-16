@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"github.com/pavlo67/workshop/common/identity"
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
@@ -12,36 +13,37 @@ const InterfaceKey joiner.InterfaceKey = "auth"
 const Anyone common.ID = "_"
 
 //type Access struct {
-//	TargetID   ID     `bson:"target_id"             json:"target_id"`
+//	TargetID   Key     `bson:"target_id"             json:"target_id"`
 //	TargetNick string `bson:"target_nick,omitempty" json:"target_nick,omitempty"`
 //	Right      Right  `bson:"right,omitempty"       json:"right,omitempty"`
 //}
 
 type User struct {
-	ID       common.ID `bson:"id"               json:"id"`
-	Nickname string    `bson:"nickname"         json:"nickname"`
-	Creds    Creds     `bson:"creds, omitempty" json:"creds, omitempty"`
-	// Accesses []Access `bson:"accesses,omitempty" json:"accesses,omitempty"`
+	Key      identity.Key `bson:",omitempty" json:",omitempty"`
+	Nickname string       `bson:",omitempty" json:",omitempty"`
+	Creds    Creds        `bson:",omitempty" json:",omitempty"`
 }
 
 type Operator interface {
+	// SetCreds can require multi-steps (using returned Creds)...
+	SetCreds(user *User, toSet Creds) (*Creds, error)
+
+	// InitAuthSession starts an auth session if it's required
+	InitAuthSession(toInit Creds) (*Creds, error)
+
 	// Authorize can require multi-steps (using returned Creds)...
 	Authorize(toAuth Creds) (*User, error)
-
-	// SetCreds can require multi-steps (using returned Creds)...
-	SetCreds(user User, toSet Creds) (*Creds, error)
 }
 
 // to use with map[CredsType]identity.Actor  --------------------------------------------------------------------
 
-var errNoCreds = errors.New("no creds")
-var errNoIdentityOp = errors.New("no identity.Actor")
+var ErrNoIdentityOp = errors.New("no identity.Actor")
 
 const onGetUser = "on GetUser()"
 
 func GetUser(creds Creds, ops []Operator, errs common.Errors) (*User, common.Errors) {
 	if len(creds.Values) < 1 {
-		return nil, append(errs, errNoCreds)
+		return nil, append(errs, ErrNoCreds)
 	}
 
 	for _, op := range ops {

@@ -52,7 +52,7 @@ func (ts *taggerSQLiteStarter) Setup() error {
 	//return sqllib.SetupTables(
 	//	sm.mysqlConfig,
 	//	sm.index.MySQL,
-	//	[]config.Table{{ID: "table", Title: sm.table}},
+	//	[]config.Table{{Key: "table", Title: sm.table}},
 	//)
 }
 

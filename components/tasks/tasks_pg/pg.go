@@ -71,7 +71,7 @@ func New(access config.Access, table string, interfaceKey joiner.InterfaceKey) (
 		sqlReadToStartFinish: "SELECT " + fieldsToReadToStartFinishStr + " FROM " + table + " WHERE id = $1",
 		sqlStartFinish:       "UPDATE " + table + " SET " + fieldsToStartFinishStr + " WHERE id = $" + strconv.Itoa(len(fieldsToStartFinish)+1),
 
-		//sqlRemove: "DELETE FROM " + table + " where ID = $1",
+		//sqlRemove: "DELETE FROM " + table + " where Key = $1",
 		sqlClean: "DELETE FROM " + table,
 
 		interfaceKey: interfaceKey,
@@ -143,12 +143,12 @@ const onRead = "on tasksPostgres.Read(): "
 
 func (tasksOp *tasksPostgres) Read(id common.ID, _ *crud.GetOptions) (*tasks.Item, error) {
 	if len(id) < 1 {
-		return nil, errors.New(onRead + "empty ID")
+		return nil, errors.New(onRead + "empty Key")
 	}
 
 	idNum, err := strconv.ParseUint(string(id), 10, 64)
 	if err != nil {
-		return nil, errors.Errorf(onRead+"wrong ID (%s)", id)
+		return nil, errors.Errorf(onRead+"wrong Key (%s)", id)
 	}
 
 	item := tasks.Item{ID: id}
@@ -297,12 +297,12 @@ const onStart = "on tasksPostgres.Start(): "
 
 func (tasksOp *tasksPostgres) Start(id common.ID, _ *crud.SaveOptions) error {
 	if len(id) < 1 {
-		return errors.New(onStart + "empty ID")
+		return errors.New(onStart + "empty Key")
 	}
 
 	idNum, err := strconv.ParseUint(string(id), 10, 64)
 	if err != nil {
-		return errors.Errorf(onStart+"wrong ID (%s)", id)
+		return errors.Errorf(onStart+"wrong Key (%s)", id)
 	}
 
 	status, results, err := tasksOp.readToStartFinish(idNum)
@@ -341,12 +341,12 @@ const onFinish = "on tasksPostgres.Finish(): "
 
 func (tasksOp *tasksPostgres) Finish(id common.ID, result tasks.Result, _ *crud.SaveOptions) error {
 	if len(id) < 1 {
-		return errors.New(onFinish + "empty ID")
+		return errors.New(onFinish + "empty Key")
 	}
 
 	idNum, err := strconv.ParseUint(string(id), 10, 64)
 	if err != nil {
-		return errors.Errorf(onFinish+"wrong ID (%s)", id)
+		return errors.Errorf(onFinish+"wrong Key (%s)", id)
 	}
 
 	_, results, err := tasksOp.readToStartFinish(idNum)

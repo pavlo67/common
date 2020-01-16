@@ -66,7 +66,7 @@ package sources_pg
 // 		sqlReadToAddHistory: "SELECT history FROM " + table + " WHERE id = $1",
 // 		sqlAddHistory:       "UPDATE " + table + " SET history = $1 WHERE id = $2",
 
-// 		//sqlRemove: "DELETE FROM " + table + " where ID = $1",
+// 		//sqlRemove: "DELETE FROM " + table + " where Key = $1",
 // 		sqlClean: "DELETE FROM " + table,
 
 // 		interfaceKey: interfaceKey,
@@ -93,7 +93,7 @@ package sources_pg
 
 // const onSave = "on packsPg.Save(): "
 
-// func (packsOp *packsPg) Save(pack *packs.Pack, _ *crud.SaveOptions) (common.ID, error) {
+// func (packsOp *packsPg) Save(pack *packs.Pack, _ *crud.SaveOptions) (common.Key, error) {
 // 	if pack == nil {
 // 		return "", errors.New(onSave + "nothing to save")
 // 	}
@@ -152,22 +152,22 @@ package sources_pg
 // 		return "", errors.Wrapf(err, onSave+sqllib.CantExec, packsOp.sqlInsert, values)
 // 	}
 
-// 	return common.ID(strconv.FormatUint(lastInsertId, 10)), nil
+// 	return common.Key(strconv.FormatUint(lastInsertId, 10)), nil
 // }
 
 // const onRead = "on packsPg.Read(): "
 
-// func (packsOp *packsPg) Read(id common.ID, _ *crud.GetOptions) (*packs.Item, error) {
+// func (packsOp *packsPg) Read(id common.Key, _ *crud.GetOptions) (*packs.Item, error) {
 // 	if len(id) < 1 {
-// 		return nil, errors.New(onRead + "empty ID")
+// 		return nil, errors.New(onRead + "empty Key")
 // 	}
 
 // 	idNum, err := strconv.ParseUint(string(id), 10, 64)
 // 	if err != nil {
-// 		return nil, errors.Errorf(onRead+"wrong ID (%s)", id)
+// 		return nil, errors.Errorf(onRead+"wrong Key (%s)", id)
 // 	}
 
-// 	item := packs.Item{ID: id}
+// 	item := packs.Item{Key: id}
 
 // 	var toBytes, optionsBytes, historyBytes []byte
 // 	var createdAtStr string
@@ -217,7 +217,7 @@ package sources_pg
 
 // const onRemove = "on packsPg.Remove()"
 
-// func (packsOp *packsPg) Remove(common.ID, *crud.RemoveOptions) error {
+// func (packsOp *packsPg) Remove(common.Key, *crud.RemoveOptions) error {
 // 	return common.ErrNotImplemented
 // }
 
@@ -267,7 +267,7 @@ package sources_pg
 // 			return items, errors.Wrapf(err, onList+sqllib.CantScanQueryRow, query, values)
 // 		}
 
-// 		item.ID = common.ID(strconv.FormatInt(idNum, 10))
+// 		item.Key = common.Key(strconv.FormatInt(idNum, 10))
 
 // 		if len(toBytes) > 0 {
 // 			err = json.Unmarshal(toBytes, &item.To)
@@ -312,7 +312,7 @@ package sources_pg
 
 // const onAddHistory = "on packsPg.AddHistory(): "
 
-// func (packsOp *packsPg) AddHistory(id common.ID, historyToAdd crud.History, _ *crud.SaveOptions) (crud.History, error) {
+// func (packsOp *packsPg) AddHistory(id common.Key, historyToAdd crud.History, _ *crud.SaveOptions) (crud.History, error) {
 
 // 	// nothing to do
 
@@ -323,12 +323,12 @@ package sources_pg
 // 	// reading old .History
 
 // 	if len(id) < 1 {
-// 		return nil, errors.New(onAddHistory + "empty ID")
+// 		return nil, errors.New(onAddHistory + "empty Key")
 // 	}
 
 // 	idNum, err := strconv.ParseUint(string(id), 10, 64)
 // 	if err != nil {
-// 		return nil, errors.Errorf(onAddHistory+"wrong ID (%s)", id)
+// 		return nil, errors.Errorf(onAddHistory+"wrong Key (%s)", id)
 // 	}
 
 // 	var historyBytes []byte

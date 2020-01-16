@@ -202,12 +202,12 @@ const onRead = "on dataSQLite.Read(): "
 
 func (dataOp *dataSQLite) Read(id common.ID, _ *crud.GetOptions) (*data.Item, error) {
 	if len(id) < 1 {
-		return nil, errors.New(onRead + "empty ID")
+		return nil, errors.New(onRead + "empty Key")
 	}
 
 	idNum, err := strconv.ParseUint(string(id), 10, 64)
 	if err != nil {
-		return nil, errors.Errorf(onRead+"wrong ID (%s)", id)
+		return nil, errors.Errorf(onRead+"wrong Key (%s)", id)
 	}
 
 	item := data.Item{ID: id}
@@ -293,12 +293,12 @@ const onRemove = "on dataSQLite.Remove()"
 
 func (dataOp *dataSQLite) Remove(id common.ID, _ *crud.RemoveOptions) error {
 	if len(id) < 1 {
-		return errors.New(onRemove + "empty ID")
+		return errors.New(onRemove + "empty Key")
 	}
 
 	idNum, err := strconv.ParseUint(string(id), 10, 64)
 	if err != nil {
-		return errors.Errorf(onRemove+"wrong ID (%s)", id)
+		return errors.Errorf(onRemove+"wrong Key (%s)", id)
 	}
 
 	_, err = dataOp.stmRemove.Exec(idNum)
@@ -336,11 +336,11 @@ func (dataOp *dataSQLite) Export(afterIDStr string, options *crud.GetOptions) ([
 			return nil, errors.Errorf("can't strconv.Atoi(%s) for after_id parameter: %s", afterIDStr, err)
 		}
 
-		// TODO!!! term with some item's autoincrement if original .ID isn't it (using .ID to find corresponding autoincrement value)
+		// TODO!!! term with some item's autoincrement if original .Key isn't it (using .Key to find corresponding autoincrement value)
 		term = selectors.Binary(selectors.Gt, "id", selectors.Value{afterID})
 	}
 
-	// TODO!!! order by some item's autoincrement if original .ID isn't it
+	// TODO!!! order by some item's autoincrement if original .Key isn't it
 	if options == nil {
 		options = &crud.GetOptions{OrderBy: []string{"id"}}
 	} else {

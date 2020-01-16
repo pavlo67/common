@@ -93,7 +93,7 @@ func (it *copyTask) Copy() (int, int, int, error) {
 	for _, item := range series.Data {
 		var cnt uint64
 
-		// l.Info("? ", item.ID)
+		// l.Info("? ", item.Key)
 
 		numProcessed++
 

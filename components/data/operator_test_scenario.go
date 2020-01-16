@@ -134,7 +134,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		//var uniques, autoUniques []string
 		//
 		//for _, field := range description.FieldsArr {
-		//	key := field.ID
+		//	key := field.Key
 		//	if field.Unique {
 		//		if field.AutoUnique {
 		//			autoUniques = append(autoUniques, key)
@@ -203,7 +203,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		//		var uniquesUpdatable []string
 		//		for _, field := range description.FieldsArr {
 		//			if field.Unique && (field.Updatable && !field.AutoUnique) { // || field.Additable
-		//				uniquesUpdatable = append(uniquesUpdatable, field.ID)
+		//				uniquesUpdatable = append(uniquesUpdatable, field.Key)
 		//			}
 		//		}
 		//
@@ -272,14 +272,14 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		//toUpdateResult := tc.ToUpdate
 		//for _, f := range description.FieldsArr {
 		//	if !f.Creatable {
-		//		toUpdateResult[f.ID] = data[f.ID]
+		//		toUpdateResult[f.Key] = data[f.Key]
 		//	}
 		//}
 
 		// test ListTags -------------------------------------------------------------------------------------
 
 		//if !tc.ExcludeListTest {
-		//	var ids []common.ID
+		//	var ids []common.Key
 		//	for _, idi := range id {
 		//		ids = append(ids, idi)
 		//	}

@@ -121,7 +121,7 @@ func OperatorTestScenario(t *testing.T, testCases []TestCase, cleanerOp crud.Cle
 			case "add":
 				err = tc.Operator.AddTags(step.ToTag, step.Tags, nil)
 			//case "remove":
-			//	err = tc.Actor.RemoveTags(step.ID, step.ID, step.Tags, nil)
+			//	err = tc.Actor.RemoveTags(step.Key, step.Key, step.Tags, nil)
 			case "replace":
 				err = tc.Operator.ReplaceTags(step.ToTag, step.Tags, nil)
 			case "tags":

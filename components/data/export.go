@@ -30,11 +30,11 @@ func Export(dataOp Operator, afterIDStr string, options *crud.GetOptions) ([]Ite
 			return nil, errors.Errorf("can't strconv.Atoi(%s) for after_id parameter: %s", afterIDStr, err)
 		}
 
-		// TODO!!! term with some item's autoincrement if original .ID isn't it (using .ID to find corresponding autoincrement value)
+		// TODO!!! term with some item's autoincrement if original .Key isn't it (using .Key to find corresponding autoincrement value)
 		term = selectors.Binary(selectors.Gt, "id", selectors.Value{afterID})
 	}
 
-	// TODO!!! order by some item's autoincrement if original .ID isn't it
+	// TODO!!! order by some item's autoincrement if original .Key isn't it
 	if options == nil {
 		options = &crud.GetOptions{OrderBy: []string{"id"}}
 	} else {

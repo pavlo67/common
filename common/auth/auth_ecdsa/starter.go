@@ -1,6 +1,8 @@
 package auth_ecdsa
 
 import (
+	"time"
+
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
@@ -43,7 +45,7 @@ func (ss *identity_ecdsa) Setup() error {
 }
 
 func (ss *identity_ecdsa) Run(joiner joiner.Operator) error {
-	identOp, err := New(nil)
+	identOp, err := New(1000, time.Second*2, nil)
 	if err != nil {
 		return errors.Wrap(err, "can't init identity_ecdsa.Actor")
 	}

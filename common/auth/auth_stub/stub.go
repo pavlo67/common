@@ -32,6 +32,10 @@ func New(users []UserStub, salt string) (*isentityLoginStub, error) {
 //	return []auth.CredsType{auth.CredsPassword}, nil
 //}
 
+func (_ *isentityLoginStub) GetSessionKeys() (common.Map, error) {
+	return nil, nil
+}
+
 func (u *isentityLoginStub) SetCreds(user auth.User, toSet auth.Creds) (*auth.Creds, error) {
 	return nil, common.ErrNotImplemented
 }
@@ -61,15 +65,15 @@ func (u *isentityLoginStub) Authorize(toAuth auth.Creds) (*auth.User, error) {
 				crypt := crypt.SHA256.New()
 				passwordHash, _ := crypt.Generate([]byte(strings.TrimSpace(password)), []byte(u.salt))
 				if password == passwordHash {
-					return &auth.User{ID: user.ID, Nickname: user.Login}, nil
+					return &auth.User{Key: user.ID, Nickname: user.Login}, nil
 				}
 			default:
 				if password == user.Password {
-					return &auth.User{ID: user.ID, Nickname: user.Login}, nil
+					return &auth.User{Key: user.ID, Nickname: user.Login}, nil
 				}
 			}
 		}
 	}
 
-	return nil, auth.ErrBadPassword
+	return nil, auth.ErrPassword
 }
