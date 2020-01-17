@@ -1,14 +1,12 @@
-package auth_ecdsa
+package auth_jwt
 
 import (
 	"os"
 	"testing"
-	"time"
-
-	"github.com/stretchr/testify/require"
 
 	"github.com/pavlo67/workshop/common/auth"
 	"github.com/pavlo67/workshop/common/logger"
+	"github.com/stretchr/testify/require"
 )
 
 const serviceName = "gatherer"
@@ -27,11 +25,11 @@ func TestOperator(t *testing.T) {
 	//require.NoError(t, err)
 	//require.NotNil(t, cfg)
 
-	authOp, err := New(10, time.Second, nil)
+	authOp, err := New()
 	require.NoError(t, err)
 	require.NotNil(t, authOp)
 
 	testCases := auth.TestCases(authOp)
 
-	auth.OperatorTestScenarioPublicKey(t, testCases, l)
+	auth.OperatorTestScenarioToken(t, testCases, l)
 }

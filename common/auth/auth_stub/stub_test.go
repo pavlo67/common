@@ -1,9 +1,8 @@
-package auth_ecdsa
+package auth_stub
 
 import (
 	"os"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -27,11 +26,22 @@ func TestOperator(t *testing.T) {
 	//require.NoError(t, err)
 	//require.NotNil(t, cfg)
 
-	authOp, err := New(10, time.Second, nil)
+	//salt := &common.Salt{
+	//	SaltLenMin:    1,
+	//	SaltLenMax:    100,
+	//	RoundsMin:     1,
+	//	RoundsMax:     100,
+	//	RoundsDefault: 10,
+	//}
+	//saltStr := string(salt.Generate(10))
+	//
+	//l.Infof("salt string: %s", saltStr)
+
+	authOp, err := New(nil, "")
 	require.NoError(t, err)
 	require.NotNil(t, authOp)
 
 	testCases := auth.TestCases(authOp)
 
-	auth.OperatorTestScenarioPublicKey(t, testCases, l)
+	auth.OperatorTestScenarioPassword(t, testCases, l)
 }

@@ -18,16 +18,10 @@ func Starter() starter.Operator {
 	return &auth_stubStarter{}
 }
 
-type UserStub struct {
-	ID       common.ID
-	Login    string
-	Password string
-}
-
 var UserStubDefault = UserStub{
-	ID:       "1",
-	Login:    "pavlo",
-	Password: "123",
+	Key:          "1",
+	Nickname:     "pavlo",
+	PasswordHash: "123",
 }
 
 type auth_stubStarter struct {
@@ -46,10 +40,10 @@ func (sc *auth_stubStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (sc *auth_stubStarter) Init(cfgCommon, cfg *config.Config, params common.Map) (info []common.Map, err error) {
+func (sc *auth_stubStarter) Init(cfgCommon, cfg *config.Config, l logger.Operator, options common.Map) (info []common.Map, err error) {
 	l = logger.Get()
 
-	sc.interfaceKey = joiner.InterfaceKey(params.StringDefault("interface_key", string(auth.InterfaceKey)))
+	sc.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(auth.InterfaceKey)))
 
 	// var ok bool
 	var errs common.Errors

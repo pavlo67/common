@@ -26,7 +26,7 @@ type User struct {
 
 type Operator interface {
 	// SetCreds can require multi-steps (using returned Creds)...
-	SetCreds(user *User, toSet Creds) (*Creds, error)
+	SetCreds(user *User, toSet Creds) (*User, *Creds, error)
 
 	// InitAuthSession starts an auth session if it's required
 	InitAuthSession(toInit Creds) (*Creds, error)

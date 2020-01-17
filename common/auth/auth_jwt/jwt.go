@@ -4,19 +4,17 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"log"
+	"time"
 
+	"github.com/pkg/errors"
 	"gopkg.in/square/go-jose.v2"
 	"gopkg.in/square/go-jose.v2/jwt"
 
-	"time"
-
-	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/auth"
-	"github.com/pavlo67/workshop/libraries/addrlib"
-	"github.com/pkg/errors"
+	"github.com/pavlo67/workshop/common/identity"
 )
 
-const Proto addrlib.Proto = "jwt://"
+const Proto = "jwt"
 
 var _ auth.Operator = &authJWT{}
 
@@ -27,6 +25,8 @@ type authJWT struct {
 	privKey rsa.PrivateKey
 	builder jwt.Builder
 }
+
+// TODO!!! add expiration time
 
 func New() (auth.Operator, error) {
 	privKey, err := rsa.GenerateKey(rand.Reader, 2048)
@@ -54,14 +54,14 @@ type jwtCreds struct {
 	Creds auth.Creds `json:"creds,omitempty"`
 }
 
-func (_ *authJWT) GetSessionKeys() (common.Map, error) {
+func (_ *authJWT) InitAuthSession(toInit auth.Creds) (*auth.Creds, error) {
 	return nil, nil
 }
 
 // 	SetCreds ignores all input parameters, creates new "BTC identity" and returns it
-func (authOp *authJWT) SetCreds(user *auth.User, creds auth.Creds) (*auth.Creds, error) {
+func (authOp *authJWT) SetCreds(user *auth.User, creds auth.Creds) (*auth.User, *auth.Creds, error) {
 	if user == nil {
-		return nil, auth.ErrNoUser
+		return nil, nil, auth.ErrNoUser
 	}
 
 	jc := jwtCreds{
@@ -82,12 +82,10 @@ func (authOp *authJWT) SetCreds(user *auth.User, creds auth.Creds) (*auth.Creds,
 
 	rawJWT, err := builder.CompactSerialize()
 	if err != nil {
-		return nil, errors.Wrap(err, "on authJWT.SetCreds() with builder.CompactSerialize()")
+		return nil, nil, errors.Wrap(err, "on authJWT.SetCreds() with builder.CompactSerialize()")
 	}
 
-	return &auth.Creds{Values: map[auth.CredsType]string{
-		auth.CredsJWT: rawJWT,
-	}}, nil
+	return user, &auth.Creds{Values: auth.Values{auth.CredsJWT: rawJWT}}, nil
 }
 
 func (authOp *authJWT) Authorize(toAuth auth.Creds) (*auth.User, error) {
@@ -115,7 +113,7 @@ func (authOp *authJWT) Authorize(toAuth auth.Creds) (*auth.User, error) {
 	}
 
 	return &auth.User{
-		Key:      common.ID(res.ID),
+		Key:      identity.Key(res.ID),
 		Nickname: nick,
 		Creds:    res.Creds,
 	}, nil

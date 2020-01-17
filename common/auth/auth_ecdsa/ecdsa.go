@@ -145,41 +145,53 @@ func (is *identityECDSA) Authorize(toAuth auth.Creds) (*auth.User, error) {
 	}
 
 	return &auth.User{
-		Key:      identity.Key(publKeyBase58),
+		Key:      identity.Key(Proto + "://" + publKeyBase58),
 		Nickname: nickname,
 		// Creds
 	}, nil
 }
 
 // 	SetCreds ignores all input parameters, creates new "BTC identity" and returns it
-func (*identityECDSA) SetCreds(_ *auth.User, toSet auth.Creds) (*auth.Creds, error) {
+func (*identityECDSA) SetCreds(user *auth.User, toSet auth.Creds) (*auth.User, *auth.Creds, error) {
 	// TODO: modify acceptableIDs if it's necessary
 
 	privKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	} else if privKey == nil {
-		return nil, errEmptyPrivateKeyGenerated
+		return nil, nil, errEmptyPrivateKeyGenerated
 	}
 
 	privKeyBytes, err := encrlib.ECDSASerialize(*privKey)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	publKeyBase58 := base58.Encode(encrlib.ECDSAPublicKey(*privKey))
+	nickname := publKeyBase58
+	if user != nil && strings.TrimSpace(user.Nickname) != "" {
+		nickname = user.Nickname
+	}
 
 	creds := auth.Creds{
 		Values: map[auth.CredsType]string{
 			auth.CredsPrivateKey:        string(privKeyBytes),
 			auth.CredsPublicKeyBase58:   publKeyBase58,
 			auth.CredsPublicKeyEncoding: Proto,
-			auth.CredsNickname:          toSet.Values[auth.CredsNickname],
-			auth.CredsIentityKey:        publKeyBase58,
 		},
 	}
 
-	return &creds, nil
+	if user == nil {
+		user = &auth.User{
+			Key:      identity.Key(Proto + "://" + publKeyBase58),
+			Nickname: nickname,
+		}
+	} else {
+		user.Key = identity.Key(Proto + "://" + publKeyBase58)
+		user.Nickname = nickname
+	}
+
+	return user, &creds, nil
 }
 
 //

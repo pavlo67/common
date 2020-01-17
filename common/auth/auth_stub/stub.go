@@ -4,76 +4,126 @@ import (
 	"strings"
 
 	"github.com/GehirnInc/crypt"
+	"github.com/pkg/errors"
 
-	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/auth"
-
-	"github.com/pavlo67/workshop/libraries/encrlib"
+	"github.com/pavlo67/workshop/common/identity"
+	"github.com/pavlo67/workshop/common/libraries/encrlib"
 )
 
-var _ auth.Operator = &isentityLoginStub{}
+var _ auth.Operator = &authStub{}
 
-type isentityLoginStub struct {
-	users []UserStub
-	salt  string
+type UserStub struct {
+	Key          identity.Key
+	Nickname     string
+	PasswordHash string
 }
 
-//const login = "йа"
-//const password = "мій пароль"
+type authStub struct {
+	users   []UserStub
+	crypter crypt.Crypter
+	salt    string
+}
 
-func New(users []UserStub, salt string) (*isentityLoginStub, error) {
-	return &isentityLoginStub{
-		users: users,
-		salt:  salt,
+func New(users []UserStub, salt string) (*authStub, error) {
+	return &authStub{
+		users:   users,
+		crypter: crypt.SHA256.New(),
+		salt:    salt,
 	}, nil
 }
 
-//func (u *isentityLoginStub) Accepts() ([]auth.CredsType, error) {
-//	return []auth.CredsType{auth.CredsPassword}, nil
-//}
-
-func (_ *isentityLoginStub) GetSessionKeys() (common.Map, error) {
+func (_ *authStub) InitAuthSession(_ auth.Creds) (*auth.Creds, error) {
 	return nil, nil
 }
 
-func (u *isentityLoginStub) SetCreds(user auth.User, toSet auth.Creds) (*auth.Creds, error) {
-	return nil, common.ErrNotImplemented
-}
-
-func (u *isentityLoginStub) Authorize(toAuth auth.Creds) (*auth.User, error) {
-	login := toAuth.Values[auth.CredsLogin]
-
-	nickname := toAuth.Values[auth.CredsNickname]
-	if nickname != "" {
-		login = nickname
+func (u *authStub) SetCreds(user *auth.User, toSet auth.Creds) (*auth.User, *auth.Creds, error) {
+	if user == nil {
+		return nil, nil, auth.ErrNoUser
 	}
 
-	email := toAuth.Values[auth.CredsEmail]
-	if email != "" {
-		login = email
+	userStub := UserStub{
+		Key:      user.Key,
+		Nickname: user.Nickname,
 	}
 
-	password := toAuth.Values[auth.CredsPassword]
-	cryptype := toAuth.Cryptype
+	passwordToSet := strings.TrimSpace(toSet.Values[auth.CredsPassword])
+	l.Infof("password to set  : %s", passwordToSet)
 
-	for _, user := range u.users {
-		// l.Infof("%#v: %s, %s", user, login, password)
+	var err error
+	userStub.PasswordHash, err = u.crypter.Generate([]byte(passwordToSet), []byte(u.salt))
+	if err != nil {
+		return nil, nil, err
+	}
 
-		if user.Login == login {
-			switch cryptype {
-			case encrlib.SHA256:
-				crypt := crypt.SHA256.New()
-				passwordHash, _ := crypt.Generate([]byte(strings.TrimSpace(password)), []byte(u.salt))
-				if password == passwordHash {
-					return &auth.User{Key: user.ID, Nickname: user.Login}, nil
-				}
-			default:
-				if password == user.Password {
-					return &auth.User{Key: user.ID, Nickname: user.Login}, nil
-				}
-			}
+	l.Infof("password hash set: %s", userStub.PasswordHash)
+	l.Infof("salt: %s", u.salt)
+
+	//passwordHashAgain, _ := u.crypter.Generate([]byte(passwordToSet), []byte(u.salt))
+	//l.Infof("password hash ???: %s", passwordHashAgain)
+	//l.Infof("salt: %s", u.salt)
+
+	l.Infof("verify: %s", u.crypter.Verify(userStub.PasswordHash, []byte(passwordToSet)))
+
+	if toSet.Values[auth.CredsNickname] != "" {
+		userStub.Nickname = toSet.Values[auth.CredsNickname]
+		user.Nickname = toSet.Values[auth.CredsNickname]
+	}
+
+	for i, us := range u.users {
+		if us.Key == user.Key {
+			u.users[i] = userStub
+			return user, nil, nil
 		}
 	}
 
-	return nil, auth.ErrPassword
+	u.users = append(u.users, userStub)
+
+	return user, nil, nil
+}
+
+func (u *authStub) Authorize(toAuth auth.Creds) (*auth.User, error) {
+
+	login := toAuth.Values[auth.CredsLogin]
+	if login == "" {
+		email := toAuth.Values[auth.CredsEmail]
+		if email != "" {
+			login = email
+		}
+		nickname := toAuth.Values[auth.CredsNickname]
+		if nickname != "" {
+			login = nickname
+		}
+	}
+
+	password := strings.TrimSpace(toAuth.Values[auth.CredsPassword])
+
+	// l.Infof("password to check: %s", password)
+
+	// var passwordHash string
+
+	switch toAuth.Cryptype {
+	//case encrlib.SHA256:
+	//	passwordHash = strings.TrimSpace(password)
+	case encrlib.NoCrypt:
+		//passwordHash, _ = u.crypter.Generate([]byte(password), []byte(u.salt))
+	default:
+		return nil, auth.ErrEncryptionType
+	}
+
+	// l.Infof("password hash    : %s", passwordHash)
+
+	for _, us := range u.users {
+		// l.Infof("%#v: %s, %s", us, login, password)
+
+		if us.Nickname == login {
+			// l.Info("++")
+			if u.crypter.Verify(us.PasswordHash, []byte(password)) == nil {
+				return &auth.User{Key: us.Key, Nickname: us.Nickname}, nil
+			}
+			return nil, auth.ErrPassword
+		}
+	}
+
+	return nil, errors.Wrap(auth.ErrPassword, "no user")
 }
