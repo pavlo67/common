@@ -10,9 +10,13 @@ import (
 	"math/big"
 )
 
-func ECDSASign(privKey ecdsa.PrivateKey, data []byte) ([]byte, error) {
+func ECDSAPublicKey(privKey ecdsa.PrivateKey) []byte {
+	return append(privKey.PublicKey.X.Bytes(), privKey.PublicKey.Y.Bytes()...)
+}
+
+func ECDSASign(data string, privKey ecdsa.PrivateKey) ([]byte, error) {
 	h := md5.New()
-	io.WriteString(h, string(data))
+	io.WriteString(h, data)
 
 	r, s, err := ecdsa.Sign(rand.Reader, &privKey, h.Sum(nil))
 	if err != nil {
@@ -22,19 +26,19 @@ func ECDSASign(privKey ecdsa.PrivateKey, data []byte) ([]byte, error) {
 	return append(r.Bytes(), s.Bytes()...), nil
 }
 
-func ECDSAVerify(publKey, dataRaw, signature []byte) bool {
+func ECDSAVerify(data string, publKey, signature []byte) bool {
 	h := md5.New()
-	io.WriteString(h, string(dataRaw))
-	data := h.Sum(nil)
+	io.WriteString(h, data)
+	dataSum := h.Sum(nil)
 
-	// build key and verify data
+	// build key and verify dataSum
 	sigLen := len(signature)
 
 	s := big.Int{}
-	s.SetBytes([]byte(signature)[(sigLen / 2):])
+	s.SetBytes(signature[(sigLen / 2):])
 
 	r := big.Int{}
-	r.SetBytes([]byte(signature)[:(sigLen / 2)])
+	r.SetBytes(signature[:(sigLen / 2)])
 
 	x := big.Int{}
 	y := big.Int{}
@@ -44,7 +48,7 @@ func ECDSAVerify(publKey, dataRaw, signature []byte) bool {
 
 	rawPubKey := ecdsa.PublicKey{Curve: elliptic.P256(), X: &x, Y: &y}
 
-	return ecdsa.Verify(&rawPubKey, data, &r, &s)
+	return ecdsa.Verify(&rawPubKey, dataSum, &r, &s)
 }
 
 func ECDSASerialize(privKey ecdsa.PrivateKey) ([]byte, error) {
@@ -63,20 +67,22 @@ func ECDSASerialize(privKey ecdsa.PrivateKey) ([]byte, error) {
 	//return encoded.Bytes(), nil
 }
 
-func ECDSADeserialize(data []byte, privKey *ecdsa.PrivateKey) error {
+func ECDSADeserialize(data []byte) (*ecdsa.PrivateKey, error) {
 	//decoder := gob.NewDecoder(bytes.NewReader(data))
 	//err := decoder.Decode(privKey)
 	//if err != nil {
 	//	return err
 	//}
 
-	err := json.Unmarshal(data, privKey)
+	privKey := ecdsa.PrivateKey{}
+
+	err := json.Unmarshal(data, &privKey)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// it's not necessary if privKey.Curve would be serialized instead "nilled"
 	privKey.Curve = elliptic.P256()
 
-	return nil
+	return &privKey, nil
 }

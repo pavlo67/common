@@ -53,7 +53,7 @@ func UserWithRequest(r *http.Request, authOps []auth.Operator) (*auth.User, erro
 
 		credsSignature := auth.Creds{
 			Values: map[auth.CredsType]string{
-				auth.CredsPublicKeyAddress:   publicKeyAddress,
+				auth.CredsPublicKeyBase58:    publicKeyAddress,
 				auth.CredsContentToSignature: r.URL.Path + "?" + r.URL.RawQuery,
 				auth.CredsKeyToSignature:     numberToSignature,
 				auth.CredsSignature:          signature,

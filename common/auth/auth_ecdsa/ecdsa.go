@@ -97,18 +97,19 @@ func (is *identityECDSA) Authorize(toAuth auth.Creds) (*auth.User, error) {
 		return nil, auth.ErrEncryptionType
 	}
 
-	publKeyAddress := toAuth.Values[auth.CredsPublicKeyAddress]
-	if len(publKeyAddress) < 1 {
+	publKeyBase58 := toAuth.Values[auth.CredsPublicKeyBase58]
+	if len(publKeyBase58) < 1 {
 		return nil, errEmptyPublicKeyAddress
 	}
+	publKey := base58.Decode(publKeyBase58)
 
 	// TODO: use mutex is is.acceptableIDs can be modified using .SetCreds or somehow else
-	if is.acceptableIDs != nil && !strlib.In(is.acceptableIDs, publKeyAddress) {
+	if is.acceptableIDs != nil && !strlib.In(is.acceptableIDs, publKeyBase58) {
 		return nil, nil
 	}
 
-	contentToSignature := toAuth.Values[auth.CredsContentToSignature]
-	numberToSend, err := strconv.ParseUint(contentToSignature, 10, 64)
+	keyToSignature := toAuth.Values[auth.CredsKeyToSignature]
+	numberToSend, err := strconv.ParseUint(keyToSignature, 10, 64)
 	if err != nil {
 		return nil, errors.Wrap(auth.ErrSignaturedKey, "not a number!")
 	}
@@ -133,19 +134,18 @@ func (is *identityECDSA) Authorize(toAuth auth.Creds) (*auth.User, error) {
 	}
 
 	signature := []byte(toAuth.Values[auth.CredsSignature])
-	publKey := base58.Decode(publKeyAddress)
 
-	if !encrlib.ECDSAVerify(publKey, []byte(contentToSignature), signature) {
+	if !encrlib.ECDSAVerify(keyToSignature, publKey, signature) {
 		return nil, errWrongSignature
 	}
 
-	var nickname = publKeyAddress
+	var nickname = publKeyBase58
 	if nicknameReceived := toAuth.Values[auth.CredsNickname]; strings.TrimSpace(nicknameReceived) != "" {
 		nickname = nicknameReceived
 	}
 
 	return &auth.User{
-		Key:      identity.Key(publKeyAddress),
+		Key:      identity.Key(publKeyBase58),
 		Nickname: nickname,
 		// Creds
 	}, nil
@@ -167,15 +167,15 @@ func (*identityECDSA) SetCreds(_ *auth.User, toSet auth.Creds) (*auth.Creds, err
 		return nil, err
 	}
 
-	publKeyAddress := string(append(privKey.PublicKey.X.Bytes(), privKey.PublicKey.Y.Bytes()...))
+	publKeyBase58 := base58.Encode(encrlib.ECDSAPublicKey(*privKey))
 
 	creds := auth.Creds{
 		Values: map[auth.CredsType]string{
 			auth.CredsPrivateKey:        string(privKeyBytes),
-			auth.CredsPublicKeyAddress:  publKeyAddress,
+			auth.CredsPublicKeyBase58:   publKeyBase58,
 			auth.CredsPublicKeyEncoding: Proto,
 			auth.CredsNickname:          toSet.Values[auth.CredsNickname],
-			auth.CredsIentityKey:        publKeyAddress,
+			auth.CredsIentityKey:        publKeyBase58,
 		},
 	}
 
