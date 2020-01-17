@@ -54,7 +54,7 @@ type jwtCreds struct {
 	Creds auth.Creds `json:"creds,omitempty"`
 }
 
-func (_ *authJWT) InitAuthSession(toInit auth.Creds) (*auth.Creds, error) {
+func (_ *authJWT) InitAuth(toInit auth.Creds) (*auth.Creds, error) {
 	return nil, nil
 }
 

@@ -63,7 +63,7 @@ func New(numbersLimit int, maxSessionDuration time.Duration, acceptableIDs []str
 	return is, nil
 }
 
-func (is *identityECDSA) InitAuthSession(toInit auth.Creds) (*auth.Creds, error) {
+func (is *identityECDSA) InitAuth(toInit auth.Creds) (*auth.Creds, error) {
 	now := time.Now()
 
 	is.mutex.Lock() // Lock() -----------------------------------------------------

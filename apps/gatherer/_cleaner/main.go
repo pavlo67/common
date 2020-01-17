@@ -54,7 +54,7 @@ func main() {
 
 	// common config
 
-	//configCommonPath := currentPath + "../../environments/common." + configEnv + ".yaml"
+	//configCommonPath := currentPath + "../../../environments/common." + configEnv + ".yaml"
 	//cfgCommon, err := config.Get(configCommonPath, encodelib.MarshalerYAML)
 	//if err != nil {
 	//	l.Fatal(err)
@@ -69,7 +69,7 @@ func main() {
 
 	serviceEnv, ok := os.LookupEnv("SERVICE")
 
-	configGathererPath := currentPath + "../../environments/" + serviceEnv + "." + configEnv + ".yaml"
+	configGathererPath := currentPath + "../../../environments/" + serviceEnv + "." + configEnv + ".yaml"
 	cfgGatherer, err := config.Get(configGathererPath, serializer.MarshalerYAML)
 	if err != nil {
 		l.Fatal(err)

@@ -42,9 +42,7 @@ func TestCases(authOp Operator) []OperatorTestCase {
 			},
 			ToInit: Creds{
 				Cryptype: encrlib.NoCrypt,
-				Values: Values{
-					CredsIP: testIP,
-				},
+				Values:   Values{},
 			},
 		},
 	}
@@ -70,9 +68,9 @@ func OperatorTestScenarioPassword(t *testing.T, testCases []OperatorTestCase, l 
 		require.Equal(t, tc.User.Nickname, userSet.Nickname)
 		require.Equal(t, tc.User.Key, userSet.Key)
 
-		// .InitAuthSession() -----------------------------------
+		// .InitAuth() -----------------------------------
 
-		sessionCreds, err := tc.InitAuthSession(tc.ToInit)
+		sessionCreds, err := tc.InitAuth(tc.ToInit)
 		require.NoError(t, err)
 		require.Nil(t, sessionCreds)
 
@@ -116,9 +114,9 @@ func OperatorTestScenarioToken(t *testing.T, testCases []OperatorTestCase, l log
 		require.Equal(t, tc.User.Nickname, userSet.Nickname)
 		require.Equal(t, tc.User.Key, userSet.Key)
 
-		// .InitAuthSession() -----------------------------------
+		// .InitAuth() -----------------------------------
 
-		sessionCreds, err := tc.InitAuthSession(tc.ToInit)
+		sessionCreds, err := tc.InitAuth(tc.ToInit)
 		require.NoError(t, err)
 		require.Nil(t, sessionCreds)
 
@@ -155,9 +153,11 @@ func OperatorTestScenarioPublicKey(t *testing.T, testCases []OperatorTestCase, l
 		require.Equal(t, tc.User.Nickname, userSet.Nickname)
 		require.NotEmpty(t, userSet.Key)
 
-		// .InitAuthSession() -----------------------------------
+		// .InitAuth() -----------------------------------
 
-		sessionCreds, err := tc.InitAuthSession(tc.ToInit)
+		tc.ToInit.Values[CredsIP] = testIP
+
+		sessionCreds, err := tc.InitAuth(tc.ToInit)
 		require.NoError(t, err)
 		require.NotNil(t, sessionCreds)
 

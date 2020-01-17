@@ -110,7 +110,7 @@ func (gs *gathererStarter) Run(joinerOp joiner.Operator) error {
 	}
 
 	var endpoints = server_http.Endpoints{
-		"receive": {Path: "/transport", Tags: []string{"transport"}, HandlerKey: gs.receiverHandlerKey},
+		"transport": {Path: "/transport", Tags: []string{"transport"}, HandlerKey: gs.receiverHandlerKey},
 	}
 
 	for key, ep := range endpoints {
@@ -137,12 +137,15 @@ func (gs *gathererStarter) Run(joinerOp joiner.Operator) error {
 		"api-docs",
 		l,
 	)
+	if err != nil {
+		l.Error("on server_http.InitEndpointsWithSwaggerV2(): ", err)
+	}
 
 	WG.Add(1)
 
 	go func() {
 		defer WG.Done()
-		_ = srvOp.Start()
+		err := srvOp.Start()
 		if err != nil {
 			l.Error("on srvOp.Start(): ", err)
 		}

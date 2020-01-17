@@ -9,6 +9,9 @@ import (
 )
 
 const InterfaceKey joiner.InterfaceKey = "auth"
+const AuthorizeHandlerKey joiner.InterfaceKey = "auth_handler"
+const AuthInitHandlerKey joiner.InterfaceKey = "auth_init_session_handler"
+const SetCredsHandlerKey joiner.InterfaceKey = "auth_set_creds_handler"
 
 const Anyone common.ID = "_"
 
@@ -28,8 +31,8 @@ type Operator interface {
 	// SetCreds can require multi-steps (using returned Creds)...
 	SetCreds(user *User, toSet Creds) (*User, *Creds, error)
 
-	// InitAuthSession starts an auth session if it's required
-	InitAuthSession(toInit Creds) (*Creds, error)
+	// InitAuth starts an auth session if it's required
+	InitAuth(toInit Creds) (*Creds, error)
 
 	// Authorize can require multi-steps (using returned Creds)...
 	Authorize(toAuth Creds) (*User, error)

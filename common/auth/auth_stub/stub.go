@@ -33,7 +33,7 @@ func New(users []UserStub, salt string) (*authStub, error) {
 	}, nil
 }
 
-func (_ *authStub) InitAuthSession(_ auth.Creds) (*auth.Creds, error) {
+func (_ *authStub) InitAuth(_ auth.Creds) (*auth.Creds, error) {
 	return nil, nil
 }
 

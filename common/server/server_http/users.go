@@ -45,24 +45,24 @@ func UserWithRequest(r *http.Request, authOps []auth.Operator) (*auth.User, erro
 	//	// previous errs is added with auth.GetUser()
 	//}
 
-	// SIGNATURE CHECK
-	signature := r.Header.Get("Signature")
-	if signature != "" && r.URL != nil {
-		publicKeyAddress := r.Header.Get("Public-Key-Address")
-		numberToSignature := r.Header.Get("Number-To-Signature")
-
-		credsSignature := auth.Creds{
-			Values: map[auth.CredsType]string{
-				auth.CredsPublicKeyBase58:    publicKeyAddress,
-				auth.CredsContentToSignature: r.URL.Path + "?" + r.URL.RawQuery,
-				auth.CredsKeyToSignature:     numberToSignature,
-				auth.CredsSignature:          signature,
-			},
-		}
-
-		user, errs = auth.GetUser(credsSignature, authOps, errs)
-		// previous errs is added by auth.GetUser()
-	}
+	//// SIGNATURE CHECK
+	//signature := r.Header.Get("Signature")
+	//if signature != "" && r.URL != nil {
+	//	publicKeyAddress := r.Header.Get("Public-Key-Address")
+	//	numberToSignature := r.Header.Get("Number-To-Signature")
+	//
+	//	credsSignature := auth.Creds{
+	//		Values: map[auth.CredsType]string{
+	//			auth.CredsPublicKeyBase58:    publicKeyAddress,
+	//			auth.CredsContentToSignature: r.URL.Path + "?" + r.URL.RawQuery,
+	//			auth.CredsKeyToSignature:     numberToSignature,
+	//			auth.CredsSignature:          signature,
+	//		},
+	//	}
+	//
+	//	user, errs = auth.GetUser(credsSignature, authOps, errs)
+	//	// previous errs is added by auth.GetUser()
+	//}
 
 	return user, errs.Err()
 }

@@ -1,0 +1,71 @@
+{
+ "info": {
+  "title": "Pavlo's workspace REST API",
+  "version": "0.0.1"
+ },
+ "paths": {
+  "/auth_init": {
+   "post": {
+    "operationId": "auth_init",
+    "parameters": [
+     {
+      "in": "body",
+      "name": "body_item",
+      "required": true,
+      "type": "string"
+     }
+    ],
+    "produces": [
+     "application/json"
+    ],
+    "tags": [
+     "auth"
+    ]
+   }
+  },
+  "/authorize": {
+   "post": {
+    "operationId": "authorize",
+    "parameters": [
+     {
+      "in": "body",
+      "name": "body_item",
+      "required": true,
+      "type": "string"
+     }
+    ],
+    "produces": [
+     "application/json"
+    ],
+    "tags": [
+     "auth"
+    ]
+   }
+  },
+  "/transport": {
+   "post": {
+    "operationId": "transport",
+    "parameters": [
+     {
+      "in": "body",
+      "name": "body_item",
+      "required": true,
+      "type": "string"
+     }
+    ],
+    "produces": [
+     "application/json"
+    ],
+    "tags": [
+     "transport"
+    ]
+   }
+  }
+ },
+ "port": ":3003",
+ "schemes": [
+  "http",
+  "https"
+ ],
+ "swagger": "2.0"
+}

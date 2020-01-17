@@ -8,29 +8,32 @@ import (
 	"time"
 
 	"github.com/pavlo67/workshop/common"
+	"github.com/pavlo67/workshop/common/auth"
 	"github.com/pavlo67/workshop/common/auth/auth_ecdsa"
+	"github.com/pavlo67/workshop/common/auth/auth_http"
+	"github.com/pavlo67/workshop/common/auth/auth_jwt"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/control"
 	"github.com/pavlo67/workshop/common/libraries/filelib"
 	"github.com/pavlo67/workshop/common/logger"
+	"github.com/pavlo67/workshop/common/scheduler/scheduler_timeout"
 	"github.com/pavlo67/workshop/common/serializer"
-	"github.com/pavlo67/workshop/common/server/server_http"
 	"github.com/pavlo67/workshop/common/server/server_http/server_http_jschmhr"
 	"github.com/pavlo67/workshop/common/starter"
 
-	"github.com/pavlo67/workshop/common/scheduler/scheduler_timeout"
-	"github.com/pavlo67/workshop/components/data/data_sqlite"
+	"github.com/pavlo67/workshop/components/data/data_pg"
 	"github.com/pavlo67/workshop/components/datatagged"
 	"github.com/pavlo67/workshop/components/flow"
-	"github.com/pavlo67/workshop/components/flow/flow_server_http"
-	"github.com/pavlo67/workshop/components/flow/flowcopier_task"
-	"github.com/pavlo67/workshop/components/flowcleaner/flowcleaner_sqlite"
 	"github.com/pavlo67/workshop/components/packs/packs_pg"
-	"github.com/pavlo67/workshop/components/storage"
-	"github.com/pavlo67/workshop/components/storage/storage_server_http"
-	"github.com/pavlo67/workshop/components/tagger/tagger_sqlite"
+	"github.com/pavlo67/workshop/components/runner_factory/runner_factory_goroutine"
+	"github.com/pavlo67/workshop/components/sources/sources_stub"
+	"github.com/pavlo67/workshop/components/tagger/tagger_pg"
+	"github.com/pavlo67/workshop/components/tasks/tasks_pg"
+	"github.com/pavlo67/workshop/components/transport"
+	"github.com/pavlo67/workshop/components/transport/transport_http"
+	"github.com/pavlo67/workshop/components/transportrouter/transportrouter_stub"
 
-	"github.com/pavlo67/workshop/apps/workspace/ws_routes"
+	"github.com/pavlo67/workshop/apps/workspace/workspace_actions"
 )
 
 var (
@@ -39,13 +42,14 @@ var (
 	BuildCommit = "unknown"
 )
 
-const domain = "workspace"
+const serviceName = "workspace"
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
-	var versionOnly bool
-	flag.BoolVar(&versionOnly, "version", false, "show build vars only")
+	var versionOnly, copyImmediately bool
+	flag.BoolVar(&versionOnly, "version_only", false, "show build vars only")
+	flag.BoolVar(&copyImmediately, "copy_immediately", false, "immediately copy flow data")
 	flag.Parse()
 
 	log.Printf("builded: %s, tag: %s, commit: %s\n", BuildDate, BuildTag, BuildCommit)
@@ -83,97 +87,77 @@ func main() {
 	}
 
 	var port int
-	if serviceAccess, ok := routesCfg[domain]; ok {
+	if serviceAccess, ok := routesCfg[serviceName]; ok {
 		port = serviceAccess.Port
 	} else {
-		l.Fatalf("no access config for key %s (%#v)", domain, routesCfg)
+		l.Fatalf("no access config for key %s (%#v)", serviceName, routesCfg)
 	}
 
-	// storage config
+	// workspace config
 
-	configWorkspacePath := currentPath + "../../environments/" + domain + "." + configEnv + ".yaml"
-	cfgWorkspace, err := config.Get(configWorkspacePath, serializer.MarshalerYAML)
+	configworkspacePath := currentPath + "../../environments/" + serviceName + "." + configEnv + ".yaml"
+	cfgworkspace, err := config.Get(configworkspacePath, serializer.MarshalerYAML)
 	if err != nil {
 		l.Fatal(err)
 	}
 
 	// running starters
 
-	const storageTable = storage.CollectionDefault
-	const flowTable = flow.CollectionDefault
-
-	label := "WORKSPACE REST BUILD"
+	label := "WORKSPACE/PG CLI BUILD"
 
 	starters := []starter.Starter{
-		{control.Starter(), nil},
-		{auth_ecdsa.Starter(), nil},
 
+		// general purposes components
+		{control.Starter(), nil},
+
+		// auth system
+		{auth_ecdsa.Starter(), common.Map{"interface_key": auth_ecdsa.InterfaceKey}},
+		{auth_jwt.Starter(), common.Map{"interface_key": auth_jwt.InterfaceKey}},
+		{auth_http.Starter(), common.Map{"auth_handler_key": auth.AuthorizeHandlerKey, "auth_init_handler_key": auth.AuthInitHandlerKey}},
+
+		// tasks system
+		{tasks_pg.Starter(), nil},
+		{runner_factory_goroutine.Starter(), nil},
+
+		// action managers
 		{scheduler_timeout.Starter(), nil},
 		{server_http_jschmhr.Starter(), common.Map{"port": port}},
 
+		// transport system
 		{packs_pg.Starter(), nil},
-		{tagger_sqlite.Starter(), nil},
+		{transportrouter_stub.Starter(), nil},
+		{transport_http.Starter(), common.Map{"handler_key": transport.HandlerInterfaceKey, "domain": serviceName}},
 
-		{data_sqlite.Starter(), common.Map{"interface_key": storage.DataInterfaceKey, "table": storageTable}},
-		{datatagged.Starter(), common.Map{"interface_key": storage.InterfaceKey, "data_key": storage.DataInterfaceKey}},
-		{storage_server_http.Starter(), nil},
+		// database
+		{tagger_pg.Starter(), nil},
+		{data_pg.Starter(), common.Map{"table": flow.CollectionDefault, "interface_key": flow.DataInterfaceKey, "cleaner_key": flow.CleanerInterfaceKey, "no_tagger": true}},
+		{datatagged.Starter(), common.Map{"data_key": flow.DataInterfaceKey, "interface_key": flow.InterfaceKey}},
 
-		{data_sqlite.Starter(), common.Map{"interface_key": flow.DataInterfaceKey, "table": flowTable}},
-		{datatagged.Starter(), common.Map{"interface_key": flow.InterfaceKey, "data_key": flow.DataInterfaceKey}},
-		{flowcopier_task.Starter(), common.Map{"client_http": true, "flow_key": flow.InterfaceKey}},
-		{flowcleaner_sqlite.Starter(), common.Map{"limit": 3000, "flow_key": flow.CleanerInterfaceKey}},
-		{flow_server_http.Starter(), nil},
+		// flow actions
+		{sources_stub.Starter(), nil},
+		// {flowcopier_task.Starter(), common.Map{"datatagged_key": flow.InterfaceKey}},
+		// {flowcleaner_task.Starter(), common.Map{"cleaner_key": flow.CleanerInterfaceKey, "interface_key": flow.CleanerTaskInterfaceKey, "limit": 300000}},
 
-		{ws_routes.Starter(), nil},
+		// actions starter (connecting specific actions to the corresponding action managers)
+		{workspace_actions.Starter(), common.Map{
+			"auth_handler_key":      auth.AuthorizeHandlerKey,
+			"auth_init_handler_key": auth.AuthInitHandlerKey,
+			// "copier_task_key":       flow.CopierTaskInterfaceKey,
+			"copy_immediately":      copyImmediately,
+			"transport_handler_key": transport.HandlerInterfaceKey,
+
+			// "cleaner_task_key":   flow.CopierTaskInterfaceKey,
+		}},
 	}
 
-	joiner, err := starter.Run(starters, cfgCommon, cfgWorkspace, os.Args[1:], label)
+	joinerOp, err := starter.Run(starters, cfgCommon, cfgworkspace, os.Args[1:], label)
 	if err != nil {
 		l.Fatal(err)
 	}
-	defer joiner.CloseAll()
+	defer joinerOp.CloseAll()
 
-	// scheduling importer task
+	workspace_actions.WG.Wait()
 
-	//dataOp, ok := joiner.Interface(flow.DataInterfaceKey).(data.Actor)
-	//if !ok {
-	//	l.Fatalf("no data.Actor with key %s", flow.DataInterfaceKey)
-	//}
-
-	// TODO!!!
-	//url := "http://localhost:" + cfgEnvs["gatherer_port"] + "/gatherer/export"
-	//
-	//task, err := importer_tasks.NewCopyTask(url, dataOp)
-	//if err != nil {
-	//	l.Fatal(err)
-	//}
-	//
-	//schOp, ok := joiner.Interface(taskscheduler.HandlerKey).(taskscheduler.Actor)
-	//if !ok {
-	//	l.Fatalf("no scheduler.Actor with key %s", taskscheduler.HandlerKey)
-	//}
-	//
-	//taskID, err := schOp.Init(task)
-	//if err != nil {
-	//	l.Fatalf("can't schOp.Init(%#v): %s", task, err)
-	//}
-	//
-	//err = schOp.Run(taskID, time.Minute, true)
-	//if err != nil {
-	//	l.Fatalf("can't schOp.Run(%s, time.Hour, true): %s", taskID, err)
-	//}
-
-	// http_server
-
-	srvOp, ok := joiner.Interface(server_http.InterfaceKey).(server_http.Operator)
-	if !ok {
-		l.Fatalf("no server_http.Actor with key %s", server_http.InterfaceKey)
-	}
-
-	err = srvOp.Start()
-	if err != nil {
-		l.Error(err)
-	}
 }
 
 //manifest, err := manager.ReadManifest(currentPath)

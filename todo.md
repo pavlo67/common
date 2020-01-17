@@ -1,3 +1,8 @@
+## auth
+
+* public keygen: Web, CLI, bitcoin
+
+
 ## transport
 
 * transpOp.Track()

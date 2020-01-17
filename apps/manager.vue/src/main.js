@@ -6,7 +6,7 @@ import Router from 'vue-router';
 import App          from './App.vue';
 import { eventBus } from './App.vue';
 import parts        from './parts';
-import swagger      from '../../workspace/ws_routes/api-docs/swagger';
+import swagger      from '../../workspace/workspace_actions/api-docs/swagger';
 import { convert }  from '../../../components.js/swagger_convertor';
 
 Vue.use(Router);

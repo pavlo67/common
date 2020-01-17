@@ -7,7 +7,6 @@ import (
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/starter"
-	"github.com/pavlo67/workshop/components/flowcleaner"
 )
 
 func Starter() starter.Operator {
