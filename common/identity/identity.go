@@ -43,6 +43,10 @@ func FromURLRaw(urlRaw string) Item {
 // Key is a string representation of Item.
 type Key string
 
+//func (key Key) NotEmpty() bool {
+//
+//}
+
 func (item *Item) IsValid() bool {
 	if item == nil {
 		return false

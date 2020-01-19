@@ -9,40 +9,32 @@ import (
 
 	"github.com/stretchr/testify/require"
 
+	"github.com/pavlo67/workshop/common/identity"
 	"github.com/pavlo67/workshop/common/libraries/encrlib"
-
 	"github.com/pavlo67/workshop/common/logger"
 )
 
 type OperatorTestCase struct {
 	Operator
-	User   *User
-	ToSet  Creds
-	ToInit Creds
+	UserKey identity.Key
+	ToSet   Creds
 }
 
 const testIP = "1.2.3.4"
 const testNick = "nick1"
+const testUserKey = identity.Key("nick1@aaa")
 
 func TestCases(authOp Operator) []OperatorTestCase {
 	return []OperatorTestCase{
 		{
 			Operator: authOp,
 
-			User: &User{
-				Key:      "nick1@aaa",
-				Nickname: testNick,
-			},
-
 			ToSet: Creds{
 				Cryptype: encrlib.NoCrypt,
 				Values: Values{
 					CredsPassword: "pass1",
+					CredsNickname: testNick,
 				},
-			},
-			ToInit: Creds{
-				Cryptype: encrlib.NoCrypt,
-				Values:   Values{},
 			},
 		},
 	}
@@ -58,21 +50,14 @@ func OperatorTestScenarioPassword(t *testing.T, testCases []OperatorTestCase, l 
 
 		// .SetCreds() ------------------------------------------
 
-		userSet, userCreds, err := tc.SetCreds(tc.User, tc.ToSet)
+		userKey, userCreds, err := tc.SetCreds(tc.UserKey, tc.ToSet, "")
 		require.NoError(t, err)
-		require.NotNil(t, userSet)
-		require.Nil(t, userCreds)
+		require.NotNil(t, userCreds)
 
-		log.Printf("            user: %#v", *userSet)
+		log.Printf("           creds: %#v", *userCreds)
 
-		require.Equal(t, tc.User.Nickname, userSet.Nickname)
-		require.Equal(t, tc.User.Key, userSet.Key)
-
-		// .InitAuth() -----------------------------------
-
-		sessionCreds, err := tc.InitAuth(tc.ToInit)
-		require.NoError(t, err)
-		require.Nil(t, sessionCreds)
+		require.Equal(t, tc.ToSet.Values[CredsNickname], userCreds.Values[CredsNickname])
+		require.NotNil(t, userKey)
 
 		// .Authorize() -----------------------------------------
 
@@ -80,7 +65,7 @@ func OperatorTestScenarioPassword(t *testing.T, testCases []OperatorTestCase, l 
 			Cryptype: encrlib.NoCrypt,
 			Values: Values{
 				CredsIP:       testIP,
-				CredsLogin:    tc.User.Nickname,
+				CredsLogin:    tc.ToSet.Values[CredsNickname],
 				CredsPassword: tc.ToSet.Values[CredsPassword],
 			},
 		}
@@ -89,8 +74,8 @@ func OperatorTestScenarioPassword(t *testing.T, testCases []OperatorTestCase, l 
 
 		require.NoError(t, err)
 		require.NotNil(t, user)
-		require.Equal(t, userSet.Nickname, user.Nickname)
-		require.Equal(t, userSet.Key, user.Key)
+		require.Equal(t, tc.ToSet.Values[CredsNickname], user.Creds.Values[CredsNickname])
+		require.Equal(t, userKey, user.Key)
 	}
 }
 
@@ -104,21 +89,13 @@ func OperatorTestScenarioToken(t *testing.T, testCases []OperatorTestCase, l log
 
 		// .SetCreds() ------------------------------------------
 
-		userSet, userCreds, err := tc.SetCreds(tc.User, tc.ToSet)
+		userKey, userCreds, err := tc.SetCreds(testUserKey, tc.ToSet, CredsJWT)
 		require.NoError(t, err)
-		require.NotNil(t, userSet)
+		require.Equal(t, userKey, testUserKey)
 		require.NotNil(t, userCreds)
 
-		log.Printf("            user: %#v", *userSet)
-
-		require.Equal(t, tc.User.Nickname, userSet.Nickname)
-		require.Equal(t, tc.User.Key, userSet.Key)
-
-		// .InitAuth() -----------------------------------
-
-		sessionCreds, err := tc.InitAuth(tc.ToInit)
-		require.NoError(t, err)
-		require.Nil(t, sessionCreds)
+		log.Printf("           creds: %#v", *userCreds)
+		require.Equal(t, tc.ToSet.Values[CredsNickname], userCreds.Values[CredsNickname])
 
 		// .Authorize() -----------------------------------------
 
@@ -128,8 +105,8 @@ func OperatorTestScenarioToken(t *testing.T, testCases []OperatorTestCase, l log
 
 		require.NoError(t, err)
 		require.NotNil(t, user)
-		require.Equal(t, userSet.Nickname, user.Nickname)
-		require.Equal(t, userSet.Key, user.Key)
+		require.Equal(t, tc.ToSet.Values[CredsNickname], user.Creds.Values[CredsNickname])
+		require.Equal(t, testUserKey, user.Key)
 	}
 }
 
@@ -143,23 +120,19 @@ func OperatorTestScenarioPublicKey(t *testing.T, testCases []OperatorTestCase, l
 
 		// .SetCreds() ------------------------------------------
 
-		userSet, userCreds, err := tc.SetCreds(tc.User, tc.ToSet)
+		userKey, userCreds, err := tc.SetCreds("", tc.ToSet, CredsPrivateKey)
 		require.NoError(t, err)
-		require.NotNil(t, userSet)
+		require.NotNil(t, userKey)
 		require.NotNil(t, userCreds)
 
-		log.Printf("             user: %#v", *userSet)
+		log.Printf("   userKey, creds: %s, %#v", userKey, userCreds)
 
-		require.Equal(t, tc.User.Nickname, userSet.Nickname)
-		require.NotEmpty(t, userSet.Key)
+		require.NotEmpty(t, userKey)
+
+		require.Equal(t, tc.ToSet.Values[CredsNickname], userCreds.Values[CredsNickname])
+		nickname := userCreds.Values[CredsNickname]
 
 		// .InitAuth() -----------------------------------
-
-		tc.ToInit.Values[CredsIP] = testIP
-
-		sessionCreds, err := tc.InitAuth(tc.ToInit)
-		require.NoError(t, err)
-		require.NotNil(t, sessionCreds)
 
 		privKeySerialization := []byte(userCreds.Values[CredsPrivateKey])
 		privKey, err := encrlib.ECDSADeserialize(privKeySerialization)
@@ -168,6 +141,17 @@ func OperatorTestScenarioPublicKey(t *testing.T, testCases []OperatorTestCase, l
 
 		publicKeyBase58 := userCreds.Values[CredsPublicKeyBase58]
 		log.Printf("public key base58: %s", publicKeyBase58)
+
+		credsToInit := Creds{
+			Cryptype: encrlib.NoCrypt,
+			Values: Values{
+				CredsIP: testIP,
+			},
+		}
+
+		_, sessionCreds, err := tc.SetCreds("", credsToInit, CredsKeyToSignature)
+		require.NoError(t, err)
+		require.NotNil(t, sessionCreds)
 
 		// ---------------------------------------------------------------------
 
@@ -189,7 +173,7 @@ func OperatorTestScenarioPublicKey(t *testing.T, testCases []OperatorTestCase, l
 		// .Authorize() -----------------------------------------
 
 		userCreds.Values[CredsIP] = testIP
-		userCreds.Values[CredsNickname] = userSet.Nickname
+		userCreds.Values[CredsNickname] = nickname
 		userCreds.Values[CredsKeyToSignature] = keyToSignature
 		userCreds.Values[CredsSignature] = string(signature)
 
@@ -197,7 +181,7 @@ func OperatorTestScenarioPublicKey(t *testing.T, testCases []OperatorTestCase, l
 
 		require.NoError(t, err)
 		require.NotNil(t, user)
-		require.Equal(t, userSet.Nickname, user.Nickname)
-		require.Equal(t, userSet.Key, user.Key)
+		require.Equal(t, nickname, user.Creds.Values[CredsNickname])
+		require.Equal(t, userKey, user.Key)
 	}
 }

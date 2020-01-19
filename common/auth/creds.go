@@ -11,7 +11,6 @@ const CredsJWT CredsType = "jwt"
 const CredsToken CredsType = "token"
 const CredsPartnerToken CredsType = "partner_token"
 
-const CredsIdentityKey CredsType = "identity_key"
 const CredsLogin CredsType = "login"
 const CredsNickname CredsType = "nickname"
 const CredsEmail CredsType = "email"

@@ -54,38 +54,32 @@ type jwtCreds struct {
 	Creds auth.Creds `json:"creds,omitempty"`
 }
 
-func (_ *authJWT) InitAuth(toInit auth.Creds) (*auth.Creds, error) {
-	return nil, nil
-}
-
 // 	SetCreds ignores all input parameters, creates new "BTC identity" and returns it
-func (authOp *authJWT) SetCreds(user *auth.User, creds auth.Creds) (*auth.User, *auth.Creds, error) {
-	if user == nil {
-		return nil, nil, auth.ErrNoUser
-	}
+func (authOp *authJWT) SetCreds(userKey identity.Key, creds auth.Creds, _ auth.CredsType) (identity.Key, *auth.Creds, error) {
 
 	jc := jwtCreds{
 		Claims: &jwt.Claims{
 			//Issuer:   "issuer1",
 			//Subject:  "subject1",
 			// Audience: jwt.Audience{"aud1", "aud2"},
-			ID:       string(user.Key),
+			ID:       string(userKey),
 			IssuedAt: jwt.NewNumericDate(time.Now()),
 			// Expiry:   jwt.NewNumericDate(time.Date(2017, 1, 1, 0, 8, 0, 0, time.UTC)),
 		},
 
-		// !!! original user.Creds are disabled here
-		Creds: auth.Creds{Values: map[auth.CredsType]string{auth.CredsNickname: user.Nickname}},
+		Creds: creds,
 	}
 	// add claims to the Builder
 	builder := authOp.builder.Claims(jc)
 
 	rawJWT, err := builder.CompactSerialize()
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "on authJWT.SetCreds() with builder.CompactSerialize()")
+		return "", nil, errors.Wrap(err, "on authJWT.SetCreds() with builder.CompactSerialize()")
 	}
 
-	return user, &auth.Creds{Values: auth.Values{auth.CredsJWT: rawJWT}}, nil
+	creds.Values[auth.CredsJWT] = rawJWT
+
+	return userKey, &creds, nil
 }
 
 func (authOp *authJWT) Authorize(toAuth auth.Creds) (*auth.User, error) {
@@ -105,17 +99,9 @@ func (authOp *authJWT) Authorize(toAuth auth.Creds) (*auth.User, error) {
 		return nil, errors.Wrapf(err, "failed to get claims: %#v", parsedJWT)
 	}
 
-	var nick string
-
-	if t, ok := res.Creds.Values[auth.CredsNickname]; ok {
-		nick = t
-		delete(res.Creds.Values, auth.CredsNickname)
-	}
-
 	return &auth.User{
-		Key:      identity.Key(res.ID),
-		Nickname: nick,
-		Creds:    res.Creds,
+		Key:   identity.Key(res.ID),
+		Creds: res.Creds,
 	}, nil
 }
 

@@ -1,7 +1,9 @@
 package auth_stub
 
 import (
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/GehirnInc/crypt"
 	"github.com/pkg/errors"
@@ -33,53 +35,41 @@ func New(users []UserStub, salt string) (*authStub, error) {
 	}, nil
 }
 
-func (_ *authStub) InitAuth(_ auth.Creds) (*auth.Creds, error) {
-	return nil, nil
-}
-
-func (u *authStub) SetCreds(user *auth.User, toSet auth.Creds) (*auth.User, *auth.Creds, error) {
-	if user == nil {
-		return nil, nil, auth.ErrNoUser
-	}
-
-	userStub := UserStub{
-		Key:      user.Key,
-		Nickname: user.Nickname,
-	}
-
-	passwordToSet := strings.TrimSpace(toSet.Values[auth.CredsPassword])
+func (u *authStub) SetCreds(userKey identity.Key, creds auth.Creds, _ auth.CredsType) (identity.Key, *auth.Creds, error) {
+	passwordToSet := strings.TrimSpace(creds.Values[auth.CredsPassword])
 	l.Infof("password to set  : %s", passwordToSet)
 
-	var err error
-	userStub.PasswordHash, err = u.crypter.Generate([]byte(passwordToSet), []byte(u.salt))
+	passwordHash, err := u.crypter.Generate([]byte(passwordToSet), []byte(u.salt))
 	if err != nil {
-		return nil, nil, err
+		return "", nil, err
 	}
 
-	l.Infof("password hash set: %s", userStub.PasswordHash)
+	l.Infof("password hash set: %s", passwordHash)
 	l.Infof("salt: %s", u.salt)
+	l.Infof("verify: %s", u.crypter.Verify(passwordHash, []byte(passwordToSet)))
 
-	//passwordHashAgain, _ := u.crypter.Generate([]byte(passwordToSet), []byte(u.salt))
-	//l.Infof("password hash ???: %s", passwordHashAgain)
-	//l.Infof("salt: %s", u.salt)
+	userStub := UserStub{
+		Nickname:     creds.Values[auth.CredsNickname],
+		PasswordHash: passwordHash,
+	}
 
-	l.Infof("verify: %s", u.crypter.Verify(userStub.PasswordHash, []byte(passwordToSet)))
+	if userKey == "" {
+		userKey = identity.Key(strconv.FormatInt(time.Now().UnixNano(), 10))
+		userStub.Key = userKey
 
-	if toSet.Values[auth.CredsNickname] != "" {
-		userStub.Nickname = toSet.Values[auth.CredsNickname]
-		user.Nickname = toSet.Values[auth.CredsNickname]
+		u.users = append(u.users, userStub)
+
+		return userKey, &creds, nil
 	}
 
 	for i, us := range u.users {
-		if us.Key == user.Key {
+		if us.Key == userKey {
 			u.users[i] = userStub
-			return user, nil, nil
+			return userKey, &creds, nil
 		}
 	}
 
-	u.users = append(u.users, userStub)
-
-	return user, nil, nil
+	return "", nil, auth.ErrNoUser
 }
 
 func (u *authStub) Authorize(toAuth auth.Creds) (*auth.User, error) {
@@ -119,7 +109,12 @@ func (u *authStub) Authorize(toAuth auth.Creds) (*auth.User, error) {
 		if us.Nickname == login {
 			// l.Info("++")
 			if u.crypter.Verify(us.PasswordHash, []byte(password)) == nil {
-				return &auth.User{Key: us.Key, Nickname: us.Nickname}, nil
+				return &auth.User{Key: us.Key, Creds: auth.Creds{
+					Cryptype: encrlib.NoCrypt,
+					Values: auth.Values{
+						auth.CredsNickname: us.Nickname,
+					},
+				}}, nil
 			}
 			return nil, auth.ErrPassword
 		}

@@ -22,19 +22,15 @@ const Anyone common.ID = "_"
 //}
 
 type User struct {
-	Key      identity.Key `bson:",omitempty" json:",omitempty"`
-	Nickname string       `bson:",omitempty" json:",omitempty"`
-	Creds    Creds        `bson:",omitempty" json:",omitempty"`
+	Key   identity.Key `bson:",omitempty" json:",omitempty"`
+	Creds Creds        `bson:",omitempty" json:",omitempty"`
 }
 
 type Operator interface {
-	// SetCreds can require multi-steps (using returned Creds)...
-	SetCreds(user *User, toSet Creds) (*User, *Creds, error)
+	// SetCreds sets user's own or temporary (session-generated) creds
+	SetCreds(userKey identity.Key, creds Creds, toSet CredsType) (identity.Key, *Creds, error)
 
-	// InitAuth starts an auth session if it's required
-	InitAuth(toInit Creds) (*Creds, error)
-
-	// Authorize can require multi-steps (using returned Creds)...
+	// Authorize can require to do .SetCreds first and to usa some session-generated creds
 	Authorize(toAuth Creds) (*User, error)
 }
 

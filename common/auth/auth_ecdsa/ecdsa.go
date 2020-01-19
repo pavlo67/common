@@ -23,7 +23,7 @@ import (
 const Cryptype encrlib.Cryptype = "ecdsa"
 const Proto = "ecdsa"
 
-var _ auth.Operator = &identityECDSA{}
+var _ auth.Operator = &authECDSA{}
 
 var errWrongSignature = errors.New("wrong signature")
 var errWrongNumber = errors.New("wrong user's number")
@@ -37,7 +37,7 @@ type Session struct {
 	StartedAt time.Time
 }
 
-type identityECDSA struct {
+type authECDSA struct {
 	sessions map[uint64]Session
 	mutex    *sync.Mutex
 
@@ -50,7 +50,7 @@ type identityECDSA struct {
 func New(numbersLimit int, maxSessionDuration time.Duration, acceptableIDs []string) (auth.Operator, error) {
 	r.Seed(time.Now().UnixNano())
 
-	is := &identityECDSA{
+	is := &authECDSA{
 		sessions: map[uint64]Session{},
 		mutex:    &sync.Mutex{},
 
@@ -63,36 +63,70 @@ func New(numbersLimit int, maxSessionDuration time.Duration, acceptableIDs []str
 	return is, nil
 }
 
-func (is *identityECDSA) InitAuth(toInit auth.Creds) (*auth.Creds, error) {
-	now := time.Now()
+// 	SetCreds creates either session-generated key or new "BTC identity" and returns it
+func (is *authECDSA) SetCreds(userKey identity.Key, creds auth.Creds, toSet auth.CredsType) (identity.Key, *auth.Creds, error) {
+	if toSet == auth.CredsKeyToSignature {
+		now := time.Now()
 
-	is.mutex.Lock() // Lock() -----------------------------------------------------
+		is.mutex.Lock() // Lock() -----------------------------------------------------
 
-	if is.numbersLimit > 0 && len(is.sessions) >= is.numbersLimit {
-		for n, s := range is.sessions {
-			if now.Sub(s.StartedAt) >= is.maxSessionDuration {
-				delete(is.sessions, n)
+		if is.numbersLimit > 0 && len(is.sessions) >= is.numbersLimit {
+			for n, s := range is.sessions {
+				if now.Sub(s.StartedAt) >= is.maxSessionDuration {
+					delete(is.sessions, n)
+				}
 			}
 		}
+
+		cnt++
+		numberToSend := uint64(cnt)<<32 + uint64(r.Uint32())
+
+		is.sessions[numberToSend] = Session{
+			IP:        creds.Values[auth.CredsIP], // TODO??? check if IP isn't empty
+			StartedAt: now,
+		}
+
+		is.mutex.Unlock() // Unlock() -------------------------------------------------
+
+		return "", &auth.Creds{
+			Cryptype: encrlib.NoCrypt,
+			Values:   auth.Values{auth.CredsKeyToSignature: strconv.FormatUint(numberToSend, 10)},
+		}, nil
 	}
 
-	cnt++
-	numberToSend := uint64(cnt)<<32 + uint64(r.Uint32())
+	// TODO: modify acceptableIDs if it's necessary
 
-	is.sessions[numberToSend] = Session{
-		IP:        toInit.Values[auth.CredsIP], // TODO??? check if IP isn't empty
-		StartedAt: now,
+	privKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		return "", nil, err
+	} else if privKey == nil {
+		return "", nil, errEmptyPrivateKeyGenerated
 	}
 
-	is.mutex.Unlock() // Unlock() -------------------------------------------------
+	privKeyBytes, err := encrlib.ECDSASerialize(*privKey)
+	if err != nil {
+		return "", nil, err
+	}
 
-	return &auth.Creds{
-		Cryptype: encrlib.NoCrypt,
-		Values:   auth.Values{auth.CredsKeyToSignature: strconv.FormatUint(numberToSend, 10)},
-	}, nil
+	publKeyBase58 := base58.Encode(encrlib.ECDSAPublicKey(*privKey))
+	nickname := publKeyBase58
+	if creds.Values[auth.CredsNickname] != "" {
+		nickname = creds.Values[auth.CredsNickname]
+	}
+
+	credsNew := &auth.Creds{
+		Values: map[auth.CredsType]string{
+			auth.CredsNickname:          nickname,
+			auth.CredsPrivateKey:        string(privKeyBytes),
+			auth.CredsPublicKeyBase58:   publKeyBase58,
+			auth.CredsPublicKeyEncoding: Proto,
+		},
+	}
+
+	return identity.Key(Proto + "://" + publKeyBase58), credsNew, nil
 }
 
-func (is *identityECDSA) Authorize(toAuth auth.Creds) (*auth.User, error) {
+func (is *authECDSA) Authorize(toAuth auth.Creds) (*auth.User, error) {
 	if toAuth.Values[auth.CredsPublicKeyEncoding] != Proto {
 		return nil, auth.ErrEncryptionType
 	}
@@ -145,56 +179,17 @@ func (is *identityECDSA) Authorize(toAuth auth.Creds) (*auth.User, error) {
 	}
 
 	return &auth.User{
-		Key:      identity.Key(Proto + "://" + publKeyBase58),
-		Nickname: nickname,
-		// Creds
+		Key: identity.Key(Proto + "://" + publKeyBase58),
+		Creds: auth.Creds{
+			Cryptype: encrlib.NoCrypt,
+			Values: auth.Values{
+				auth.CredsNickname: nickname,
+			},
+		},
 	}, nil
 }
 
-// 	SetCreds ignores all input parameters, creates new "BTC identity" and returns it
-func (*identityECDSA) SetCreds(user *auth.User, toSet auth.Creds) (*auth.User, *auth.Creds, error) {
-	// TODO: modify acceptableIDs if it's necessary
-
-	privKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
-	if err != nil {
-		return nil, nil, err
-	} else if privKey == nil {
-		return nil, nil, errEmptyPrivateKeyGenerated
-	}
-
-	privKeyBytes, err := encrlib.ECDSASerialize(*privKey)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	publKeyBase58 := base58.Encode(encrlib.ECDSAPublicKey(*privKey))
-	nickname := publKeyBase58
-	if user != nil && strings.TrimSpace(user.Nickname) != "" {
-		nickname = user.Nickname
-	}
-
-	creds := auth.Creds{
-		Values: map[auth.CredsType]string{
-			auth.CredsPrivateKey:        string(privKeyBytes),
-			auth.CredsPublicKeyBase58:   publKeyBase58,
-			auth.CredsPublicKeyEncoding: Proto,
-		},
-	}
-
-	if user == nil {
-		user = &auth.User{
-			Key:      identity.Key(Proto + "://" + publKeyBase58),
-			Nickname: nickname,
-		}
-	} else {
-		user.Key = identity.Key(Proto + "://" + publKeyBase58)
-		user.Nickname = nickname
-	}
-
-	return user, &creds, nil
-}
-
 //
-//func (*identityECDSA) Accepts() ([]auth.CredsType, error) {
+//func (*authECDSA) Accepts() ([]auth.CredsType, error) {
 //	return []auth.CredsType{auth.CredsSignature}, nil
 //}
