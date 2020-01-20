@@ -1,12 +1,12 @@
 {
  "info": {
-  "title": "Pavlo's workspace REST API",
+  "title": "Pavlo's notebook REST API",
   "version": "0.0.1"
  },
  "paths": {
-  "/auth_init": {
+  "/authorize": {
    "post": {
-    "operationId": "auth_init",
+    "operationId": "authorize",
     "parameters": [
      {
       "in": "body",
@@ -23,9 +23,9 @@
     ]
    }
   },
-  "/authorize": {
+  "/set_creds": {
    "post": {
-    "operationId": "authorize",
+    "operationId": "auth_init",
     "parameters": [
      {
       "in": "body",

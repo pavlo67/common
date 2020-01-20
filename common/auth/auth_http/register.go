@@ -41,7 +41,7 @@ package auth_http
 //	//
 //	//if toAddModified != nil {
 //	//	for t, c := range toAddModified.Values {
-//	//		user.Creds.Values[t] = c
+//	//		user.creds[t] = c
 //	//	}
 //	//}
 //	//
@@ -74,7 +74,7 @@ package auth_http
 //
 //	if toReplaceModified != nil {
 //		for t, c := range toReplaceModified.Values {
-//			user.Creds.Values[t] = c
+//			user.creds[t] = c
 //		}
 //	}
 //	return server.ResponseRESTOk(map[string]interface{}{"user": user})

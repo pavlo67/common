@@ -1,17 +1,19 @@
 package auth_http
 
 import (
-	"github.com/pavlo67/workshop/common/auth/auth_ecdsa"
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/auth"
+	"github.com/pavlo67/workshop/common/auth/auth_ecdsa"
 	"github.com/pavlo67/workshop/common/auth/auth_jwt"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/starter"
 )
+
+const InterfaceKey joiner.InterfaceKey = "auth_http"
 
 func Starter() starter.Operator {
 	return &authHTTPStarter{}
@@ -29,7 +31,7 @@ var authOpToSetToken auth.Operator
 type authHTTPStarter struct {
 	interfaceKey       joiner.InterfaceKey
 	authHandlerKey     joiner.InterfaceKey
-	authInitHandlerKey joiner.InterfaceKey
+	setCredsHandlerKey joiner.InterfaceKey
 }
 
 func (th *authHTTPStarter) Name() string {
@@ -38,9 +40,9 @@ func (th *authHTTPStarter) Name() string {
 
 func (th *authHTTPStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	l = lCommon
-	th.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(auth.InterfaceKey)))
+	th.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
 	th.authHandlerKey = joiner.InterfaceKey(options.StringDefault("auth_handler_key", string(auth.AuthorizeHandlerKey)))
-	th.authInitHandlerKey = joiner.InterfaceKey(options.StringDefault("auth_init_handler_key", string(auth.AuthInitHandlerKey)))
+	th.setCredsHandlerKey = joiner.InterfaceKey(options.StringDefault("auth_init_handler_key", string(auth.SetCredsHandlerKey)))
 
 	return nil, nil
 }
@@ -82,9 +84,9 @@ func (th *authHTTPStarter) Run(joinerOp joiner.Operator) error {
 		return errors.Wrapf(err, "can't join authEndpoint as server_http.Endpoint with key '%s'", th.authHandlerKey)
 	}
 
-	err = joinerOp.Join(authInitEndpoint, th.authInitHandlerKey)
+	err = joinerOp.Join(authInitEndpoint, th.setCredsHandlerKey)
 	if err != nil {
-		return errors.Wrapf(err, "can't join authInitSessionEndpoint as server_http.Endpoint with key '%s'", th.authInitHandlerKey)
+		return errors.Wrapf(err, "can't join authInitSessionEndpoint as server_http.Endpoint with key '%s'", th.setCredsHandlerKey)
 	}
 
 	return nil

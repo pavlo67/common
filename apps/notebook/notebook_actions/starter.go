@@ -1,4 +1,4 @@
-package workspace_actions
+package notebook_actions
 
 import (
 	"fmt"
@@ -33,7 +33,7 @@ var _ starter.Operator = &workspaceStarter{}
 
 type workspaceStarter struct {
 	authHandlerKey      joiner.InterfaceKey
-	authInitHandlerKey  joiner.InterfaceKey
+	setCredsHandlerKey  joiner.InterfaceKey
 	copierTaskKey       joiner.InterfaceKey
 	copyImmediately     bool
 	cleanerTaskKey      joiner.InterfaceKey
@@ -55,7 +55,7 @@ func (gs *workspaceStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.O
 	}
 
 	gs.authHandlerKey = joiner.InterfaceKey(options.StringDefault("auth_handler_key", string(auth.AuthorizeHandlerKey)))
-	gs.authInitHandlerKey = joiner.InterfaceKey(options.StringDefault("auth_init_handler_key", string(auth.AuthInitHandlerKey)))
+	gs.setCredsHandlerKey = joiner.InterfaceKey(options.StringDefault("set_creds_handler_key", string(auth.SetCredsHandlerKey)))
 	gs.copierTaskKey = joiner.InterfaceKey(options.StringDefault("copier_task_key", "")) // string(flow.copierTaskInterfaceKey)
 	gs.copyImmediately = options.IsTrue("copy_immediately")
 	gs.transportHandlerKey = joiner.InterfaceKey(options.StringDefault("transport_handler_key", string(transport.HandlerInterfaceKey)))
@@ -115,7 +115,7 @@ func (gs *workspaceStarter) Run(joinerOp joiner.Operator) error {
 	}
 
 	var endpoints = server_http.Endpoints{
-		"auth_init": {Path: "/auth_init", Tags: []string{"auth"}, HandlerKey: gs.authInitHandlerKey},
+		"auth_init": {Path: "/set_creds", Tags: []string{"auth"}, HandlerKey: gs.setCredsHandlerKey},
 		"authorize": {Path: "/authorize", Tags: []string{"auth"}, HandlerKey: gs.authHandlerKey},
 		"transport": {Path: "/transport", Tags: []string{"transport"}, HandlerKey: gs.transportHandlerKey},
 	}
@@ -129,7 +129,7 @@ func (gs *workspaceStarter) Run(joinerOp joiner.Operator) error {
 	}
 
 	cfg := server_http.Config{
-		Title:     "Pavlo's workspace REST API",
+		Title:     "Pavlo's notebook REST API",
 		Version:   "0.0.1",
 		Prefix:    "",
 		Endpoints: endpoints,

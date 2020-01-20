@@ -16,7 +16,6 @@ import (
 	"github.com/pavlo67/workshop/common/control"
 	"github.com/pavlo67/workshop/common/libraries/filelib"
 	"github.com/pavlo67/workshop/common/logger"
-	"github.com/pavlo67/workshop/common/scheduler/scheduler_timeout"
 	"github.com/pavlo67/workshop/common/serializer"
 	"github.com/pavlo67/workshop/common/server/server_http/server_http_jschmhr"
 	"github.com/pavlo67/workshop/common/starter"
@@ -26,14 +25,13 @@ import (
 	"github.com/pavlo67/workshop/components/flow"
 	"github.com/pavlo67/workshop/components/packs/packs_pg"
 	"github.com/pavlo67/workshop/components/runner_factory/runner_factory_goroutine"
-	"github.com/pavlo67/workshop/components/sources/sources_stub"
 	"github.com/pavlo67/workshop/components/tagger/tagger_pg"
 	"github.com/pavlo67/workshop/components/tasks/tasks_pg"
 	"github.com/pavlo67/workshop/components/transport"
 	"github.com/pavlo67/workshop/components/transport/transport_http"
 	"github.com/pavlo67/workshop/components/transportrouter/transportrouter_stub"
 
-	"github.com/pavlo67/workshop/apps/workspace/workspace_actions"
+	"github.com/pavlo67/workshop/apps/notebook/notebook_actions"
 )
 
 var (
@@ -42,7 +40,7 @@ var (
 	BuildCommit = "unknown"
 )
 
-const serviceName = "workspace"
+const serviceName = "notebook"
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
@@ -93,7 +91,7 @@ func main() {
 		l.Fatalf("no access config for key %s (%#v)", serviceName, routesCfg)
 	}
 
-	// workspace config
+	// notebook config
 
 	configworkspacePath := currentPath + "../../environments/" + serviceName + "." + configEnv + ".yaml"
 	cfgworkspace, err := config.Get(configworkspacePath, serializer.MarshalerYAML)
@@ -103,7 +101,7 @@ func main() {
 
 	// running starters
 
-	label := "WORKSPACE/PG CLI BUILD"
+	label := "NOTEBOOK/PG CLI BUILD"
 
 	starters := []starter.Starter{
 
@@ -113,14 +111,14 @@ func main() {
 		// auth system
 		{auth_ecdsa.Starter(), common.Map{"interface_key": auth_ecdsa.InterfaceKey}},
 		{auth_jwt.Starter(), common.Map{"interface_key": auth_jwt.InterfaceKey}},
-		{auth_http.Starter(), common.Map{"auth_handler_key": auth.AuthorizeHandlerKey, "auth_init_handler_key": auth.AuthInitHandlerKey}},
+		{auth_http.Starter(), common.Map{"auth_handler_key": auth.AuthorizeHandlerKey, "set_creds_handler_key": auth.SetCredsHandlerKey}},
 
 		// tasks system
 		{tasks_pg.Starter(), nil},
 		{runner_factory_goroutine.Starter(), nil},
 
 		// action managers
-		{scheduler_timeout.Starter(), nil},
+		//{scheduler_timeout.Starter(), nil},
 		{server_http_jschmhr.Starter(), common.Map{"port": port}},
 
 		// transport system
@@ -134,18 +132,19 @@ func main() {
 		{datatagged.Starter(), common.Map{"data_key": flow.DataInterfaceKey, "interface_key": flow.InterfaceKey}},
 
 		// flow actions
-		{sources_stub.Starter(), nil},
+		// {sources_stub.Starter(), nil},
 		// {flowcopier_task.Starter(), common.Map{"datatagged_key": flow.InterfaceKey}},
 		// {flowcleaner_task.Starter(), common.Map{"cleaner_key": flow.CleanerInterfaceKey, "interface_key": flow.CleanerTaskInterfaceKey, "limit": 300000}},
 
 		// actions starter (connecting specific actions to the corresponding action managers)
-		{workspace_actions.Starter(), common.Map{
+		{notebook_actions.Starter(), common.Map{
 			"auth_handler_key":      auth.AuthorizeHandlerKey,
-			"auth_init_handler_key": auth.AuthInitHandlerKey,
-			// "copier_task_key":       flow.CopierTaskInterfaceKey,
-			"copy_immediately":      copyImmediately,
+			"set_creds_handler_key": auth.SetCredsHandlerKey,
+
 			"transport_handler_key": transport.HandlerInterfaceKey,
 
+			// "copier_task_key":    flow.CopierTaskInterfaceKey,
+			// "copy_immediately":   copyImmediately,
 			// "cleaner_task_key":   flow.CopierTaskInterfaceKey,
 		}},
 	}
@@ -156,7 +155,7 @@ func main() {
 	}
 	defer joinerOp.CloseAll()
 
-	workspace_actions.WG.Wait()
+	notebook_actions.WG.Wait()
 
 }
 

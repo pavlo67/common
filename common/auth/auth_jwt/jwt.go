@@ -55,7 +55,7 @@ type jwtCreds struct {
 }
 
 // 	SetCreds ignores all input parameters, creates new "BTC identity" and returns it
-func (authOp *authJWT) SetCreds(userKey identity.Key, creds auth.Creds, _ auth.CredsType) (identity.Key, *auth.Creds, error) {
+func (authOp *authJWT) SetCreds(userKey identity.Key, creds auth.Creds) (*auth.Creds, error) {
 
 	jc := jwtCreds{
 		Claims: &jwt.Claims{
@@ -74,16 +74,16 @@ func (authOp *authJWT) SetCreds(userKey identity.Key, creds auth.Creds, _ auth.C
 
 	rawJWT, err := builder.CompactSerialize()
 	if err != nil {
-		return "", nil, errors.Wrap(err, "on authJWT.SetCreds() with builder.CompactSerialize()")
+		return nil, errors.Wrap(err, "on authJWT.SetCreds() with builder.CompactSerialize()")
 	}
 
-	creds.Values[auth.CredsJWT] = rawJWT
+	creds[auth.CredsJWT] = rawJWT
 
-	return userKey, &creds, nil
+	return &creds, nil
 }
 
 func (authOp *authJWT) Authorize(toAuth auth.Creds) (*auth.User, error) {
-	credsJWT, ok := toAuth.Values[auth.CredsJWT]
+	credsJWT, ok := toAuth[auth.CredsJWT]
 	if !ok {
 		return nil, nil
 	}

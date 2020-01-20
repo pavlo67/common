@@ -223,7 +223,7 @@ func OperatorTestScenario(t *testing.T, testCases []TestCase, cleanerOp crud.Cle
 //		sort.Sort(byLinked(linked))
 //
 //		for i, li := range tc.ExpectedLinked {
-//			require.Equal(t, Hash(li), Hash(linked[i]), "linked[%d] isn't correct", i)
+//			require.Equal(t, EncryptedPass(li), EncryptedPass(linked[i]), "linked[%d] isn't correct", i)
 //		}
 //
 //	}
@@ -247,7 +247,7 @@ func OperatorTestScenario(t *testing.T, testCases []TestCase, cleanerOp crud.Cle
 //	return res
 //}
 //
-//func Hash(li Linked) string {
+//func EncryptedPass(li Linked) string {
 //	return li.ObjectID + " " + li.TypeKey + " " + li.LinkedID + " " + li.LinkedType + " " + li.Tag
 //}
 //
@@ -261,5 +261,5 @@ func OperatorTestScenario(t *testing.T, testCases []TestCase, cleanerOp crud.Cle
 //}
 //
 //func (s byLinked) Less(i, j int) bool {
-//	return Hash(s[i]) < Hash(s[j])
+//	return EncryptedPass(s[i]) < EncryptedPass(s[j])
 //}

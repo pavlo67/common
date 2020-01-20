@@ -1,4 +1,4 @@
-package workspace_actions
+package notebook_actions
 
 import "sync"
 

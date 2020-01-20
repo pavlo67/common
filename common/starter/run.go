@@ -6,8 +6,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/pkg/errors"
-
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/joiner"
@@ -50,11 +48,6 @@ func ReadOptions(args []string) common.Map {
 }
 
 func Run(starters []Starter, cfgCommon, cfg *config.Config, args []string, label string) (joiner.Operator, error) {
-
-	if cfg == nil {
-		return nil, errors.New("no config data for starter.Prepare()")
-	}
-
 	l := logger.Get()
 
 	joinerOp := joiner.New()

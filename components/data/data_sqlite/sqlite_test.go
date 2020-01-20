@@ -14,7 +14,7 @@ import (
 	"github.com/pavlo67/workshop/components/tagger/tagger_sqlite"
 )
 
-const serviceName = "workspace"
+const serviceName = "notebook"
 
 func TestCRUD(t *testing.T) {
 	env := "test"

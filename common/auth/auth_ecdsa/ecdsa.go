@@ -64,7 +64,9 @@ func New(numbersLimit int, maxSessionDuration time.Duration, acceptableIDs []str
 }
 
 // 	SetCreds creates either session-generated key or new "BTC identity" and returns it
-func (is *authECDSA) SetCreds(userKey identity.Key, creds auth.Creds, toSet auth.CredsType) (identity.Key, *auth.Creds, error) {
+func (is *authECDSA) SetCreds(userKey identity.Key, creds auth.Creds) (*auth.Creds, error) {
+	toSet := auth.CredsType(creds[auth.CredsToSet])
+
 	if toSet == auth.CredsKeyToSignature {
 		now := time.Now()
 
@@ -82,56 +84,51 @@ func (is *authECDSA) SetCreds(userKey identity.Key, creds auth.Creds, toSet auth
 		numberToSend := uint64(cnt)<<32 + uint64(r.Uint32())
 
 		is.sessions[numberToSend] = Session{
-			IP:        creds.Values[auth.CredsIP], // TODO??? check if IP isn't empty
+			IP:        creds[auth.CredsIP], // TODO??? check if IP isn't empty
 			StartedAt: now,
 		}
 
 		is.mutex.Unlock() // Unlock() -------------------------------------------------
 
-		return "", &auth.Creds{
-			Cryptype: encrlib.NoCrypt,
-			Values:   auth.Values{auth.CredsKeyToSignature: strconv.FormatUint(numberToSend, 10)},
-		}, nil
+		return &auth.Creds{auth.CredsKeyToSignature: strconv.FormatUint(numberToSend, 10)}, nil
 	}
 
 	// TODO: modify acceptableIDs if it's necessary
 
 	privKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
-		return "", nil, err
+		return nil, err
 	} else if privKey == nil {
-		return "", nil, errEmptyPrivateKeyGenerated
+		return nil, errEmptyPrivateKeyGenerated
 	}
 
 	privKeyBytes, err := encrlib.ECDSASerialize(*privKey)
 	if err != nil {
-		return "", nil, err
+		return nil, err
 	}
 
 	publKeyBase58 := base58.Encode(encrlib.ECDSAPublicKey(*privKey))
 	nickname := publKeyBase58
-	if creds.Values[auth.CredsNickname] != "" {
-		nickname = creds.Values[auth.CredsNickname]
+	if creds[auth.CredsNickname] != "" {
+		nickname = creds[auth.CredsNickname]
 	}
 
 	credsNew := &auth.Creds{
-		Values: map[auth.CredsType]string{
-			auth.CredsNickname:          nickname,
-			auth.CredsPrivateKey:        string(privKeyBytes),
-			auth.CredsPublicKeyBase58:   publKeyBase58,
-			auth.CredsPublicKeyEncoding: Proto,
-		},
+		auth.CredsNickname:          nickname,
+		auth.CredsPrivateKey:        string(privKeyBytes),
+		auth.CredsPublicKeyBase58:   publKeyBase58,
+		auth.CredsPublicKeyEncoding: Proto,
 	}
 
-	return identity.Key(Proto + "://" + publKeyBase58), credsNew, nil
+	return credsNew, nil
 }
 
 func (is *authECDSA) Authorize(toAuth auth.Creds) (*auth.User, error) {
-	if toAuth.Values[auth.CredsPublicKeyEncoding] != Proto {
+	if toAuth[auth.CredsPublicKeyEncoding] != Proto {
 		return nil, auth.ErrEncryptionType
 	}
 
-	publKeyBase58 := toAuth.Values[auth.CredsPublicKeyBase58]
+	publKeyBase58 := toAuth[auth.CredsPublicKeyBase58]
 	if len(publKeyBase58) < 1 {
 		return nil, errEmptyPublicKeyAddress
 	}
@@ -142,7 +139,7 @@ func (is *authECDSA) Authorize(toAuth auth.Creds) (*auth.User, error) {
 		return nil, nil
 	}
 
-	keyToSignature := toAuth.Values[auth.CredsKeyToSignature]
+	keyToSignature := toAuth[auth.CredsKeyToSignature]
 	numberToSend, err := strconv.ParseUint(keyToSignature, 10, 64)
 	if err != nil {
 		return nil, errors.Wrap(auth.ErrSignaturedKey, "not a number!")
@@ -163,29 +160,24 @@ func (is *authECDSA) Authorize(toAuth auth.Creds) (*auth.User, error) {
 		return nil, errors.Wrap(auth.ErrAuthSession, "session is expired")
 	}
 
-	if session.IP != toAuth.Values[auth.CredsIP] {
+	if session.IP != toAuth[auth.CredsIP] {
 		return nil, auth.ErrIP
 	}
 
-	signature := []byte(toAuth.Values[auth.CredsSignature])
+	signature := []byte(toAuth[auth.CredsSignature])
 
 	if !encrlib.ECDSAVerify(keyToSignature, publKey, signature) {
 		return nil, errWrongSignature
 	}
 
 	var nickname = publKeyBase58
-	if nicknameReceived := toAuth.Values[auth.CredsNickname]; strings.TrimSpace(nicknameReceived) != "" {
+	if nicknameReceived := toAuth[auth.CredsNickname]; strings.TrimSpace(nicknameReceived) != "" {
 		nickname = nicknameReceived
 	}
 
 	return &auth.User{
-		Key: identity.Key(Proto + "://" + publKeyBase58),
-		Creds: auth.Creds{
-			Cryptype: encrlib.NoCrypt,
-			Values: auth.Values{
-				auth.CredsNickname: nickname,
-			},
-		},
+		Key:   identity.Key(Proto + "://" + publKeyBase58),
+		Creds: auth.Creds{auth.CredsNickname: nickname},
 	}, nil
 }
 

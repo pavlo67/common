@@ -6,7 +6,6 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
-	"github.com/pavlo67/workshop/common/auth"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/logger"
@@ -35,7 +34,7 @@ func (ss *identity_ecdsa) Init(cfgCommon, cfg *config.Config, lCommon logger.Ope
 
 	// var errs basis.Errors
 
-	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(auth.InterfaceKey)))
+	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
 
 	return nil, nil
 }
@@ -44,13 +43,13 @@ func (ss *identity_ecdsa) Setup() error {
 	return nil
 }
 
-func (ss *identity_ecdsa) Run(joiner joiner.Operator) error {
+func (ss *identity_ecdsa) Run(joinerOp joiner.Operator) error {
 	identOp, err := New(1000, time.Second*2, nil)
 	if err != nil {
 		return errors.Wrap(err, "can't init identity_ecdsa.Actor")
 	}
 
-	err = joiner.Join(identOp, ss.interfaceKey)
+	err = joinerOp.Join(identOp, ss.interfaceKey)
 	if err != nil {
 		return errors.Wrapf(err, "can't join identity_ecdsa identOp as identity.Actor with key '%s'", ss.interfaceKey)
 	}

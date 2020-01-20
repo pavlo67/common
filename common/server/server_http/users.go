@@ -19,7 +19,7 @@ func UserWithRequest(r *http.Request, authOps []auth.Operator) (*auth.User, erro
 	// TOKEN CHECK
 	token := r.Header.Get("Token")
 	if token != "" {
-		user, errs = auth.GetUser(auth.Creds{Values: map[auth.CredsType]string{auth.CredsToken: token}}, authOps, errs)
+		user, errs = auth.GetUser(auth.Creds{auth.CredsToken: token}, authOps, errs)
 		if user != nil {
 			return user, errs.Err()
 		}
@@ -28,7 +28,7 @@ func UserWithRequest(r *http.Request, authOps []auth.Operator) (*auth.User, erro
 
 	tokenJWT := r.Header.Get("JWT")
 	if tokenJWT != "" {
-		user, errs = auth.GetUser(auth.Creds{Values: map[auth.CredsType]string{auth.CredsJWT: token}}, authOps, errs)
+		user, errs = auth.GetUser(auth.Creds{auth.CredsJWT: token}, authOps, errs)
 		if user != nil {
 			return user, errs.Err()
 		}

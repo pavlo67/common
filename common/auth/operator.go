@@ -8,18 +8,8 @@ import (
 	"github.com/pavlo67/workshop/common/joiner"
 )
 
-const InterfaceKey joiner.InterfaceKey = "auth"
 const AuthorizeHandlerKey joiner.InterfaceKey = "auth_handler"
-const AuthInitHandlerKey joiner.InterfaceKey = "auth_init_session_handler"
 const SetCredsHandlerKey joiner.InterfaceKey = "auth_set_creds_handler"
-
-const Anyone common.ID = "_"
-
-//type Access struct {
-//	TargetID   Key     `bson:"target_id"             json:"target_id"`
-//	TargetNick string `bson:"target_nick,omitempty" json:"target_nick,omitempty"`
-//	Right      Right  `bson:"right,omitempty"       json:"right,omitempty"`
-//}
 
 type User struct {
 	Key   identity.Key `bson:",omitempty" json:",omitempty"`
@@ -28,7 +18,7 @@ type User struct {
 
 type Operator interface {
 	// SetCreds sets user's own or temporary (session-generated) creds
-	SetCreds(userKey identity.Key, creds Creds, toSet CredsType) (identity.Key, *Creds, error)
+	SetCreds(userKey identity.Key, toSet Creds) (*Creds, error)
 
 	// Authorize can require to do .SetCreds first and to usa some session-generated creds
 	Authorize(toAuth Creds) (*User, error)
@@ -41,7 +31,7 @@ var ErrNoIdentityOp = errors.New("no identity.Actor")
 const onGetUser = "on GetUser()"
 
 func GetUser(creds Creds, ops []Operator, errs common.Errors) (*User, common.Errors) {
-	if len(creds.Values) < 1 {
+	if len(creds) < 1 {
 		return nil, append(errs, ErrNoCreds)
 	}
 
@@ -72,3 +62,11 @@ func GetUser(creds Creds, ops []Operator, errs common.Errors) (*User, common.Err
 //
 //	AddCallback(key Callback, url string)
 // }
+
+//const Anyone common.ID = "_"
+
+//type Access struct {
+//	TargetID   Key     `bson:"target_id"             json:"target_id"`
+//	TargetNick string `bson:"target_nick,omitempty" json:"target_nick,omitempty"`
+//	Right      Right  `bson:"right,omitempty"       json:"right,omitempty"`
+//}
