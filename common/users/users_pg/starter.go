@@ -73,7 +73,7 @@ package users_pg
 //	if !dp.noTagger {
 //		taggerOp, ok = joinerOp.Interface(tagger.InterfaceKey).(tagger.Operator)
 //		if !ok {
-//			return errors.Errorf("no tagger.Actor with key %s", tagger.InterfaceKey)
+//			return errors.Errorf("no tagger.Operator with key %s", tagger.InterfaceKey)
 //		}
 //
 //		taggercleanerOp, ok = joinerOp.Interface(tagger.CleanerInterfaceKey).(crud.Cleaner)

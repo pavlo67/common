@@ -17,7 +17,7 @@ import (
 func NewLoader(dataOp datatagged.Operator) (runner.Actor, error) {
 
 	if dataOp == nil {
-		return nil, errors.New("on importer_task.NewLoader(): data.Actor == nil")
+		return nil, errors.New("on importer_task.NewLoader(): data.Operator == nil")
 	}
 
 	return &cleanTask{dataOp}, nil

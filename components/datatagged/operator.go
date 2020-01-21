@@ -11,7 +11,7 @@ import (
 
 const InterfaceKey joiner.InterfaceKey = "data_tagged"
 
-type Tagger = tagger.Operator // to use data.Actor and tagger.Actor simultaneously in Actor interface
+type Tagger = tagger.Operator // to use data.Operator and tagger.Operator simultaneously in Actor interface
 
 type Operator interface {
 	data.Operator

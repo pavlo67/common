@@ -40,7 +40,7 @@ const onListWithTag = "on ws.ListWithTag(): "
 
 func (wsOp *ws) ListWithTag(key *joiner.InterfaceKey, tagLabel string, selector *selectors.Term, options *crud.GetOptions) ([]data.Item, error) {
 	if wsOp.Tagger == nil {
-		return nil, errors.New(onListWithTag + ": no tagger.Actor")
+		return nil, errors.New(onListWithTag + ": no tagger.Operator")
 	}
 
 	index, err := wsOp.IndexTagged(key, tagLabel, options)

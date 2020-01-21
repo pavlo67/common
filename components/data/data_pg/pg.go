@@ -106,17 +106,7 @@ func (dataOp *dataPg) Save(item data.Item, options *crud.SaveOptions) (common.ID
 		actor = options.Actor
 	}
 
-	item.History = append(item.History, crud.Action{
-		Actor:  actor,
-		Key:    crud.SavedAction,
-		DoneAt: time.Now(),
-	})
-
-	history, err := json.Marshal(item.History)
-	if err != nil {
-		return "", errors.Wrapf(err, onSave+"can't marshal .History(%#v)", item)
-	}
-
+	var err error
 	var embedded, tags []byte
 
 	if len(item.Embedded) > 0 {
@@ -133,15 +123,26 @@ func (dataOp *dataPg) Save(item data.Item, options *crud.SaveOptions) (common.ID
 		}
 	}
 
-	values := []interface{}{item.Key, item.URL, item.Title, item.Summary, embedded, tags, item.Data.TypeKey, item.Data.Content, history}
+	item.History = append(item.History, crud.Action{
+		Actor:  actor,
+		Key:    crud.SavedAction,
+		DoneAt: time.Now(),
+	})
 
 	var id common.ID
 
 	if item.ID == "" {
 
+		history, err := json.Marshal(item.History)
+		if err != nil {
+			return "", errors.Wrapf(err, onSave+"can't marshal .History(%#v)", item)
+		}
+
+		values := []interface{}{item.Key, item.URL, item.Title, item.Summary, embedded, tags, item.Data.TypeKey, item.Data.Content, history}
+
 		var lastInsertId uint64
 
-		err := dataOp.stmInsert.QueryRow(values...).Scan(&lastInsertId)
+		err = dataOp.stmInsert.QueryRow(values...).Scan(&lastInsertId)
 		if err != nil {
 			return "", errors.Wrapf(err, onSave+sqllib.CantExec, dataOp.sqlInsert, strlib.Stringify(values))
 		}
@@ -158,9 +159,27 @@ func (dataOp *dataPg) Save(item data.Item, options *crud.SaveOptions) (common.ID
 	} else {
 		id = item.ID
 
-		values := append(values, item.ID)
+		itemOld, err := dataOp.Read(id, &crud.GetOptions{Actor: options.Actor})
+		if err != nil {
+			return "", errors.Wrapf(err, onSave+"can't read old item with id = %s", id)
+		}
+		if itemOld == nil {
+			return "", errors.Errorf(onSave+"old item with id = %s is nil", id)
+		}
 
-		_, err := dataOp.stmUpdate.Exec(values...)
+		item.History, err = itemOld.History.Append(item.History)
+		if err != nil {
+			return "", errors.Wrap(err, onSave)
+		}
+
+		history, err := json.Marshal(item.History)
+		if err != nil {
+			return "", errors.Wrapf(err, onSave+"can't marshal .History(%#v)", item)
+		}
+
+		values := []interface{}{item.Key, item.URL, item.Title, item.Summary, embedded, tags, item.Data.TypeKey, item.Data.Content, history, item.ID}
+
+		_, err = dataOp.stmUpdate.Exec(values...)
 		if err != nil {
 			return "", errors.Wrapf(err, onSave+sqllib.CantExec, dataOp.sqlUpdate, strlib.Stringify(values))
 		}
