@@ -46,12 +46,12 @@ func (ss *identity_ecdsa) Setup() error {
 func (ss *identity_ecdsa) Run(joinerOp joiner.Operator) error {
 	identOp, err := New(1000, time.Second*2, nil)
 	if err != nil {
-		return errors.Wrap(err, "can't init identity_ecdsa.Actor")
+		return errors.Wrap(err, "can't init identity_ecdsa.ActorKey")
 	}
 
 	err = joinerOp.Join(identOp, ss.interfaceKey)
 	if err != nil {
-		return errors.Wrapf(err, "can't join identity_ecdsa identOp as identity.Actor with key '%s'", ss.interfaceKey)
+		return errors.Wrapf(err, "can't join identity_ecdsa identOp as identity.ActorKey with key '%s'", ss.interfaceKey)
 	}
 
 	return nil

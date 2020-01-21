@@ -20,11 +20,11 @@ const CreatedAction ActionKey = "created"
 const UpdatedAction ActionKey = "updated"
 
 type Action struct {
-	Actor   *identity.Key `bson:",omitempty" json:",omitempty"`
-	Key     ActionKey     `bson:",omitempty" json:",omitempty"`
-	DoneAt  time.Time     `bson:",omitempty" json:",omitempty"`
-	Related *joiner.Link  `bson:",omitempty" json:",omitempty"`
-	Errors  common.Errors `bson:",omitempty" json:",omitempty"`
+	ActorKey *identity.Key `bson:",omitempty" json:",omitempty"`
+	Key      ActionKey     `bson:",omitempty" json:",omitempty"`
+	DoneAt   time.Time     `bson:",omitempty" json:",omitempty"`
+	Related  *joiner.Link  `bson:",omitempty" json:",omitempty"`
+	Errors   common.Errors `bson:",omitempty" json:",omitempty"`
 }
 
 type History []Action

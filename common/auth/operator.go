@@ -24,9 +24,9 @@ type Operator interface {
 	Authorize(toAuth Creds) (*User, error)
 }
 
-// to use with map[CredsType]identity.Actor  --------------------------------------------------------------------
+// to use with map[CredsType]identity.ActorKey  --------------------------------------------------------------------
 
-var ErrNoIdentityOp = errors.New("no identity.Actor")
+var ErrNoIdentityOp = errors.New("no identity.ActorKey")
 
 const onGetUser = "on GetUser()"
 
@@ -49,14 +49,14 @@ func GetUser(creds Creds, ops []Operator, errs common.Errors) (*User, common.Err
 	return nil, errs
 }
 
-// callbacks can be used for partial implementations of identity.Actor (in their own interfaces)
+// callbacks can be used for partial implementations of identity.ActorKey (in their own interfaces)
 //
 // type Callback string
 //
 // const Confirm Callback = "confirm"
 // const SendCode Callback = "send_code"
 //
-// type Actor interface {
+// type ActorKey interface {
 //	// Create stores registration data and (as usual) sends confirmation code to user.
 //	Create(creds ...Creds) ([]Message, error)
 //

@@ -64,7 +64,7 @@ func (rs *sourcesStubStarter) Run(joinerOp joiner.Operator) error {
 
 	err = joinerOp.Join(sourcesOp, rs.interfaceKey)
 	if err != nil {
-		return errors.Wrapf(err, "can't join *sourcesStub as sources.Actor with key '%s'", rs.interfaceKey)
+		return errors.Wrapf(err, "can't join *sourcesStub as sources.ActorKey with key '%s'", rs.interfaceKey)
 	}
 
 	return nil

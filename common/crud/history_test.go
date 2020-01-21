@@ -20,21 +20,21 @@ func TestHistoryCheckOn(t *testing.T) {
 
 	hOld := History{
 		{
-			Actor:  nil,
-			Key:    ActionKey("a0"),
-			DoneAt: time.Now(),
+			ActorKey: nil,
+			Key:      ActionKey("a0"),
+			DoneAt:   time.Now(),
 		},
 		{
-			Actor:  &actorKey0,
-			Key:    ActionKey("a1"),
-			DoneAt: time.Now(),
+			ActorKey: &actorKey0,
+			Key:      ActionKey("a1"),
+			DoneAt:   time.Now(),
 		},
 	}
 
 	hNew0 := append(hOld, Action{
-		Actor:  &actorKey0,
-		Key:    "an0",
-		DoneAt: time0,
+		ActorKey: &actorKey0,
+		Key:      "an0",
+		DoneAt:   time0,
 		Related: &joiner.Link{
 			InterfaceKey: interfaceKey0,
 			ID:           "123",
@@ -42,9 +42,9 @@ func TestHistoryCheckOn(t *testing.T) {
 	})
 
 	hNew1 := append(hOld, Action{
-		Actor:  &actorKey0,
-		Key:    "an0",
-		DoneAt: time.Now(),
+		ActorKey: &actorKey0,
+		Key:      "an0",
+		DoneAt:   time.Now(),
 		Related: &joiner.Link{
 			InterfaceKey: interfaceKey0,
 			ID:           "123",
@@ -55,9 +55,9 @@ func TestHistoryCheckOn(t *testing.T) {
 	require.Error(t, err01) // times are different
 
 	hNew2 := append(hOld, Action{
-		Actor:  &actorKey1,
-		Key:    "an0",
-		DoneAt: time0,
+		ActorKey: &actorKey1,
+		Key:      "an0",
+		DoneAt:   time0,
 		Related: &joiner.Link{
 			InterfaceKey: interfaceKey0,
 			ID:           "123",
@@ -68,9 +68,9 @@ func TestHistoryCheckOn(t *testing.T) {
 	require.Error(t, err02) // actors are different
 
 	hNew0duplicate := append(hOld, Action{
-		Actor:  &actorKey0,
-		Key:    "an0",
-		DoneAt: time0,
+		ActorKey: &actorKey0,
+		Key:      "an0",
+		DoneAt:   time0,
 		Related: &joiner.Link{
 			InterfaceKey: interfaceKey0,
 			ID:           "123",
@@ -81,9 +81,9 @@ func TestHistoryCheckOn(t *testing.T) {
 	require.NoError(t, err00duplicate)
 
 	hNew0duplicate1 := append(hNew0duplicate, Action{
-		Actor:  &actorKey0,
-		Key:    "an0",
-		DoneAt: time.Now(),
+		ActorKey: &actorKey0,
+		Key:      "an0",
+		DoneAt:   time.Now(),
 		Related: &joiner.Link{
 			InterfaceKey: interfaceKey0,
 			ID:           "123",

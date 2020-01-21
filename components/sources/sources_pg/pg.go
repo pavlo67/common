@@ -30,7 +30,7 @@ package sources_pg
 // var fieldsToList = append([]string{"id"}, fieldsToRead...)
 // var fieldsToListStr = strings.Join(fieldsToList, ",")
 
-// var _ packs.Actor = &packsPg{}
+// var _ packs.ActorKey = &packsPg{}
 
 // type packsPg struct {
 // 	db    *sql.DB
@@ -44,7 +44,7 @@ package sources_pg
 
 // const onNew = "on packsPg.New(): "
 
-// func New(access config.Access, table string, interfaceKey joiner.InterfaceKey) (packs.Actor, crud.Cleaner, error) {
+// func New(access config.Access, table string, interfaceKey joiner.InterfaceKey) (packs.ActorKey, crud.Cleaner, error) {
 // 	db, err := sqllib_pg.Connect(access)
 // 	if err != nil {
 // 		return nil, nil, errors.Wrap(err, onNew)

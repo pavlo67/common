@@ -9,7 +9,7 @@ import (
 	"github.com/pavlo67/workshop/common/auth"
 )
 
-var errNoIdentityOpsMap = errors.New("no map[CredsType]identity.Actor")
+var errNoIdentityOpsMap = errors.New("no map[CredsType]identity.ActorKey")
 
 func UserWithRequest(r *http.Request, authOps []auth.Operator) (*auth.User, error) {
 

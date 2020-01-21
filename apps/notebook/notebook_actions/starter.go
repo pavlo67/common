@@ -79,12 +79,12 @@ func (gs *workspaceStarter) Run(joinerOp joiner.Operator) error {
 	if gs.copierTaskKey != "" {
 		copyTaskOp, ok = joinerOp.Interface(gs.copierTaskKey).(runner.Actor)
 		if !ok {
-			l.Fatalf("no actor.Actor with key %s", gs.copierTaskKey)
+			l.Fatalf("no actor.ActorKey with key %s", gs.copierTaskKey)
 		}
 
 		schOp, ok := joinerOp.Interface(gs.schedulerKey).(scheduler.Operator)
 		if !ok {
-			l.Fatalf("no scheduler.Actor with key %s", gs.schedulerKey)
+			l.Fatalf("no scheduler.ActorKey with key %s", gs.schedulerKey)
 		}
 
 		taskID, err := schOp.Init(copyTaskOp)
@@ -106,7 +106,7 @@ func (gs *workspaceStarter) Run(joinerOp joiner.Operator) error {
 
 	srvOp, ok := joinerOp.Interface(server_http.InterfaceKey).(server_http.Operator)
 	if !ok {
-		return errors.Errorf("no server_http.Actor with key %s", server_http.InterfaceKey)
+		return errors.Errorf("no server_http.ActorKey with key %s", server_http.InterfaceKey)
 	}
 
 	srvPort, ok := joinerOp.Interface(server_http.PortInterfaceKey).(int)

@@ -60,12 +60,12 @@ func (ws *workspaceStarter) Run(joinerOp joiner.Operator) error {
 
 	wsOp, _, err := New(dataOp, taggerOp)
 	if err != nil {
-		return errors.Wrap(err, "can't init storage.Actor")
+		return errors.Wrap(err, "can't init storage.ActorKey")
 	}
 
 	err = joinerOp.Join(wsOp, ws.interfaceKey)
 	if err != nil {
-		return errors.Wrapf(err, "can't join *ws as storage.Actor with key '%s'", ws.interfaceKey)
+		return errors.Wrapf(err, "can't join *ws as storage.ActorKey with key '%s'", ws.interfaceKey)
 	}
 
 	return nil

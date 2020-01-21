@@ -84,12 +84,12 @@ package users_pg
 //
 //	usersOp, userscleanerOp, err := New(dp.config, dp.table, dp.interfaceKey, taggerOp, taggercleanerOp)
 //	if err != nil {
-//		return errors.Wrap(err, "can't init *usersPG as users.Actor")
+//		return errors.Wrap(err, "can't init *usersPG as users.ActorKey")
 //	}
 //
 //	err = joinerOp.Join(usersOp, dp.interfaceKey)
 //	if err != nil {
-//		return errors.Wrapf(err, "can't join *usersPG as users.Actor with key '%s'", dp.interfaceKey)
+//		return errors.Wrapf(err, "can't join *usersPG as users.ActorKey with key '%s'", dp.interfaceKey)
 //	}
 //
 //	err = joinerOp.Join(userscleanerOp, dp.cleanerKey)

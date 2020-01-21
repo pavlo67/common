@@ -47,7 +47,7 @@ func Process(tasksOp tasks.Operator, joinerOp joiner.Operator, l logger.Operator
 		for _, item := range items {
 			workerOp, ok := joinerOp.Interface(item.TypeKey).(runner.Actor)
 			if !ok {
-				l.Errorf("no worker.Actor for task (%#v)", item)
+				l.Errorf("no worker.ActorKey for task (%#v)", item)
 				time.Sleep(timeToWait)
 				continue
 			}
@@ -96,6 +96,6 @@ func Process(tasksOp tasks.Operator, joinerOp joiner.Operator, l logger.Operator
 }
 
 func SelectTasksToProcess(tasksOp tasks.Operator) ([]tasks.Item, error) {
-	return tasksOp.List(selectors.Binary(selectors.Eq, "status", selectors.Value{""}), &crud.GetOptions{Limit0: 0, Limit1: 1})
-	// return tasksOp.ListTags(selectors.In("status", ""), &crud.GetOptions{Limit0: 0, Limit1: 1})
+	return tasksOp.List(selectors.Binary(selectors.Eq, "status", selectors.Value{""}), &crud.GetOptions{Offset: 0, Limit: 1})
+	// return tasksOp.ListTags(selectors.In("status", ""), &crud.GetOptions{Offset: 0, Limit: 1})
 }

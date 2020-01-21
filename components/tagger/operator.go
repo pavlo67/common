@@ -27,7 +27,7 @@ type Tagged struct {
 
 type Index map[joiner.InterfaceKey][]Tagged
 
-// TODO: don't remove "...Tags", it's necessary to resolve conflict in data_tagged.Actor
+// TODO: don't remove "...Tags", it's necessary to resolve conflict in data_tagged.ActorKey
 
 type Operator interface {
 	AddTags(joiner.Link, []Tag, *crud.SaveOptions) error
@@ -38,7 +38,7 @@ type Operator interface {
 	IndexTagged(*joiner.InterfaceKey, string, *crud.GetOptions) (Index, error)
 }
 
-//func CheckCycle(userIS auth.Key, operator Actor, id string, passedIDs []string) ([]string, error) {
+//func CheckCycle(userIS auth.Key, operator ActorKey, id string, passedIDs []string) ([]string, error) {
 //	for _, passedID := range passedIDs {
 //		if id == passedID {
 //			return nil, ErrSectionCycle

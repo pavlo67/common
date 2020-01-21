@@ -19,7 +19,7 @@ import (
 var listEndpoint = server_http.Endpoint{Method: "GET", PathParams: nil, WorkerHTTP: FlowList}
 
 func FlowList(user *auth.User, _ server_http.Params, req *http.Request) (server.Response, error) {
-	items, err := dataTaggedOp.List(nil, &crud.GetOptions{Limit1: 200})
+	items, err := dataTaggedOp.List(nil, &crud.GetOptions{Limit: 200})
 
 	l.Debugf("%#v", items)
 

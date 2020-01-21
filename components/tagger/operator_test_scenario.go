@@ -121,7 +121,7 @@ func OperatorTestScenario(t *testing.T, testCases []TestCase, cleanerOp crud.Cle
 			case "add":
 				err = tc.Operator.AddTags(step.ToTag, step.Tags, nil)
 			//case "remove":
-			//	err = tc.Actor.RemoveTags(step.Key, step.Key, step.Tags, nil)
+			//	err = tc.ActorKey.RemoveTags(step.Key, step.Key, step.Tags, nil)
 			case "replace":
 				err = tc.Operator.ReplaceTags(step.ToTag, step.Tags, nil)
 			case "tags":
@@ -156,7 +156,7 @@ func OperatorTestScenario(t *testing.T, testCases []TestCase, cleanerOp crud.Cle
 	}
 }
 
-//func prepareTest(t *testing.T, operator Actor, settaggerSteps []SettaggerStep) {
+//func prepareTest(t *testing.T, operator ActorKey, settaggerSteps []SettaggerStep) {
 //	// ClearDatabase ------------------------------------------------------------------------------------
 //
 //	//err := goroutine.go.Clean()
@@ -200,22 +200,22 @@ func OperatorTestScenario(t *testing.T, testCases []TestCase, cleanerOp crud.Cle
 //	for i, tc := range testCases {
 //		fmt.Println("QueryByObjectIDTest: ", i)
 //
-//		prepareTest(t, tc.Actor, tc.SettaggerSteps)
+//		prepareTest(t, tc.ActorKey, tc.SettaggerSteps)
 //
 //		// test QueryByObjectID --------------------------------------------------------------------------------------
 //
 //		if tc.ExpectedErr != nil {
-//			_, err := tc.Actor.QueryByObjectID(tc.IS, tc.ObjectID)
+//			_, err := tc.ActorKey.QueryByObjectID(tc.IS, tc.ObjectID)
 //			require.ErrStr(t, err, "where is an error on .QueryByObjectID(%#v, %s)?", tc.IS, tc.ObjectID)
 //			continue
 //		}
 //
 //		if tc.ISBad != nil {
-//			_, err := tc.Actor.QueryByObjectID(*tc.ISBad, tc.ObjectID)
+//			_, err := tc.ActorKey.QueryByObjectID(*tc.ISBad, tc.ObjectID)
 //			require.ErrStr(t, err, "where is an error on .QueryByObjectID(%#v, %s)?", *tc.ISBad, tc.ObjectID)
 //		}
 //
-//		linked, err := tc.Actor.QueryByObjectID(tc.IS, tc.ObjectID)
+//		linked, err := tc.ActorKey.QueryByObjectID(tc.IS, tc.ObjectID)
 //		require.NoError(t, err, "what is an error on .QueryByObjectID(%#v, %s)?", tc.IS, tc.ObjectID)
 //		require.Equal(t, len(tc.ExpectedLinked), len(linked), "len(tc.ExpectedLinked = %#v) != len(linked = %#v)", tc.ExpectedLinked, linked)
 //

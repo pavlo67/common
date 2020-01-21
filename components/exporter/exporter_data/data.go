@@ -60,12 +60,12 @@ func (expOp *exporterData) Export(selector *selectors.Term, afterIDStr string, o
 		selector = logic.AND(selector, selectorID)
 	}
 
-	// TODO!!! order by some other item's autoincrement if original .ID isn't autoincremental
 	if options == nil {
-		options = &crud.GetOptions{OrderBy: []string{"id"}}
-	} else {
-		options.OrderBy = []string{"id"}
+		options = &crud.GetOptions{}
 	}
+
+	// TODO!!! order by some other item's autoincrement if original .ID isn't autoincremental
+	options.OrderBy = []string{"id"}
 
 	items, err := expOp.dataOp.List(selectorFull, options)
 	if err != nil {
@@ -78,13 +78,13 @@ func (expOp *exporterData) Export(selector *selectors.Term, afterIDStr string, o
 		return nil, errors.Wrapf(err, onExport+"can't .Marshal(%#v)", items)
 	}
 
-	return &crud.Data{TypeKey: DataItemsTypeKey, Content: content}, nil
+	return &crud.Data{TypeKey: data.ItemsTypeKey, Content: content}, nil
 }
 
 const onImport = "on data.Import(): "
 
 func (expOp *exporterData) Import(crudData crud.Data, options *crud.SaveOptions) (string, error) {
-	if crudData.TypeKey != DataItemsTypeKey {
+	if crudData.TypeKey != data.ItemsTypeKey {
 		return "", errors.Errorf(onImport+"wrong crudData.TypeKey(%s)", crudData.TypeKey)
 	}
 
@@ -97,15 +97,20 @@ func (expOp *exporterData) Import(crudData crud.Data, options *crud.SaveOptions)
 	var tillIDStr string
 	if len(items) > 0 {
 		for i, item := range items {
-			itemsOld, err := expOp.dataOp.List(selectors.Binary(selectors.Eq, KeyFieldName, selectors.Value{item.Key}), nil)
+			itemsOld, err := expOp.dataOp.List(selectors.Binary(selectors.Eq, data.KeyFieldName, selectors.Value{item.Key}), nil)
 			if err != nil {
 				return "", errors.Wrapf(err, onImport+"can't get old item for key '%s'", item.Key)
 			}
-			if len(itemsOld) != 1 {
-				return "", errors.Errorf(onImport+"%d old items for key '%s' (instead one)", len(itemsOld))
+			if len(itemsOld) > 1 {
+				return "", errors.Errorf(onImport+"too many (%d) old items for key '%s' (should be not more then instead one)", len(itemsOld), item.Key)
 			}
 
-			item.ID = itemsOld[0].ID
+			if len(itemsOld) == 1 {
+				item.ID = itemsOld[0].ID
+			} else {
+				item.ID = ""
+			}
+
 			_, err = expOp.dataOp.Save(item, options)
 			if err != nil {
 				return "", errors.Wrapf(err, onImport+"can't save new item for key '%s'", item.Key)

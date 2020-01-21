@@ -350,7 +350,7 @@ func (dataOp *dataSQLite) Export(afterIDStr string, options *crud.GetOptions) ([
 	return dataOp.List(term, options)
 }
 
-const onList = "on dataSQLite.ListTags()"
+const onList = "on dataSQLite.List()"
 
 func (dataOp *dataSQLite) List(term *selectors.Term, options *crud.GetOptions) ([]data.Item, error) {
 	condition, values, err := selectors_sql.Use(term)

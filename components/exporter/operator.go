@@ -12,7 +12,3 @@ type Operator interface {
 	Export(selector *selectors.Term, after string, options *crud.GetOptions) (*crud.Data, error)
 	Import(crudData crud.Data, options *crud.SaveOptions) (till string, err error)
 }
-
-func ExporterTestScenario(exporterOp Operator) {
-
-}

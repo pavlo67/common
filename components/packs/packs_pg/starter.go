@@ -52,12 +52,12 @@ func (ps *packsPgStarter) Setup() error {
 func (ps *packsPgStarter) Run(joinerOp joiner.Operator) error {
 	packsOp, _, err := New(ps.config, ps.table, ps.interfaceKey)
 	if err != nil {
-		return errors.Wrap(err, "can't init packs.Actor")
+		return errors.Wrap(err, "can't init packs.ActorKey")
 	}
 
 	err = joinerOp.Join(packsOp, ps.interfaceKey)
 	if err != nil {
-		return errors.Wrapf(err, "can't join &packsPg as packs.Actor with key '%s'", ps.interfaceKey)
+		return errors.Wrapf(err, "can't join &packsPg as packs.ActorKey with key '%s'", ps.interfaceKey)
 	}
 
 	return nil

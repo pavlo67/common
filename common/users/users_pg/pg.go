@@ -103,11 +103,11 @@ package users_pg
 //
 //	var actor *identity.Key
 //	if options != nil {
-//		actor = options.Actor
+//		actor = options.ActorKey
 //	}
 //
 //	item.History = append(item.History, crud.Action{
-//		Actor:  actor,
+//		ActorKey:  actor,
 //		Key:    crud.SavedAction,
 //		DoneAt: time.Now(),
 //	})
@@ -271,7 +271,7 @@ package users_pg
 //	return nil
 //}
 //
-//const onList = "on usersPg.ListTags()"
+//const onList = "on usersPg.List()"
 //
 //func (usersOp *usersPg) List(term *selectors.Term, options *crud.GetOptions) ([]users.Item, error) {
 //	condition, values, err := selectors_sql.Use(term)

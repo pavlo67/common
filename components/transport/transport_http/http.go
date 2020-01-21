@@ -43,7 +43,7 @@ const onNew = "on sender_http.New(): "
 
 func New(packsOp packs.Operator, runnerFactory runner_factory.Factory, routerOp transportrouter.Operator, domain identity.Domain) (transport.Operator, *server_http.Endpoint, error) {
 	if packsOp == nil {
-		return nil, nil, errors.New(onNew + "no packs.Actor")
+		return nil, nil, errors.New(onNew + "no packs.ActorKey")
 	}
 
 	if runnerFactory == nil {
@@ -51,7 +51,7 @@ func New(packsOp packs.Operator, runnerFactory runner_factory.Factory, routerOp 
 	}
 
 	if routerOp == nil {
-		return nil, nil, errors.New(onNew + "no router.Actor")
+		return nil, nil, errors.New(onNew + "no router.ActorKey")
 	}
 
 	if strings.TrimSpace(string(domain)) == "" {

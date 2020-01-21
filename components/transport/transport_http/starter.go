@@ -51,12 +51,12 @@ func (th *transportHTTPStarter) Setup() error {
 func (th *transportHTTPStarter) Run(joinerOp joiner.Operator) error {
 	routerOp, ok := joinerOp.Interface(transportrouter.InterfaceKey).(transportrouter.Operator)
 	if !ok {
-		return errors.Errorf("no router.Actor with key %s", transportrouter.InterfaceKey)
+		return errors.Errorf("no router.ActorKey with key %s", transportrouter.InterfaceKey)
 	}
 
 	packsOp, ok := joinerOp.Interface(packs.InterfaceKey).(packs.Operator)
 	if !ok {
-		return errors.Errorf("no packs.Actor with key %s", packs.InterfaceKey)
+		return errors.Errorf("no packs.ActorKey with key %s", packs.InterfaceKey)
 	}
 
 	runnerFactory, ok := joinerOp.Interface(runner.FactoryInterfaceKey).(runner_factory.Factory)
@@ -66,12 +66,12 @@ func (th *transportHTTPStarter) Run(joinerOp joiner.Operator) error {
 
 	transpOp, receiveEndpoint, err := New(packsOp, runnerFactory, routerOp, th.domain)
 	if err != nil {
-		return errors.Wrap(err, "can'th init transport.Actor")
+		return errors.Wrap(err, "can'th init transport.ActorKey")
 	}
 
 	err = joinerOp.Join(transpOp, th.interfaceKey)
 	if err != nil {
-		return errors.Wrapf(err, "can'th join *transportHTTP as transport.Actor with key '%s'", th.interfaceKey)
+		return errors.Wrapf(err, "can'th join *transportHTTP as transport.ActorKey with key '%s'", th.interfaceKey)
 	}
 
 	err = joinerOp.Join(receiveEndpoint, th.handlerKey)

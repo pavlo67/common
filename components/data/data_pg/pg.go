@@ -7,8 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pavlo67/workshop/common/identity"
-
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/crud"
@@ -101,9 +99,8 @@ const onSave = "on dataPg.Save(): "
 
 func (dataOp *dataPg) Save(item data.Item, options *crud.SaveOptions) (common.ID, error) {
 
-	var actor *identity.Key
-	if options != nil {
-		actor = options.Actor
+	if options == nil {
+		options = &crud.SaveOptions{}
 	}
 
 	var err error
@@ -124,9 +121,9 @@ func (dataOp *dataPg) Save(item data.Item, options *crud.SaveOptions) (common.ID
 	}
 
 	item.History = append(item.History, crud.Action{
-		Actor:  actor,
-		Key:    crud.SavedAction,
-		DoneAt: time.Now(),
+		ActorKey: options.ActorKey,
+		Key:      crud.SavedAction,
+		DoneAt:   time.Now(),
 	})
 
 	var id common.ID
@@ -159,7 +156,7 @@ func (dataOp *dataPg) Save(item data.Item, options *crud.SaveOptions) (common.ID
 	} else {
 		id = item.ID
 
-		itemOld, err := dataOp.Read(id, &crud.GetOptions{Actor: options.Actor})
+		itemOld, err := dataOp.Read(id, &crud.GetOptions{Actor: options.ActorKey})
 		if err != nil {
 			return "", errors.Wrapf(err, onSave+"can't read old item with id = %s", id)
 		}
@@ -167,7 +164,7 @@ func (dataOp *dataPg) Save(item data.Item, options *crud.SaveOptions) (common.ID
 			return "", errors.Errorf(onSave+"old item with id = %s is nil", id)
 		}
 
-		item.History, err = itemOld.History.Append(item.History)
+		err = item.History.CheckOn(itemOld.History)
 		if err != nil {
 			return "", errors.Wrap(err, onSave)
 		}
@@ -290,7 +287,7 @@ func (dataOp *dataPg) Remove(id common.ID, _ *crud.RemoveOptions) error {
 	return nil
 }
 
-const onList = "on dataPg.ListTags()"
+const onList = "on dataPg.List()"
 
 func (dataOp *dataPg) List(term *selectors.Term, options *crud.GetOptions) ([]data.Item, error) {
 	condition, values, err := selectors_sql.Use(term)
@@ -302,14 +299,14 @@ func (dataOp *dataPg) List(term *selectors.Term, options *crud.GetOptions) ([]da
 	stm := dataOp.stmList
 
 	if condition != "" || options != nil {
-		query = sqllib.SQLList(dataOp.table, fieldsToListStr, condition, options)
+		query = sqllib_pg.CorrectWildcards(sqllib.SQLList(dataOp.table, fieldsToListStr, condition, options))
 		stm, err = dataOp.db.Prepare(query)
 		if err != nil {
 			return nil, errors.Wrapf(err, onList+": can't db.Prepare(%s)", query)
 		}
 	}
 
-	//l.Infof("%s / %#v\n%s", condition, values, query)
+	// l.Infof("%s / %#v\n%s", condition, values, query)
 
 	rows, err := stm.Query(values...)
 

@@ -71,12 +71,12 @@ func (th *authHTTPStarter) Run(joinerOp joiner.Operator) error {
 	}
 
 	if authOpToSetToken == nil {
-		return errors.New("no auth_jwt.Actor")
+		return errors.New("no auth_jwt.ActorKey")
 	}
 
 	authEndpoint, authInitEndpoint, err := New()
 	if err != nil {
-		return errors.Wrap(err, "can'th init auth.Actor")
+		return errors.Wrap(err, "can'th init auth.ActorKey")
 	}
 
 	err = joinerOp.Join(authEndpoint, th.authHandlerKey)

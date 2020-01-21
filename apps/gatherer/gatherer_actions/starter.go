@@ -74,12 +74,12 @@ func (gs *gathererStarter) Run(joinerOp joiner.Operator) error {
 	if gs.importerTaskKey != "" {
 		impTaskOp, ok = joinerOp.Interface(gs.importerTaskKey).(runner.Actor)
 		if !ok {
-			l.Fatalf("no actor.Actor with key %s", gs.importerTaskKey)
+			l.Fatalf("no actor.ActorKey with key %s", gs.importerTaskKey)
 		}
 
 		schOp, ok := joinerOp.Interface(scheduler.InterfaceKey).(scheduler.Operator)
 		if !ok {
-			l.Fatalf("no scheduler.Actor with key %s", scheduler.InterfaceKey)
+			l.Fatalf("no scheduler.ActorKey with key %s", scheduler.InterfaceKey)
 		}
 
 		taskID, err := schOp.Init(impTaskOp)
@@ -101,7 +101,7 @@ func (gs *gathererStarter) Run(joinerOp joiner.Operator) error {
 
 	srvOp, ok := joinerOp.Interface(server_http.InterfaceKey).(server_http.Operator)
 	if !ok {
-		return errors.Errorf("no server_http.Actor with key %s", server_http.InterfaceKey)
+		return errors.Errorf("no server_http.ActorKey with key %s", server_http.InterfaceKey)
 	}
 
 	srvPort, ok := joinerOp.Interface(server_http.PortInterfaceKey).(int)

@@ -12,12 +12,12 @@ package sources_pg
 // 	"github.com/pavlo67/workshop/components/packs"
 // )
 
-// func Starter() starter.Actor {
+// func Starter() starter.ActorKey {
 // 	return &packsPgStarter{}
 // }
 
-// var l logger.Actor
-// var _ starter.Actor = &packsPgStarter{}
+// var l logger.ActorKey
+// var _ starter.ActorKey = &packsPgStarter{}
 
 // type packsPgStarter struct {
 // 	config       config.Access
@@ -29,7 +29,7 @@ package sources_pg
 // 	return logger.GetCallInfo().PackageName
 // }
 
-// func (ps *packsPgStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Actor, options common.Map) ([]common.Map, error) {
+// func (ps *packsPgStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.ActorKey, options common.Map) ([]common.Map, error) {
 // 	l = lCommon
 
 // 	var cfgPg config.Access
@@ -49,15 +49,15 @@ package sources_pg
 // 	return nil
 // }
 
-// func (ps *packsPgStarter) Run(joinerOp joiner.Actor) error {
+// func (ps *packsPgStarter) Run(joinerOp joiner.ActorKey) error {
 // 	packsOp, _, err := New(ps.config, ps.table, ps.interfaceKey)
 // 	if err != nil {
-// 		return errors.Wrap(err, "can't init packs.Actor")
+// 		return errors.Wrap(err, "can't init packs.ActorKey")
 // 	}
 
 // 	err = joinerOp.Join(packsOp, ps.interfaceKey)
 // 	if err != nil {
-// 		return errors.Wrapf(err, "can't join &packsPg as packs.Actor with key '%s'", ps.interfaceKey)
+// 		return errors.Wrapf(err, "can't join &packsPg as packs.ActorKey with key '%s'", ps.interfaceKey)
 // 	}
 
 // 	return nil

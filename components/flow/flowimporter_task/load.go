@@ -24,7 +24,7 @@ func New(dataOp datatagged.Operator, sourcesOp sources.Operator) (runner.Actor, 
 		return nil, errors.New("on flowimporter_task.New(): data.Operator == nil")
 	}
 	if sourcesOp == nil {
-		return nil, errors.New("on flowimporter_task.New(): sources.Actor == nil")
+		return nil, errors.New("on flowimporter_task.New(): sources.ActorKey == nil")
 	}
 
 	return &loadTask{dataOp, sourcesOp}, nil

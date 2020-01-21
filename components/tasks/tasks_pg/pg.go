@@ -102,13 +102,13 @@ func (tasksOp *tasksPostgres) Save(item tasks.Item, options *crud.SaveOptions) (
 
 	var actor *identity.Key
 	if options != nil {
-		actor = options.Actor
+		actor = options.ActorKey
 	}
 
 	item.History = append(item.History, crud.Action{
-		Actor:  actor,
-		Key:    crud.SavedAction,
-		DoneAt: time.Now(),
+		ActorKey: actor,
+		Key:      crud.SavedAction,
+		DoneAt:   time.Now(),
 	})
 
 	history, err := json.Marshal(item.History)

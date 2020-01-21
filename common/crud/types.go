@@ -11,9 +11,9 @@ type Type struct {
 	Exemplar interface{}
 }
 
-const KeyString TypeKey = "string"
-const KeyHRefImage TypeKey = "href_image"
-const KeyHRef TypeKey = "href"
+const StringTypeKey TypeKey = "string"
+const HRefImageTypeKey TypeKey = "href_image"
+const HRefTypeKey TypeKey = "href"
 
 type Data struct {
 	TypeKey TypeKey `bson:",omitempty" json:",omitempty"`
