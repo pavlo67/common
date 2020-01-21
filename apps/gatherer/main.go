@@ -109,11 +109,15 @@ func main() {
 
 		// general purposes components
 		{control.Starter(), nil},
+
+		// auth system
 		{auth_ecdsa.Starter(), nil},
 
-		// action managers
+		// tasks system
 		{tasks_pg.Starter(), nil},
 		{runner_factory_goroutine.Starter(), nil},
+
+		// action managers
 		{scheduler_timeout.Starter(), nil},
 		{server_http_jschmhr.Starter(), common.Map{"port": port}},
 
@@ -123,7 +127,6 @@ func main() {
 		{transport_http.Starter(), common.Map{"handler_key": transport.HandlerInterfaceKey, "domain": serviceName}},
 
 		// database
-		// {tagger_pg.Starter(), nil},
 		{data_pg.Starter(), common.Map{"table": flow.CollectionDefault, "interface_key": flow.DataInterfaceKey, "cleaner_key": flow.CleanerInterfaceKey, "no_tagger": true}},
 		{datatagged.Starter(), common.Map{"data_key": flow.DataInterfaceKey, "interface_key": flow.InterfaceKey, "no_tagger": true}},
 
@@ -131,16 +134,14 @@ func main() {
 		{sources_stub.Starter(), nil},
 		{flowimporter_task.Starter(), common.Map{"datatagged_key": flow.InterfaceKey, "interface_key": flow.ImporterTaskInterfaceKey}},
 		// {flowcleaner_task.Starter(), common.Map{"cleaner_key": flow.CleanerInterfaceKey, "interface_key": flow.CleanerTaskInterfaceKey, "limit": 300000}},
-		// {flowcopier_task.Starter(), common.Map{"datatagged_key": flow.HandlerKey, "receiver_server_http": true}},
 
 		// actions starter (connecting specific actions to the corresponding action managers)
 		{gatherer_actions.Starter(), common.Map{
-			"import_immediately": importImmediately,
-			"importer_task_key":  flow.ImporterTaskInterfaceKey,
+			"import_immediately":    importImmediately,
+			"importer_task_key":     flow.ImporterTaskInterfaceKey,
+			"transport_handler_key": transport.HandlerInterfaceKey,
 
 			// "cleaner_task_key":     flow.CopierTaskInterfaceKey,
-
-			"receiver_handler_key": transport.HandlerInterfaceKey,
 		}},
 	}
 

@@ -46,7 +46,7 @@ func (sc *sendergomailComponent) Init() error {
 
 	err = joiner.JoinInterface(senderOp, sender.InterfaceKey)
 	if err != nil {
-		return errors.Wrap(err, "can't join sendergomail as sender.Actor")
+		return errors.Wrap(err, "can't join sendergomail as sender.ActorKey")
 	}
 	return nil
 }

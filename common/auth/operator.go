@@ -1,47 +1,38 @@
 package auth
 
 import (
+	"github.com/pavlo67/workshop/common/identity"
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/joiner"
 )
 
-const InterfaceKey joiner.InterfaceKey = "auth"
-
-const Anyone common.ID = "_"
-
-//type Access struct {
-//	TargetID   ID     `bson:"target_id"             json:"target_id"`
-//	TargetNick string `bson:"target_nick,omitempty" json:"target_nick,omitempty"`
-//	Right      Right  `bson:"right,omitempty"       json:"right,omitempty"`
-//}
+const AuthorizeHandlerKey joiner.InterfaceKey = "auth_handler"
+const SetCredsHandlerKey joiner.InterfaceKey = "auth_set_creds_handler"
 
 type User struct {
-	ID       common.ID `bson:"id"               json:"id"`
-	Nickname string    `bson:"nickname"         json:"nickname"`
-	Creds    Creds     `bson:"creds, omitempty" json:"creds, omitempty"`
-	// Accesses []Access `bson:"accesses,omitempty" json:"accesses,omitempty"`
+	Key   identity.Key `bson:",omitempty" json:",omitempty"`
+	Creds Creds        `bson:",omitempty" json:",omitempty"`
 }
 
 type Operator interface {
-	// Authorize can require multi-steps (using returned Creds)...
-	Authorize(toAuth Creds) (*User, error)
+	// SetCreds sets user's own or temporary (session-generated) creds
+	SetCreds(userKey identity.Key, toSet Creds) (*Creds, error)
 
-	// SetCreds can require multi-steps (using returned Creds)...
-	SetCreds(user User, toSet Creds) (*Creds, error)
+	// Authorize can require to do .SetCreds first and to usa some session-generated creds
+	Authorize(toAuth Creds) (*User, error)
 }
 
-// to use with map[CredsType]identity.Actor  --------------------------------------------------------------------
+// to use with map[CredsType]identity.ActorKey  --------------------------------------------------------------------
 
-var errNoCreds = errors.New("no creds")
-var errNoIdentityOp = errors.New("no identity.Actor")
+var ErrNoIdentityOp = errors.New("no identity.ActorKey")
 
 const onGetUser = "on GetUser()"
 
 func GetUser(creds Creds, ops []Operator, errs common.Errors) (*User, common.Errors) {
-	if len(creds.Values) < 1 {
-		return nil, append(errs, errNoCreds)
+	if len(creds) < 1 {
+		return nil, append(errs, ErrNoCreds)
 	}
 
 	for _, op := range ops {
@@ -58,16 +49,24 @@ func GetUser(creds Creds, ops []Operator, errs common.Errors) (*User, common.Err
 	return nil, errs
 }
 
-// callbacks can be used for partial implementations of identity.Actor (in their own interfaces)
+// callbacks can be used for partial implementations of identity.ActorKey (in their own interfaces)
 //
 // type Callback string
 //
 // const Confirm Callback = "confirm"
 // const SendCode Callback = "send_code"
 //
-// type Actor interface {
+// type ActorKey interface {
 //	// Create stores registration data and (as usual) sends confirmation code to user.
 //	Create(creds ...Creds) ([]Message, error)
 //
 //	AddCallback(key Callback, url string)
 // }
+
+//const Anyone common.ID = "_"
+
+//type Access struct {
+//	TargetID   Key     `bson:"target_id"             json:"target_id"`
+//	TargetNick string `bson:"target_nick,omitempty" json:"target_nick,omitempty"`
+//	Right      Right  `bson:"right,omitempty"       json:"right,omitempty"`
+//}

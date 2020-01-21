@@ -35,11 +35,16 @@ func SQLList(table, fields, condition string, options *crud.GetOptions) string {
 			order = strings.Join(options.OrderBy, ", ")
 		}
 
-		if options.Limit0+options.Limit1 > 0 {
-			limit = " LIMIT " + strconv.FormatUint(options.Limit0, 10)
-			if options.Limit1 > 0 {
-				limit += ", " + strconv.FormatUint(options.Limit1, 10)
+		if options.Offset+options.Limit > 0 {
+			if options.Limit > 0 {
+				limit += " LIMIT " + strconv.FormatUint(options.Limit, 10)
 			}
+
+			if options.Offset > 0 {
+				limit += " OFFSET " + strconv.FormatUint(options.Offset, 10)
+			}
+
+			// TODO: sqlite & mysql version
 		}
 	}
 

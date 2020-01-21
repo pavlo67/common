@@ -5,8 +5,6 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/pavlo67/workshop/common/identity"
-
 	"github.com/pavlo67/workshop/common"
 	"github.com/pkg/errors"
 )
@@ -26,9 +24,8 @@ type Operator interface {
 }
 
 type Link struct {
-	InterfaceKey `bson:",omitempty" json:",omitempty"`
-	common.ID    `bson:",omitempty" json:",omitempty"`
-	identity.Key `bson:",omitempty" json:",omitempty"`
+	InterfaceKey InterfaceKey `bson:",omitempty" json:",omitempty"`
+	ID           common.ID    `bson:",omitempty" json:",omitempty"`
 }
 
 var _ Operator = &joiner{}
@@ -70,7 +67,7 @@ func (j *joiner) Join(intrfc interface{}, interfaceKey InterfaceKey) error {
 
 func (j *joiner) Interface(interfaceKey InterfaceKey) interface{} {
 	if j == nil {
-		log.Printf("on Actor.Component(%s): null Actor item", interfaceKey)
+		log.Printf("on ActorKey.Component(%s): null ActorKey item", interfaceKey)
 	}
 
 	j.mutex.RLock()
@@ -114,7 +111,7 @@ func CheckInterface(intrfc interface{}, ptrToInterface interface{}) bool {
 
 func (j *joiner) CloseAll() {
 	if j == nil {
-		log.Print("on Actor.Close(): null Actor item")
+		log.Print("on ActorKey.Close(): null ActorKey item")
 		return
 	}
 
@@ -124,7 +121,7 @@ func (j *joiner) CloseAll() {
 		if closer, _ := closerComponent.Interface.(Closer); closer != nil {
 			err := closer.Close()
 			if err != nil {
-				log.Print("on Actor.Close(): ", err)
+				log.Print("on ActorKey.Close(): ", err)
 			}
 		}
 	}

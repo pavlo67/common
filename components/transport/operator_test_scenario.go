@@ -24,10 +24,10 @@ import (
 
 var createdAt = time.Now().UTC()
 
-//func TestCases(PacksOp Actor, cleanerOp crud.Cleaner) []OperatorTestCase {
+//func TestCases(PacksOp ActorKey, cleanerOp crud.Cleaner) []OperatorTestCase {
 //	return []OperatorTestCase{
 //		{
-//			Actor: PacksOp,
+//			ActorKey: PacksOp,
 //			Cleaner:  cleanerOp,
 //			ToSave: Pack{
 //				Key: "test_key1",

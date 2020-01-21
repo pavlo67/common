@@ -4,29 +4,29 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"log"
+	"time"
 
+	"github.com/pkg/errors"
 	"gopkg.in/square/go-jose.v2"
 	"gopkg.in/square/go-jose.v2/jwt"
 
-	"time"
-
-	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/auth"
-	"github.com/pavlo67/workshop/libraries/addrlib"
-	"github.com/pkg/errors"
+	"github.com/pavlo67/workshop/common/identity"
 )
 
-const Proto addrlib.Proto = "jwt://"
+const Proto = "jwt"
 
 var _ auth.Operator = &authJWT{}
 
-//var errEmptyPublicKeyAddress = errors.New("empty public ID address")
+//var errEmptyPublicKeyAddress = errors.New("empty public Key address")
 //var errEmptyPrivateKeyGenerated = errors.New("empty private key generated")
 
 type authJWT struct {
 	privKey rsa.PrivateKey
 	builder jwt.Builder
 }
+
+// TODO!!! add expiration time
 
 func New() (auth.Operator, error) {
 	privKey, err := rsa.GenerateKey(rand.Reader, 2048)
@@ -55,19 +55,19 @@ type jwtCreds struct {
 }
 
 // 	SetCreds ignores all input parameters, creates new "BTC identity" and returns it
-func (authOp *authJWT) SetCreds(user auth.User, creds auth.Creds) (*auth.Creds, error) {
+func (authOp *authJWT) SetCreds(userKey identity.Key, creds auth.Creds) (*auth.Creds, error) {
+
 	jc := jwtCreds{
 		Claims: &jwt.Claims{
 			//Issuer:   "issuer1",
 			//Subject:  "subject1",
 			// Audience: jwt.Audience{"aud1", "aud2"},
-			ID:       string(user.ID),
+			ID:       string(userKey),
 			IssuedAt: jwt.NewNumericDate(time.Now()),
 			// Expiry:   jwt.NewNumericDate(time.Date(2017, 1, 1, 0, 8, 0, 0, time.UTC)),
 		},
 
-		// !!! original user.Creds are disabled here
-		Creds: auth.Creds{Values: map[auth.CredsType]string{auth.CredsNickname: user.Nickname}},
+		Creds: creds,
 	}
 	// add claims to the Builder
 	builder := authOp.builder.Claims(jc)
@@ -77,13 +77,13 @@ func (authOp *authJWT) SetCreds(user auth.User, creds auth.Creds) (*auth.Creds, 
 		return nil, errors.Wrap(err, "on authJWT.SetCreds() with builder.CompactSerialize()")
 	}
 
-	return &auth.Creds{Values: map[auth.CredsType]string{
-		auth.CredsJWT: rawJWT,
-	}}, nil
+	creds[auth.CredsJWT] = rawJWT
+
+	return &creds, nil
 }
 
 func (authOp *authJWT) Authorize(toAuth auth.Creds) (*auth.User, error) {
-	credsJWT, ok := toAuth.Values[auth.CredsJWT]
+	credsJWT, ok := toAuth[auth.CredsJWT]
 	if !ok {
 		return nil, nil
 	}
@@ -99,17 +99,9 @@ func (authOp *authJWT) Authorize(toAuth auth.Creds) (*auth.User, error) {
 		return nil, errors.Wrapf(err, "failed to get claims: %#v", parsedJWT)
 	}
 
-	var nick string
-
-	if t, ok := res.Creds.Values[auth.CredsNickname]; ok {
-		nick = t
-		delete(res.Creds.Values, auth.CredsNickname)
-	}
-
 	return &auth.User{
-		ID:       common.ID(res.ID),
-		Nickname: nick,
-		Creds:    res.Creds,
+		Key:   identity.Key(res.ID),
+		Creds: res.Creds,
 	}, nil
 }
 

@@ -18,7 +18,7 @@ type Test struct {
 	BBB int
 }
 
-const serviceName = "workspace"
+const serviceName = "notebook"
 
 func TestCRUD(t *testing.T) {
 	env := "test"

@@ -10,8 +10,8 @@ const InterfaceKey joiner.InterfaceKey = "tagger"
 const CleanerInterfaceKey joiner.InterfaceKey = "tag_cleaner"
 
 type Tag struct {
-	Label    string
-	Relation string
+	Label  string
+	Params common.Map
 }
 
 type TagCount struct {
@@ -21,25 +21,24 @@ type TagCount struct {
 }
 
 type Tagged struct {
-	ID       common.ID
-	Relation string
+	ID     common.ID
+	Params common.Map
 }
 
 type Index map[joiner.InterfaceKey][]Tagged
 
-// TODO: don't remove "...Tags", it's necessary to resolve conflict in data_tagged.Actor
+// TODO: don't remove "...Tags", it's necessary to resolve conflict in data_tagged.ActorKey
 
 type Operator interface {
-	AddTags(joiner.InterfaceKey, common.ID, []Tag, *crud.SaveOptions) error
-	ReplaceTags(joiner.InterfaceKey, common.ID, []Tag, *crud.SaveOptions) error // or remove in particlar
+	AddTags(joiner.Link, []Tag, *crud.SaveOptions) error
+	ReplaceTags(joiner.Link, []Tag, *crud.SaveOptions) error // or remove in particlar
+	ListTags(joiner.Link, *crud.GetOptions) ([]Tag, error)   // i.e. parent sections if joiner.HandlerKey == "tagger"
 
-	ListTags(joiner.InterfaceKey, common.ID, *crud.GetOptions) ([]Tag, error) // i.e. parent sections if joiner.HandlerKey == "tagger"
 	CountTags(*joiner.InterfaceKey, *crud.GetOptions) ([]TagCount, error)
-
 	IndexTagged(*joiner.InterfaceKey, string, *crud.GetOptions) (Index, error)
 }
 
-//func CheckCycle(userIS auth.ID, operator Actor, id string, passedIDs []string) ([]string, error) {
+//func CheckCycle(userIS auth.Key, operator ActorKey, id string, passedIDs []string) ([]string, error) {
 //	for _, passedID := range passedIDs {
 //		if id == passedID {
 //			return nil, ErrSectionCycle

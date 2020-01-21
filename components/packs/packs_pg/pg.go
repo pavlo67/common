@@ -66,7 +66,7 @@ func New(access config.Access, table string, interfaceKey joiner.InterfaceKey) (
 		sqlReadToAddHistory: "SELECT history FROM " + table + " WHERE id = $1",
 		sqlAddHistory:       "UPDATE " + table + " SET history = $1 WHERE id = $2",
 
-		//sqlRemove: "DELETE FROM " + table + " where ID = $1",
+		//sqlRemove: "DELETE FROM " + table + " where Key = $1",
 		sqlClean: "DELETE FROM " + table,
 
 		interfaceKey: interfaceKey,
@@ -147,12 +147,12 @@ const onRead = "on packsPg.Read(): "
 
 func (packsOp *packsPg) Read(id common.ID, _ *crud.GetOptions) (*packs.Item, error) {
 	if len(id) < 1 {
-		return nil, errors.New(onRead + "empty ID")
+		return nil, errors.New(onRead + "empty Key")
 	}
 
 	idNum, err := strconv.ParseUint(string(id), 10, 64)
 	if err != nil {
-		return nil, errors.Errorf(onRead+"wrong ID (%s)", id)
+		return nil, errors.Errorf(onRead+"wrong Key (%s)", id)
 	}
 
 	item := packs.Item{ID: id}
@@ -307,12 +307,12 @@ func (packsOp *packsPg) AddHistory(id common.ID, historyToAdd crud.History, _ *c
 	// reading old .History
 
 	if len(id) < 1 {
-		return nil, errors.New(onAddHistory + "empty ID")
+		return nil, errors.New(onAddHistory + "empty Key")
 	}
 
 	idNum, err := strconv.ParseUint(string(id), 10, 64)
 	if err != nil {
-		return nil, errors.Errorf(onAddHistory+"wrong ID (%s)", id)
+		return nil, errors.Errorf(onAddHistory+"wrong Key (%s)", id)
 	}
 
 	var historyBytes []byte

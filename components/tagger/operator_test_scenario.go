@@ -14,8 +14,7 @@ import (
 
 type TagsToChange struct {
 	Action          string
-	Key             joiner.InterfaceKey
-	ID              common.ID
+	ToTag           joiner.Link
 	Tags            []Tag
 	IsErrorExpected bool
 }
@@ -40,8 +39,11 @@ func QueryTagsTestCases(taggerOp Operator) []TestCase {
 	id1 := common.ID("11")
 	id2 := common.ID("22")
 
-	tags1 := []Tag{{"1", ""}, {"2", ""}, {"3", ""}}
-	tags2 := []Tag{{"3", ""}, {"5", ""}, {"6", ""}}
+	params1 := common.Map{"a": "b"}
+	params2 := common.Map{"c": "d"}
+
+	tags1 := []Tag{{"1", params1}, {"2", nil}, {"3", nil}}
+	tags2 := []Tag{{"3", params2}, {"5", nil}, {"6", nil}}
 
 	key := InterfaceKey
 
@@ -53,49 +55,46 @@ func QueryTagsTestCases(taggerOp Operator) []TestCase {
 				{
 					TagsToChange: TagsToChange{
 						Action: "add",
-						Key:    InterfaceKey,
-						ID:     id1,
+						ToTag:  joiner.Link{InterfaceKey: InterfaceKey, ID: id1},
 						Tags:   tags1,
 					},
 					TagsToCheck: []TagToCheck{
-						{Tag: Tag{"1", ""}, Tagged: Index{key: []Tagged{{ID: id1}}}},
-						{Tag: Tag{"2", ""}, Tagged: Index{key: []Tagged{{ID: id1}}}},
-						{Tag: Tag{"3", ""}, Tagged: Index{key: []Tagged{{ID: id1}}}},
-						{Tag: Tag{"4", ""}, Tagged: Index{}},
-						{Tag: Tag{"5", ""}, Tagged: Index{}},
-						{Tag: Tag{"6", ""}, Tagged: Index{}},
+						{Tag: Tag{"1", nil}, Tagged: Index{key: []Tagged{{ID: id1, Params: params1}}}},
+						{Tag: Tag{"2", nil}, Tagged: Index{key: []Tagged{{ID: id1}}}},
+						{Tag: Tag{"3", nil}, Tagged: Index{key: []Tagged{{ID: id1}}}},
+						{Tag: Tag{"4", nil}, Tagged: Index{}},
+						{Tag: Tag{"5", nil}, Tagged: Index{}},
+						{Tag: Tag{"6", nil}, Tagged: Index{}},
 					},
 				},
 				{
 					TagsToChange: TagsToChange{
 						Action: "add",
-						Key:    InterfaceKey,
-						ID:     id2,
+						ToTag:  joiner.Link{InterfaceKey: InterfaceKey, ID: id2},
 						Tags:   tags2,
 					},
 					TagsToCheck: []TagToCheck{
-						{Tag: Tag{"1", ""}, Tagged: Index{key: []Tagged{{ID: id1}}}},
-						{Tag: Tag{"2", ""}, Tagged: Index{key: []Tagged{{ID: id1}}}},
-						{Tag: Tag{"3", ""}, Tagged: Index{key: []Tagged{{ID: id1}, {ID: id2}}}},
-						{Tag: Tag{"4", ""}, Tagged: Index{}},
-						{Tag: Tag{"5", ""}, Tagged: Index{key: []Tagged{{ID: id2}}}},
-						{Tag: Tag{"6", ""}, Tagged: Index{key: []Tagged{{ID: id2}}}},
+						{Tag: Tag{"1", nil}, Tagged: Index{key: []Tagged{{ID: id1, Params: params1}}}},
+						{Tag: Tag{"2", nil}, Tagged: Index{key: []Tagged{{ID: id1}}}},
+						{Tag: Tag{"3", nil}, Tagged: Index{key: []Tagged{{ID: id1}, {ID: id2, Params: params2}}}},
+						{Tag: Tag{"4", nil}, Tagged: Index{}},
+						{Tag: Tag{"5", nil}, Tagged: Index{key: []Tagged{{ID: id2}}}},
+						{Tag: Tag{"6", nil}, Tagged: Index{key: []Tagged{{ID: id2}}}},
 					},
 				},
 				{
 					TagsToChange: TagsToChange{
 						Action: "replace",
-						Key:    InterfaceKey,
-						ID:     id1,
+						ToTag:  joiner.Link{InterfaceKey: InterfaceKey, ID: id1},
 						Tags:   nil,
 					},
 					TagsToCheck: []TagToCheck{
-						{Tag: Tag{"1", ""}, Tagged: Index{}},
-						{Tag: Tag{"2", ""}, Tagged: Index{}},
-						{Tag: Tag{"3", ""}, Tagged: Index{key: []Tagged{{ID: id2}}}},
-						{Tag: Tag{"4", ""}, Tagged: Index{}},
-						{Tag: Tag{"5", ""}, Tagged: Index{key: []Tagged{{ID: id2}}}},
-						{Tag: Tag{"6", ""}, Tagged: Index{key: []Tagged{{ID: id2}}}},
+						{Tag: Tag{"1", nil}, Tagged: Index{}},
+						{Tag: Tag{"2", nil}, Tagged: Index{}},
+						{Tag: Tag{"3", nil}, Tagged: Index{key: []Tagged{{ID: id2, Params: params2}}}},
+						{Tag: Tag{"4", nil}, Tagged: Index{}},
+						{Tag: Tag{"5", nil}, Tagged: Index{key: []Tagged{{ID: id2}}}},
+						{Tag: Tag{"6", nil}, Tagged: Index{key: []Tagged{{ID: id2}}}},
 					},
 				},
 			},
@@ -120,14 +119,14 @@ func OperatorTestScenario(t *testing.T, testCases []TestCase, cleanerOp crud.Cle
 			var err error
 			switch step.Action {
 			case "add":
-				err = tc.Operator.AddTags(step.Key, step.ID, step.Tags, nil)
+				err = tc.Operator.AddTags(step.ToTag, step.Tags, nil)
 			//case "remove":
-			//	err = tc.Actor.RemoveTags(step.ID, step.ID, step.Tags, nil)
+			//	err = tc.ActorKey.RemoveTags(step.Key, step.Key, step.Tags, nil)
 			case "replace":
-				err = tc.Operator.ReplaceTags(step.Key, step.ID, step.Tags, nil)
+				err = tc.Operator.ReplaceTags(step.ToTag, step.Tags, nil)
 			case "tags":
 				var tags []Tag
-				tags, err = tc.Operator.ListTags(step.Key, step.ID, nil)
+				tags, err = tc.Operator.ListTags(step.ToTag, nil)
 				if !step.TagsToChange.IsErrorExpected {
 					require.Equal(t, step.Tags, tags)
 				}
@@ -157,7 +156,7 @@ func OperatorTestScenario(t *testing.T, testCases []TestCase, cleanerOp crud.Cle
 	}
 }
 
-//func prepareTest(t *testing.T, operator Actor, settaggerSteps []SettaggerStep) {
+//func prepareTest(t *testing.T, operator ActorKey, settaggerSteps []SettaggerStep) {
 //	// ClearDatabase ------------------------------------------------------------------------------------
 //
 //	//err := goroutine.go.Clean()
@@ -201,22 +200,22 @@ func OperatorTestScenario(t *testing.T, testCases []TestCase, cleanerOp crud.Cle
 //	for i, tc := range testCases {
 //		fmt.Println("QueryByObjectIDTest: ", i)
 //
-//		prepareTest(t, tc.Actor, tc.SettaggerSteps)
+//		prepareTest(t, tc.ActorKey, tc.SettaggerSteps)
 //
 //		// test QueryByObjectID --------------------------------------------------------------------------------------
 //
 //		if tc.ExpectedErr != nil {
-//			_, err := tc.Actor.QueryByObjectID(tc.IS, tc.ObjectID)
+//			_, err := tc.ActorKey.QueryByObjectID(tc.IS, tc.ObjectID)
 //			require.ErrStr(t, err, "where is an error on .QueryByObjectID(%#v, %s)?", tc.IS, tc.ObjectID)
 //			continue
 //		}
 //
 //		if tc.ISBad != nil {
-//			_, err := tc.Actor.QueryByObjectID(*tc.ISBad, tc.ObjectID)
+//			_, err := tc.ActorKey.QueryByObjectID(*tc.ISBad, tc.ObjectID)
 //			require.ErrStr(t, err, "where is an error on .QueryByObjectID(%#v, %s)?", *tc.ISBad, tc.ObjectID)
 //		}
 //
-//		linked, err := tc.Actor.QueryByObjectID(tc.IS, tc.ObjectID)
+//		linked, err := tc.ActorKey.QueryByObjectID(tc.IS, tc.ObjectID)
 //		require.NoError(t, err, "what is an error on .QueryByObjectID(%#v, %s)?", tc.IS, tc.ObjectID)
 //		require.Equal(t, len(tc.ExpectedLinked), len(linked), "len(tc.ExpectedLinked = %#v) != len(linked = %#v)", tc.ExpectedLinked, linked)
 //
@@ -224,7 +223,7 @@ func OperatorTestScenario(t *testing.T, testCases []TestCase, cleanerOp crud.Cle
 //		sort.Sort(byLinked(linked))
 //
 //		for i, li := range tc.ExpectedLinked {
-//			require.Equal(t, Hash(li), Hash(linked[i]), "linked[%d] isn't correct", i)
+//			require.Equal(t, EncryptedPass(li), EncryptedPass(linked[i]), "linked[%d] isn't correct", i)
 //		}
 //
 //	}
@@ -248,7 +247,7 @@ func OperatorTestScenario(t *testing.T, testCases []TestCase, cleanerOp crud.Cle
 //	return res
 //}
 //
-//func Hash(li Linked) string {
+//func EncryptedPass(li Linked) string {
 //	return li.ObjectID + " " + li.TypeKey + " " + li.LinkedID + " " + li.LinkedType + " " + li.Tag
 //}
 //
@@ -262,5 +261,5 @@ func OperatorTestScenario(t *testing.T, testCases []TestCase, cleanerOp crud.Cle
 //}
 //
 //func (s byLinked) Less(i, j int) bool {
-//	return Hash(s[i]) < Hash(s[j])
+//	return EncryptedPass(s[i]) < EncryptedPass(s[j])
 //}

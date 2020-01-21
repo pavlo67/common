@@ -35,7 +35,7 @@ type receiverPOP3BytBox struct {
 
 var _ receiver.Operator = &receiverPOP3BytBox{}
 
-var noOp = errors.New("receiver.Actor == nil	")
+var noOp = errors.New("receiver.ActorKey == nil	")
 
 func (recOp *receiverPOP3BytBox) start() (*pop3.Client, uint64, error) {
 	if recOp == nil {

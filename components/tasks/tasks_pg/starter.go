@@ -54,12 +54,12 @@ func (ts *tasksPgStarter) Setup() error {
 func (ts *tasksPgStarter) Run(joinerOp joiner.Operator) error {
 	tasksOp, _, err := New(ts.config, ts.table, ts.interfaceKey)
 	if err != nil {
-		return errors.Wrap(err, "can't init tasks.Actor")
+		return errors.Wrap(err, "can't init tasks.ActorKey")
 	}
 
 	err = joinerOp.Join(tasksOp, ts.interfaceKey)
 	if err != nil {
-		return errors.Wrapf(err, "can't join &tasksPg as tasks.Actor with key '%s'", ts.interfaceKey)
+		return errors.Wrapf(err, "can't join &tasksPg as tasks.ActorKey with key '%s'", ts.interfaceKey)
 	}
 
 	return nil

@@ -44,7 +44,7 @@ func (sc *receiverpop3Component) Init() error {
 
 	err = joiner.JoinInterface(receiverOp, receiver.InterfaceKey)
 	if err != nil {
-		return errors.Wrap(err, "can't join receiverpop3 as receiver.Actor")
+		return errors.Wrap(err, "can't join receiverpop3 as receiver.ActorKey")
 	}
 	return nil
 }

@@ -23,7 +23,7 @@ func NewCopyTask(url string, dataOp data.Operator) (runner.Actor, error) {
 	//}
 	//
 	//if dataOp == nil {
-	//	return nil, errors.New("on importer_task.NewCopyTask(): data.Actor == nil")
+	//	return nil, errors.New("on importer_task.NewCopyTask(): data.Operator == nil")
 	//}
 	//
 	//impOp, err := importer_http_series.NewSeriesHTTP(url, l)
@@ -93,7 +93,7 @@ func (it *copyTask) Copy() (int, int, int, error) {
 	for _, item := range series.Data {
 		var cnt uint64
 
-		// l.Info("? ", item.ID)
+		// l.Info("? ", item.Key)
 
 		numProcessed++
 

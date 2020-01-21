@@ -17,7 +17,7 @@ func Identity(sourceURL, originalID string) *identity.Item {
 func SourceKey(history crud.History) *identity.Key { //  , sourceTime time.Time
 	for _, action := range history {
 		if action.Key == ActionKey {
-			return action.Actor // , action.DoneAt
+			return action.ActorKey // , action.DoneAt
 		}
 	}
 

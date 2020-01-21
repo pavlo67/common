@@ -12,6 +12,7 @@ import (
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/crud"
+	"github.com/pavlo67/workshop/common/identity"
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/libraries/sqllib"
 	"github.com/pavlo67/workshop/common/libraries/sqllib/sqllib_pg"
@@ -21,23 +22,18 @@ import (
 	"github.com/pavlo67/workshop/components/tasks"
 )
 
-var fieldsToInsert = []string{"worker_type", "params", "status", "results"}
+var fieldsToInsert = []string{"worker_type", "params", "status", "results", "history"}
 var fieldsToInsertStr = strings.Join(fieldsToInsert, ",")
 
-var fieldsToRead = append(fieldsToInsert, "created_at", "updated_at")
+var fieldsToRead = append(fieldsToInsert, "created_at")
 var fieldsToReadStr = strings.Join(fieldsToRead, ",")
 
 var fieldsToList = append([]string{"id"}, fieldsToRead...)
 var fieldsToListStr = strings.Join(fieldsToList, ",")
 
-var fieldsToStart = []string{"status", "updated_at"}
-var fieldsToStartStr = sqllib_pg.WildcardsForUpdate(fieldsToStart)
-
-// var fieldsToReadToStartStr = strings.Join(fieldsToStart[:len(fieldsToStart)-1], ",")
-
-var fieldsToFinish = []string{"status", "results", "updated_at"}
-var fieldsToFinishStr = sqllib_pg.WildcardsForUpdate(fieldsToFinish)
-var fieldsToReadToFinishStr = strings.Join(fieldsToFinish[:len(fieldsToFinish)-1], ",")
+var fieldsToStartFinish = []string{"status", "results"}
+var fieldsToStartFinishStr = sqllib_pg.WildcardsForUpdate(fieldsToStartFinish)
+var fieldsToReadToStartFinishStr = strings.Join(fieldsToStartFinish, ",")
 
 var _ tasks.Operator = &tasksPostgres{}
 var _ crud.Cleaner = &tasksPostgres{}
@@ -46,8 +42,8 @@ type tasksPostgres struct {
 	db    *sql.DB
 	table string
 
-	sqlInsert, sqlRead, sqlList, sqlReadToStart, sqlStart, sqlReadToFinish, sqlFinish, sqlClean string
-	stmInsert, stmRead, stmList, stmReadToStart, stmStart, stmReadToFinish, stmFinish           *sql.Stmt
+	sqlInsert, sqlRead, sqlList, sqlReadToStart, sqlStartFinish, sqlReadToStartFinish, sqlClean string
+	stmInsert, stmRead, stmList, stmReadToStart, stmStartFinish, stmReadToStartFinish           *sql.Stmt
 
 	interfaceKey joiner.InterfaceKey
 }
@@ -72,13 +68,10 @@ func New(access config.Access, table string, interfaceKey joiner.InterfaceKey) (
 		sqlRead:   "SELECT " + fieldsToReadStr + " FROM " + table + " WHERE id = $1",
 		sqlList:   sqllib.SQLList(table, fieldsToListStr, "", &crud.GetOptions{OrderBy: []string{"created_at"}}),
 
-		// sqlReadToStart: "SELECT " + fieldsToReadToStartStr + " FROM " + table + " WHERE id = $1",
-		sqlStart: "UPDATE " + table + " SET " + fieldsToStartStr + " WHERE id = $" + strconv.Itoa(len(fieldsToStart)+1),
+		sqlReadToStartFinish: "SELECT " + fieldsToReadToStartFinishStr + " FROM " + table + " WHERE id = $1",
+		sqlStartFinish:       "UPDATE " + table + " SET " + fieldsToStartFinishStr + " WHERE id = $" + strconv.Itoa(len(fieldsToStartFinish)+1),
 
-		sqlReadToFinish: "SELECT " + fieldsToReadToFinishStr + " FROM " + table + " WHERE id = $1",
-		sqlFinish:       "UPDATE " + table + " SET " + fieldsToFinishStr + " WHERE id = $" + strconv.Itoa(len(fieldsToFinish)+1),
-
-		//sqlRemove: "DELETE FROM " + table + " where ID = $1",
+		//sqlRemove: "DELETE FROM " + table + " where Key = $1",
 		sqlClean: "DELETE FROM " + table,
 
 		interfaceKey: interfaceKey,
@@ -90,11 +83,8 @@ func New(access config.Access, table string, interfaceKey joiner.InterfaceKey) (
 		{&tasksOp.stmList, tasksOp.sqlList},
 		//	{&tasksOp.stmRemove, tasksOp.sqlRemove},
 
-		// {&tasksOp.stmReadToStart, tasksOp.sqlReadToStart},
-		{&tasksOp.stmStart, tasksOp.sqlStart},
-
-		{&tasksOp.stmReadToFinish, tasksOp.sqlReadToFinish},
-		{&tasksOp.stmFinish, tasksOp.sqlFinish},
+		{&tasksOp.stmReadToStartFinish, tasksOp.sqlReadToStartFinish},
+		{&tasksOp.stmStartFinish, tasksOp.sqlStartFinish},
 	}
 
 	for _, sqlStmt := range sqlStmts {
@@ -108,19 +98,40 @@ func New(access config.Access, table string, interfaceKey joiner.InterfaceKey) (
 
 const onSave = "on tasksPostgres.Save(): "
 
-func (tasksOp *tasksPostgres) Save(item tasks.Item, _ *crud.SaveOptions) (common.ID, error) {
-	var content interface{}
-	if task.Content != nil {
-		content = task.Content
-	} else {
-		content = ""
+func (tasksOp *tasksPostgres) Save(item tasks.Item, options *crud.SaveOptions) (common.ID, error) {
+
+	var actor *identity.Key
+	if options != nil {
+		actor = options.ActorKey
 	}
 
-	values := []interface{}{task.TypeKey, content, "", ""}
+	item.History = append(item.History, crud.Action{
+		ActorKey: actor,
+		Key:      crud.SavedAction,
+		DoneAt:   time.Now(),
+	})
+
+	history, err := json.Marshal(item.History)
+	if err != nil {
+		return "", errors.Wrapf(err, onSave+"can't marshal .History(%#v)", item)
+	}
+
+	var results []byte
+	if len(item.Results) > 0 {
+		results, err = json.Marshal(item.Results)
+		if err != nil {
+			return "", errors.Wrapf(err, onSave+"can't marshal .Results(%#v)", item)
+		}
+
+	}
+
+	// TODO!!! be careful: old items can't be changed
+
+	values := []interface{}{item.TypeKey, item.Content, item.Status, results, history}
 
 	var lastInsertId uint64
 
-	err := tasksOp.stmInsert.QueryRow(values...).Scan(&lastInsertId)
+	err = tasksOp.stmInsert.QueryRow(values...).Scan(&lastInsertId)
 	if err != nil {
 		return "", errors.Wrapf(err, onSave+sqllib.CantExec, tasksOp.sqlInsert, values)
 	}
@@ -132,21 +143,20 @@ const onRead = "on tasksPostgres.Read(): "
 
 func (tasksOp *tasksPostgres) Read(id common.ID, _ *crud.GetOptions) (*tasks.Item, error) {
 	if len(id) < 1 {
-		return nil, errors.New(onRead + "empty ID")
+		return nil, errors.New(onRead + "empty Key")
 	}
 
 	idNum, err := strconv.ParseUint(string(id), 10, 64)
 	if err != nil {
-		return nil, errors.Errorf(onRead+"wrong ID (%s)", id)
+		return nil, errors.Errorf(onRead+"wrong Key (%s)", id)
 	}
 
 	item := tasks.Item{ID: id}
-	var status, results []byte
+	var history, results []byte
 	var createdAtStr string
-	var updatedAtPtr *string
 
 	err = tasksOp.stmRead.QueryRow(idNum).Scan(
-		&item.TypeKey, &item.Content, &status, &results, &createdAtStr, &updatedAtPtr,
+		&item.TypeKey, &item.Content, &item.Status, &results, &history, &createdAtStr,
 	)
 	if err == sql.ErrNoRows {
 		return nil, common.ErrNotFound
@@ -155,10 +165,10 @@ func (tasksOp *tasksPostgres) Read(id common.ID, _ *crud.GetOptions) (*tasks.Ite
 		return nil, errors.Wrapf(err, onRead+sqllib.CantScanQueryRow, tasksOp.sqlRead, idNum)
 	}
 
-	if len(status) > 0 {
-		err = json.Unmarshal(status, &item.Status)
+	if len(history) > 0 {
+		err = json.Unmarshal(history, &item.History)
 		if err != nil {
-			return &item, errors.Wrapf(err, onRead+"can't unmarshal .History (%s)", status)
+			return &item, errors.Wrapf(err, onRead+"can't unmarshal .History (%s)", history)
 		}
 	}
 
@@ -174,14 +184,6 @@ func (tasksOp *tasksPostgres) Read(id common.ID, _ *crud.GetOptions) (*tasks.Ite
 		// TODO??? return &item, errors.Wrapf(err, onRead+"can't parse .CreatedAt (%s)", createdAtStr)
 	} else {
 		item.History = item.History.SaveAction(crud.Action{Key: crud.CreatedAction, DoneAt: createdAt, Related: &joiner.Link{InterfaceKey: tasks.InterfaceKey, ID: id}})
-	}
-
-	if updatedAtPtr != nil {
-		updatedAt, err := time.Parse(time.RFC3339, *updatedAtPtr)
-		if err != nil {
-			// TODO??? return &item, errors.Wrapf(err, onRead+"can't parse .UpdatedAt (%s)", *updatedAtPtr)
-		}
-		item.History = item.History.SaveAction(crud.Action{Key: crud.UpdatedAction, DoneAt: updatedAt, Related: &joiner.Link{InterfaceKey: tasks.InterfaceKey, ID: id}})
 	}
 
 	return &item, nil
@@ -226,21 +228,20 @@ func (tasksOp *tasksPostgres) List(term *selectors.Term, options *crud.GetOption
 	for rows.Next() {
 		var idNum int64
 		var item tasks.Item
-		var status, results []byte
+		var history, results []byte
 		var createdAtStr string
-		var updatedAtPtr *string
 
 		err := rows.Scan(
-			&idNum, &item.TypeKey, &item.Content, &status, &results, &createdAtStr, &updatedAtPtr,
+			&idNum, &item.TypeKey, &item.Content, &item.Status, &results, &history, &createdAtStr,
 		)
 		if err != nil {
 			return items, errors.Wrapf(err, onList+sqllib.CantScanQueryRow, query, values)
 		}
 
-		if len(status) > 0 {
-			err = json.Unmarshal(status, &item.Status)
+		if len(history) > 0 {
+			err = json.Unmarshal(history, &item.History)
 			if err != nil {
-				return items, errors.Wrapf(err, onList+"can't unmarshal .History (%s)", status)
+				return items, errors.Wrapf(err, onList+"can't unmarshal .History (%s)", history)
 			}
 		}
 
@@ -260,14 +261,6 @@ func (tasksOp *tasksPostgres) List(term *selectors.Term, options *crud.GetOption
 			item.History = item.History.SaveAction(crud.Action{Key: crud.CreatedAction, DoneAt: createdAt, Related: &joiner.Link{InterfaceKey: tasks.InterfaceKey, ID: item.ID}})
 		}
 
-		if updatedAtPtr != nil {
-			updatedAt, err := time.Parse(time.RFC3339, *updatedAtPtr)
-			if err != nil {
-				// TODO??? return &item, errors.Wrapf(err, onRead+"can't parse .UpdatedAt (%s)", *updatedAtPtr)
-			}
-			item.History = item.History.SaveAction(crud.Action{Key: crud.UpdatedAction, DoneAt: updatedAt, Related: &joiner.Link{InterfaceKey: tasks.InterfaceKey, ID: item.ID}})
-		}
-
 		items = append(items, item)
 	}
 	err = rows.Err()
@@ -278,38 +271,67 @@ func (tasksOp *tasksPostgres) List(term *selectors.Term, options *crud.GetOption
 	return items, nil
 }
 
+const onReadToStartFinish = "on tasksPostgres.readToStartFinish(): "
+
+func (tasksOp *tasksPostgres) readToStartFinish(idNum uint64) (tasks.Status, []tasks.Result, error) {
+	var status tasks.Status
+	var resultsBytes []byte
+	var results []tasks.Result
+
+	err := tasksOp.stmReadToStartFinish.QueryRow(idNum).Scan(&status, &resultsBytes)
+	if err != nil {
+		return "", nil, errors.Wrapf(err, onReadToStartFinish+sqllib.CantScanQueryRow, tasksOp.sqlReadToStartFinish, idNum)
+	}
+
+	if len(resultsBytes) > 0 {
+		err = json.Unmarshal(resultsBytes, &results)
+		if err != nil {
+			return "", nil, errors.Wrapf(err, onReadToStartFinish+"can't unmarshal .Results (%s)", resultsBytes)
+		}
+	}
+
+	return status, results, nil
+}
+
 const onStart = "on tasksPostgres.Start(): "
 
 func (tasksOp *tasksPostgres) Start(id common.ID, _ *crud.SaveOptions) error {
 	if len(id) < 1 {
-		return errors.New(onStart + "empty ID")
+		return errors.New(onStart + "empty Key")
 	}
 
 	idNum, err := strconv.ParseUint(string(id), 10, 64)
 	if err != nil {
-		return errors.Errorf(onStart+"wrong ID (%s)", id)
+		return errors.Errorf(onStart+"wrong Key (%s)", id)
 	}
 
-	//err = tasksOp.stmReadToStart.QueryRow(idNum).Scan(&statusStr)
-	//if err != nil {
-	//	return errors.Wrapf(err, onStart+sqllib.CantScanQueryRow, tasksOp.sqlReadToStart, idNum)
-	//}
-
-	// setting status ---------------------------------------------------------------------------------
-
-	startedAt := time.Now()
-	status := tasks.Status{tasks.Timing{StartedAt: &startedAt}}
-	statusBytes, err := json.Marshal(status)
+	status, results, err := tasksOp.readToStartFinish(idNum)
 	if err != nil {
-		return errors.Wrapf(err, onStart+"can't marshal .History (%#v)", status)
+		return errors.Wrap(err, onStart)
+	}
+
+	if status != "" {
+		return errors.Wrapf(err, onStart+"can't start task (%s) due to non-empty status (%s), previous results = %#v)", id, status, results)
+	}
+
+	// setting results ---------------------------------------------------------------------------------
+
+	now := time.Now()
+	results = append(results, tasks.Result{
+		Timing: tasks.Timing{StartedAt: &now},
+	})
+
+	resultsBytes, err := json.Marshal(results)
+	if err != nil {
+		return errors.Wrapf(err, onStart+"can't marshal .Results (%#v)", results)
 	}
 
 	// saving the updates -----------------------------------------------------------------------------
 
-	values := []interface{}{statusBytes, startedAt.Format(time.RFC3339), idNum}
-	_, err = tasksOp.stmStart.Exec(values...)
+	values := []interface{}{tasks.StatusStarted, resultsBytes, idNum}
+	_, err = tasksOp.stmStartFinish.Exec(values...)
 	if err != nil {
-		return errors.Wrapf(err, onStart+sqllib.CantExec, tasksOp.sqlStart, values)
+		return errors.Wrapf(err, onStart+sqllib.CantExec, tasksOp.sqlStartFinish, values)
 	}
 
 	return nil
@@ -319,45 +341,26 @@ const onFinish = "on tasksPostgres.Finish(): "
 
 func (tasksOp *tasksPostgres) Finish(id common.ID, result tasks.Result, _ *crud.SaveOptions) error {
 	if len(id) < 1 {
-		return errors.New(onFinish + "empty ID")
+		return errors.New(onFinish + "empty Key")
 	}
 
 	idNum, err := strconv.ParseUint(string(id), 10, 64)
 	if err != nil {
-		return errors.Errorf(onFinish+"wrong ID (%s)", id)
+		return errors.Errorf(onFinish+"wrong Key (%s)", id)
 	}
 
-	var statusStr, resultsStr string
-
-	err = tasksOp.stmReadToFinish.QueryRow(idNum).Scan(&statusStr, &resultsStr)
+	_, results, err := tasksOp.readToStartFinish(idNum)
 	if err != nil {
-		return errors.Wrapf(err, onFinish+sqllib.CantScanQueryRow, tasksOp.sqlReadToFinish, idNum)
+		return errors.Wrap(err, onStart)
 	}
 
-	// clearing status --------------------------------------------------------------------------------
+	// TODO: check status
 
-	var status tasks.Status
-	if len(statusStr) > 0 {
-		err = json.Unmarshal([]byte(statusStr), &status)
-		if err != nil {
-			return errors.Wrapf(err, onFinish+"can't unmarshal .History (%s)", statusStr)
-		}
+	// setting results ---------------------------------------------------------------------------------
+
+	if len(results) > 0 && results[len(results)-1].FinishedAt == nil {
+		result.StartedAt = results[len(results)-1].StartedAt
 	}
-	if result.StartedAt == nil && status.StartedAt != nil {
-		result.StartedAt = status.StartedAt
-	}
-	statusStr = ""
-
-	// adding the result ------------------------------------------------------------------------------
-
-	var results []tasks.Result
-	if len(resultsStr) > 0 {
-		err = json.Unmarshal([]byte(resultsStr), &results)
-		if err != nil {
-			return errors.Wrapf(err, onFinish+"can't unmarshal .Results (%s)", resultsStr)
-		}
-	}
-
 	if result.FinishedAt == nil {
 		now := time.Now()
 		result.FinishedAt = &now
@@ -366,15 +369,15 @@ func (tasksOp *tasksPostgres) Finish(id common.ID, result tasks.Result, _ *crud.
 	results = append(results, result)
 	resultsBytes, err := json.Marshal(results)
 	if err != nil {
-		return errors.Wrapf(err, onFinish+"can't .Marshal(%#v)", results)
+		return errors.Wrapf(err, onFinish+"can't marshal .Results(%#v)", results)
 	}
 
 	// saving the updates -----------------------------------------------------------------------------
 
-	values := []interface{}{statusStr, resultsBytes, time.Now().Format(time.RFC3339), idNum}
-	_, err = tasksOp.stmFinish.Exec(values...)
+	values := []interface{}{"", resultsBytes, idNum}
+	_, err = tasksOp.stmStartFinish.Exec(values...)
 	if err != nil {
-		return errors.Wrapf(err, onFinish+sqllib.CantExec, tasksOp.sqlFinish, values)
+		return errors.Wrapf(err, onFinish+sqllib.CantExec, tasksOp.sqlStartFinish, values)
 	}
 
 	return nil

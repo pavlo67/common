@@ -7,7 +7,6 @@ import (
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/starter"
-	"github.com/pavlo67/workshop/components/flowcleaner"
 )
 
 func Starter() starter.Operator {
@@ -55,7 +54,7 @@ func (ts *importerTasksStarter) Run(joinerOp joiner.Operator) error {
 
 	fcOp, _ = joinerOp.Interface(flowcleaner.InterfaceKey).(crud.Cleaner)
 	if fcOp == nil {
-		l.Fatalf("no flow_cleaner.Actor with key %s", flowcleaner.InterfaceKey)
+		l.Fatalf("no flow_cleaner.ActorKey with key %s", flowcleaner.InterfaceKey)
 	}
 
 	return nil

@@ -20,11 +20,6 @@ const CryptypePreferred Cryptype = SHA256
 
 var ErrBadCryptype = errors.New("bad cryptography type")
 
-type Hash struct {
-	Passhash string   `bson:"passhash"           json:"passhash"`
-	Cryptype Cryptype `bson:"cryptype,omitempty" json:"cryptype,omitempty"`
-}
-
 func PasswordValidation(password string, minLength int) (string, error) {
 	password = strings.TrimSpace(password)
 

@@ -1,15 +1,16 @@
 package auth
 
-import "github.com/pavlo67/workshop/common/libraries/encrlib"
-
 type CredsType string
+
+const CredsToSet CredsType = "to_set"
+
+const CredsIP CredsType = "ip"
 
 const CredsJWT CredsType = "jwt"
 
 const CredsToken CredsType = "token"
 const CredsPartnerToken CredsType = "partner_token"
 
-const CredsID CredsType = "id"
 const CredsLogin CredsType = "login"
 const CredsNickname CredsType = "nickname"
 const CredsEmail CredsType = "email"
@@ -21,14 +22,13 @@ const CredsQuestionAnswer CredsType = "question_answer"
 
 const CredsAllowedID CredsType = "allowed_id"
 
-const CredsContentToSignature CredsType = "content_to_signature"
-const CredsNumberToSignature CredsType = "number_to_signature"
+const CredsKeyToSignature CredsType = "key_to_signature"
 const CredsSignature CredsType = "signature"
-const CredsPublicKeyAddress CredsType = "public_key_address"
-const CredsPublicKey CredsType = "public_key"
+const CredsPublicKeyBase58 CredsType = "public_key_base58"
+const CredsPublicKeyEncoding CredsType = "public_key_encoding"
 const CredsPrivateKey CredsType = "private_key"
 
-type Creds struct {
-	Cryptype encrlib.Cryptype     `json:"cryptype,omitempty"`
-	Values   map[CredsType]string `json:"values,omitempty"`
-}
+const CredsPasshash CredsType = "passhash"
+const CredsPasshashCryptype CredsType = "passhash_cryptype"
+
+type Creds map[CredsType]string

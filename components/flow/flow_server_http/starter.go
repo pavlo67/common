@@ -53,7 +53,7 @@ func (ss *flowTaggedServerHTTPStarter) Run(joinerOp joiner.Operator) error {
 	var ok bool
 	dataTaggedOp, ok = joinerOp.Interface(flow.InterfaceKey).(datatagged.Operator)
 	if !ok {
-		return errors.Errorf("no data_tagged.Actor with key %s", flow.InterfaceKey)
+		return errors.Errorf("no data_tagged.ActorKey with key %s", flow.InterfaceKey)
 	}
 
 	err := joinerOp.Join(&listEndpoint, flow.ListInterfaceKey)

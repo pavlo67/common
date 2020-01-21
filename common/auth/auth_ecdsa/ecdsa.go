@@ -4,48 +4,97 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	r "math/rand"
 	"strconv"
 	"strings"
 	"sync"
+	"time"
+
+	"github.com/pavlo67/workshop/common/identity"
 
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/auth"
-	"github.com/pavlo67/workshop/common/libraries/addrlib"
 	"github.com/pavlo67/workshop/common/libraries/encrlib"
+	"github.com/pavlo67/workshop/common/libraries/strlib"
 )
 
-const Proto addrlib.Proto = "ecdsa://"
+const Cryptype encrlib.Cryptype = "ecdsa"
+const Proto = "ecdsa"
 
-var _ auth.Operator = &identityECDSA{}
+var _ auth.Operator = &authECDSA{}
 
-var errWrongAddressProto = errors.New("wrong address proto")
 var errWrongSignature = errors.New("wrong signature")
 var errWrongNumber = errors.New("wrong user's number")
-var errEmptyPublicKeyAddress = errors.New("empty public ID address")
+var errEmptyPublicKeyAddress = errors.New("empty public Key address")
 var errEmptyPrivateKeyGenerated = errors.New("empty private key generated")
 
-type identityECDSA struct {
-	numberedIDs   map[string]uint64
-	numberedMutex *sync.Mutex
+var cnt uint32
+
+type Session struct {
+	IP        string
+	StartedAt time.Time
 }
 
-func New(numberedIDs []string) (auth.Operator, error) {
-	is := &identityECDSA{
-		numberedIDs:   map[string]uint64{},
-		numberedMutex: &sync.Mutex{},
-	}
-	for _, id := range numberedIDs {
-		is.numberedIDs[id] = 0
+type authECDSA struct {
+	sessions map[uint64]Session
+	mutex    *sync.Mutex
+
+	maxSessionDuration time.Duration
+	numbersLimit       int
+
+	acceptableIDs []string
+}
+
+func New(numbersLimit int, maxSessionDuration time.Duration, acceptableIDs []string) (auth.Operator, error) {
+	r.Seed(time.Now().UnixNano())
+
+	is := &authECDSA{
+		sessions: map[uint64]Session{},
+		mutex:    &sync.Mutex{},
+
+		maxSessionDuration: maxSessionDuration,
+		numbersLimit:       numbersLimit,
+
+		acceptableIDs: acceptableIDs,
 	}
 
 	return is, nil
 }
 
-// 	SetCreds ignores all input parameters, creates new "BTC identity" and returns it
-func (*identityECDSA) SetCreds(auth.User, auth.Creds) (*auth.Creds, error) {
+// 	SetCreds creates either session-generated key or new "BTC identity" and returns it
+func (is *authECDSA) SetCreds(userKey identity.Key, creds auth.Creds) (*auth.Creds, error) {
+	toSet := auth.CredsType(creds[auth.CredsToSet])
+
+	if toSet == auth.CredsKeyToSignature {
+		now := time.Now()
+
+		is.mutex.Lock() // Lock() -----------------------------------------------------
+
+		if is.numbersLimit > 0 && len(is.sessions) >= is.numbersLimit {
+			for n, s := range is.sessions {
+				if now.Sub(s.StartedAt) >= is.maxSessionDuration {
+					delete(is.sessions, n)
+				}
+			}
+		}
+
+		cnt++
+		numberToSend := uint64(cnt)<<32 + uint64(r.Uint32())
+
+		is.sessions[numberToSend] = Session{
+			IP:        creds[auth.CredsIP], // TODO??? check if IP isn't empty
+			StartedAt: now,
+		}
+
+		is.mutex.Unlock() // Unlock() -------------------------------------------------
+
+		return &auth.Creds{auth.CredsKeyToSignature: strconv.FormatUint(numberToSend, 10)}, nil
+	}
+
+	// TODO: modify acceptableIDs if it's necessary
+
 	privKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
 		return nil, err
@@ -58,58 +107,81 @@ func (*identityECDSA) SetCreds(auth.User, auth.Creds) (*auth.Creds, error) {
 		return nil, err
 	}
 
-	publKeyAddress := string(Proto) + string(append(privKey.PublicKey.X.Bytes(), privKey.PublicKey.Y.Bytes()...))
-
-	creds := auth.Creds{
-		Values: map[auth.CredsType]string{
-			auth.CredsPrivateKey:       string(privKeyBytes),
-			auth.CredsPublicKeyAddress: publKeyAddress,
-		},
+	publKeyBase58 := base58.Encode(encrlib.ECDSAPublicKey(*privKey))
+	nickname := publKeyBase58
+	if creds[auth.CredsNickname] != "" {
+		nickname = creds[auth.CredsNickname]
 	}
 
-	return &creds, nil
+	credsNew := &auth.Creds{
+		auth.CredsNickname:          nickname,
+		auth.CredsPrivateKey:        string(privKeyBytes),
+		auth.CredsPublicKeyBase58:   publKeyBase58,
+		auth.CredsPublicKeyEncoding: Proto,
+	}
+
+	return credsNew, nil
 }
 
-func (is *identityECDSA) Authorize(toAuth auth.Creds) (*auth.User, error) {
-	publKeyAddress := strings.TrimSpace(toAuth.Values[auth.CredsPublicKeyAddress])
-
-	var publKeyEncoded string
-	if len(publKeyAddress) < len(string(Proto)) || publKeyAddress[:len(string(Proto))] != string(Proto) {
-		return nil, errWrongAddressProto
+func (is *authECDSA) Authorize(toAuth auth.Creds) (*auth.User, error) {
+	if toAuth[auth.CredsPublicKeyEncoding] != Proto {
+		return nil, auth.ErrEncryptionType
 	}
-	publKeyEncoded = publKeyAddress[len(string(Proto)):]
 
-	contentToSignature := []byte(toAuth.Values[auth.CredsContentToSignature])
-	numberToSignature := []byte(toAuth.Values[auth.CredsNumberToSignature])
-	signature := []byte(toAuth.Values[auth.CredsSignature])
-
-	if len(publKeyEncoded) < 1 {
+	publKeyBase58 := toAuth[auth.CredsPublicKeyBase58]
+	if len(publKeyBase58) < 1 {
 		return nil, errEmptyPublicKeyAddress
 	}
+	publKey := base58.Decode(publKeyBase58)
 
-	publKey := base58.Decode(publKeyEncoded)
-
-	is.numberedMutex.Lock()
-	if num, ok := is.numberedIDs[publKeyEncoded]; ok {
-		numNew, _ := strconv.ParseUint(string(numberToSignature), 10, 64)
-		if numNew <= num {
-			is.numberedMutex.Unlock()
-			return nil, errWrongNumber
-		}
-		is.numberedIDs[publKeyEncoded] = numNew
+	// TODO: use mutex is is.acceptableIDs can be modified using .SetCreds or somehow else
+	if is.acceptableIDs != nil && !strlib.In(is.acceptableIDs, publKeyBase58) {
+		return nil, nil
 	}
-	is.numberedMutex.Unlock()
 
-	if !encrlib.ECDSAVerify(publKey, append(contentToSignature, numberToSignature...), signature) {
+	keyToSignature := toAuth[auth.CredsKeyToSignature]
+	numberToSend, err := strconv.ParseUint(keyToSignature, 10, 64)
+	if err != nil {
+		return nil, errors.Wrap(auth.ErrSignaturedKey, "not a number!")
+	}
+
+	is.mutex.Lock() // Lock() -----------------------------------------------------
+
+	session, ok := is.sessions[numberToSend]
+	if !ok {
+		return nil, errors.Wrap(auth.ErrSignaturedKey, "no appropriate session")
+		is.mutex.Unlock() // Unlock() ---------------------------------------------
+	}
+	delete(is.sessions, numberToSend)
+
+	is.mutex.Unlock() // Unlock() -------------------------------------------------
+
+	if time.Now().Sub(session.StartedAt) > is.maxSessionDuration {
+		return nil, errors.Wrap(auth.ErrAuthSession, "session is expired")
+	}
+
+	if session.IP != toAuth[auth.CredsIP] {
+		return nil, auth.ErrIP
+	}
+
+	signature := []byte(toAuth[auth.CredsSignature])
+
+	if !encrlib.ECDSAVerify(keyToSignature, publKey, signature) {
 		return nil, errWrongSignature
 	}
 
+	var nickname = publKeyBase58
+	if nicknameReceived := toAuth[auth.CredsNickname]; strings.TrimSpace(nicknameReceived) != "" {
+		nickname = nicknameReceived
+	}
+
 	return &auth.User{
-		ID:       common.ID(publKeyAddress),
-		Nickname: publKeyAddress,
+		Key:   identity.Key(Proto + "://" + publKeyBase58),
+		Creds: auth.Creds{auth.CredsNickname: nickname},
 	}, nil
 }
 
-func (*identityECDSA) Accepts() ([]auth.CredsType, error) {
-	return []auth.CredsType{auth.CredsSignature}, nil
-}
+//
+//func (*authECDSA) Accepts() ([]auth.CredsType, error) {
+//	return []auth.CredsType{auth.CredsSignature}, nil
+//}

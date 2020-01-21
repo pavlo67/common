@@ -16,7 +16,7 @@ func (item Item) PrepareToEdit() ([]editor.Field, error) {
 	//if len(item.Data.Content) > 0 {
 	//	editDetailsOp, ok := item.Data.Content.(editor.Operator)
 	//	if !ok {
-	//		return nil, errors.Errorf("item.Details (%#v) isn't editor.Actor", item.Details)
+	//		return nil, errors.Errorf("item.Details (%#v) isn't editor.ActorKey", item.Details)
 	//	}
 	//
 	//	detailsFields, err := editDetailsOp.PrepareToEdit()

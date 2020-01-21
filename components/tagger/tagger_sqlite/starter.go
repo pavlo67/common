@@ -52,19 +52,19 @@ func (ts *taggerSQLiteStarter) Setup() error {
 	//return sqllib.SetupTables(
 	//	sm.mysqlConfig,
 	//	sm.index.MySQL,
-	//	[]config.Table{{ID: "table", Title: sm.table}},
+	//	[]config.Table{{Key: "table", Title: sm.table}},
 	//)
 }
 
 func (ts *taggerSQLiteStarter) Run(joinerOp joiner.Operator) error {
 	taggerOp, taggerCleanerOp, err := New(ts.config, ts.interfaceKey)
 	if err != nil {
-		return errors.Wrap(err, "can't init tagger.Actor")
+		return errors.Wrap(err, "can't init tagger.Operator")
 	}
 
 	err = joinerOp.Join(taggerOp, ts.interfaceKey)
 	if err != nil {
-		return errors.Wrapf(err, "can't join *tagsSQLite as tagger.Actor with key '%s'", ts.interfaceKey)
+		return errors.Wrapf(err, "can't join *tagsSQLite as tagger.Operator with key '%s'", ts.interfaceKey)
 	}
 
 	err = joinerOp.Join(taggerCleanerOp, ts.cleanerInterfaceKey)

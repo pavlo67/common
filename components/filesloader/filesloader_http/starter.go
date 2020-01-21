@@ -48,12 +48,12 @@ func (fl *loaderHTTPStarter) Setup() error {
 func (fl *loaderHTTPStarter) Run(joinerOp joiner.Operator) error {
 	flOp, _, err := New(fl.pathToStore)
 	if err != nil {
-		return errors.Wrap(err, "can't init filesloader.Actor")
+		return errors.Wrap(err, "can't init filesloader.ActorKey")
 	}
 
 	err = joinerOp.Join(flOp, fl.interfaceKey)
 	if err != nil {
-		return errors.Wrapf(err, "can't join *filesloaderHTTP as filesloader.Actor with key '%s'", fl.interfaceKey)
+		return errors.Wrapf(err, "can't join *filesloaderHTTP as filesloader.ActorKey with key '%s'", fl.interfaceKey)
 	}
 
 	return nil

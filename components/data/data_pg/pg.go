@@ -97,42 +97,49 @@ func New(access config.Access, table string, interfaceKey joiner.InterfaceKey, t
 
 const onSave = "on dataPg.Save(): "
 
-func (dataOp *dataPg) Save(item data.Item, _ *crud.SaveOptions) (common.ID, error) {
-	var err error
+func (dataOp *dataPg) Save(item data.Item, options *crud.SaveOptions) (common.ID, error) {
 
-	var embedded, tags, history []byte
+	if options == nil {
+		options = &crud.SaveOptions{}
+	}
+
+	var err error
+	var embedded, tags []byte
 
 	if len(item.Embedded) > 0 {
 		embedded, err = json.Marshal(item.Embedded)
 		if err != nil {
-			return "", errors.Wrapf(err, onSave+"can't marshal .Embedded(%#v)", item.Embedded)
+			return "", errors.Wrapf(err, onSave+"can't marshal .Embedded(%#v)", item)
 		}
 	}
 
 	if len(item.Tags) > 0 {
 		tags, err = json.Marshal(item.Tags)
 		if err != nil {
-			return "", errors.Wrapf(err, onSave+"can't marshal .Tags(%#v)", item.Tags)
+			return "", errors.Wrapf(err, onSave+"can't marshal .Tags(%#v)", item)
 		}
 	}
 
-	// TODO!!! append to .History
-
-	if len(item.History) > 0 {
-		history, err = json.Marshal(item.History)
-		if err != nil {
-			return "", errors.Wrapf(err, onSave+"can't marshal .History(%#v)", item.History)
-		}
-	}
+	item.History = append(item.History, crud.Action{
+		ActorKey: options.ActorKey,
+		Key:      crud.SavedAction,
+		DoneAt:   time.Now(),
+	})
 
 	var id common.ID
 
 	if item.ID == "" {
-		values := []interface{}{string(item.Key), item.URL, item.Title, item.Summary, embedded, tags, item.Data.TypeKey, item.Data.Content, history}
+
+		history, err := json.Marshal(item.History)
+		if err != nil {
+			return "", errors.Wrapf(err, onSave+"can't marshal .History(%#v)", item)
+		}
+
+		values := []interface{}{item.Key, item.URL, item.Title, item.Summary, embedded, tags, item.Data.TypeKey, item.Data.Content, history}
 
 		var lastInsertId uint64
 
-		err := dataOp.stmInsert.QueryRow(values...).Scan(&lastInsertId)
+		err = dataOp.stmInsert.QueryRow(values...).Scan(&lastInsertId)
 		if err != nil {
 			return "", errors.Wrapf(err, onSave+sqllib.CantExec, dataOp.sqlInsert, strlib.Stringify(values))
 		}
@@ -140,7 +147,7 @@ func (dataOp *dataPg) Save(item data.Item, _ *crud.SaveOptions) (common.ID, erro
 		id = common.ID(strconv.FormatUint(lastInsertId, 10))
 
 		if dataOp.taggerOp != nil && len(item.Tags) > 0 {
-			err = dataOp.taggerOp.AddTags(dataOp.interfaceKey, id, item.Tags, nil)
+			err = dataOp.taggerOp.AddTags(joiner.Link{dataOp.interfaceKey, id}, item.Tags, nil)
 			if err != nil {
 				return "", errors.Wrapf(err, onSave+": can't .AddTags(%#v)", item.Tags)
 			}
@@ -149,19 +156,38 @@ func (dataOp *dataPg) Save(item data.Item, _ *crud.SaveOptions) (common.ID, erro
 	} else {
 		id = item.ID
 
+		itemOld, err := dataOp.Read(id, &crud.GetOptions{Actor: options.ActorKey})
+		if err != nil {
+			return "", errors.Wrapf(err, onSave+"can't read old item with id = %s", id)
+		}
+		if itemOld == nil {
+			return "", errors.Errorf(onSave+"old item with id = %s is nil", id)
+		}
+
+		err = item.History.CheckOn(itemOld.History)
+		if err != nil {
+			return "", errors.Wrap(err, onSave)
+		}
+
+		history, err := json.Marshal(item.History)
+		if err != nil {
+			return "", errors.Wrapf(err, onSave+"can't marshal .History(%#v)", item)
+		}
+
 		values := []interface{}{item.Key, item.URL, item.Title, item.Summary, embedded, tags, item.Data.TypeKey, item.Data.Content, history, item.ID}
 
-		_, err := dataOp.stmUpdate.Exec(values...)
+		_, err = dataOp.stmUpdate.Exec(values...)
 		if err != nil {
 			return "", errors.Wrapf(err, onSave+sqllib.CantExec, dataOp.sqlUpdate, strlib.Stringify(values))
 		}
 
 		if dataOp.taggerOp != nil {
-			err = dataOp.taggerOp.ReplaceTags(dataOp.interfaceKey, item.ID, item.Tags, nil)
+			err = dataOp.taggerOp.ReplaceTags(joiner.Link{dataOp.interfaceKey, item.ID}, item.Tags, nil)
 			if err != nil {
 				return "", errors.Wrapf(err, onSave+": can't .ReplaceTags(%#v)", item.Tags)
 			}
 		}
+
 	}
 
 	return id, nil
@@ -171,12 +197,12 @@ const onRead = "on dataPg.Read(): "
 
 func (dataOp *dataPg) Read(id common.ID, _ *crud.GetOptions) (*data.Item, error) {
 	if len(id) < 1 {
-		return nil, errors.New(onRead + "empty ID")
+		return nil, errors.New(onRead + "empty Key")
 	}
 
 	idNum, err := strconv.ParseUint(string(id), 10, 64)
 	if err != nil {
-		return nil, errors.Errorf(onRead+"wrong ID (%s)", id)
+		return nil, errors.Errorf(onRead+"wrong Key (%s)", id)
 	}
 
 	item := data.Item{ID: id}
@@ -187,8 +213,6 @@ func (dataOp *dataPg) Read(id common.ID, _ *crud.GetOptions) (*data.Item, error)
 	err = dataOp.stmRead.QueryRow(idNum).Scan(
 		&item.Key, &item.URL, &item.Title, &item.Summary, &embedded, &tags, &item.Data.TypeKey, &item.Data.Content, &history, &updatedAtPtr, &createdAtStr,
 	)
-
-	// TODO!!! read updatedAt, createdAt
 
 	if err == sql.ErrNoRows {
 		return nil, common.ErrNotFound
@@ -240,12 +264,12 @@ const onRemove = "on dataPg.Remove()"
 
 func (dataOp *dataPg) Remove(id common.ID, _ *crud.RemoveOptions) error {
 	if len(id) < 1 {
-		return errors.New(onRemove + "empty ID")
+		return errors.New(onRemove + "empty Key")
 	}
 
 	idNum, err := strconv.ParseUint(string(id), 10, 64)
 	if err != nil {
-		return errors.Errorf(onRemove+"wrong ID (%s)", id)
+		return errors.Errorf(onRemove+"wrong Key (%s)", id)
 	}
 
 	_, err = dataOp.stmRemove.Exec(idNum)
@@ -254,7 +278,7 @@ func (dataOp *dataPg) Remove(id common.ID, _ *crud.RemoveOptions) error {
 	}
 
 	if dataOp.taggerOp != nil {
-		err = dataOp.taggerOp.ReplaceTags(dataOp.interfaceKey, id, nil, nil)
+		err = dataOp.taggerOp.ReplaceTags(joiner.Link{dataOp.interfaceKey, id}, nil, nil)
 		if err != nil {
 			return errors.Wrapf(err, onRemove+": can't .ReplaceTags(%#v)", nil)
 		}
@@ -263,7 +287,7 @@ func (dataOp *dataPg) Remove(id common.ID, _ *crud.RemoveOptions) error {
 	return nil
 }
 
-const onList = "on dataPg.ListTags()"
+const onList = "on dataPg.List()"
 
 func (dataOp *dataPg) List(term *selectors.Term, options *crud.GetOptions) ([]data.Item, error) {
 	condition, values, err := selectors_sql.Use(term)
@@ -275,14 +299,14 @@ func (dataOp *dataPg) List(term *selectors.Term, options *crud.GetOptions) ([]da
 	stm := dataOp.stmList
 
 	if condition != "" || options != nil {
-		query = sqllib.SQLList(dataOp.table, fieldsToListStr, condition, options)
+		query = sqllib_pg.CorrectWildcards(sqllib.SQLList(dataOp.table, fieldsToListStr, condition, options))
 		stm, err = dataOp.db.Prepare(query)
 		if err != nil {
 			return nil, errors.Wrapf(err, onList+": can't db.Prepare(%s)", query)
 		}
 	}
 
-	//l.Infof("%s / %#v\n%s", condition, values, query)
+	// l.Infof("%s / %#v\n%s", condition, values, query)
 
 	rows, err := stm.Query(values...)
 
@@ -305,8 +329,6 @@ func (dataOp *dataPg) List(term *selectors.Term, options *crud.GetOptions) ([]da
 		err := rows.Scan(
 			&idNum, &item.Key, &item.URL, &item.Title, &item.Summary, &embedded, &tags, &item.Data.TypeKey, &item.Data.Content, &history, &updatedAtPtr, &createdAtStr,
 		)
-
-		// TODO: read updatedAt, createdAt
 
 		if err != nil {
 			return items, errors.Wrapf(err, onList+sqllib.CantScanQueryRow, query, values)

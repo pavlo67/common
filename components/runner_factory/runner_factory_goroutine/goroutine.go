@@ -47,7 +47,7 @@ func (rf runnerFactory) TaskRunner(item tasks.Item, saveOptions *crud.SaveOption
 
 	actor, ok := rf.joinerOp.Interface(runner.DataInterfaceKey(item.TypeKey)).(runner.Actor)
 	if !ok {
-		return nil, "", errors.Errorf("on runnerFactory.ItemRunner(): no runner.Actor with key %s to init new runner for data(%#v)", item.TypeKey, item)
+		return nil, "", errors.Errorf("on runnerFactory.ItemRunner(): no runner.ActorKey with key %s to init new runner for data(%#v)", item.TypeKey, item)
 	}
 
 	if item.ID == "" {
@@ -147,7 +147,7 @@ func (r runnerOp) runOnly() {
 			Options: nil,
 			Data:    *task,
 			History: crud.History{
-				{Key: crud.ProducedAction, Related: &joiner.Link{InterfaceKey: packs.InterfaceKey, Key: r.listener.PackKey}},
+				{Key: crud.ProducedAction, ActorKey: &r.listener.PackKey},
 				{Key: crud.ProducedAction, Related: &joiner.Link{InterfaceKey: tasks.InterfaceKey, ID: r.item.ID}, DoneAt: time.Now()},
 			},
 		})

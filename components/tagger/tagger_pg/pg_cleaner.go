@@ -8,17 +8,17 @@ import (
 	"github.com/pavlo67/workshop/common/selectors"
 )
 
-var _ crud.Cleaner = &tagsSQLite{}
+var _ crud.Cleaner = &tagsPg{}
 
-const onSelectToClean = "on tagsSQLite.SelectToClean(): "
+const onSelectToClean = "on tagsPg.SelectToClean(): "
 
-func (taggerOp *tagsSQLite) SelectToClean(*crud.RemoveOptions) (*selectors.Term, error) {
+func (taggerOp *tagsPg) SelectToClean(*crud.RemoveOptions) (*selectors.Term, error) {
 	return nil, errors.Wrap(common.ErrNotImplemented, onSelectToClean)
 }
 
-const onClean = "on tagsSQLite.Clean(): "
+const onClean = "on tagsPg.Clean(): "
 
-func (taggerOp *tagsSQLite) Clean(*selectors.Term, *crud.RemoveOptions) error {
+func (taggerOp *tagsPg) Clean(*selectors.Term, *crud.RemoveOptions) error {
 	_, err := taggerOp.db.Exec("DELETE FROM " + taggerOp.table)
 	if err != nil {
 		return errors.Wrap(err, onClean+"can't DELETE FROM "+taggerOp.table)

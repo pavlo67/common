@@ -43,14 +43,14 @@ func (item *Item) GetData() (*data.Item, error) {
 	key := dataimporter.Identity(item.sourceURL, originalID).Key()
 	history := []crud.Action{
 		{Key: crud.CreatedAction, DoneAt: sourceTime},
-		{Key: dataimporter.ActionKey, DoneAt: time.Now(), Actor: &key},
+		{Key: dataimporter.ActionKey, DoneAt: time.Now(), ActorKey: &key},
 	}
 
 	var embedded []data.Item
 
 	if feedItem.Image != nil {
 		embedded = append(embedded, data.Item{
-			Data:    crud.Data{TypeKey: crud.KeyHRefImage},
+			Data:    crud.Data{TypeKey: crud.HRefImageTypeKey},
 			URL:     feedItem.Image.URL,
 			Title:   feedItem.Image.Title,
 			History: history,
@@ -60,7 +60,7 @@ func (item *Item) GetData() (*data.Item, error) {
 	if len(feedItem.Enclosures) > 0 {
 		for _, p := range feedItem.Enclosures {
 			embedded = append(embedded, data.Item{
-				Data:    crud.Data{TypeKey: crud.KeyHRef},
+				Data:    crud.Data{TypeKey: crud.HRefTypeKey},
 				URL:     p.URL,
 				Title:   p.Type + ": " + p.Length,
 				History: history,
@@ -76,7 +76,7 @@ func (item *Item) GetData() (*data.Item, error) {
 	var dataItem = data.Item{
 		Key:      key,
 		URL:      feedItem.Link,
-		Data:     crud.Data{TypeKey: crud.KeyString, Content: []byte(feedItem.Content)},
+		Data:     crud.Data{TypeKey: crud.StringTypeKey, Content: []byte(feedItem.Content)},
 		Title:    feedItem.Title,
 		Summary:  feedItem.Description,
 		Embedded: embedded,

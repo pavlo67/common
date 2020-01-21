@@ -48,12 +48,12 @@ func (ts *importerTasksStarter) Setup() error {
 func (ts *importerTasksStarter) Run(joinerOp joiner.Operator) error {
 	datataggedOp, ok := joinerOp.Interface(ts.datataggedKey).(datatagged.Operator)
 	if !ok {
-		return errors.Errorf("no datatagged.Actor with key %s", ts.datataggedKey)
+		return errors.Errorf("no datatagged.ActorKey with key %s", ts.datataggedKey)
 	}
 
 	sourcesOp, ok := joinerOp.Interface(sources.InterfaceKey).(sources.Operator)
 	if !ok {
-		return errors.Errorf("no sources.Actor with key %s", sources.InterfaceKey)
+		return errors.Errorf("no sources.ActorKey with key %s", sources.InterfaceKey)
 	}
 
 	impOp, err := New(datataggedOp, sourcesOp)
@@ -63,7 +63,7 @@ func (ts *importerTasksStarter) Run(joinerOp joiner.Operator) error {
 
 	err = joinerOp.Join(impOp, ts.interfaceKey)
 	if err != nil {
-		return errors.Wrapf(err, "can't join *loadTask as actor.Actor with key '%s'", ts.interfaceKey)
+		return errors.Wrapf(err, "can't join *loadTask as actor.ActorKey with key '%s'", ts.interfaceKey)
 	}
 
 	return nil
