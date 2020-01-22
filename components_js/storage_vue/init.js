@@ -1,4 +1,4 @@
-import { ep } from '../../../components.js/swagger_convertor';
+import { ep } from '../swagger_convertor';
 
 let cfg = {};
 

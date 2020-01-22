@@ -11,11 +11,11 @@
 
 
 <script>
-    import b       from '../../../components.js/basis';
+    import b       from '../basis';
     import { cfg } from './init';
 
     export default {
-        title: 'мій каталог',
+        title: 'зміст',
         created () {
             this.getTags();
         },

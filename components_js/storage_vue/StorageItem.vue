@@ -1,41 +1,35 @@
 <template>
-    <div id="storage_tagged" class="small">
-        <b>Мій каталог: всі записи з міткою '{{ $route.params.tag }}'</b>
+    <div id="storage_item" class="small">
+        <div v-if="dataItem">
+            <b>Мій каталог: {{ dataItem.Title }}</b>
+            <br>&nbsp;
+            <DataItemView v-bind:dataItem="dataItem"/>
+        </div>
+        <div v-else>
+            <b>Мій каталог:</b> відсутній запис для показу
+        </div>
 
-        <br>&nbsp;
 
-        <DataList v-bind:dataList="dataList"/>
-
-        <!--<br>&nbsp;-->
-
-        <!--<div v-if="dataItems">-->
-            <!--<DataList v-bind:dataItems="dataItems"/>-->
-        <!--</div><div v-else>-->
-        <!--немає записів для перегляду...-->
     </div>
-
 </template>
 
 
 <script>
-    import b       from '../../../components.js/basis';
+    import b       from '../basis';
     import { cfg } from './init';
 
     export default {
-        name: 'StorageTagged',
         created () {
-            this.getDataList();
+            this.getDataItem();
         },
         data: () => {
             return {
-                dataList: [],
+                dataItem: {},
             };
         },
         methods: {
-            getDataList() {
-                console.log(cfg.taggedEp + "?tag=" + encodeURIComponent(this.$route.params.tag));
-
-                fetch(cfg.taggedEp + "?key=storage&tag=" + encodeURIComponent(this.$route.params.tag), {
+            getDataItem() {
+                fetch(cfg.readEp + "/" + encodeURIComponent(this.$route.params.id), {
                     method: 'GET', // *GET, POST, PUT, DELETE, etc.
                     headers: {
                         'Content-Type': 'application/json',
@@ -49,8 +43,8 @@
                 }).then(response => {
                     return response.json();
                 }).then(data => {
-                    this.dataList = data;
-                    // console.log(this.tags);
+                    this.dataItem = data;
+                    console.log(66666666, this.dataItem);
                 });
             }
         },

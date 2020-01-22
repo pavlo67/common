@@ -8,9 +8,6 @@
 
 
 <script>
-    // import b from '../../components.js/basis';
-    // import e from '../../components.js/elements';
-
     export default {
         name: 'TagsIndex',
         props: ['tagsIndex'],

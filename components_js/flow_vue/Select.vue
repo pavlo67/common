@@ -8,7 +8,7 @@
 
 
 <script>
-    import b  from '../../../components.js/basis';
+    import b  from '../basis';
 
     export default {
         name: 'Flow selector',

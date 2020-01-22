@@ -13,12 +13,8 @@
 
 
 <script>
-    import b from '../../../components.js/basis';
-    import e from '../../../components.js/elements';
-
-    // import sh from '../../components.js/show_hide/show_hide';
-    // let itemPostfix = "_details";
-    // let showHide = sh.NewShowHide(itemPostfix);
+    import b from '../basis';
+    import e from '../elements';
 
     export default {
         name: 'DataList',
