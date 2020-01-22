@@ -1,8 +1,8 @@
 <template>
   <div id="auth">
     <span v-if="user">
-      {{ user.nickname }}
-      <br><button v-on:click="signOut">Вийти</button>
+      {{ user.Creds.nickname }}
+      <br><button v-on:click="signOut">Вийти</button> &nbsp; <button v-on:click="checkIn">?</button>
     </span>
     <span v-else>
       <input v-model="inputLogin"    style="width:80px;margin-right:5px;">
@@ -15,25 +15,30 @@
 
 
 <script>
-  import b       from '../basis';
-  import { cfg } from './init';
-
   const unauthorized = undefined;
   const whoAmI       = 'хто я?';
 
-  let title = whoAmI;
-  let user  = restoreUser();
+  import b     from '../basis';
+  import {cfg} from './init';
+
+  // -------------------------------------------------------------------------------------------------------
+
+  let menuTitle = whoAmI;
+  let user      = restoreUser();
 
   function setUser(user) {
-    if (user instanceof Object) {
-      title = user.nickname;
+    if (user instanceof Object && user.Creds instanceof Object) {
+      console.log(2222222, user.Creds)
+
+      if (cfg.eventBus instanceof Object) {
+        cfg.eventBus.$emit("jwt", user.Creds.jwt);
+      }
+      menuTitle = user.Creds.nickname;
+
       if (cfg.vue instanceof Object && typeof cfg.vue.$forceUpdate === "function") cfg.vue.$forceUpdate();
-
-      console.log(2222222222, title);
-
       return user;
     } else {
-      title = whoAmI;
+      menuTitle = whoAmI;
       if (cfg.vue instanceof Object && typeof cfg.vue.$forceUpdate === "function") cfg.vue.$forceUpdate();
       return unauthorized;
     }
@@ -51,8 +56,6 @@
       }
     }
 
-    console.log(111111111, user);
-
     return setUser(user);
   }
 
@@ -62,14 +65,18 @@
     return setUser(user);
   }
 
-  let exported = {
+  // -------------------------------------------------------------------------------------------------------
+
+  export default   {
+    preface: 'тут я:',
+
     title() {
-      return title;
+      return menuTitle;
     },
 
     data: () => {
       return {
-        title,
+        title: menuTitle,
         inputLogin: "",
         inputPassword: "",
         user,
@@ -77,30 +84,44 @@
     },
     methods: {
       getUserFromAuth: function(login, password, cb) {
-        cb({user: {nickname: "pavlo"}});
-
-        // fetch('http://localhost:3333/confidence/auth/auth', {
-        //   method: 'POST', // *GET, POST, PUT, DELETE, etc.
-        //   headers: {
-        //     'Content-Type': 'application/json',
-        //   },
-        //   body: JSON.stringify({values: {login, password}}),
-        //   mode: 'cors', // no-cors, cors, *same-origin
-        //
-        //   // cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-        //   // credentials: 'same-origin', // include, *same-origin, omit
-        //   // redirect: 'follow', // manual, *follow, error
-        //   // referrer: 'no-referrer', // no-referrer, *client
-        // }).then(response => {
-        //   return response.json();
-        // }).then(data =>
-        //   cb(data)
-        // );
       },
 
       signIn: function () {
-        this.getUserFromAuth(this.inputLogin, this.inputPassword, data => {
-          this.user = saveUser(data.user);
+        fetch(cfg.authorizeEp, {
+          method: 'POST', // *GET, POST, PUT, DELETE, etc.
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({login: this.inputLogin, password: this.inputPassword}),
+          mode: 'cors', // no-cors, cors, *same-origin
+
+          // cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+          // credentials: 'same-origin', // include, *same-origin, omit
+          // redirect: 'follow', // manual, *follow, error
+          // referrer: 'no-referrer', // no-referrer, *client
+        }).then(response => {
+          return response.json();
+        }).then(data => {
+          if (data instanceof Object) {
+            this.user = saveUser(data.user);
+          } else {
+            console.log("what is the data from /authorize?", data)
+          }
+        });
+      },
+
+      checkIn: function() {
+        fetch(cfg.getCredsEp, {
+          method: 'POST',
+          headers: {
+            'content-type' : 'application/json',
+            'authorization': cfg.jwt,
+          },
+          // mode: 'cors',
+        }).then(response => {
+          return response.json();
+        }).then(data => {
+          console.log(777777777, data);
         });
       },
 
@@ -110,7 +131,6 @@
     },
   };
 
-  export default exported;
 
 </script>
 

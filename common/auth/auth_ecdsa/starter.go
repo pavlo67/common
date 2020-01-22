@@ -30,6 +30,9 @@ func (ss *identity_ecdsa) Name() string {
 }
 
 func (ss *identity_ecdsa) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) (info []common.Map, err error) {
+	if lCommon == nil {
+		return nil, errors.New("no logger")
+	}
 	l = lCommon
 
 	// var errs basis.Errors

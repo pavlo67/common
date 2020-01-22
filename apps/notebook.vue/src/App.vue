@@ -1,16 +1,14 @@
 <template>
   <div id="app">
     <div id="nav">
-<!--      <Menu v-bind:menuItems="menu"/>-->
-
-      <router-link v-for="item in menu" v-bind:key="item.path" :to="item.path">
-        {{ item.title() }}<br>
-      </router-link>
-
+      <span v-for="item in menu">
+        {{ item.preface }} <router-link v-bind:key="item.path" :to="item.path">
+          {{ item.title() }}<br>
+        </router-link>
+      </span>
     </div>
 
-<!--    <div id="message">-->
-<!--    </div>-->
+    <div id="message"/>
 
     <div id="view">
       <router-view/>
@@ -100,41 +98,42 @@
 
 
 <script>
-  // import Vue from 'vue';
-  //
-  // let eventBus = new Vue();
-  //
-  // function show(id, html, color) {
-  //   let el = document.getElementById(id);
-  //   if (el) {
-  //     el.innerHTML = html;
-  //     el.style.position = "relative";
-  //     el.style.visibility = "visible";
-  //     el.style["border-color"] = color || "green";
-  //   }
-  // }
-  //
-  // function hide(id) {
-  //   let el = document.getElementById(id);
-  //   if (el) {
-  //     el.style.visibility = "hidden";
-  //     el.style.position = "absolute";
-  //   }
-  // }
-  //
+  import Vue from 'vue';
+
+  let eventBus = new Vue();
+
+  function show(id, html, color) {
+    let el = document.getElementById(id);
+    if (el) {
+      el.innerHTML = html;
+      el.style.position = "relative";
+      el.style.visibility = "visible";
+      el.style["border-color"] = color || "green";
+    }
+  }
+
+  function hide(id) {
+    let el = document.getElementById(id);
+    if (el) {
+      el.style.visibility = "hidden";
+      el.style.position = "absolute";
+    }
+  }
+
   // export { eventBus };
 
   export default {
-    // mounted() {
-    //   eventBus.$on('message', message => {
-    //     show("message", message);
-    //     setTimeout(() => { hide("message"); }, 3000);
-    //   });
-    //   eventBus.$on('error', message => {
-    //     show("message", message, "red");
-    //     setTimeout(() => { hide("message"); }, 3000);
-    //   });
-    // },
+    eventBus,
+    mounted() {
+      eventBus.$on('message', message => {
+        show("message", message);
+        setTimeout(() => { hide("message"); }, 3000);
+      });
+      eventBus.$on('error', message => {
+        show("message", message, "red");
+        setTimeout(() => { hide("message"); }, 3000);
+      });
+    },
 
   };
 </script>

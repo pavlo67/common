@@ -34,6 +34,7 @@ var _ starter.Operator = &workspaceStarter{}
 type workspaceStarter struct {
 	authHandlerKey      joiner.InterfaceKey
 	setCredsHandlerKey  joiner.InterfaceKey
+	getCredsHandlerKey  joiner.InterfaceKey
 	copierTaskKey       joiner.InterfaceKey
 	copyImmediately     bool
 	cleanerTaskKey      joiner.InterfaceKey
@@ -56,6 +57,7 @@ func (gs *workspaceStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.O
 
 	gs.authHandlerKey = joiner.InterfaceKey(options.StringDefault("auth_handler_key", string(auth.AuthorizeHandlerKey)))
 	gs.setCredsHandlerKey = joiner.InterfaceKey(options.StringDefault("set_creds_handler_key", string(auth.SetCredsHandlerKey)))
+	gs.getCredsHandlerKey = joiner.InterfaceKey(options.StringDefault("get_creds_handler_key", string(auth.SetCredsHandlerKey)))
 	gs.copierTaskKey = joiner.InterfaceKey(options.StringDefault("copier_task_key", "")) // string(flow.copierTaskInterfaceKey)
 	gs.copyImmediately = options.IsTrue("copy_immediately")
 	gs.transportHandlerKey = joiner.InterfaceKey(options.StringDefault("transport_handler_key", string(transport.HandlerInterfaceKey)))
@@ -115,7 +117,8 @@ func (gs *workspaceStarter) Run(joinerOp joiner.Operator) error {
 	}
 
 	var endpoints = server_http.Endpoints{
-		"auth_init": {Path: "/set_creds", Tags: []string{"auth"}, HandlerKey: gs.setCredsHandlerKey},
+		"set_creds": {Path: "/set_creds", Tags: []string{"auth"}, HandlerKey: gs.setCredsHandlerKey},
+		"get_creds": {Path: "/get_creds", Tags: []string{"auth"}, HandlerKey: gs.getCredsHandlerKey},
 		"authorize": {Path: "/authorize", Tags: []string{"auth"}, HandlerKey: gs.authHandlerKey},
 		"transport": {Path: "/transport", Tags: []string{"transport"}, HandlerKey: gs.transportHandlerKey},
 	}

@@ -27,8 +27,11 @@ func (ss *identity_jwtStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *identity_jwtStarter) Init(cfgCommon, cfg *config.Config, l logger.Operator, options common.Map) (info []common.Map, err error) {
-	l = logger.Get()
+func (ss *identity_jwtStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) (info []common.Map, err error) {
+	if lCommon == nil {
+		return nil, errors.New("no logger")
+	}
+	l = lCommon
 
 	// var errs basis.Errors
 

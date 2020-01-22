@@ -23,9 +23,28 @@
     ]
    }
   },
+  "/get_creds": {
+   "post": {
+    "operationId": "get_creds",
+    "parameters": [
+     {
+      "in": "body",
+      "name": "body_item",
+      "required": true,
+      "type": "string"
+     }
+    ],
+    "produces": [
+     "application/json"
+    ],
+    "tags": [
+     "auth"
+    ]
+   }
+  },
   "/set_creds": {
    "post": {
-    "operationId": "auth_init",
+    "operationId": "set_creds",
     "parameters": [
      {
       "in": "body",

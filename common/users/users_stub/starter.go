@@ -17,8 +17,8 @@ func Starter() starter.Operator {
 }
 
 var UserStubDefault = UserStub{
-	Key:      "pishoheed/1",
-	Nickname: "pishoheed",
+	Key:      "pavlo/1",
+	Nickname: "pavlo",
 	Password: "fsamunp",
 }
 

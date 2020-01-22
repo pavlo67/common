@@ -1,5 +1,5 @@
-import Confidence  from './Auth.vue';
-import { init }    from './init';
+import Auth   from './Auth.vue';
+import {init} from './init';
 
 export default [
     init,
@@ -7,7 +7,8 @@ export default [
         inMenu:    true,
         path:      '/auth',
         name:      'Confidence',
-        title:     Confidence.title,
-        component: Confidence,
+        preface:   Auth.preface,
+        title:     Auth.title,
+        component: Auth,
     },
 ];

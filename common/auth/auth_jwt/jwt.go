@@ -67,8 +67,12 @@ func (authOp *authJWT) SetCreds(userKey identity.Key, creds auth.Creds) (*auth.C
 			// Expiry:   jwt.NewNumericDate(time.Date(2017, 1, 1, 0, 8, 0, 0, time.UTC)),
 		},
 
-		Creds: creds,
+		Creds: auth.Creds{
+			auth.CredsNickname: creds[auth.CredsNickname],
+			// TODO: add some other creds...
+		},
 	}
+
 	// add claims to the Builder
 	builder := authOp.builder.Claims(jc)
 
@@ -76,6 +80,8 @@ func (authOp *authJWT) SetCreds(userKey identity.Key, creds auth.Creds) (*auth.C
 	if err != nil {
 		return nil, errors.Wrap(err, "on authJWT.SetCreds() with builder.CompactSerialize()")
 	}
+
+	delete(creds, auth.CredsToSet)
 
 	creds[auth.CredsJWT] = rawJWT
 

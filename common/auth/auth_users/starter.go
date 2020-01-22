@@ -1,8 +1,6 @@
 package auth_users
 
 import (
-	"fmt"
-
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
@@ -33,16 +31,14 @@ func (apu *authPassUsersStarter) Name() string {
 }
 
 func (apu *authPassUsersStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
-	var errs common.Errors
-
-	l = lCommon
-	if l == nil {
-		errs = append(errs, fmt.Errorf("no logger for %s:-(", apu.Name()))
+	if lCommon == nil {
+		return nil, errors.New("no logger")
 	}
+	l = lCommon
 
 	apu.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
 
-	return nil, errs.Err()
+	return nil, nil
 }
 
 func (apu *authPassUsersStarter) Setup() error {

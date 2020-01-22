@@ -7,23 +7,25 @@ function init(data) {
         return;
     }
 
+    if ('backend' in data) {
+        cfg.authorizeEp = ep(data.backend, "authorize");
+        cfg.setCredsEp  = ep(data.backend, "set_creds");
+        cfg.getCredsEp  = ep(data.backend, "get_creds");
+    }
+
     if ('eventBus' in data) {
         cfg.eventBus = data.eventBus;
+        cfg.eventBus.$on('jwt', jwt => {
+            cfg.jwt = jwt;
+
+            console.log(666666666, cfg.jwt);
+        });
     }
 
     if ('vue' in data) {
         cfg.vue = data.vue;
     }
 
-    // // TODO: do it safely!!!
-    //
-    // cfg.listEp   = ep(data.backend, "list");
-    // cfg.readEp   = ep(data.backend, "read").replace("/{id}", "");
-    // cfg.saveEp   = ep(data.backend, "save");
-    // cfg.removeEp = ep(data.backend, "remove").replace("/{id}", "");
-    //
-    // cfg.tagsEp   = ep(data.backend, "tags");
-    // cfg.taggedEp = ep(data.backend, "tagged");
 }
 
 export { cfg, init };

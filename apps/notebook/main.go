@@ -7,9 +7,11 @@ import (
 	"os"
 	"time"
 
+	"github.com/pavlo67/workshop/common/auth/auth_users"
+	"github.com/pavlo67/workshop/common/users/users_stub"
+
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/auth"
-	"github.com/pavlo67/workshop/common/auth/auth_ecdsa"
 	"github.com/pavlo67/workshop/common/auth/auth_http"
 	"github.com/pavlo67/workshop/common/auth/auth_jwt"
 	"github.com/pavlo67/workshop/common/config"
@@ -109,9 +111,14 @@ func main() {
 		{control.Starter(), nil},
 
 		// auth system
-		{auth_ecdsa.Starter(), common.Map{"interface_key": auth_ecdsa.InterfaceKey}},
+		{users_stub.Starter(), nil},
+		{auth_users.Starter(), common.Map{"interface_key": auth_users.InterfaceKey}},
 		{auth_jwt.Starter(), common.Map{"interface_key": auth_jwt.InterfaceKey}},
-		{auth_http.Starter(), common.Map{"auth_handler_key": auth.AuthorizeHandlerKey, "set_creds_handler_key": auth.SetCredsHandlerKey}},
+		{auth_http.Starter(), common.Map{
+			"authorize_handler_key": auth.AuthorizeHandlerKey,
+			"set_creds_handler_key": auth.SetCredsHandlerKey,
+			"get_creds_handler_key": auth.GetCredsHandlerKey,
+		}},
 
 		// tasks system
 		{tasks_pg.Starter(), nil},
@@ -138,8 +145,9 @@ func main() {
 
 		// actions starter (connecting specific actions to the corresponding action managers)
 		{notebook_actions.Starter(), common.Map{
-			"auth_handler_key":      auth.AuthorizeHandlerKey,
+			"authorize_handler_key": auth.AuthorizeHandlerKey,
 			"set_creds_handler_key": auth.SetCredsHandlerKey,
+			"get_creds_handler_key": auth.GetCredsHandlerKey,
 
 			"transport_handler_key": transport.HandlerInterfaceKey,
 
