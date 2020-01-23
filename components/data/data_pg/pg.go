@@ -317,7 +317,7 @@ func (dataOp *dataPg) List(term *selectors.Term, options *crud.GetOptions) ([]da
 	}
 	defer rows.Close()
 
-	var items []data.Item
+	items := []data.Item{} // to return [] to front-end instead null
 
 	for rows.Next() {
 		var idNum int64

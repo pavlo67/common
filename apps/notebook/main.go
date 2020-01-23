@@ -7,13 +7,14 @@ import (
 	"os"
 	"time"
 
-	"github.com/pavlo67/workshop/common/auth/auth_users"
-	"github.com/pavlo67/workshop/common/users/users_stub"
+	"github.com/pavlo67/workshop/components/storage"
+	"github.com/pavlo67/workshop/components/storage/storage_server_http"
 
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/auth"
 	"github.com/pavlo67/workshop/common/auth/auth_http"
 	"github.com/pavlo67/workshop/common/auth/auth_jwt"
+	"github.com/pavlo67/workshop/common/auth/auth_users"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/control"
 	"github.com/pavlo67/workshop/common/libraries/filelib"
@@ -21,10 +22,10 @@ import (
 	"github.com/pavlo67/workshop/common/serializer"
 	"github.com/pavlo67/workshop/common/server/server_http/server_http_jschmhr"
 	"github.com/pavlo67/workshop/common/starter"
+	"github.com/pavlo67/workshop/common/users/users_stub"
 
 	"github.com/pavlo67/workshop/components/data/data_pg"
 	"github.com/pavlo67/workshop/components/datatagged"
-	"github.com/pavlo67/workshop/components/flow"
 	"github.com/pavlo67/workshop/components/packs/packs_pg"
 	"github.com/pavlo67/workshop/components/runner_factory/runner_factory_goroutine"
 	"github.com/pavlo67/workshop/components/tagger/tagger_pg"
@@ -135,10 +136,14 @@ func main() {
 
 		// database
 		{tagger_pg.Starter(), nil},
-		{data_pg.Starter(), common.Map{"table": flow.CollectionDefault, "interface_key": flow.DataInterfaceKey, "cleaner_key": flow.CleanerInterfaceKey}},
-		{datatagged.Starter(), common.Map{"data_key": flow.DataInterfaceKey, "interface_key": flow.InterfaceKey}},
+		{data_pg.Starter(), common.Map{"table": storage.CollectionDefault, "interface_key": storage.DataInterfaceKey}},
+		{datatagged.Starter(), common.Map{"data_key": storage.DataInterfaceKey, "interface_key": storage.InterfaceKey}},
+		{storage_server_http.Starter(), common.Map{"data_key": storage.InterfaceKey}},
 
 		// flow actions
+		//{data_pg.Starter(), common.Map{"table": flow.CollectionDefault, "interface_key": flow.DataInterfaceKey, "cleaner_key": flow.CleanerInterfaceKey}},
+		//{datatagged.Starter(), common.Map{"data_key": flow.DataInterfaceKey, "interface_key": flow.InterfaceKey}},
+		//{flow_server_http.Starter(), common.Map{"data_key": flow.DataInterfaceKey, "interface_key": flow.InterfaceKey}},
 		// {sources_stub.Starter(), nil},
 		// {flowcopier_task.Starter(), common.Map{"datatagged_key": flow.InterfaceKey}},
 		// {flowcleaner_task.Starter(), common.Map{"cleaner_key": flow.CleanerInterfaceKey, "interface_key": flow.CleanerTaskInterfaceKey, "limit": 300000}},

@@ -1,6 +1,7 @@
 package auth_jwt
 
 import (
+	"github.com/pavlo67/workshop/common/libraries/filelib"
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
@@ -45,7 +46,7 @@ func (ss *identity_jwtStarter) Setup() error {
 }
 
 func (ss *identity_jwtStarter) Run(joinerOp joiner.Operator) error {
-	identOp, err := New()
+	identOp, err := New(filelib.CurrentPath() + "jwt.key")
 	if err != nil {
 		return errors.Wrap(err, "can't init identity_jwt.ActorKey")
 	}

@@ -1,8 +1,10 @@
 <template>
   <div id="auth">
+    <div class="title"><b>Авторизація</b></div>
+
     <span v-if="user">
-      {{ user.Creds.nickname }}
-      <br><button v-on:click="signOut">Вийти</button> &nbsp; <button v-on:click="checkIn">?</button>
+      {{ user.Creds.nickname }} &nbsp; <button v-on:click="signOut">Вийти</button>
+      <!-- &nbsp; <button v-on:click="checkIn">?</button> -->
     </span>
     <span v-else>
       <input v-model="inputLogin"    style="width:80px;margin-right:5px;">
@@ -13,10 +15,9 @@
   </div>
 </template>
 
-
 <script>
   const unauthorized = undefined;
-  const whoAmI       = 'хто я?';
+  const whoAmI       = 'я???';
 
   import b     from '../basis';
   import {cfg} from './init';
@@ -28,8 +29,6 @@
 
   function setUser(user) {
     if (user instanceof Object && user.Creds instanceof Object) {
-      console.log(2222222, user.Creds)
-
       if (cfg.eventBus instanceof Object) {
         cfg.eventBus.$emit("jwt", user.Creds.jwt);
       }
@@ -68,7 +67,7 @@
   // -------------------------------------------------------------------------------------------------------
 
   export default   {
-    preface: 'тут я:',
+    preface: 'хто тут:',
 
     title() {
       return menuTitle;
@@ -110,20 +109,20 @@
         });
       },
 
-      checkIn: function() {
-        fetch(cfg.getCredsEp, {
-          method: 'POST',
-          headers: {
-            'content-type' : 'application/json',
-            'authorization': cfg.jwt,
-          },
-          // mode: 'cors',
-        }).then(response => {
-          return response.json();
-        }).then(data => {
-          console.log(777777777, data);
-        });
-      },
+      // checkIn: function() {
+      //   fetch(cfg.getCredsEp, {
+      //     method: 'POST',
+      //     headers: {
+      //       'content-type' : 'application/json',
+      //       'authorization': cfg.jwt,
+      //     },
+      //     // mode: 'cors',
+      //   }).then(response => {
+      //     return response.json();
+      //   }).then(data => {
+      //     console.log(777777777, data);
+      //   });
+      // },
 
       signOut: function () {
         this.user = saveUser(unauthorized);

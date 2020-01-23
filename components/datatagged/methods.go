@@ -36,9 +36,9 @@ func New(dataOp data.Operator, taggerOp tagger.Operator) (Operator, crud.Cleaner
 	return &wsOp, nil, nil
 }
 
-const onListWithTag = "on ws.ListWithTag(): "
+const onListWithTag = "on ws.ListTagged(): "
 
-func (wsOp *ws) ListWithTag(key *joiner.InterfaceKey, tagLabel string, selector *selectors.Term, options *crud.GetOptions) ([]data.Item, error) {
+func (wsOp *ws) ListTagged(key *joiner.InterfaceKey, tagLabel string, selector *selectors.Term, options *crud.GetOptions) ([]data.Item, error) {
 	if wsOp.Tagger == nil {
 		return nil, errors.New(onListWithTag + ": no tagger.Operator")
 	}

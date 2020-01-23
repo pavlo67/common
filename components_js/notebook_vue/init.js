@@ -8,9 +8,14 @@ function init(data) {
     }
 
     if ('backend' in data) {
-        cfg.authorizeEp = ep(data.backend, "authorize");
-        cfg.setCredsEp  = ep(data.backend, "set_creds");
-        cfg.getCredsEp  = ep(data.backend, "get_creds");
+        // TODO: do it safely!!!
+
+        cfg.listEp   = ep(data.backend, "list");
+        cfg.readEp   = ep(data.backend, "read").replace("/{id}", "");
+        cfg.saveEp   = ep(data.backend, "save");
+        cfg.removeEp = ep(data.backend, "remove").replace("/{id}", "");
+        cfg.tagsEp   = ep(data.backend, "tags");
+        cfg.taggedEp = ep(data.backend, "tagged");
     }
 
     if ('eventBus' in data) {

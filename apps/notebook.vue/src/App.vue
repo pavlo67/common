@@ -1,11 +1,11 @@
 <template>
   <div id="app">
     <div id="nav">
-      <span v-for="item in menu">
+      <li v-for="item in menu" class="menu_item">
         {{ item.preface }} <router-link v-bind:key="item.path" :to="item.path">
-          {{ item.title() }}<br>
+          {{ typeof item.title === "function" ? item.title() : item.title }}<br>
         </router-link>
-      </span>
+      </li>
     </div>
 
     <div id="message"/>
@@ -33,14 +33,19 @@
     min-height: 100vh;
     text-align: left;
     background-color: #f2dede;
-    a {
-      color: #4414ff;
-    }
+  }
 
+  #nav a {
+    color: #4414ff;
+  }
+
+  .menu_item {
+    min-height: 25px;
   }
 
   .title {
-    color: blue;
+    font-size: large;
+    min-height: 45px;
   }
 
   .time {
@@ -63,7 +68,6 @@
   .smallest {
     font-size: xx-small;
   }
-
 
   a {
     text-decoration: none;

@@ -1,10 +1,10 @@
 package users_stub
 
 import (
+	"crypto/sha256"
 	"strconv"
 	"time"
 
-	"github.com/GehirnInc/crypt"
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
@@ -12,7 +12,6 @@ import (
 	"github.com/pavlo67/workshop/common/crud"
 	"github.com/pavlo67/workshop/common/identity"
 	"github.com/pavlo67/workshop/common/selectors"
-
 	"github.com/pavlo67/workshop/common/users"
 )
 
@@ -26,44 +25,59 @@ type UserStub struct {
 }
 
 type usersStub struct {
-	users   []UserStub
-	crypter crypt.Crypter
-	salt    string
+	users []UserStub
+	//crypter crypt.Crypter
+	//salt    string
 }
 
 const onNew = "on users_stub/New(): "
 
 func New(users []UserStub, salt string) (*usersStub, error) {
-	crypter := crypt.SHA256.New()
+	//crypter := crypt.SHA256.New()
+	//
+	//var err error
+	//for i, user := range users {
+	//	users[i].PasswordHash, err = crypter.Generate([]byte(user.Password), []byte(salt))
+	//	if err != nil {
+	//		return nil, errors.Wrap(err, onNew)
+	//	}
+	//}
 
-	var err error
 	for i, user := range users {
-		users[i].PasswordHash, err = crypter.Generate([]byte(user.Password), []byte(salt))
-		if err != nil {
-			return nil, errors.Wrap(err, onNew)
-		}
+		h := sha256.New()
+		h.Write([]byte(user.Password))
+		users[i].PasswordHash = string(h.Sum(nil))
 	}
 
 	return &usersStub{
-		users:   users,
-		crypter: crypter,
-		salt:    salt,
+		users: users,
+		//crypter: crypter,
+		//salt:    salt,
 	}, nil
+}
+
+func (u *usersStub) CheckPassword(password, passHash string) bool {
+	h := sha256.New()
+	h.Write([]byte(password))
+	return passHash == string(h.Sum(nil))
 }
 
 const onSave = "on usersStub.Save(): "
 
 func (u *usersStub) Save(item users.Item, _ *crud.SaveOptions) (identity.Key, error) {
-	var err error
-
 	userStub := UserStub{
 		Nickname: item.Creds[auth.CredsNickname],
 		Password: item.Creds[auth.CredsPassword],
 	}
-	userStub.PasswordHash, err = u.crypter.Generate([]byte(userStub.Password), []byte(u.salt))
-	if err != nil {
-		return "", errors.Wrap(err, onSave)
-	}
+
+	h := sha256.New()
+	h.Write([]byte(userStub.Password))
+	userStub.PasswordHash = string(h.Sum(nil))
+
+	//userStub.PasswordHash, err = u.crypter.Generate([]byte(userStub.Password), []byte(u.salt))
+	//if err != nil {
+	//	return "", errors.Wrap(err, onSave)
+	//}
 
 	if item.Key == "" {
 		userStub.Key = identity.Key(strconv.FormatInt(time.Now().UnixNano(), 10))

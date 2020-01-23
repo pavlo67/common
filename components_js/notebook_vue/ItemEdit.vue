@@ -1,10 +1,14 @@
 <template>
-    <div id="storage_index">
-        <b>Мій каталог (теми, сиріч теґи, мітки)</b>
+    <div id="storage_item" class="small">
+        <div v-if="dataItem">
+            <b>Мій каталог: {{ dataItem.Title }}</b>
+            <br>&nbsp;
+            <DataItemView v-bind:dataItem="dataItem"/>
+        </div>
+        <div v-else>
+            <b>Мій каталог:</b> відсутній запис для показу
+        </div>
 
-        <br>&nbsp;
-
-        <TagsIndex v-bind:tagsIndex="tagsIndex"/>
 
     </div>
 </template>
@@ -15,18 +19,18 @@
     import { cfg } from './init';
 
     export default {
-        title: 'зміст',
+        title: () => 'новий запис',
         created () {
-            this.getTags();
+            this.getDataItem();
         },
         data: () => {
             return {
-                tagsIndex: [],
+                dataItem: {},
             };
         },
         methods: {
-            getTags() {
-                fetch(cfg.tagsEp + "?key=storage", {
+            getDataItem() {
+                fetch(cfg.readEp + "/" + encodeURIComponent(this.$route.params.id), {
                     method: 'GET', // *GET, POST, PUT, DELETE, etc.
                     headers: {
                         'Content-Type': 'application/json',
@@ -40,8 +44,8 @@
                 }).then(response => {
                     return response.json();
                 }).then(data => {
-                    this.tagsIndex = data;
-                    console.log(this.tagsIndex);
+                    this.dataItem = data;
+                    console.log(66666666, this.dataItem);
                 });
             }
         },

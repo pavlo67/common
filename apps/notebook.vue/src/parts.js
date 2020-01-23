@@ -10,12 +10,12 @@ Vue.component(TagsIndex.name,    TagsIndex);
 
 import auth    from '../../../components_js/auth_vue/routes';
 import home    from './home/routes';
-import storage from '../../../components_js/storage_vue/routes';
+import notebook from '../../../components_js/notebook_vue/routes';
 
 let routes = [
   ...auth,
-  // ...home,
-  // ...storage,
+  ...home,
+  ...notebook,
 ];
 
 export default routes;

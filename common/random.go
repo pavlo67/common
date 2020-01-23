@@ -1,4 +1,4 @@
-package encrlib
+package common
 
 import (
 	"math/rand"

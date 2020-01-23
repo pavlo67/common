@@ -34,7 +34,7 @@ func Save(user *auth.User, params server_http.Params, req *http.Request) (server
 		return server.ResponseRESTError(http.StatusBadRequest, errors.Errorf("ERROR on POST storage/...Save: can't json.Unmarshal(%s): %s", itemJSON, err))
 	}
 
-	ids, err := dataTaggedOp.Save([]data.Item{item}, nil)
+	ids, err := dataTaggedOp.Save(item, nil)
 	if err != nil {
 		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on POST storage/...Save: %s", err))
 	}
@@ -57,11 +57,6 @@ func Read(user *auth.User, params server_http.Params, req *http.Request) (server
 	if err == common.ErrNotFound {
 		return server.ResponseRESTError(http.StatusNotFound, errors.Errorf("ERROR on GET storage/...Read: not found item with id = %s", id))
 	} else if err != nil {
-		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on GET storage/...Read: ", err))
-	}
-
-	err = dataTaggedOp.SetDetails(item)
-	if err != nil {
 		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on GET storage/...Read: ", err))
 	}
 

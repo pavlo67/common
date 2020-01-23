@@ -42,6 +42,123 @@
     ]
    }
   },
+  "/notebook/list": {
+   "get": {
+    "operationId": "list",
+    "produces": [
+     "application/json"
+    ],
+    "tags": [
+     "notebook"
+    ]
+   }
+  },
+  "/notebook/read/{id}": {
+   "get": {
+    "operationId": "read",
+    "parameters": [
+     {
+      "description": "",
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "type": "string"
+     }
+    ],
+    "produces": [
+     "application/json"
+    ],
+    "tags": [
+     "notebook"
+    ]
+   }
+  },
+  "/notebook/remove/{id}": {
+   "delete": {
+    "operationId": "remove",
+    "parameters": [
+     {
+      "description": "",
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "type": "string"
+     }
+    ],
+    "produces": [
+     "application/json"
+    ],
+    "tags": [
+     "notebook"
+    ]
+   }
+  },
+  "/notebook/save": {
+   "post": {
+    "operationId": "save",
+    "parameters": [
+     {
+      "in": "body",
+      "name": "body_item",
+      "required": true,
+      "type": "string"
+     }
+    ],
+    "produces": [
+     "application/json"
+    ],
+    "tags": [
+     "notebook"
+    ]
+   }
+  },
+  "/notebook/tagged": {
+   "get": {
+    "operationId": "tagged",
+    "parameters": [
+     {
+      "description": "",
+      "in": "query",
+      "name": "key",
+      "required": false,
+      "type": "string"
+     },
+     {
+      "description": "",
+      "in": "query",
+      "name": "tag",
+      "required": false,
+      "type": "string"
+     }
+    ],
+    "produces": [
+     "application/json"
+    ],
+    "tags": [
+     "notebook"
+    ]
+   }
+  },
+  "/notebook/tags": {
+   "get": {
+    "operationId": "tags",
+    "parameters": [
+     {
+      "description": "",
+      "in": "query",
+      "name": "key",
+      "required": false,
+      "type": "string"
+     }
+    ],
+    "produces": [
+     "application/json"
+    ],
+    "tags": [
+     "notebook"
+    ]
+   }
+  },
   "/set_creds": {
    "post": {
     "operationId": "set_creds",

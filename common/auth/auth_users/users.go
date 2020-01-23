@@ -3,7 +3,6 @@ package auth_users
 import (
 	"regexp"
 
-	"github.com/GehirnInc/crypt"
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common/auth"
@@ -17,9 +16,6 @@ var _ auth.Operator = &authPassUsers{}
 type authPassUsers struct {
 	usersOp             users.Operator
 	maxUsersToAuthCheck int
-
-	crypter crypt.Crypter
-	salt    string
 }
 
 const onNew = "on authPassUsers.New"
@@ -35,9 +31,6 @@ func New(usersOp users.Operator, maxUsersToAuthCheck int, salt string) (auth.Ope
 	return &authPassUsers{
 		usersOp:             usersOp,
 		maxUsersToAuthCheck: maxUsersToAuthCheck,
-
-		crypter: crypt.SHA256.New(),
-		salt:    salt,
 	}, nil
 }
 
@@ -140,7 +133,7 @@ func (authOp *authPassUsers) Authorize(toAuth auth.Creds) (*auth.User, error) {
 
 		item := items[i]
 
-		if authOp.crypter.Verify(item.Creds[auth.CredsPasshash], []byte(toAuth[auth.CredsPassword])) == nil {
+		if authOp.usersOp.CheckPassword(toAuth[auth.CredsPassword], item.Creds[auth.CredsPasshash]) {
 			user := item.User
 			user.Creds = auth.Creds{
 				auth.CredsNickname: item.Creds[auth.CredsNickname],

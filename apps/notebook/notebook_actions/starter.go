@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/pavlo67/workshop/components/storage"
+
 	"github.com/pavlo67/workshop/common/auth"
 
 	"github.com/pkg/errors"
@@ -120,7 +122,20 @@ func (gs *workspaceStarter) Run(joinerOp joiner.Operator) error {
 		"set_creds": {Path: "/set_creds", Tags: []string{"auth"}, HandlerKey: gs.setCredsHandlerKey},
 		"get_creds": {Path: "/get_creds", Tags: []string{"auth"}, HandlerKey: gs.getCredsHandlerKey},
 		"authorize": {Path: "/authorize", Tags: []string{"auth"}, HandlerKey: gs.authHandlerKey},
+
 		"transport": {Path: "/transport", Tags: []string{"transport"}, HandlerKey: gs.transportHandlerKey},
+
+		"read": {Path: "/notebook/read", Tags: []string{"notebook"}, HandlerKey: storage.ReadInterfaceKey},
+		"list": {Path: "/notebook/list", Tags: []string{"notebook"}, HandlerKey: storage.ListInterfaceKey},
+
+		"save":   {Path: "/notebook/save", Tags: []string{"notebook"}, HandlerKey: storage.SaveInterfaceKey},
+		"remove": {Path: "/notebook/remove", Tags: []string{"notebook"}, HandlerKey: storage.RemoveInterfaceKey},
+
+		"tags":   {Path: "/notebook/tags", Tags: []string{"notebook"}, HandlerKey: storage.ListTagsInterfaceKey},
+		"tagged": {Path: "/notebook/tagged", Tags: []string{"notebook"}, HandlerKey: storage.ListTaggedInterfaceKey},
+
+		//"flow_read": {Path: "/flow/read", Tags: []string{"flow"}, HandlerKey: flow.ReadInterfaceKey},
+		//"flow_list": {Path: "/flow/list", Tags: []string{"flow"}, HandlerKey: flow.ListInterfaceKey},
 	}
 
 	for key, ep := range endpoints {

@@ -6,6 +6,6 @@ export default [
         path: '/',
         name: 'home',
         component: Home,
-        title: 'ой, мамо, де я?',
+        title: Home.title,
     }
 ];
