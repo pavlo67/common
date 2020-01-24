@@ -10,19 +10,19 @@ const InterfaceKey joiner.InterfaceKey = "tagger"
 const CleanerInterfaceKey joiner.InterfaceKey = "tag_cleaner"
 
 type Tag struct {
-	Label  string
-	Params common.Map
+	Label  string     `bson:",omitempty" json:",omitempty"`
+	Params common.Map `bson:",omitempty" json:",omitempty"`
 }
 
 type TagCount struct {
-	Label     string
-	Immediate uint64
-	Full      uint64
+	Label     string `bson:",omitempty" json:",omitempty"`
+	Immediate uint64 `bson:",omitempty" json:",omitempty"`
+	Full      uint64 `bson:",omitempty" json:",omitempty"`
 }
 
 type Tagged struct {
-	ID     common.ID
-	Params common.Map
+	ID     common.ID  `bson:",omitempty" json:",omitempty"`
+	Params common.Map `bson:",omitempty" json:",omitempty"`
 }
 
 type Index map[joiner.InterfaceKey][]Tagged

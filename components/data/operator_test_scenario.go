@@ -38,7 +38,7 @@ func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 				}},
 				Data: crud.Data{
 					TypeKey: "test",
-					Content: []byte(`{"AAA": "aaa", "BBB": 222}`),
+					Content: `{"AAA": "aaa", "BBB": 222}`,
 				},
 				Tags: []tagger.Tag{{Label: "1"}, {Label: "333"}},
 				History: []crud.Action{{
@@ -53,7 +53,7 @@ func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 				Summary: "6578eegj",
 				Data: crud.Data{
 					TypeKey: "test",
-					Content: []byte(`{"AAA": "awraa", "BBB": 22552}`),
+					Content: `{"AAA": "awraa", "BBB": 22552}`,
 				},
 				Tags: []tagger.Tag{{Label: "1"}, {Label: "333"}},
 			},
@@ -81,10 +81,10 @@ func Compare(t *testing.T, dataOp Operator, readed *Item, expectedItem Item, l l
 	}
 
 	expectedDetails := expectedItem.Data.Content
-	expectedItem.Data.Content = nil
+	expectedItem.Data.Content = ""
 
 	readedDetails := readed.Data.Content
-	readed.Data.Content = nil
+	readed.Data.Content = ""
 
 	// TODO!!! check it carefully
 	readed.History = nil

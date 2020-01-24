@@ -124,8 +124,6 @@
     }
   }
 
-  // export { eventBus };
-
   export default {
     eventBus,
     mounted() {

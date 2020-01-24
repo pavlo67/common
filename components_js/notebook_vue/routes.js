@@ -1,4 +1,5 @@
 import ListTags   from './ListTags.vue';
+import ListRecent from './ListRecent.vue';
 import ListTagged from './ListTagged.vue';
 import ItemNew    from './ItemNew.vue';
 import ItemView   from './ItemView.vue';
@@ -8,7 +9,14 @@ export default [
     init,
     {
         inMenu:    true,
-        path:      '/notebook',
+        path:      '/notebook/',
+        name:      'ListRecent',
+        title:     ListRecent.title,
+        component: ListRecent,
+    },
+    {
+        inMenu:    true,
+        path:      '/notebook/tags',
         name:      'ListTags',
         title:     ListTags.title,
         component: ListTags,
@@ -16,13 +24,13 @@ export default [
     },
     {
         inMenu:    true,
-        path:     '/notebook/item_new/:id',
+        path:     '/notebook/item_new',
         name:     'ItemNew',
         title:     ItemNew.title,
         component: ItemNew,
     },
     {
-        path:      '/notebook/:tag',
+        path:      '/notebook/tag/:tag',
         name:      'ListTagged',
         component: ListTagged,
     },

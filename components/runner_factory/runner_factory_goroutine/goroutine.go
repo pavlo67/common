@@ -90,7 +90,7 @@ func (r runnerOp) Run() (estimate *runner.Estimate, err error) {
 	}
 
 	var params common.Map
-	err = json.Unmarshal(r.item.Content, &params)
+	err = json.Unmarshal([]byte(r.item.Content), &params)
 	if err != nil {
 		err1 := r.tasksOp.Finish(r.item.ID, tasks.Result{ErrStr: "on json.Unmarshal(r.data.Content, &params): " + err.Error()}, nil)
 		if err1 != nil {

@@ -31,7 +31,7 @@ func Save(user *auth.User, params server_http.Params, req *http.Request) (server
 
 	err = json.Unmarshal(itemJSON, &item)
 	if err != nil {
-		return server.ResponseRESTError(http.StatusBadRequest, errors.Errorf("ERROR on POST storage/...Save: can't json.Unmarshal(%s): %s", itemJSON, err))
+		return server.ResponseRESTError(http.StatusBadRequest, errors.Errorf("ERROR on POST storage/...Save: can't json.Unmarshal(%s): %s", string(itemJSON), err))
 	}
 
 	ids, err := dataTaggedOp.Save(item, nil)

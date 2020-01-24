@@ -1,16 +1,10 @@
 <template>
-    <div id="storage_item" class="small">
-        <div v-if="dataItem">
-            <b>Мій каталог: {{ dataItem.Title }}</b>
-            <br>&nbsp;
-            <DataItemEdit v-bind:dataItem="dataItem"/>
-        </div>
-        <div v-else>
-            <b>Мій каталог:</b> відсутній запис для показу
-        </div>
+    <div id="storage_tagged" class="small">
+        <div class="title"><b>Нещодавні записи</b></div>
 
-
+        <DataList v-bind:dataList="dataList"/>
     </div>
+
 </template>
 
 
@@ -19,18 +13,21 @@
     import { cfg } from './init';
 
     export default {
-        title: () => 'новий запис',
+        title: () => 'нещодавні записи',
+        name: 'ListRecent',
         created () {
-            this.getDataItem();
+            this.getDataList();
         },
         data: () => {
             return {
-                dataItem: {},
+                dataList: [],
             };
         },
         methods: {
-            getDataItem() {
-                fetch(cfg.readEp + "/" + encodeURIComponent(this.$route.params.id), {
+            getDataList() {
+                console.log(cfg.taggedEp + "?tag=" + encodeURIComponent(this.$route.params.tag));
+
+                fetch(cfg.taggedEp + "?key=storage", {
                     method: 'GET', // *GET, POST, PUT, DELETE, etc.
                     headers: {
                         'Content-Type': 'application/json',
@@ -44,8 +41,8 @@
                 }).then(response => {
                     return response.json();
                 }).then(data => {
-                    this.dataItem = data;
-                    console.log(66666666, this.dataItem);
+                    this.dataList = data;
+                    // console.log(this.tags);
                 });
             }
         },

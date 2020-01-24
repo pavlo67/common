@@ -2,7 +2,7 @@
     <div id="storage_index">
         <div class="title"><b>Теми (сиріч теґи, мітки)</b></div>
 
-        <TagsIndex v-bind:tagsIndex="tagsIndex"/>
+        <ListTags listTags="listTags"/>
 
     </div>
 </template>
@@ -19,7 +19,7 @@
         },
         data: () => {
             return {
-                tagsIndex: [],
+                listTags: [],
             };
         },
         methods: {

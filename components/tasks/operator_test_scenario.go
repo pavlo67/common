@@ -33,7 +33,7 @@ func TestCases(tasksOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 			ToSave: Item{
 				Data: crud.Data{
 					TypeKey: "wt0",
-					Content: []byte(`{"1": float64(2), "3": "4"}`),
+					Content: `{"1": float64(2), "3": "4"}`,
 				},
 				Results: nil, // TODO!!!
 				History: nil, // TODO!!!

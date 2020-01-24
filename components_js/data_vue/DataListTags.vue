@@ -1,6 +1,6 @@
 <template>
-    <div class="tags_index">
-        <div v-for="tag in tagsIndex">
+    <div class="list_tags">
+        <div v-for="tag in listTags">
             <li>{{ tag.Label }} [<router-link :to="{ name: 'StorageTagged', params: {tag: tag.Label} }">{{ tag.Immediate }} / {{ tag.Full }}</router-link>]</li>
         </div>
     </div>
@@ -9,8 +9,8 @@
 
 <script>
     export default {
-        name: 'TagsIndex',
-        props: ['tagsIndex'],
+        name: 'ListTags',
+        props: ['listTags'],
     }
 </script>
 
