@@ -56,9 +56,9 @@ func (dtsh *dataTaggedServerHTTPStarter) Run(joinerOp joiner.Operator) error {
 		return errors.Errorf("no data_tagged.ActorKey with key %s", storage.InterfaceKey)
 	}
 
-	err := joinerOp.Join(&listEndpoint, storage.ListInterfaceKey)
+	err := joinerOp.Join(&recentEndpoint, storage.RecentInterfaceKey)
 	if err != nil {
-		return errors.Wrapf(err, "can't join listEndpoint as server_http.Endpoint with key '%s'", storage.ListInterfaceKey)
+		return errors.Wrapf(err, "can't join recentEndpoint as server_http.Endpoint with key '%s'", storage.RecentInterfaceKey)
 	}
 
 	err = joinerOp.Join(&readEndpoint, storage.ReadInterfaceKey)

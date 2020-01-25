@@ -1,8 +1,6 @@
 <template>
     <div id="storage_tagged" class="small">
-        <b>Мій каталог: всі записи з міткою '{{ $route.params.tag }}'</b>
-
-        <br>&nbsp;
+        <div class="title"><b>Нотатник: всі записи з міткою '{{ $route.params.tag }}'</b></div>
 
         <DataList v-bind:dataList="dataList"/>
 
@@ -23,19 +21,25 @@
 
     export default {
         name: 'StorageTagged',
-        created () {
-            this.getDataList();
+        mounted() {
+            this.getDataList(this.$route.params.tag);
         },
+
+        beforeRouteUpdate (to, from, next) {
+            this.getDataList(to.params.tag);
+            next();         // it's necessary!!! else no hook is generated when we returns to the original route
+        },
+
         data: () => {
             return {
                 dataList: [],
             };
         },
         methods: {
-            getDataList() {
-                console.log(cfg.taggedEp + "?tag=" + encodeURIComponent(this.$route.params.tag));
+            getDataList(tag) {
+                // console.log(cfg.taggedEp + "?tag=" + encodeURIComponent(tag));
 
-                fetch(cfg.taggedEp + "?key=storage&tag=" + encodeURIComponent(this.$route.params.tag), {
+                fetch(cfg.taggedEp + "?tag=" + encodeURIComponent(tag), {
                     method: 'GET', // *GET, POST, PUT, DELETE, etc.
                     headers: {
                         'Content-Type': 'application/json',

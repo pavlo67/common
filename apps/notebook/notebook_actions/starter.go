@@ -125,17 +125,16 @@ func (gs *workspaceStarter) Run(joinerOp joiner.Operator) error {
 
 		"transport": {Path: "/transport", Tags: []string{"transport"}, HandlerKey: gs.transportHandlerKey},
 
-		"read": {Path: "/notebook/read", Tags: []string{"notebook"}, HandlerKey: storage.ReadInterfaceKey},
-		"list": {Path: "/notebook/list", Tags: []string{"notebook"}, HandlerKey: storage.ListInterfaceKey},
-
+		"read":   {Path: "/notebook/read", Tags: []string{"notebook"}, HandlerKey: storage.ReadInterfaceKey},
 		"save":   {Path: "/notebook/save", Tags: []string{"notebook"}, HandlerKey: storage.SaveInterfaceKey},
 		"remove": {Path: "/notebook/remove", Tags: []string{"notebook"}, HandlerKey: storage.RemoveInterfaceKey},
 
+		"recent": {Path: "/notebook/recent", Tags: []string{"notebook"}, HandlerKey: storage.RecentInterfaceKey},
 		"tags":   {Path: "/notebook/tags", Tags: []string{"notebook"}, HandlerKey: storage.ListTagsInterfaceKey},
 		"tagged": {Path: "/notebook/tagged", Tags: []string{"notebook"}, HandlerKey: storage.ListTaggedInterfaceKey},
 
 		//"flow_read": {Path: "/flow/read", Tags: []string{"flow"}, HandlerKey: flow.ReadInterfaceKey},
-		//"flow_list": {Path: "/flow/list", Tags: []string{"flow"}, HandlerKey: flow.ListInterfaceKey},
+		//"flow_list": {Path: "/flow/list", Tags: []string{"flow"}, HandlerKey: flow.RecentInterfaceKey},
 	}
 
 	for key, ep := range endpoints {

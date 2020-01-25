@@ -9,6 +9,7 @@ import (
 
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/auth"
+	"github.com/pavlo67/workshop/common/crud"
 	"github.com/pavlo67/workshop/common/server"
 	"github.com/pavlo67/workshop/common/server/server_http"
 
@@ -34,16 +35,15 @@ func Save(user *auth.User, params server_http.Params, req *http.Request) (server
 		return server.ResponseRESTError(http.StatusBadRequest, errors.Errorf("ERROR on POST storage/...Save: can't json.Unmarshal(%s): %s", string(itemJSON), err))
 	}
 
-	ids, err := dataTaggedOp.Save(item, nil)
+	id, err := dataTaggedOp.Save(item, nil)
 	if err != nil {
 		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on POST storage/...Save: %s", err))
 	}
-
-	if len(ids) != 1 {
-		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on POST storage/...Save: returned wrong ids (%#v)", ids))
+	if id == "" {
+		return server.ResponseRESTError(http.StatusInternalServerError, errors.New("ERROR on POST storage/...Save: no id returned"))
 	}
 
-	return server.ResponseRESTOk(map[string]interface{}{"Key": ids[0]})
+	return server.ResponseRESTOk(map[string]interface{}{"id": id})
 }
 
 // Read --------------------------------------------------------------------------------------
@@ -65,10 +65,10 @@ func Read(user *auth.User, params server_http.Params, req *http.Request) (server
 
 // ListFlow --------------------------------------------------------------------------------------
 
-var listEndpoint = server_http.Endpoint{Method: "GET", WorkerHTTP: List}
+var recentEndpoint = server_http.Endpoint{Method: "GET", WorkerHTTP: Recent}
 
-func List(user *auth.User, _ server_http.Params, req *http.Request) (server.Response, error) {
-	items, err := dataTaggedOp.List(nil, nil)
+func Recent(user *auth.User, _ server_http.Params, req *http.Request) (server.Response, error) {
+	items, err := dataTaggedOp.List(nil, &crud.GetOptions{OrderBy: []string{data.RecentOrder}})
 
 	l.Infof("%#v", items)
 

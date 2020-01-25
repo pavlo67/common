@@ -29,12 +29,16 @@
                 </div>
             </td>
         </tr>
+        <tr><td>
+            <button v-on:click="save" class="edit_button">зберегти у нотатнику</button>
+        </td></tr>
         </table>
     </div>
 </template>
 
 <script>
     import e  from '../elements';
+    import {cfg} from "../notebook_vue/init";
 
     const fields = [
         {key: "Key",      title: "ключ запису",           type: "view",     omitEmpty: true },
@@ -55,6 +59,67 @@
         },
         props: ["dataItem"],
         methods: {
+            prepare(dataItem) {
+                if (!(dataItem instanceof Object)) return {};
+
+                if (dataItem.Data instanceof Object) {
+                    dataItem._content = dataItem.Data.Content;
+                    delete dataItem.Data;
+                }
+
+                if (dataItem.Tags instanceof Array) {
+                    dataItem._tags = dataItem.Tags.map(t => t.Label);
+                    delete dataItem.Tags;
+                }
+
+                return dataItem;
+            },
+
+            save(){
+                if ("_content" in this.dataItem) {
+                    this.dataItem.Data = {
+                        TypeKey: "string",
+                        Content: this.dataItem._content,
+                    };
+                    delete this.dataItem._content;
+                }
+
+                if ("_tags" in this.dataItem) {
+                    this.dataItem.Tags = this.dataItem._tags.map(
+                        t => ({Label: t.text})
+                    );
+                    delete this.dataItem._tags;
+                }
+
+                let toSave = JSON.stringify(this.dataItem)
+                console.log("TO SAVE: " + toSave);
+
+                fetch(cfg.saveEp, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json;charset=utf-8',
+                    },
+                    mode: 'cors', // no-cors, cors, *same-origin
+                    body: toSave,
+
+                }).then(response => {
+                    return response.json();
+
+                }).then(data => {
+                    if (data.id) {
+                        cfg.eventBus.$emit('message', "запис з id = " + data.id + " збережено");
+                        this.$router.push({ name: 'NoteView',  params: { id: data.id } })
+
+                    } else {
+                        console.log(data);
+                        cfg.eventBus.$emit('message', "не вдалось зберегти запис: " + data.Error);
+                    }
+
+
+                });
+
+            },
+
         },
     };
 </script>

@@ -45,7 +45,7 @@
 
   .title {
     font-size: large;
-    min-height: 45px;
+    min-height: 50px;
   }
 
   .time {
@@ -54,7 +54,6 @@
 
   .control {
     color: blue;
-    font-size: xx-small;
   }
 
   .small {

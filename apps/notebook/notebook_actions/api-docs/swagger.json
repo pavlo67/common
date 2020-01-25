@@ -42,17 +42,6 @@
     ]
    }
   },
-  "/notebook/list": {
-   "get": {
-    "operationId": "list",
-    "produces": [
-     "application/json"
-    ],
-    "tags": [
-     "notebook"
-    ]
-   }
-  },
   "/notebook/read/{id}": {
    "get": {
     "operationId": "read",
@@ -65,6 +54,17 @@
       "type": "string"
      }
     ],
+    "produces": [
+     "application/json"
+    ],
+    "tags": [
+     "notebook"
+    ]
+   }
+  },
+  "/notebook/recent": {
+   "get": {
+    "operationId": "recent",
     "produces": [
      "application/json"
     ],

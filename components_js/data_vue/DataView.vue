@@ -1,27 +1,43 @@
 <template>
 
-    <div id="data_item_view">
+    <div id="data_item_view" class="smaller">
 
         <div v-if="showTitle">
             {{ dataItem.Title }}
             <br>&nbsp;
         </div>
 
-        <div v-if="dataItem.Summary">
-            <span v-html="dataItem.Summary"></span>
-            <br>
-        </div>
+        <table align="right">
+            <tr><td>
+                Створено: <span class="time">{{ createdAt(dataItem) }}</span><br>
+                Ключ запису:&nbsp; {{ dataItem.Key }}
 
-        <span v-html="href(dataItem.URL)" class="href smaller"></span>
-        <br>
+                <p/>
+                <span class="control">
+                    [<span v-on:click="$router.push({ name: 'NoteEdit',  params: { id: dataItem.ID } })">редаґувати</span>] &nbsp;
+                    [<span v-on:click="remove">вилучити</span>]
+                </span>
 
-        <span @mouseover="showDetails" @mouseleave="hideDetails" :id=itemId(dataItem) class="smaller">
-            подробиці...
-            <div class="data_summary" :id=itemId(dataItem,true)>{{ details(dataItem) }}</div>
+                <p/>Теґи:
+                <span v-if="dataItem.Tags instanceof Array">
+                    <span v-for="tag in dataItem.Tags" class="tag control" >
+                    &nbsp; [<span v-on:click="$router.push({ name: 'ListTagged',  params: { tag: tag.Label } })">{{ tag.Label }}</span>]
+                    </span><br>
+                </span>
+
+            </td></tr>
+        </table>
+        <span v-if="dataItem.Summary">
+            <b>Короткий зміст, анонс:</b>&nbsp; <span v-html="dataItem.Summary"></span><br>
+        </span>
+        <span v-if="dataItem.URL">
+            <b>URL:</b>&nbsp; <span v-html="href(dataItem.URL)" class="href"></span><br>
         </span>
 
-        <br>
-        &nbsp;
+        <span v-if="dataItem.Data instanceof Object">
+            <p/>
+            {{ dataItem.Data.Content }}
+        </span>
 
     </div>
 </template>
@@ -29,38 +45,67 @@
 
 <script>
     import e  from '../elements';
-    import sh from '../show_hide/show_hide';
+    import {createdAt} from './data';
+    import {cfg} from "../notebook_vue/init";
 
-    let itemPostfix = "_details";
-    let showHide = sh.NewShowHide(itemPostfix);
+    // let itemPostfix = "_details";
+    // let showHide = sh.NewShowHide(itemPostfix);
 
     export default {
         name: 'DataItemView',
         props: ["dataItem", "showTitle"],
         methods: {
             href: e.href,
-            itemId(item, postfixed) {
-                return "item_to_import_" + item.ID + (postfixed ? itemPostfix : "");
-            },
+            createdAt: createdAt,
 
-            showDetails(ev) {
-                showHide.showContent(ev);
-            },
+            remove() {
+                fetch(cfg.removeEp + "/" + this.dataItem.ID, {
+                    method: 'DELETE',
+                    headers: {
+                        // 'Content-Type': 'application/json;charset=utf-8',
+                    },
+                    mode: 'cors', // no-cors, cors, *same-origin
 
-            hideDetails(ev) {
-                showHide.hideContent(ev);
-            },
+                }).then(response => {
+                    return response.json();
 
-            details(item) {
-                let itemCopy = {};
-                for (let k in item) {
-                    if (!["Title", "Summary", "URL"].includes(k)) {
-                        itemCopy[k] = item[k];
+                }).then(data => {
+                    if (data.id) {
+                        cfg.eventBus.$emit('message', "запис з id = " + data.id + " вилучено");
+                        this.$router.push({ name: 'ListRecent'})
+
+                    } else {
+                        console.log(data);
+                        cfg.eventBus.$emit('message', "не вдалось вилучити запис: " + data.Error);
                     }
-                }
 
-                return itemCopy;
-            }
+
+                });
+
+            },
+
+            // itemId(item, postfixed) {
+            //     return "item_to_import_" + item.ID + (postfixed ? itemPostfix : "");
+            // },
+            //
+            // showDetails(ev) {
+            //     showHide.showContent(ev);
+            // },
+            //
+            // hideDetails(ev) {
+            //     showHide.hideContent(ev);
+            // },
+            //
+            // details(item) {
+            //     let itemCopy = {};
+            //     for (let k in item) {
+            //         if (!["Title", "Summary", "URL"].includes(k)) {
+            //             itemCopy[k] = item[k];
+            //         }
+            //     }
+            //
+            //     return itemCopy;
+            // }
         }
 
     };

@@ -16,7 +16,6 @@ const CleanerInterfaceKey joiner.InterfaceKey = "datacleaner"
 const ItemsTypeKey crud.TypeKey = "data_items"
 
 const CollectionDefault = "data"
-const KeyFieldName = "data_key"
 
 type Item struct {
 	ID  common.ID    `bson:"_id,omitempty" json:",omitempty"`

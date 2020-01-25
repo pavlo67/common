@@ -1,12 +1,20 @@
+import Home from './Home.vue';
 import ListTags   from './ListTags.vue';
 import ListRecent from './ListRecent.vue';
 import ListTagged from './ListTagged.vue';
-import ItemNew    from './ItemNew.vue';
-import ItemView   from './ItemView.vue';
+import NoteNew    from './NoteNew.vue';
+import NoteView   from './NoteView.vue';
 import {init}     from './init';
 
 export default [
     init,
+    {
+        inMenu: true,
+        path: '/',
+        name: 'home',
+        component: Home,
+        title: Home.title,
+    },
     {
         inMenu:    true,
         path:      '/notebook/',
@@ -14,20 +22,20 @@ export default [
         title:     ListRecent.title,
         component: ListRecent,
     },
+    // {
+    //     inMenu:    true,
+    //     path:      '/notebook/tags',
+    //     name:      'ListTags',
+    //     title:     ListTags.title,
+    //     component: ListTags,
+    //     // component: () => import(/* webpackChunkName: "data" */ './StorageIndex.vue'),
+    // },
     {
         inMenu:    true,
-        path:      '/notebook/tags',
-        name:      'ListTags',
-        title:     ListTags.title,
-        component: ListTags,
-        // component: () => import(/* webpackChunkName: "data" */ './StorageIndex.vue'),
-    },
-    {
-        inMenu:    true,
-        path:     '/notebook/item_new',
-        name:     'ItemNew',
-        title:     ItemNew.title,
-        component: ItemNew,
+        path:     '/notebook/note_new',
+        name:     'NoteNew',
+        title:     NoteNew.title,
+        component: NoteNew,
     },
     {
         path:      '/notebook/tag/:tag',
@@ -35,18 +43,18 @@ export default [
         component: ListTagged,
     },
     {
-        path:     '/notebook/item/:id',
-        name:     'ItemView',
-        component: ItemView,
+        path:     '/notebook/note/:id',
+        name:     'NoteView',
+        component: NoteView,
     },
     {
-        path:     '/notebook/item_edit/:id',
-        name:     'ItemEdit',
-        component: () => import('./ItemEdit.vue'),
+        path:     '/notebook/note_edit/:id',
+        name:     'NoteEdit',
+        component: () => import('./NoteEdit.vue'),
     },
     {
-        path:      '/notebook/item_import',
-        name:      'ItemImport',
-        component: () => import('./ItemImport.vue'),
+        path:      '/notebook/note_import',
+        name:      'NoteImport',
+        component: () => import('./NoteImport.vue'),
     },
 ];

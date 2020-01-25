@@ -9,7 +9,7 @@ const CollectionDefault = "storage"
 const DataInterfaceKey joiner.InterfaceKey = "storage_data"
 const InterfaceKey joiner.InterfaceKey = "storage"
 
-const ListInterfaceKey joiner.InterfaceKey = "list"
+const RecentInterfaceKey joiner.InterfaceKey = "list"
 const ReadInterfaceKey joiner.InterfaceKey = "read"
 const SaveInterfaceKey joiner.InterfaceKey = "save"
 const RemoveInterfaceKey joiner.InterfaceKey = "remove"

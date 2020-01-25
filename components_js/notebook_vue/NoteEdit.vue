@@ -1,12 +1,14 @@
 <template>
     <div id="storage_item" class="small">
         <div v-if="dataItem">
-            <b>Мій каталог: {{ dataItem.Title }}</b>
-            <br>&nbsp;
-            <DataItemEdit v-bind:dataItem="dataItem"/>
+            <div class="title"><b>Нотатник: {{ dataItem.Title }}</b></div>
+
+            <DataEdit v-bind:dataItem="dataItem"/>
         </div>
         <div v-else>
-            <b>Мій каталог:</b> відсутній запис для показу
+            <div class="title"><b>Нотатник</b></div>
+
+            Відсутній запис для редаґування...
         </div>
 
 
@@ -15,13 +17,17 @@
 
 
 <script>
-    import b       from '../basis';
-    import { cfg } from './init';
+    import DataEdit from '../data_vue/DataEdit.vue';
+    import b        from '../basis';
+    import {cfg}    from './init';
 
     export default {
-        title: () => 'новий запис',
-        created () {
-            this.getDataItem();
+        mounted() {
+            this.getDataItem(this.$route.params.id);
+        },
+        beforeRouteUpdate (to, from, next) {
+            this.getDataItem(to.params.id);
+            next();         // it's necessary!!! else no hook is generated when we returns to the original route
         },
         data: () => {
             return {
@@ -29,8 +35,8 @@
             };
         },
         methods: {
-            getDataItem() {
-                fetch(cfg.readEp + "/" + encodeURIComponent(this.$route.params.id), {
+            getDataItem(id) {
+                fetch(cfg.readEp + "/" + encodeURIComponent(id), {
                     method: 'GET', // *GET, POST, PUT, DELETE, etc.
                     headers: {
                         'Content-Type': 'application/json',
@@ -44,10 +50,12 @@
                 }).then(response => {
                     return response.json();
                 }).then(data => {
-                    this.dataItem = data;
-                    console.log(66666666, this.dataItem);
+                    this.dataItem = DataEdit.methods.prepare(data);
+                    console.log("TO EDIT:", this.dataItem);
                 });
-            }
+            },
+
+
         },
     }
 </script>

@@ -13,37 +13,39 @@ import (
 	"github.com/pavlo67/workshop/components/tagger"
 )
 
-var _ Operator = &ws{}
+var _ Operator = &dataTagged{}
 
-// var _ crud.Cleaner = &ws{}
+// var _ crud.Cleaner = &dataTagged{}
 
-type ws struct {
+type dataTagged struct {
 	data.Operator
+	DataKey joiner.InterfaceKey
 	Tagger
 }
 
 const onNewWorkspace = "on New(): "
 
-func New(dataOp data.Operator, taggerOp tagger.Operator) (Operator, crud.Cleaner, error) {
+func New(dataOp data.Operator, dataKey joiner.InterfaceKey, taggerOp tagger.Operator) (Operator, crud.Cleaner, error) {
 	if dataOp == nil {
 		return nil, nil, errors.New(onNewWorkspace + ": no data.Operatoe")
 	}
 
-	wsOp := ws{
+	dtOp := dataTagged{
 		Operator: dataOp,
+		DataKey:  dataKey,
 		Tagger:   taggerOp,
 	}
-	return &wsOp, nil, nil
+	return &dtOp, nil, nil
 }
 
-const onListWithTag = "on ws.ListTagged(): "
+const onListWithTag = "on dataTagged.ListTagged(): "
 
-func (wsOp *ws) ListTagged(key *joiner.InterfaceKey, tagLabel string, selector *selectors.Term, options *crud.GetOptions) ([]data.Item, error) {
+func (wsOp *dataTagged) ListTagged(tagLabel string, selector *selectors.Term, options *crud.GetOptions) ([]data.Item, error) {
 	if wsOp.Tagger == nil {
 		return nil, errors.New(onListWithTag + ": no tagger.Operator")
 	}
 
-	index, err := wsOp.IndexTagged(key, tagLabel, options)
+	index, err := wsOp.IndexTagged(&wsOp.DataKey, tagLabel, options)
 	if err != nil {
 		return nil, errors.Wrap(err, onListWithTag)
 	}
@@ -65,9 +67,9 @@ func (wsOp *ws) ListTagged(key *joiner.InterfaceKey, tagLabel string, selector *
 	// TODO: check if all item.TypeKey are correct in the result of wsOp.ListTags
 }
 
-// const onListWithText = "on ws.ListWithText(): "
+// const onListWithText = "on dataTagged.ListWithText(): "
 
-func (wsOp *ws) ListWithText(*joiner.InterfaceKey, hypertext.ToSearch, *selectors.Term, *crud.GetOptions) ([]data.Item, error) {
+func (wsOp *dataTagged) ListWithText(hypertext.ToSearch, *selectors.Term, *crud.GetOptions) ([]data.Item, error) {
 	return nil, common.ErrNotImplemented
 }
 

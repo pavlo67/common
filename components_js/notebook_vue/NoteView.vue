@@ -1,12 +1,14 @@
 <template>
     <div id="storage_item" class="small">
         <div v-if="dataItem">
-            <b>Мій каталог: {{ dataItem.Title }}</b>
-            <br>&nbsp;
+            <div class="title"><b>Нотатник: {{ dataItem.Title }}</b></div>
+
             <DataItemView v-bind:dataItem="dataItem"/>
         </div>
         <div v-else>
-            <b>Мій каталог:</b> відсутній запис для показу
+            <div class="title"><b>Нотатник</b></div>
+
+            Відсутній запис для показу...
         </div>
 
 
@@ -19,8 +21,12 @@
     import { cfg } from './init';
 
     export default {
-        created () {
-            this.getDataItem();
+        mounted() {
+            this.getDataItem(this.$route.params.id);
+        },
+        beforeRouteUpdate (to, from, next) {
+            this.getDataItem(to.params.id);
+            next();         // it's necessary!!! else no hook is generated when we returns to the original route
         },
         data: () => {
             return {
@@ -28,8 +34,8 @@
             };
         },
         methods: {
-            getDataItem() {
-                fetch(cfg.readEp + "/" + encodeURIComponent(this.$route.params.id), {
+            getDataItem(id) {
+                fetch(cfg.readEp + "/" + encodeURIComponent(id), {
                     method: 'GET', // *GET, POST, PUT, DELETE, etc.
                     headers: {
                         'Content-Type': 'application/json',
@@ -44,7 +50,7 @@
                     return response.json();
                 }).then(data => {
                     this.dataItem = data;
-                    console.log(66666666, this.dataItem);
+                    console.log("TO SHOW:", this.dataItem);
                 });
             }
         },

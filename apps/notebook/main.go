@@ -140,6 +140,8 @@ func main() {
 		{datatagged.Starter(), common.Map{"data_key": storage.DataInterfaceKey, "interface_key": storage.InterfaceKey}},
 		{storage_server_http.Starter(), common.Map{"data_key": storage.InterfaceKey}},
 
+		// TODO: pass the interface_key of data_pg to front_end
+
 		// flow actions
 		//{data_pg.Starter(), common.Map{"table": flow.CollectionDefault, "interface_key": flow.DataInterfaceKey, "cleaner_key": flow.CleanerInterfaceKey}},
 		//{datatagged.Starter(), common.Map{"data_key": flow.DataInterfaceKey, "interface_key": flow.InterfaceKey}},

@@ -34,15 +34,15 @@ func CountTags(_ *auth.User, _ server_http.Params, req *http.Request) (server.Re
 var listTaggedEndpoint = server_http.Endpoint{Method: "GET", QueryParams: []string{interfaceKeyParamName, tagLabelParamName}, WorkerHTTP: ListTagged}
 
 func ListTagged(user *auth.User, _ server_http.Params, req *http.Request) (server.Response, error) {
-	var interfaceKeyPtr *joiner.InterfaceKey
-	if key := req.URL.Query().Get(interfaceKeyParamName); key != "" {
-		interfaceKey := joiner.InterfaceKey(key)
-		interfaceKeyPtr = &interfaceKey
-	}
+	//var interfaceKeyPtr *joiner.InterfaceKey
+	//if key := req.URL.Query().Get(interfaceKeyParamName); key != "" {
+	//	interfaceKey := joiner.InterfaceKey(key)
+	//	interfaceKeyPtr = &interfaceKey
+	//}
 
 	tagLabel := req.URL.Query().Get(tagLabelParamName)
 
-	items, err := dataTaggedOp.ListTagged(interfaceKeyPtr, tagLabel, nil, nil)
+	items, err := dataTaggedOp.ListTagged(tagLabel, nil, nil)
 
 	if err != nil {
 		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on GET storage/...ListTagged (%#v): %s", req.URL.Query(), err))

@@ -10,10 +10,11 @@ function init(data) {
     if ('backend' in data) {
         // TODO: do it safely!!!
 
-        cfg.listEp   = ep(data.backend, "list");
         cfg.readEp   = ep(data.backend, "read").replace("/{id}", "");
         cfg.saveEp   = ep(data.backend, "save");
         cfg.removeEp = ep(data.backend, "remove").replace("/{id}", "");
+
+        cfg.recentEp = ep(data.backend, "recent");
         cfg.tagsEp   = ep(data.backend, "tags");
         cfg.taggedEp = ep(data.backend, "tagged");
     }

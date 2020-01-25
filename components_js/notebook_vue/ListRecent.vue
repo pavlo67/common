@@ -1,6 +1,6 @@
 <template>
     <div id="storage_tagged" class="small">
-        <div class="title"><b>Нещодавні записи</b></div>
+        <div class="title"><b>Нотатник: нещодавні записи</b></div>
 
         <DataList v-bind:dataList="dataList"/>
     </div>
@@ -25,9 +25,7 @@
         },
         methods: {
             getDataList() {
-                console.log(cfg.taggedEp + "?tag=" + encodeURIComponent(this.$route.params.tag));
-
-                fetch(cfg.taggedEp + "?key=storage", {
+                fetch(cfg.recentEp, {
                     method: 'GET', // *GET, POST, PUT, DELETE, etc.
                     headers: {
                         'Content-Type': 'application/json',
@@ -42,7 +40,7 @@
                     return response.json();
                 }).then(data => {
                     this.dataList = data;
-                    // console.log(this.tags);
+                    console.log("TO LIST:", this.dataList);
                 });
             }
         },
