@@ -7,6 +7,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pavlo67/workshop/common/selectors/logic"
+
+	"github.com/pavlo67/workshop/common/identity"
+
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/crud"
@@ -22,7 +26,7 @@ import (
 	"github.com/pavlo67/workshop/components/tagger"
 )
 
-var fieldsToInsert = []string{"data_key", "url", "title", "summary", "embedded", "tags", "type_key", "content", "history"}
+var fieldsToInsert = []string{"data_key", "url", "title", "summary", "embedded", "tags", "type_key", "content", "owner_key", "viewer_key", "history"}
 var fieldsToInsertStr = strings.Join(fieldsToInsert, ", ")
 
 var fieldsToUpdate = fieldsToInsert
@@ -39,8 +43,8 @@ type dataPg struct {
 	db    *sql.DB
 	table string
 
-	sqlInsert, sqlUpdate, sqlRead, sqlRemove, sqlList, sqlClean string
-	stmInsert, stmUpdate, stmRead, stmRemove, stmList           *sql.Stmt
+	sqlInsert, sqlUpdate, sqlRead, sqlRemove, sqlClean string
+	stmInsert, stmUpdate, stmRead, stmRemove           *sql.Stmt
 
 	taggerOp      tagger.Operator
 	interfaceKey  joiner.InterfaceKey
@@ -64,11 +68,12 @@ func New(access config.Access, table string, interfaceKey joiner.InterfaceKey, t
 		table: table,
 
 		sqlInsert: "INSERT INTO " + table + " (" + fieldsToInsertStr + ") VALUES (" + sqllib_pg.WildcardsForInsert(fieldsToInsert) + ") RETURNING id",
-		sqlUpdate: "UPDATE " + table + " SET " + sqllib_pg.WildcardsForUpdate(fieldsToUpdate) + " WHERE id = $" + strconv.Itoa(len(fieldsToUpdate)+1),
-		sqlRemove: "DELETE FROM " + table + " where id = $1",
+		sqlUpdate: "UPDATE " + table + " SET " + sqllib_pg.WildcardsForUpdate(fieldsToUpdate) +
+			" WHERE id = $" + strconv.Itoa(len(fieldsToUpdate)+1) + " AND owner_key = $" + strconv.Itoa(len(fieldsToUpdate)+2),
+		sqlRemove: "DELETE FROM " + table + " WHERE id = $1 AND owner_key = $2",
 
-		sqlRead: "SELECT " + fieldsToReadStr + " FROM " + table + " WHERE id = $1",
-		sqlList: sqllib.SQLList(table, fieldsToListStr, "", &crud.GetOptions{OrderBy: []string{"created_at DESC"}}),
+		sqlRead: "SELECT " + fieldsToReadStr + " FROM " + table + " WHERE id = $1 AND viewer_key IN ('', $2)",
+		//sqlList: sqllib.SQLList(table, fieldsToListStr, "", &crud.GetOptions{OrderBy: []string{"created_at DESC"}}),
 
 		sqlClean: "DELETE FROM " + table,
 
@@ -83,7 +88,7 @@ func New(access config.Access, table string, interfaceKey joiner.InterfaceKey, t
 		{&dataOp.stmRemove, dataOp.sqlRemove},
 
 		{&dataOp.stmRead, dataOp.sqlRead},
-		{&dataOp.stmList, dataOp.sqlList},
+		//{&dataOp.stmList, dataOp.sqlList},
 	}
 
 	for _, sqlStmt := range sqlStmts {
@@ -99,8 +104,8 @@ const onSave = "on dataPg.Save(): "
 
 func (dataOp *dataPg) Save(item data.Item, options *crud.SaveOptions) (common.ID, error) {
 
-	if options == nil {
-		options = &crud.SaveOptions{}
+	if options == nil || options.ActorKey == "" {
+		return "", errors.Errorf(onSave + "no user")
 	}
 
 	var err error
@@ -126,6 +131,10 @@ func (dataOp *dataPg) Save(item data.Item, options *crud.SaveOptions) (common.ID
 		DoneAt:   time.Now(),
 	})
 
+	// TODO: do it more clever
+	item.OwnerKey = options.ActorKey
+	item.ViewerKey = options.ActorKey
+
 	var id common.ID
 
 	if item.ID == "" {
@@ -135,7 +144,7 @@ func (dataOp *dataPg) Save(item data.Item, options *crud.SaveOptions) (common.ID
 			return "", errors.Wrapf(err, onSave+"can't marshal .History(%#v)", item)
 		}
 
-		values := []interface{}{item.Key, item.URL, item.Title, item.Summary, embedded, tags, item.Data.TypeKey, item.Data.Content, history}
+		values := []interface{}{item.Key, item.URL, item.Title, item.Summary, embedded, tags, item.Data.TypeKey, item.Data.Content, item.OwnerKey, item.ViewerKey, history}
 
 		var lastInsertId uint64
 
@@ -156,7 +165,7 @@ func (dataOp *dataPg) Save(item data.Item, options *crud.SaveOptions) (common.ID
 	} else {
 		id = item.ID
 
-		itemOld, err := dataOp.Read(id, &crud.GetOptions{Actor: options.ActorKey})
+		itemOld, err := dataOp.Read(id, &crud.GetOptions{ActorKey: options.ActorKey})
 		if err != nil {
 			return "", errors.Wrapf(err, onSave+"can't read old item with id = %s", id)
 		}
@@ -174,7 +183,10 @@ func (dataOp *dataPg) Save(item data.Item, options *crud.SaveOptions) (common.ID
 			return "", errors.Wrapf(err, onSave+"can't marshal .History(%#v)", item)
 		}
 
-		values := []interface{}{item.Key, item.URL, item.Title, item.Summary, embedded, tags, item.Data.TypeKey, item.Data.Content, history, item.ID}
+		values := []interface{}{
+			item.Key, item.URL, item.Title, item.Summary, embedded, tags, item.Data.TypeKey, item.Data.Content, item.OwnerKey, item.ViewerKey, history,
+			item.ID, item.OwnerKey,
+		}
 
 		_, err = dataOp.stmUpdate.Exec(values...)
 		if err != nil {
@@ -195,7 +207,7 @@ func (dataOp *dataPg) Save(item data.Item, options *crud.SaveOptions) (common.ID
 
 const onRead = "on dataPg.Read(): "
 
-func (dataOp *dataPg) Read(id common.ID, _ *crud.GetOptions) (*data.Item, error) {
+func (dataOp *dataPg) Read(id common.ID, options *crud.GetOptions) (*data.Item, error) {
 	if len(id) < 1 {
 		return nil, errors.New(onRead + "empty Key")
 	}
@@ -205,20 +217,30 @@ func (dataOp *dataPg) Read(id common.ID, _ *crud.GetOptions) (*data.Item, error)
 		return nil, errors.Errorf(onRead+"wrong Key (%s)", id)
 	}
 
+	var viewerKey identity.Key
+	if options != nil {
+		viewerKey = options.ActorKey
+	}
+
+	// TODO: check viewer_key for groups
+
+	values := []interface{}{idNum, viewerKey}
+
 	item := data.Item{ID: id}
 	var embedded, tags, history []byte
 	var createdAtStr string
 	var updatedAtPtr *string
 
-	err = dataOp.stmRead.QueryRow(idNum).Scan(
-		&item.Key, &item.URL, &item.Title, &item.Summary, &embedded, &tags, &item.Data.TypeKey, &item.Data.Content, &history, &updatedAtPtr, &createdAtStr,
+	err = dataOp.stmRead.QueryRow(values...).Scan(
+		&item.Key, &item.URL, &item.Title, &item.Summary, &embedded, &tags, &item.Data.TypeKey, &item.Data.Content, &item.OwnerKey, &item.ViewerKey, &history, &updatedAtPtr,
+		&createdAtStr,
 	)
 
 	if err == sql.ErrNoRows {
 		return nil, common.ErrNotFound
 	}
 	if err != nil {
-		return nil, errors.Wrapf(err, onRead+sqllib.CantScanQueryRow, dataOp.sqlRead, idNum)
+		return nil, errors.Wrapf(err, onRead+sqllib.CantScanQueryRow, dataOp.sqlRead, values)
 	}
 
 	if len(tags) > 0 {
@@ -262,7 +284,7 @@ func (dataOp *dataPg) Read(id common.ID, _ *crud.GetOptions) (*data.Item, error)
 
 const onRemove = "on dataPg.Remove()"
 
-func (dataOp *dataPg) Remove(id common.ID, _ *crud.RemoveOptions) error {
+func (dataOp *dataPg) Remove(id common.ID, options *crud.RemoveOptions) error {
 	if len(id) < 1 {
 		return errors.New(onRemove + "empty Key")
 	}
@@ -272,9 +294,19 @@ func (dataOp *dataPg) Remove(id common.ID, _ *crud.RemoveOptions) error {
 		return errors.Errorf(onRemove+"wrong Key (%s)", id)
 	}
 
-	_, err = dataOp.stmRemove.Exec(idNum)
+	var ownerKey identity.Key
+	if options != nil {
+		ownerKey = options.ActorKey
+	}
+
+	// TODO: check owner_key for groups
+	// TODO: deny the action if owner_key is empty
+
+	values := []interface{}{idNum, ownerKey}
+
+	_, err = dataOp.stmRemove.Exec(values...)
 	if err != nil {
-		return errors.Wrapf(err, onRemove+sqllib.CantExec, dataOp.sqlRemove, idNum)
+		return errors.Wrapf(err, onRemove+sqllib.CantExec, dataOp.sqlRemove, values)
 	}
 
 	if dataOp.taggerOp != nil {
@@ -290,20 +322,22 @@ func (dataOp *dataPg) Remove(id common.ID, _ *crud.RemoveOptions) error {
 const onList = "on dataPg.List()"
 
 func (dataOp *dataPg) List(term *selectors.Term, options *crud.GetOptions) ([]data.Item, error) {
+	var viewerKey identity.Key
+	if options != nil {
+		viewerKey = options.ActorKey
+	}
+
+	term = logic.AND(term, selectors.In("viewer_key", viewerKey))
+
 	condition, values, err := selectors_sql.Use(term)
 	if err != nil {
 		return nil, errors.Errorf(onList+"wrong selector (%#v): %s", term, err)
 	}
 
-	query := dataOp.sqlList
-	stm := dataOp.stmList
-
-	if condition != "" || options != nil {
-		query = sqllib_pg.CorrectWildcards(sqllib.SQLList(dataOp.table, fieldsToListStr, condition, options))
-		stm, err = dataOp.db.Prepare(query)
-		if err != nil {
-			return nil, errors.Wrapf(err, onList+": can't db.Prepare(%s)", query)
-		}
+	query := sqllib_pg.CorrectWildcards(sqllib.SQLList(dataOp.table, fieldsToListStr, condition, options))
+	stm, err := dataOp.db.Prepare(query)
+	if err != nil {
+		return nil, errors.Wrapf(err, onList+": can't db.Prepare(%s)", query)
 	}
 
 	// l.Infof("%s / %#v\n%s", condition, values, query)
@@ -327,7 +361,8 @@ func (dataOp *dataPg) List(term *selectors.Term, options *crud.GetOptions) ([]da
 		var updatedAtPtr *string
 
 		err := rows.Scan(
-			&idNum, &item.Key, &item.URL, &item.Title, &item.Summary, &embedded, &tags, &item.Data.TypeKey, &item.Data.Content, &history, &updatedAtPtr, &createdAtStr,
+			&idNum, &item.Key, &item.URL, &item.Title, &item.Summary, &embedded, &tags, &item.Data.TypeKey, &item.Data.Content, &item.OwnerKey, &item.ViewerKey, &history,
+			&updatedAtPtr, &createdAtStr,
 		)
 
 		if err != nil {
@@ -383,6 +418,9 @@ func (dataOp *dataPg) List(term *selectors.Term, options *crud.GetOptions) ([]da
 const onCount = "on dataPg.Count(): "
 
 func (dataOp *dataPg) Count(term *selectors.Term, options *crud.GetOptions) (uint64, error) {
+
+	// TODO: check viewer_key
+
 	condition, values, err := selectors_sql.Use(term)
 	if err != nil {
 		termStr, _ := json.Marshal(term)

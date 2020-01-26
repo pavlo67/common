@@ -2,12 +2,15 @@ CREATE TABLE tagged (
   joiner_key TEXT NOT NULL,
   id         TEXT NOT NULL,
   tag        TEXT NOT NULL,
-  relation   TEXT NOT NULL
+  relation   TEXT NOT NULL,
+  owner_key  TEXT NOT NULL,
+  viewer_key TEXT NOT NULL
+
 );
 
-CREATE UNIQUE INDEX idx_tagged_uniq ON tagged(joiner_key, id, tag);
+CREATE UNIQUE INDEX idx_tagged_uniq ON tagged(owner_key, joiner_key, id, tag);
 
-CREATE        INDEX idx_tagged      ON tagged(tag);
+CREATE        INDEX idx_tagged_tag  ON tagged(viewer_key, tag);
 
 -------------------------
 

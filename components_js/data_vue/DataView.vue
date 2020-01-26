@@ -46,6 +46,8 @@
 <script>
     import e  from '../elements';
     import {createdAt} from './data';
+
+    // TODO!!! straighten the kostyl
     import {cfg} from "../notebook_vue/init";
 
     // let itemPostfix = "_details";
@@ -63,6 +65,7 @@
                     method: 'DELETE',
                     headers: {
                         // 'Content-Type': 'application/json;charset=utf-8',
+                        'authorization': cfg.jwt,
                     },
                     mode: 'cors', // no-cors, cors, *same-origin
 

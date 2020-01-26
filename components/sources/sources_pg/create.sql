@@ -1,8 +1,6 @@
-CREATE TABLE packs (
+CREATE TABLE sources (
     id                BIGSERIAL                PRIMARY KEY,
     key               TEXT                     NOT NULL,
-    address_from      TEXT                     NOT NULL,
-    address_to        TEXT                     NOT NULL,
     options           TEXT                     NOT NULL,
     type_key          TEXT                     NOT NULL,
     content           TEXT                     NOT NULL,
@@ -10,11 +8,11 @@ CREATE TABLE packs (
     created_at        TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_packs_identity_key ON packs(identity_key);
+CREATE INDEX idx_sources_identity_key ON sources(identity_key);
 
-CREATE INDEX idx_packs_type_key     ON packs(type_key);
+CREATE INDEX idx_sources_type_key     ON sources(type_key);
 
-CREATE INDEX idx_packs_created_at   ON packs(created_at);
+CREATE INDEX idx_sources_created_at   ON sources(created_at);
 
 
 

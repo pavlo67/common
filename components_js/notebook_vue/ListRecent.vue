@@ -28,7 +28,8 @@
                 fetch(cfg.recentEp, {
                     method: 'GET', // *GET, POST, PUT, DELETE, etc.
                     headers: {
-                        'Content-Type': 'application/json',
+                        'content-type': 'application/json',
+                        'authorization': cfg.jwt,
                     },
                     mode: 'cors', // no-cors, cors, *same-origin
 

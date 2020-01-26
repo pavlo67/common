@@ -18,6 +18,14 @@ type User struct {
 	Creds Creds        `bson:",omitempty" json:",omitempty"`
 }
 
+func (user *User) KeyYet() identity.Key {
+	if user == nil {
+		return ""
+	}
+
+	return user.Key
+}
+
 type Operator interface {
 	// SetCreds sets user's own or temporary (session-generated) creds
 	SetCreds(userKey identity.Key, toSet Creds) (*Creds, error)

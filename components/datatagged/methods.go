@@ -58,7 +58,7 @@ func (wsOp *dataTagged) ListTagged(tagLabel string, selector *selectors.Term, op
 
 	selectorTagged := selectors.In("id", taggedIDs...)
 	if selector != nil {
-		selectorTagged = logic.AND(selectorTagged, *selector)
+		selectorTagged = logic.AND(selectorTagged, selector)
 	}
 
 	// l.Infof("%#v\n%#v", selectorTagged, options)

@@ -8,15 +8,18 @@ CREATE TABLE storage (
   tags         TEXT                     ,
   type_key     TEXT                     NOT NULL,
   content      TEXT                     ,
+  owner_key    TEXT                     NOT NULL,
+  viewer_key   TEXT                     NOT NULL,
   history      TEXT                     ,
   created_at   TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at   TIMESTAMP WITH TIME ZONE
 );
 
-CREATE INDEX idx_storage_key   ON storage(data_key);
+CREATE INDEX idx_storage_key    ON storage(data_key);
 
-CREATE INDEX idx_storage_title ON storage(type_key, title);
+CREATE INDEX idx_storage_owner  ON storage(owner_key, type_key, created_at);
 
+CREATE INDEX idx_storage_viewer ON storage(viewer_key, type_key, created_at);
 --
 
 CREATE TABLE flow (
@@ -29,6 +32,8 @@ CREATE TABLE flow (
   tags         TEXT                     ,
   type_key     TEXT                     NOT NULL,
   content      TEXT                     ,
+  owner_key    TEXT                     NOT NULL,
+  viewer_key   TEXT                     NOT NULL,
   history      TEXT                     ,
   created_at   TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at   TIMESTAMP WITH TIME ZONE
@@ -36,4 +41,6 @@ CREATE TABLE flow (
 
 CREATE INDEX idx_flow_key   ON flow(data_key);
 
-CREATE INDEX idx_flow_title ON flow(type_key, title);
+CREATE INDEX idx_flow_owner  ON flow(owner_key, type_key, created_at);
+
+CREATE INDEX idx_flow_viewer ON flow(viewer_key, type_key, created_at);

@@ -38,6 +38,8 @@
 
 <script>
     import e  from '../elements';
+
+    // TODO!!! straighten the kostyl
     import {cfg} from "../notebook_vue/init";
 
     const fields = [
@@ -97,7 +99,8 @@
                 fetch(cfg.saveEp, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json;charset=utf-8',
+                        'content-type': 'application/json;charset=utf-8',
+                        'authorization': cfg.jwt,
                     },
                     mode: 'cors', // no-cors, cors, *same-origin
                     body: toSave,

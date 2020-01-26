@@ -10,6 +10,7 @@ import (
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/crud"
 	"github.com/pavlo67/workshop/common/logger"
+
 	"github.com/pavlo67/workshop/components/tagger"
 )
 
@@ -40,7 +41,9 @@ func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 					TypeKey: "test",
 					Content: `{"AAA": "aaa", "BBB": 222}`,
 				},
-				Tags: []tagger.Tag{{Label: "1"}, {Label: "333"}},
+				Tags:      []tagger.Tag{{Label: "1"}, {Label: "333"}},
+				OwnerKey:  actorKey,
+				ViewerKey: actorKey,
 				History: []crud.Action{{
 					Key:    crud.CreatedAction,
 					DoneAt: time.Time{},
@@ -55,7 +58,9 @@ func TestCases(dataOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 					TypeKey: "test",
 					Content: `{"AAA": "awraa", "BBB": 22552}`,
 				},
-				Tags: []tagger.Tag{{Label: "1"}, {Label: "333"}},
+				Tags:      []tagger.Tag{{Label: "1"}, {Label: "333"}},
+				OwnerKey:  actorKey,
+				ViewerKey: actorKey,
 			},
 		},
 	}
@@ -69,6 +74,8 @@ const numRepeats = 3
 const toReadI = 0   // must be < numRepeats
 const toUpdateI = 1 // must be < numRepeats
 const toDeleteI = 2 // must be < numRepeats
+
+const actorKey = "test"
 
 func Compare(t *testing.T, dataOp Operator, readed *Item, expectedItem Item, l logger.Operator) {
 	require.NotNil(t, readed)
@@ -156,7 +163,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		for i := 0; i < numRepeats; i++ {
 			toSave[i] = tc.ToSave
 			//toSave[i].Details = &tc.DetailsToSave
-			idI, err := tc.Save(toSave[i], nil)
+			idI, err := tc.Save(toSave[i], &crud.SaveOptions{ActorKey: actorKey})
 			require.NoError(t, err)
 			require.NotEmpty(t, idI)
 			id[i] = idI
@@ -170,7 +177,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		//	 continue
 		// }
 
-		readedSaved, err := tc.Read(id[toReadI], nil)
+		readedSaved, err := tc.Read(id[toReadI], &crud.GetOptions{ActorKey: actorKey})
 		require.NoError(t, err)
 
 		toSave[i].ID = id[toReadI]
@@ -188,10 +195,23 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		tc.ToUpdate.ID = id[toUpdateI]
 		// tc.ToUpdate.Details = &tc.DetailsToUpdate
 
-		_, err = tc.Save(tc.ToUpdate, nil)
+		// !!! .History error
+
+		_, err = tc.Save(tc.ToUpdate, &crud.SaveOptions{ActorKey: actorKey})
+		require.Error(t, err)
+
+		// !!! corrected .History
+
+		readedToUpdate, err := tc.Read(id[toUpdateI], &crud.GetOptions{ActorKey: actorKey})
+		require.NoError(t, err)
+		require.NotNil(t, readedToUpdate)
+
+		tc.ToUpdate.History = readedToUpdate.History
+
+		_, err = tc.Save(tc.ToUpdate, &crud.SaveOptions{ActorKey: actorKey})
 		require.NoError(t, err)
 
-		readedUpdated, err := tc.Read(id[toUpdateI], nil)
+		readedUpdated, err := tc.Read(id[toUpdateI], &crud.GetOptions{ActorKey: actorKey})
 		require.NoError(t, err)
 
 		// tc.ToUpdate.History.CreatedAt = tc.ToSave.History.CreatedAt // unchanged!!!
@@ -295,7 +315,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		//
 		//	// TODO: selector.InStr(keyFields[0], ids...)
 
-		briefsAll, err := tc.List(nil, &crud.GetOptions{OrderBy: []string{"id"}})
+		briefsAll, err := tc.List(nil, &crud.GetOptions{ActorKey: actorKey, OrderBy: []string{"id"}})
 		require.NoError(t, err)
 		require.True(t, len(briefsAll) == numRepeats)
 
@@ -304,14 +324,14 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 
 		// test .Delete --------------------------------------------------------------------------------------
 
-		err = tc.Remove(id[toDeleteI], nil)
+		err = tc.Remove(id[toDeleteI], &crud.RemoveOptions{ActorKey: actorKey})
 		require.NoError(t, err)
 
-		readDeleted, err := tc.Read(id[toDeleteI], nil)
+		readDeleted, err := tc.Read(id[toDeleteI], &crud.GetOptions{ActorKey: actorKey})
 		require.Error(t, err)
 		require.Nil(t, readDeleted)
 
-		briefsAll, err = tc.List(nil, nil)
+		briefsAll, err = tc.List(nil, &crud.GetOptions{ActorKey: actorKey})
 		require.NoError(t, err)
 		require.True(t, len(briefsAll) == numRepeats-1)
 

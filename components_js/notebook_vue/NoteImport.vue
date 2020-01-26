@@ -37,7 +37,8 @@
                     method: 'POST',
                     headers: {
                         // 'Content-Type': 'application/json;charset=utf-8'
-                        'Content-Type': 'application/json',
+                        'content-type': 'application/json',
+                        'authorization': cfg.jwt,
                     },
                     mode: 'cors', // no-cors, cors, *same-origin
                     body: JSON.stringify(this.itemToImport),

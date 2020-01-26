@@ -24,7 +24,7 @@
 
 ## data, packs, tasks
 
-* read/list updated_at & created_at
+* check viewer_key
 
 
 ## storage

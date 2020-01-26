@@ -23,6 +23,10 @@ import (
 var saveEndpoint = server_http.Endpoint{Method: "POST", WorkerHTTP: Save}
 
 func Save(user *auth.User, params server_http.Params, req *http.Request) (server.Response, error) {
+	if user == nil {
+		return server.ResponseRESTError(http.StatusUnauthorized, errors.New("ERROR on POST storage/...Save: no user"))
+	}
+
 	var item data.Item
 
 	itemJSON, err := ioutil.ReadAll(req.Body)
@@ -35,7 +39,7 @@ func Save(user *auth.User, params server_http.Params, req *http.Request) (server
 		return server.ResponseRESTError(http.StatusBadRequest, errors.Errorf("ERROR on POST storage/...Save: can't json.Unmarshal(%s): %s", string(itemJSON), err))
 	}
 
-	id, err := dataTaggedOp.Save(item, nil)
+	id, err := dataTaggedOp.Save(item, &crud.SaveOptions{ActorKey: user.Key})
 	if err != nil {
 		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on POST storage/...Save: %s", err))
 	}
@@ -53,7 +57,7 @@ var readEndpoint = server_http.Endpoint{Method: "GET", PathParams: []string{"id"
 func Read(user *auth.User, params server_http.Params, req *http.Request) (server.Response, error) {
 	id := common.ID(params["id"])
 
-	item, err := dataTaggedOp.Read(id, nil)
+	item, err := dataTaggedOp.Read(id, &crud.GetOptions{ActorKey: user.KeyYet()})
 	if err == common.ErrNotFound {
 		return server.ResponseRESTError(http.StatusNotFound, errors.Errorf("ERROR on GET storage/...Read: not found item with id = %s", id))
 	} else if err != nil {
@@ -68,9 +72,7 @@ func Read(user *auth.User, params server_http.Params, req *http.Request) (server
 var recentEndpoint = server_http.Endpoint{Method: "GET", WorkerHTTP: Recent}
 
 func Recent(user *auth.User, _ server_http.Params, req *http.Request) (server.Response, error) {
-	items, err := dataTaggedOp.List(nil, &crud.GetOptions{OrderBy: []string{data.RecentOrder}})
-
-	l.Infof("%#v", items)
+	items, err := dataTaggedOp.List(nil, &crud.GetOptions{OrderBy: []string{data.RecentOrder}, ActorKey: user.KeyYet()})
 
 	if err != nil {
 		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on GET storage/...ListFlow: ", err))
@@ -86,7 +88,7 @@ var removeEndpoint = server_http.Endpoint{Method: "DELETE", PathParams: []string
 func Remove(user *auth.User, params server_http.Params, req *http.Request) (server.Response, error) {
 	id := common.ID(params["id"])
 
-	err := dataTaggedOp.Remove(id, nil)
+	err := dataTaggedOp.Remove(id, &crud.RemoveOptions{ActorKey: user.KeyYet()})
 	if err != nil {
 		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on DELETE storage/...Remove: ", err))
 	}

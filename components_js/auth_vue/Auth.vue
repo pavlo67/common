@@ -25,11 +25,15 @@
   // -------------------------------------------------------------------------------------------------------
 
   let menuTitle = whoAmI;
-  let user      = restoreUser();
+  let user;
 
   function setUser(user) {
     if (user instanceof Object && user.Creds instanceof Object) {
-      if (cfg.eventBus instanceof Object) {
+      console.log("CFG.eventBus TO SET USER CREDS: ", 'eventBus' in cfg);
+
+      if (cfg.eventBus) {
+        console.log("USER CREDS TO EMIT JWT: ", user.Creds);
+
         cfg.eventBus.$emit("jwt", user.Creds.jwt);
       }
       menuTitle = user.Creds.nickname;
@@ -66,10 +70,20 @@
 
   // -------------------------------------------------------------------------------------------------------
 
+  let first = true;
+
   export default   {
     preface: 'хто тут:',
 
+    created() {
+    },
+
     title() {
+      if (first) {
+        user = restoreUser();
+        console.log("CREATED!", user);
+        first = false;
+      }
       return menuTitle;
     },
 
