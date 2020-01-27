@@ -1,5 +1,14 @@
 <template>
     <div>
+
+        <table align="right" class="table_right">
+            <tr><td>
+                <span class="control">
+                    [<span v-on:click="$router.push({ name: 'NoteEdit',  params: {  } })">експортувати</span>]
+                </span>
+            </td></tr>
+        </table>
+
         <div v-for="dataItem in dataList" class="small">
             <!-- TODO: customize the router target -->
             <span class="data_announce">

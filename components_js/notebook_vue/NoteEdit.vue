@@ -40,7 +40,7 @@
                     method: 'GET', // *GET, POST, PUT, DELETE, etc.
                     headers: {
                         'content-type': 'application/json',
-                        'authorization': cfg.jwt,
+                        'authorization': cfg.user && cfg.user.Creds.jwt,
                     },
                     mode: 'cors', // no-cors, cors, *same-origin
 
@@ -51,12 +51,10 @@
                 }).then(response => {
                     return response.json();
                 }).then(data => {
-                    this.dataItem = DataEdit.methods.prepare(data);
+                    this.dataItem = DataEdit.methods.prepare(data, cfg);
                     console.log("TO EDIT:", this.dataItem);
                 });
             },
-
-
         },
     }
 </script>

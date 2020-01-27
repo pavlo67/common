@@ -15,6 +15,12 @@
                     <textarea v-model="dataItem[field.key]" v-bind:placeholder="' ' + (field.placeholder || field.title)" class="edit_field" v-bind:rows="field.lines || 2"/>
                 </div>
 
+                <div v-else-if="field.type === 'select'">
+                    <select v-model="dataItem['select.' + field.key]" class="edit_field">
+                        <option v-for="v in field.values" v-bind:value="v.key">{{ v.name }}</option>
+                    </select>
+                </div>
+
                 <div v-else-if="field.type === 'tags'">
                     <vue-tags-input
                          v-model="tag"
@@ -37,19 +43,26 @@
 </template>
 
 <script>
-    import e  from '../elements';
+    import b    from '../basis';
+    import Auth from '../auth_vue/Auth.vue';
 
-    // TODO!!! straighten the kostyl
-    import {cfg} from "../notebook_vue/init";
+    let cfg = {};
 
-    const fields = [
+    const accessKey = "_access";
+    const groupsCommon = [
+        {key: '', name: 'приватний запис'},
+        {key: '', name: 'запис для загалу'},
+    ];
+
+    const fields = b.copy([
         {key: "Key",      title: "ключ запису",           type: "view",     omitEmpty: true },
         {key: "Title",    title: "заголовок"},             // , placeholder: "введіть заголовок запису"
+        {key: accessKey,  title: "доступність",           type: "select"},
         {key: "URL",      title: "URL",},
-        {key: "_tags",    title: "теґи",                  type: "tags"},
         {key: "Summary",  title: "короткий зміст, анонс", type: "textarea", lines: 3},
+        {key: "_tags",    title: "теґи",                  type: "tags"},
         {key: "_content", title: "сам запис"            , type: "textarea", lines: 30},
-    ];
+    ]);
 
     export default {
         name: 'DataEdit',
@@ -61,17 +74,32 @@
         },
         props: ["dataItem"],
         methods: {
-            prepare(dataItem) {
-                if (!(dataItem instanceof Object)) return {};
+            prepare(dataItem, cfgCommon) {
+                cfg = cfgCommon;
+                cfg.user = cfg.user || Auth.methods.getUser() || {};
 
-                if (dataItem.Data instanceof Object) {
-                    dataItem._content = dataItem.Data.Content;
-                    delete dataItem.Data;
+                for (let f of fields) {
+                    if (f.key === accessKey && cfg.user && cfg.user.groups instanceof Array) {
+                        f.values = [...groupsCommon, ...cfg.user.groups];
+                        f.values[0].key = cfg.user.Key;
+                    }
                 }
+
+                if (!(dataItem instanceof Object)) {
+                    dataItem = {};
+                    dataItem['select.' + accessKey] = cfg.user.Key;
+                }
+
+                dataItem['select.' + accessKey] = cfg.user.Key;
 
                 if (dataItem.Tags instanceof Array) {
                     dataItem._tags = dataItem.Tags.map(t => t.Label);
                     delete dataItem.Tags;
+                }
+
+                if (dataItem.Data instanceof Object) {
+                    dataItem._content = dataItem.Data.Content;
+                    delete dataItem.Data;
                 }
 
                 return dataItem;
@@ -100,7 +128,7 @@
                     method: 'POST',
                     headers: {
                         'content-type': 'application/json;charset=utf-8',
-                        'authorization': cfg.jwt,
+                        'authorization': cfg.user && cfg.user.Creds.jwt,
                     },
                     mode: 'cors', // no-cors, cors, *same-origin
                     body: toSave,
@@ -117,12 +145,8 @@
                         console.log(data);
                         cfg.eventBus.$emit('message', "не вдалось зберегти запис: " + data.Error);
                     }
-
-
                 });
-
             },
-
         },
     };
 </script>

@@ -15,9 +15,7 @@ function init(data) {
 
     if ('eventBus' in data) {
         cfg.eventBus = data.eventBus;
-        cfg.eventBus.$on('jwt', jwt => {
-            cfg.jwt = jwt;
-        });
+        cfg.eventBus.$on('user', user => { cfg.user = user; });
     }
 
     if ('vue' in data) {

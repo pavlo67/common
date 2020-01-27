@@ -7,7 +7,7 @@
             <br>&nbsp;
         </div>
 
-        <table align="right">
+        <table align="right" class="table_right">
             <tr><td>
                 Створено: <span class="time">{{ createdAt(dataItem) }}</span><br>
                 Ключ запису:&nbsp; {{ dataItem.Key }}
@@ -65,7 +65,7 @@
                     method: 'DELETE',
                     headers: {
                         // 'Content-Type': 'application/json;charset=utf-8',
-                        'authorization': cfg.jwt,
+                        'authorization': cfg.user && cfg.user.Creds.jwt,
                     },
                     mode: 'cors', // no-cors, cors, *same-origin
 

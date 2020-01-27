@@ -29,16 +29,18 @@
 
   function setUser(user) {
     if (user instanceof Object && user.Creds instanceof Object) {
-      console.log("CFG.eventBus TO SET USER CREDS: ", 'eventBus' in cfg);
+      // TODO!!!
+      user.groups = [];
 
+      // console.log("CFG.eventBus TO SET USER CREDS: ", 'eventBus' in cfg);
       if (cfg.eventBus) {
-        console.log("USER CREDS TO EMIT JWT: ", user.Creds);
-
-        cfg.eventBus.$emit("jwt", user.Creds.jwt);
+        console.log("USER TO BE EMITTED: ", user);
+        cfg.eventBus.$emit("user", user);
       }
       menuTitle = user.Creds.nickname;
 
       if (cfg.vue instanceof Object && typeof cfg.vue.$forceUpdate === "function") cfg.vue.$forceUpdate();
+
       return user;
     } else {
       menuTitle = whoAmI;
@@ -75,10 +77,8 @@
   export default   {
     preface: 'хто тут:',
 
-    created() {
-    },
-
     title() {
+      // TODO!!! remove the kostyl (move this initiation in common init() or somewhere looks like to)
       if (first) {
         user = restoreUser();
         console.log("CREATED!", user);
@@ -96,7 +96,8 @@
       };
     },
     methods: {
-      getUserFromAuth: function(login, password, cb) {
+      getUser: function() {
+        return user;
       },
 
       signIn: function () {

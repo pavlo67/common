@@ -1,4 +1,5 @@
-import { ep } from '../swagger_convertor';
+import b    from '../basis';
+import {ep} from '../swagger_convertor';
 
 let cfg = {};
 
@@ -21,8 +22,13 @@ function init(data) {
 
     if ('eventBus' in data) {
         cfg.eventBus = data.eventBus;
-        cfg.eventBus.$on('jwt', jwt => {
-            cfg.jwt = jwt;
+        cfg.eventBus.$on('user', user => {
+
+            console.log(333333333);
+            cfg.eventBus.$on('user', user => {
+                console.log(444444444);
+                cfg.user = user;
+            });
         });
     }
 

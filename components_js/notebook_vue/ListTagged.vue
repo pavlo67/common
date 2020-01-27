@@ -43,7 +43,7 @@
                     method: 'GET', // *GET, POST, PUT, DELETE, etc.
                     headers: {
                         'content-type': 'application/json',
-                        'authorization': cfg.jwt,
+                        'authorization': cfg.user && cfg.user.Creds.jwt,
                     },
                     mode: 'cors', // no-cors, cors, *same-origin
 

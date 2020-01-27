@@ -38,7 +38,7 @@
                     headers: {
                         // 'Content-Type': 'application/json;charset=utf-8'
                         'content-type': 'application/json',
-                        'authorization': cfg.jwt,
+                        'authorization': cfg.user && cfg.user.Creds.jwt,
                     },
                     mode: 'cors', // no-cors, cors, *same-origin
                     body: JSON.stringify(this.itemToImport),

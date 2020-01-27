@@ -1,14 +1,15 @@
 <template>
     <div id="storage_item" class="small">
         <div class="title"><b>Новий запис</b></div>
-        <DataEdit v-bind:dataItem="dataItem"/>
+        <DataEdit v-bind:dataItem="preparedItem()"/>
     </div>
 </template>
 
 
 <script>
-    import b       from '../basis';
-    import { cfg } from './init';
+    import b        from '../basis';
+    import {cfg}    from './init';
+    import DataEdit from "../data_vue/DataEdit";
 
     export default {
         title: () => 'новий запис',
@@ -25,6 +26,9 @@
             };
         },
         methods: {
+            preparedItem() {
+                return DataEdit.methods.prepare(this.dataItem, cfg);
+            },
         },
     }
 </script>

@@ -43,6 +43,14 @@
     min-height: 25px;
   }
 
+  .table_right {
+    font-size: x-small;
+    border-style: solid;
+    border-color: black;
+    border-width: 1px;
+    margin: 3px;
+  }
+
   .title {
     font-size: large;
     min-height: 50px;
