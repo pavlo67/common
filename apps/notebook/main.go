@@ -7,9 +7,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/pavlo67/workshop/components/storage"
-	"github.com/pavlo67/workshop/components/storage/storage_server_http"
-
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/auth"
 	"github.com/pavlo67/workshop/common/auth/auth_http"
@@ -28,6 +25,8 @@ import (
 	"github.com/pavlo67/workshop/components/datatagged"
 	"github.com/pavlo67/workshop/components/packs/packs_pg"
 	"github.com/pavlo67/workshop/components/runner_factory/runner_factory_goroutine"
+	"github.com/pavlo67/workshop/components/storage"
+	"github.com/pavlo67/workshop/components/storage/storage_server_http"
 	"github.com/pavlo67/workshop/components/tagger/tagger_pg"
 	"github.com/pavlo67/workshop/components/tasks/tasks_pg"
 	"github.com/pavlo67/workshop/components/transport"
@@ -43,14 +42,16 @@ var (
 	BuildCommit = "unknown"
 )
 
-const serviceName = "notebook"
+const serviceNameDefault = "notebook"
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
-	var versionOnly, copyImmediately bool
+	var versionOnly, copyFlow bool
+	var serviceName string
 	flag.BoolVar(&versionOnly, "version_only", false, "show build vars only")
-	flag.BoolVar(&copyImmediately, "copy_immediately", false, "immediately copy flow data")
+	flag.BoolVar(&copyFlow, "copy_flow", false, "copy flow data immediately")
+	flag.StringVar(&serviceName, "service", serviceNameDefault, "service name")
 	flag.Parse()
 
 	log.Printf("builded: %s, tag: %s, commit: %s\n", BuildDate, BuildTag, BuildCommit)
@@ -159,7 +160,7 @@ func main() {
 			"transport_handler_key": transport.HandlerInterfaceKey,
 
 			// "copier_task_key":    flow.CopierTaskInterfaceKey,
-			// "copy_immediately":   copyImmediately,
+			// "copy_immediately":   copyFlow,
 			// "cleaner_task_key":   flow.CopierTaskInterfaceKey,
 		}},
 	}

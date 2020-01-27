@@ -5,6 +5,6 @@ routes:
     gatherer:
         host: localhost
         port: 6012
-    workspace:
+    notebook:
         host: localhost
         port: 6013
