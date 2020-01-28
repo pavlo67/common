@@ -17,8 +17,9 @@
 
 
 <script>
-    import b       from '../basis';
-    import { cfg } from './init';
+    // import b     from '../basis';
+    import {cfg}    from './init';
+    import DataView from "../data_vue/DataView";
 
     export default {
         mounted() {
@@ -38,8 +39,8 @@
                 fetch(cfg.readEp + "/" + encodeURIComponent(id), {
                     method: 'GET', // *GET, POST, PUT, DELETE, etc.
                     headers: {
-                        'content-type': 'application/json',
-                        'authorization': cfg.user && cfg.user.Creds.jwt,
+                        'content-type': 'application/json;charset=utf-8',
+                        'authorization': cfg.common.user && cfg.common.user.Creds && cfg.common.user.Creds.jwt,
                     },
                     mode: 'cors', // no-cors, cors, *same-origin
 
@@ -50,7 +51,7 @@
                 }).then(response => {
                     return response.json();
                 }).then(data => {
-                    this.dataItem = data;
+                    this.dataItem = DataView.methods.prepare(data, cfg);
                     console.log("TO SHOW:", this.dataItem);
                 });
             }

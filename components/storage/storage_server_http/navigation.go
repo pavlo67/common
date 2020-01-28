@@ -52,3 +52,17 @@ func ListTagged(user *auth.User, _ server_http.Params, req *http.Request) (serve
 
 	return server.ResponseRESTOk(items)
 }
+
+var exportEndpoint = server_http.Endpoint{Method: "GET", QueryParams: []string{"after"}, WorkerHTTP: Export}
+
+func Export(user *auth.User, _ server_http.Params, req *http.Request) (server.Response, error) {
+	// TODO!!! use "after"
+
+	crudData, err := exporterOp.Export(nil, "", &crud.GetOptions{ActorKey: user.KeyYet()})
+
+	if err != nil {
+		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on GET storage/...Export: ", err))
+	}
+
+	return server.ResponseRESTOk(crudData)
+}

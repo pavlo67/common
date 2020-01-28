@@ -38,11 +38,12 @@ let parts = [
   ...notebook,
 ];
 
-let routes  = [];
-let menu    = [];
+let common = {};
+let routes = [];
+let menu   = [];
 for (let p of parts) {
     if (typeof p === "function") {
-        p({backend, eventBus: App.eventBus});
+        p({common, backend, eventBus: App.eventBus});
     } else {
         routes.push(p);
         if (p.inMenu) menu.push(p);
@@ -52,23 +53,12 @@ for (let p of parts) {
 
 // app start ---------------------------------------------------------------------------------------
 
-import App   from './App.vue';
+import App from './App.vue';
 let router = new Router({routes});
-let vue    = new Vue({
+common.vue = new Vue({
   data: { menu },
   router,
   ...App,
 }).$mount('#app');
-
-
-// parts initiation with app -----------------------------------------------------------------------
-
-// TODO: do it something else...
-
-for (let p of parts) {
-  if (typeof p === "function") {
-    p({vue});
-  }
-}
 
 

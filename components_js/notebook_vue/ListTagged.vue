@@ -18,6 +18,7 @@
 <script>
     import b       from '../basis';
     import { cfg } from './init';
+    import DataList from "../data_vue/DataList";
 
     export default {
         name: 'StorageTagged',
@@ -42,8 +43,8 @@
                 fetch(cfg.taggedEp + "?tag=" + encodeURIComponent(tag), {
                     method: 'GET', // *GET, POST, PUT, DELETE, etc.
                     headers: {
-                        'content-type': 'application/json',
-                        'authorization': cfg.user && cfg.user.Creds.jwt,
+                        'content-type': 'application/json;charset=utf-8',
+                        'authorization': cfg.common.user && cfg.common.user.Creds && cfg.common.user.Creds.jwt,
                     },
                     mode: 'cors', // no-cors, cors, *same-origin
 
@@ -54,7 +55,7 @@
                 }).then(response => {
                     return response.json();
                 }).then(data => {
-                    this.dataList = data;
+                    this.dataList = DataList.methods.prepare(data, cfg);
                     // console.log(this.tags);
                 });
             }

@@ -46,8 +46,6 @@
     import b    from '../basis';
     import Auth from '../auth_vue/Auth.vue';
 
-    let cfg = {};
-
     const accessKey = "_access";
     const groupsCommon = [
         {key: '', name: 'приватний запис'},
@@ -64,6 +62,8 @@
         {key: "_content", title: "сам запис"            , type: "textarea", lines: 30},
     ]);
 
+    let cfg = {};
+
     export default {
         name: 'DataEdit',
         data: () => {
@@ -75,22 +75,22 @@
         props: ["dataItem"],
         methods: {
             prepare(dataItem, cfgCommon) {
-                cfg = cfgCommon;
-                cfg.user = cfg.user || Auth.methods.getUser() || {};
+                cfg      = cfgCommon;
+                let user = cfg.common.user || {};
 
                 for (let f of fields) {
-                    if (f.key === accessKey && cfg.user && cfg.user.groups instanceof Array) {
-                        f.values = [...groupsCommon, ...cfg.user.groups];
-                        f.values[0].key = cfg.user.Key;
+                    if (f.key === accessKey && user.groups instanceof Array) {
+                        f.values = [...groupsCommon, ...user.groups];
+                        f.values[0].key = user.Key;
                     }
                 }
 
                 if (!(dataItem instanceof Object)) {
                     dataItem = {};
-                    dataItem['select.' + accessKey] = cfg.user.Key;
+                    dataItem['select.' + accessKey] = user.Key;
                 }
 
-                dataItem['select.' + accessKey] = cfg.user.Key;
+                dataItem['select.' + accessKey] = user.Key;
 
                 if (dataItem.Tags instanceof Array) {
                     dataItem._tags = dataItem.Tags.map(t => t.Label);
@@ -106,6 +106,9 @@
             },
 
             save(){
+
+                let user = cfg.common.user || {};
+
                 if ("_content" in this.dataItem) {
                     this.dataItem.Data = {
                         TypeKey: "string",
@@ -128,7 +131,7 @@
                     method: 'POST',
                     headers: {
                         'content-type': 'application/json;charset=utf-8',
-                        'authorization': cfg.user && cfg.user.Creds.jwt,
+                        'authorization': user.Creds && user.Creds.jwt,
                     },
                     mode: 'cors', // no-cors, cors, *same-origin
                     body: toSave,

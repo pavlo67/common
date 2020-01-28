@@ -29,7 +29,7 @@
                 //     method: 'GET', // *GET, POST, PUT, DELETE, etc.
                 //     headers: {
                 //         'content-type': 'application/json',
-                //         'authorization': cfg.user && cfg.user.Creds.jwt,
+                //         'authorization': cfg.common.user && cfg.common.user.Creds && cfg.common.user.Creds.jwt,
                 //     },
                 //     mode: 'cors', // no-cors, cors, *same-origin
                 //

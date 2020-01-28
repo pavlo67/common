@@ -7,6 +7,10 @@ function init(data) {
         return;
     }
 
+    if ('common' in data) {
+        cfg.common = data.common;
+    }
+
     if ('backend' in data) {
         cfg.authorizeEp = ep(data.backend, "authorize");
         cfg.setCredsEp  = ep(data.backend, "set_creds");
@@ -15,13 +19,7 @@ function init(data) {
 
     if ('eventBus' in data) {
         cfg.eventBus = data.eventBus;
-        cfg.eventBus.$on('user', user => { cfg.user = user; });
     }
-
-    if ('vue' in data) {
-        cfg.vue = data.vue;
-    }
-
 }
 
 export { cfg, init };

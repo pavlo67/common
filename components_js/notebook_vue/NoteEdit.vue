@@ -17,9 +17,9 @@
 
 
 <script>
-    import DataEdit from '../data_vue/DataEdit.vue';
-    import b        from '../basis';
+    // import b     from '../basis';
     import {cfg}    from './init';
+    import DataEdit from '../data_vue/DataEdit.vue';
 
     export default {
         mounted() {
@@ -39,8 +39,8 @@
                 fetch(cfg.readEp + "/" + encodeURIComponent(id), {
                     method: 'GET', // *GET, POST, PUT, DELETE, etc.
                     headers: {
-                        'content-type': 'application/json',
-                        'authorization': cfg.user && cfg.user.Creds.jwt,
+                        'content-type': 'application/json;charset=utf-8',
+                        'authorization': cfg.common.user && cfg.common.user.Creds && cfg.common.user.Creds.jwt,
                     },
                     mode: 'cors', // no-cors, cors, *same-origin
 

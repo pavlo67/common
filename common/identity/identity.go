@@ -2,18 +2,22 @@ package identity
 
 import (
 	"regexp"
-
 	"strings"
 
+	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/libraries/strlib"
 )
 
 type Domain string
 
+func (d Domain) Normalize() Domain {
+	return Domain(strings.TrimSpace(string(d)))
+}
+
 type Item struct {
-	Domain Domain `bson:"domain,omitempty"  json:"domain,omitempty"`
-	Path   string `bson:"path,omitempty"    json:"path,omitempty"`
-	ID     string `bson:"id,omitempty"      json:"id,omitempty"`
+	Domain Domain    `bson:"domain,omitempty"  json:"domain,omitempty"`
+	Path   string    `bson:"path,omitempty"    json:"path,omitempty"`
+	ID     common.ID `bson:"id,omitempty"      json:"id,omitempty"`
 }
 
 const PathDelim = `/`
@@ -53,7 +57,7 @@ func (item *Item) IsValid() bool {
 	}
 	return strlib.ReSpaces.ReplaceAllString(string(item.Domain), "") != "" &&
 		strlib.ReSpaces.ReplaceAllString(item.Path, "") != "" &&
-		strlib.ReSpaces.ReplaceAllString(item.ID, "") != ""
+		strlib.ReSpaces.ReplaceAllString(string(item.ID), "") != ""
 }
 
 func (item *Item) Key() Key {
@@ -63,7 +67,7 @@ func (item *Item) Key() Key {
 
 	domain := strlib.ReSpaces.ReplaceAllString(string(item.Domain), "")
 	path := strlib.ReSpaces.ReplaceAllString(item.Path, "")
-	id := strlib.ReSpaces.ReplaceAllString(item.ID, "")
+	id := strlib.ReSpaces.ReplaceAllString(string(item.ID), "")
 
 	if len(id) > 0 {
 		return Key(domain + PathDelim + path + IDDelim + id)
@@ -99,7 +103,7 @@ func (key Key) Identity() *Item {
 	return &Item{
 		Domain: Domain(domain),
 		Path:   path,
-		ID:     id,
+		ID:     common.ID(id),
 	}
 }
 

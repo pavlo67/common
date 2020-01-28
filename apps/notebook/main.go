@@ -7,6 +7,9 @@ import (
 	"os"
 	"time"
 
+	"github.com/pavlo67/workshop/components/exporter"
+	"github.com/pavlo67/workshop/components/exporter/exporter_data"
+
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/auth"
 	"github.com/pavlo67/workshop/common/auth/auth_http"
@@ -42,7 +45,7 @@ var (
 	BuildCommit = "unknown"
 )
 
-const serviceNameDefault = "notebook"
+const serviceNameDefault = "nb_dev"
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
@@ -78,7 +81,7 @@ func main() {
 	// routes config
 
 	configCommonPath := currentPath + "../../environments/common." + configEnv + ".yaml"
-	cfgCommon, err := config.Get(configCommonPath, serializer.MarshalerYAML)
+	cfgCommon, err := config.Get(configCommonPath, serviceName, serializer.MarshalerYAML)
 	if err != nil {
 		l.Fatal(err)
 	}
@@ -97,8 +100,8 @@ func main() {
 
 	// notebook config
 
-	configworkspacePath := currentPath + "../../environments/" + serviceName + "." + configEnv + ".yaml"
-	cfgworkspace, err := config.Get(configworkspacePath, serializer.MarshalerYAML)
+	cfgServicePath := currentPath + "../../environments/" + serviceName + "." + configEnv + ".yaml"
+	cfgService, err := config.Get(cfgServicePath, serviceName, serializer.MarshalerYAML)
 	if err != nil {
 		l.Fatal(err)
 	}
@@ -139,7 +142,8 @@ func main() {
 		{tagger_pg.Starter(), nil},
 		{data_pg.Starter(), common.Map{"table": storage.CollectionDefault, "interface_key": storage.DataInterfaceKey}},
 		{datatagged.Starter(), common.Map{"data_key": storage.DataInterfaceKey, "interface_key": storage.InterfaceKey}},
-		{storage_server_http.Starter(), common.Map{"data_key": storage.InterfaceKey}},
+		{exporter_data.Starter(), common.Map{"data_key": storage.DataInterfaceKey, "interface_key": exporter.InterfaceKey}},
+		{storage_server_http.Starter(), common.Map{"data_key": storage.InterfaceKey, "exporter_key": exporter.InterfaceKey}},
 
 		// TODO: pass the interface_key of data_pg to front_end
 
@@ -165,7 +169,7 @@ func main() {
 		}},
 	}
 
-	joinerOp, err := starter.Run(starters, cfgCommon, cfgworkspace, os.Args[1:], label)
+	joinerOp, err := starter.Run(starters, cfgCommon, cfgService, os.Args[1:], label)
 	if err != nil {
 		l.Fatal(err)
 	}

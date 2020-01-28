@@ -129,6 +129,8 @@ func (gs *workspaceStarter) Run(joinerOp joiner.Operator) error {
 		"save":   {Path: "/notebook/save", Tags: []string{"notebook"}, HandlerKey: storage.SaveInterfaceKey},
 		"remove": {Path: "/notebook/remove", Tags: []string{"notebook"}, HandlerKey: storage.RemoveInterfaceKey},
 
+		"export": {Path: "/notebook/export", Tags: []string{"notebook"}, HandlerKey: storage.ExportInterfaceKey},
+
 		"recent": {Path: "/notebook/recent", Tags: []string{"notebook"}, HandlerKey: storage.RecentInterfaceKey},
 		"tags":   {Path: "/notebook/tags", Tags: []string{"notebook"}, HandlerKey: storage.ListTagsInterfaceKey},
 		"tagged": {Path: "/notebook/tagged", Tags: []string{"notebook"}, HandlerKey: storage.ListTaggedInterfaceKey},
@@ -157,7 +159,6 @@ func (gs *workspaceStarter) Run(joinerOp joiner.Operator) error {
 		":"+strconv.Itoa(srvPort),
 		srvOp,
 		filelib.CurrentPath()+"api-docs/",
-		"swagger.json",
 		"api-docs",
 		l,
 	)

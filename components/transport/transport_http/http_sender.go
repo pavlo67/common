@@ -92,7 +92,7 @@ func (transpOp *transportHTTP) Send(outPack *packs.Pack) (sentKey identity.Key, 
 		item := identity.Item{
 			Domain: transpOp.domain,
 			Path:   transpOp.path,
-			ID:     strconv.FormatUint(transpOp.id, 10),
+			ID:     common.ID(strconv.FormatUint(transpOp.id, 10)),
 		}
 
 		outPack.Key = item.Key()

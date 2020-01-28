@@ -42,6 +42,26 @@
     ]
    }
   },
+  "/notebook/export": {
+   "get": {
+    "operationId": "export",
+    "parameters": [
+     {
+      "description": "",
+      "in": "query",
+      "name": "after",
+      "required": false,
+      "type": "string"
+     }
+    ],
+    "produces": [
+     "application/json"
+    ],
+    "tags": [
+     "notebook"
+    ]
+   }
+  },
   "/notebook/read/{id}": {
    "get": {
     "operationId": "read",

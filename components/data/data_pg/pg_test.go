@@ -14,7 +14,7 @@ import (
 	"github.com/pavlo67/workshop/components/data"
 )
 
-const serviceName = "notebook"
+const serviceName = "nb_dev"
 
 func TestCRUD(t *testing.T) {
 	env := "test"
@@ -26,7 +26,7 @@ func TestCRUD(t *testing.T) {
 	require.NotNil(t, l)
 
 	configPath := filelib.CurrentPath() + "../../../environments/" + serviceName + "." + env + ".yaml"
-	cfg, err := config.Get(configPath, serializer.MarshalerYAML)
+	cfg, err := config.Get(configPath, serviceName, serializer.MarshalerYAML)
 	require.NoError(t, err)
 	require.NotNil(t, cfg)
 
@@ -39,7 +39,7 @@ func TestCRUD(t *testing.T) {
 	//taggerOp, taggerCleanerOp, err := tagger_sqlite.New(cfgPg, "")
 	//require.NoError(t, err)
 
-	dataOp, cleanerOp, err := New(cfgPg, "storage", "", nil, nil) // taggerOp, taggerCleanerOp
+	dataOp, cleanerOp, err := New(cfgPg, serviceName, "storage", "", nil, nil) // taggerOp, taggerCleanerOp
 	require.NoError(t, err)
 	require.NotNil(t, dataOp)
 	require.NotNil(t, cleanerOp)

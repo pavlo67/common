@@ -8,6 +8,10 @@ function init(data) {
         return;
     }
 
+    if ('common' in data) {
+        cfg.common = data.common;
+    }
+
     if ('backend' in data) {
         // TODO: do it safely!!!
 
@@ -18,22 +22,16 @@ function init(data) {
         cfg.recentEp = ep(data.backend, "recent");
         cfg.tagsEp   = ep(data.backend, "tags");
         cfg.taggedEp = ep(data.backend, "tagged");
+
+        cfg.exportEp = ep(data.backend, "export");
+
     }
 
     if ('eventBus' in data) {
         cfg.eventBus = data.eventBus;
         cfg.eventBus.$on('user', user => {
-
-            console.log(333333333);
-            cfg.eventBus.$on('user', user => {
-                console.log(444444444);
-                cfg.user = user;
-            });
+            // TODO ???
         });
-    }
-
-    if ('vue' in data) {
-        cfg.vue = data.vue;
     }
 
 }

@@ -67,8 +67,8 @@
                 fetch(cfg.readEp + "/" + ev.target.id, {
                     method: 'GET', // *GET, POST, PUT, DELETE, etc.
                     headers: {
-                        'content-type': 'application/json',
-                        'authorization': cfg.user && cfg.user.Creds.jwt,
+                        'content-type': 'application/json;charset=utf-8',
+                        'authorization': cfg.common.user && cfg.common.user.Creds && cfg.common.user.Creds.jwt,
                     },
                     mode: 'cors', // no-cors, cors, *same-origin
 
@@ -76,7 +76,7 @@
                     return response.json();
 
                 }).then(flowItem => {
-                    this.$router.push({ name: 'StorageItemImport',  params: { dataItem: flowItem } })
+                    this.$router.push({name: 'StorageItemImport',  params: {dataItem: flowItem}})
 
                 });
             },
@@ -85,7 +85,8 @@
                 fetch(cfg.listEp, {
                     method: 'GET', // *GET, POST, PUT, DELETE, etc.
                     headers: {
-                        'Content-Type': 'application/json',
+                        'content-type': 'application/json',
+                        'authorization': cfg.common.user && cfg.common.user.Creds && cfg.common.user.Creds.jwt,
                     },
                     mode: 'cors', // no-cors, cors, *same-origin
                     // cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached

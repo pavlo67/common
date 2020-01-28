@@ -40,6 +40,9 @@ var fieldsToListStr = strings.Join(fieldsToList, ", ")
 var _ data.Operator = &dataPg{}
 
 type dataPg struct {
+	domain       identity.Domain
+	interfaceKey joiner.InterfaceKey
+
 	db    *sql.DB
 	table string
 
@@ -47,13 +50,19 @@ type dataPg struct {
 	stmInsert, stmUpdate, stmRead, stmRemove           *sql.Stmt
 
 	taggerOp      tagger.Operator
-	interfaceKey  joiner.InterfaceKey
 	taggerCleaner crud.Cleaner
 }
 
 const onNew = "on dataPg.New(): "
 
-func New(access config.Access, table string, interfaceKey joiner.InterfaceKey, taggerOp tagger.Operator, taggerCleaner crud.Cleaner) (data.Operator, crud.Cleaner, error) {
+func New(access config.Access, domain identity.Domain, table string, interfaceKey joiner.InterfaceKey, taggerOp tagger.Operator, taggerCleaner crud.Cleaner,
+) (data.Operator, crud.Cleaner, error) {
+
+	domain = domain.Normalize()
+	if domain == "" {
+		return nil, nil, errors.New("no service name")
+	}
+
 	db, err := sqllib_pg.Connect(access)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, onNew)
@@ -64,6 +73,8 @@ func New(access config.Access, table string, interfaceKey joiner.InterfaceKey, t
 	}
 
 	dataOp := dataPg{
+		domain: domain,
+
 		db:    db,
 		table: table,
 
@@ -106,6 +117,16 @@ func (dataOp *dataPg) Save(item data.Item, options *crud.SaveOptions) (common.ID
 
 	if options == nil || options.ActorKey == "" {
 		return "", errors.Errorf(onSave + "no user")
+	}
+
+	item.ID = item.ID.Normalize()
+	itemIdent := item.Key.Identity()
+	if itemIdent != nil && itemIdent.Domain == dataOp.domain && itemIdent.Path == string(dataOp.interfaceKey) {
+		if item.ID == "" {
+			return "", errors.Errorf(onSave+"can't insert new data with predefined local .Key (%s --> %#v)", item.Key, itemIdent)
+		} else if item.ID != itemIdent.ID.Normalize() {
+			return "", errors.Errorf(onSave+"can't update data (.ID = %s) with incorrect local .Key: (%s --> %#v)", item.ID, item.Key, itemIdent)
+		}
 	}
 
 	var err error
@@ -243,6 +264,10 @@ func (dataOp *dataPg) Read(id common.ID, options *crud.GetOptions) (*data.Item, 
 		return nil, errors.Wrapf(err, onRead+sqllib.CantScanQueryRow, dataOp.sqlRead, values)
 	}
 
+	if item.Key.Normalize() == "" {
+		item.Key = (&identity.Item{Domain: dataOp.domain, Path: strings.TrimSpace(string(dataOp.interfaceKey)), ID: id}).Key()
+	}
+
 	if len(tags) > 0 {
 		err = json.Unmarshal(tags, &item.Tags)
 		if err != nil {
@@ -322,6 +347,9 @@ func (dataOp *dataPg) Remove(id common.ID, options *crud.RemoveOptions) error {
 const onList = "on dataPg.List()"
 
 func (dataOp *dataPg) List(term *selectors.Term, options *crud.GetOptions) ([]data.Item, error) {
+
+	// TODO!!! use default key's value searching data with empty .Key
+
 	var viewerKey identity.Key
 	if options != nil {
 		viewerKey = options.ActorKey
@@ -369,6 +397,12 @@ func (dataOp *dataPg) List(term *selectors.Term, options *crud.GetOptions) ([]da
 			return items, errors.Wrapf(err, onList+sqllib.CantScanQueryRow, query, values)
 		}
 
+		item.ID = common.ID(strconv.FormatInt(idNum, 10))
+
+		if item.Key.Normalize() == "" {
+			item.Key = (&identity.Item{Domain: dataOp.domain, Path: strings.TrimSpace(string(dataOp.interfaceKey)), ID: item.ID}).Key()
+		}
+
 		if len(tags) > 0 {
 			if err = json.Unmarshal(tags, &item.Tags); err != nil {
 				return items, errors.Wrapf(err, onList+"can't unmarshal .Tags (%s)", tags)
@@ -380,8 +414,6 @@ func (dataOp *dataPg) List(term *selectors.Term, options *crud.GetOptions) ([]da
 				return items, errors.Wrapf(err, onList+"can't unmarshal .Embedded (%s)", embedded)
 			}
 		}
-
-		item.ID = common.ID(strconv.FormatInt(idNum, 10))
 
 		if len(history) > 0 {
 			err = json.Unmarshal(history, &item.History)

@@ -97,6 +97,12 @@ func Compare(t *testing.T, dataOp Operator, readed *Item, expectedItem Item, l l
 	readed.History = nil
 	expectedItem.History = nil
 
+	readedKey := readed.Key
+	readed.Key = ""
+
+	require.NotNil(t, readedKey.Identity())
+	require.Equal(t, expectedItem.ID, readedKey.Identity().ID)
+
 	require.Equal(t, &expectedItem, readed)
 	require.Equal(t, expectedDetails, readedDetails)
 
@@ -167,6 +173,8 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 			require.NoError(t, err)
 			require.NotEmpty(t, idI)
 			id[i] = idI
+
+			toSave[i].ID = idI
 		}
 
 		// test .Read ----------------------------------------------------------------------------------------
@@ -179,8 +187,6 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 
 		readedSaved, err := tc.Read(id[toReadI], &crud.GetOptions{ActorKey: actorKey})
 		require.NoError(t, err)
-
-		toSave[i].ID = id[toReadI]
 
 		Compare(t, tc, readedSaved, toSave[i], l)
 

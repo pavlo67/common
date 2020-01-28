@@ -19,33 +19,33 @@
   const unauthorized = undefined;
   const whoAmI       = 'я???';
 
-  import b     from '../basis';
+  // import b     from '../basis';
   import {cfg} from './init';
 
   // -------------------------------------------------------------------------------------------------------
 
   let menuTitle = whoAmI;
-  let user;
 
   function setUser(user) {
     if (user instanceof Object && user.Creds instanceof Object) {
-      // TODO!!!
-      user.groups = [];
+      user.groups = []; // TODO!!!
 
-      // console.log("CFG.eventBus TO SET USER CREDS: ", 'eventBus' in cfg);
-      if (cfg.eventBus) {
-        console.log("USER TO BE EMITTED: ", user);
-        cfg.eventBus.$emit("user", user);
-      }
       menuTitle = user.Creds.nickname;
+      cfg.common.user = user;
 
-      if (cfg.vue instanceof Object && typeof cfg.vue.$forceUpdate === "function") cfg.vue.$forceUpdate();
-
-      return user;
     } else {
       menuTitle = whoAmI;
-      if (cfg.vue instanceof Object && typeof cfg.vue.$forceUpdate === "function") cfg.vue.$forceUpdate();
-      return unauthorized;
+      cfg.common.user = unauthorized;
+
+    }
+
+    // console.log("CFG.eventBus TO SET USER CREDS: ", 'eventBus' in cfg);
+    if (cfg.eventBus) {
+      console.log("USER TO BE EMITTED: ", cfg.common.user);
+      cfg.eventBus.$emit("user", cfg.common.user);
+    }
+    if (cfg.vue instanceof Object && typeof cfg.vue.$forceUpdate === "function") {
+      cfg.vue.$forceUpdate();
     }
   }
 
@@ -61,18 +61,19 @@
       }
     }
 
-    return setUser(user);
+    setUser(user);
   }
 
   function saveUser(user) {
-    localStorage.setItem('user', JSON.stringify(user));
+    setUser(user);
 
-    return setUser(user);
+    localStorage.setItem('user', JSON.stringify(cfg.common.user));
   }
 
   // -------------------------------------------------------------------------------------------------------
 
   let first = true;
+  let user  = (cfg.common && cfg.common.user) || {};
 
   export default   {
     preface: 'хто тут:',
@@ -80,8 +81,9 @@
     title() {
       // TODO!!! remove the kostyl (move this initiation in common init() or somewhere looks like to)
       if (first) {
-        user = restoreUser();
-        console.log("CREATED!", user);
+        restoreUser();
+        user = cfg.common.user;
+
         first = false;
       }
       return menuTitle;
@@ -96,10 +98,6 @@
       };
     },
     methods: {
-      getUser: function() {
-        return user;
-      },
-
       signIn: function () {
         fetch(cfg.authorizeEp, {
           method: 'POST', // *GET, POST, PUT, DELETE, etc.
@@ -117,10 +115,14 @@
           return response.json();
         }).then(data => {
           if (data instanceof Object) {
-            this.user = saveUser(data.user);
+            saveUser(data.user);
+
           } else {
             console.log("what is the data from /authorize?", data)
+            saveUser(unauthorized);
           }
+
+          this.user = user = cfg.common.user;
         });
       },
 
@@ -140,7 +142,9 @@
       // },
 
       signOut: function () {
-        this.user = saveUser(unauthorized);
+        saveUser(unauthorized);
+        this.user = user = cfg.common.user;
+
       },
     },
   };

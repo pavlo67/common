@@ -7,8 +7,8 @@ function init(data) {
         return;
     }
 
-    if ('router' in data) {
-        cfg.router = data.router;
+    if ('common' in data) {
+        cfg.common = data.common;
     }
 
     if ('backend' in data) {
@@ -19,12 +19,8 @@ function init(data) {
     if ('eventBus' in data) {
         cfg.eventBus = data.eventBus;
         cfg.eventBus.$on('user', user => {
-            cfg.eventBus.$on('user', user => { cfg.user = user; });
+            // TODO ???
         });
-    }
-
-    if ('vue' in data) {
-        cfg.vue = data.vue;
     }
 
 }

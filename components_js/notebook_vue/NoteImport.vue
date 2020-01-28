@@ -36,9 +36,8 @@
                 fetch(cfg.saveEp, {
                     method: 'POST',
                     headers: {
-                        // 'Content-Type': 'application/json;charset=utf-8'
-                        'content-type': 'application/json',
-                        'authorization': cfg.user && cfg.user.Creds.jwt,
+                        'content-type': 'application/json;charset=utf-8',
+                        'authorization': cfg.common.user && cfg.common.user.Creds && cfg.common.user.Creds.jwt,
                     },
                     mode: 'cors', // no-cors, cors, *same-origin
                     body: JSON.stringify(this.itemToImport),

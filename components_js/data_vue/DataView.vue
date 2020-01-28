@@ -47,11 +47,7 @@
     import e  from '../elements';
     import {createdAt} from './data';
 
-    // TODO!!! straighten the kostyl
-    import {cfg} from "../notebook_vue/init";
-
-    // let itemPostfix = "_details";
-    // let showHide = sh.NewShowHide(itemPostfix);
+    let cfg = {};
 
     export default {
         name: 'DataItemView',
@@ -60,12 +56,16 @@
             href: e.href,
             createdAt: createdAt,
 
+            prepare(dataItem, cfgCommon) {
+                cfg = cfgCommon || {common: {}};
+            },
+
             remove() {
                 fetch(cfg.removeEp + "/" + this.dataItem.ID, {
                     method: 'DELETE',
                     headers: {
-                        // 'Content-Type': 'application/json;charset=utf-8',
-                        'authorization': cfg.user && cfg.user.Creds.jwt,
+                        'content-type' : 'application/json;charset=utf-8',
+                        'authorization': cfg.common.user && cfg.common.user.Creds && cfg.common.user.Creds.jwt,
                     },
                     mode: 'cors', // no-cors, cors, *same-origin
 
