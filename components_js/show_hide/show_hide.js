@@ -1,4 +1,4 @@
-export default { NewShowHide }
+export default {NewShowHide}
 
 function NewShowHide(postfix) {
     return new ShowHideDetails(postfix);

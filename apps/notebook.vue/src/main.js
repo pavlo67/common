@@ -15,12 +15,14 @@ let backend = convert(swagger);
 
 // common components -------------------------------------------------------------------------------
 
+import ActionSteps  from '../../../components_js/helpers_vue/ActionSteps';
 import DataItemView from '../../../components_js/data_vue/DataView';
 import DataItemEdit from '../../../components_js/data_vue/DataEdit';
 import DataList     from '../../../components_js/data_vue/DataList';
 import DataListTags from '../../../components_js/data_vue/DataListTags';
 import VueTagsInput from '@johmun/vue-tags-input';
 
+Vue.component(ActionSteps.name,    ActionSteps);
 Vue.component(DataItemView.name,   DataItemView);
 Vue.component(DataItemEdit.name,   DataItemEdit);
 Vue.component(DataList.name,       DataList);

@@ -3,10 +3,12 @@
 
         <table align="right" class="table_right">
             <tr><td>
-                <span class="control">
-                    [<a v-bind:href="exportData()" download="data.json">експортувати</a>]
-                    <!--                    [<span v-on:click="exportData">експортувати</span>]-->
-                </span>
+                <ActionSteps
+                        v-bind:activationText="'експортувати'"
+                        v-bind:activationAction="exportData"
+                        v-bind:preparationText="'дані готуються...'"
+                        v-bind:actionButtonText="'зберегти собі JSON файл'"
+                />
             </td></tr>
         </table>
 
@@ -50,42 +52,41 @@
         props: ['dataList'],
         methods: {
             createdAt: createdAt,
-            object:  b.object,
-            href:    e.href,
+            object: b.object,
+            href: e.href,
 
             prepare(dataItems, cfgCommon) {
                 cfg = cfgCommon;
                 return dataItems;
             },
 
-            exportData() {
-                return "data:text/html,aaa";
+            exportData(cb) {
+                if (typeof cb === "function") {
+                    fetch(cfg.exportEp, {
+                        method: 'GET',
+                        headers: {
+                            'content-type': 'application/json;charset=utf-8',
+                            'authorization': cfg.common.user && cfg.common.user.Creds && cfg.common.user.Creds.jwt,
+                        },
+                        mode: 'cors', // no-cors, cors, *same-origin
+
+                        // cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                        // credentials: 'same-origin', // include, *same-origin, omit
+                        // redirect: 'follow', // manual, *follow, error
+                        // referrer: 'no-referrer', // no-referrer, *client
+                    }).then(response => {
+                        return response.json();
+                    }).then(data => {
+                        console.log('EXPORTED DATA ARE READY TO BE SAVED: ', data);
+                        cb(JSON.stringify(data));
+
+                    });
+                } else {
+                    console.error('THERE IS NO CALLBACK TO RETURN EXPORTED DATA!');
+
+                }
             },
-
-            exportDataAsync() {
-                console.log(555555555555, cfg.exportEp, cfg.common.user && cfg.common.user.Creds && cfg.common.user.Creds.jwt);
-
-                fetch(cfg.exportEp, {
-                    method: 'GET',
-                    headers: {
-                        'content-type': 'application/json;charset=utf-8',
-                        'authorization': cfg.common.user && cfg.common.user.Creds && cfg.common.user.Creds.jwt,
-                    },
-                    mode: 'cors', // no-cors, cors, *same-origin
-
-                    // cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-                    // credentials: 'same-origin', // include, *same-origin, omit
-                    // redirect: 'follow', // manual, *follow, error
-                    // referrer: 'no-referrer', // no-referrer, *client
-                }).then(response => {
-                    return response.json();
-                }).then(data => {
-                    // this.dataItem = DataEdit.methods.prepare(data, cfg);
-                    console.log("TO EXPORT:", data);
-                });
-
-            }
-        },
+        }
     }
 </script>
 
