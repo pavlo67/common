@@ -8,18 +8,18 @@ Vue.config.productionTip = false;
 
 // TODO: use config to find the appropriate swagger file
 
-import swagger   from '../../notebook/notebook_actions/api-docs/swagger';
-import {convert} from '../../../components_js/swagger_convertor';
+import swagger   from '../../api-docs/swagger';
+import {convert} from '../../components_js/swagger_convertor';
 let backend = convert(swagger);
 
 
 // common components -------------------------------------------------------------------------------
 
-import ActionSteps  from '../../../components_js/helpers_vue/ActionSteps';
-import DataItemView from '../../../components_js/data_vue/DataView';
-import DataItemEdit from '../../../components_js/data_vue/DataEdit';
-import DataList     from '../../../components_js/data_vue/DataList';
-import DataListTags from '../../../components_js/data_vue/DataListTags';
+import ActionSteps  from '../../components_js/helpers_vue/ActionSteps';
+import DataItemView from '../../components_js/data_vue/DataView';
+import DataItemEdit from '../../components_js/data_vue/DataEdit';
+import DataList     from '../../components_js/data_vue/DataList';
+import DataListTags from '../../components_js/data_vue/DataListTags';
 import VueTagsInput from '@johmun/vue-tags-input';
 
 Vue.component(ActionSteps.name,    ActionSteps);
@@ -32,8 +32,8 @@ Vue.component("vue-tags-input", VueTagsInput);
 
 // application parts initiated with backend and event bus ------------------------------------------
 
-import auth     from '../../../components_js/auth_vue/routes';
-import notebook from '../../../components_js/notebook_vue/routes';
+import auth     from '../../components_js/auth_vue/routes';
+import notebook from '../../components_js/notebook_vue/routes';
 
 let parts = [
   ...auth,

@@ -7,9 +7,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/pavlo67/workshop/components/exporter"
-	"github.com/pavlo67/workshop/components/exporter/exporter_data"
-
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/auth"
 	"github.com/pavlo67/workshop/common/auth/auth_http"
@@ -17,7 +14,6 @@ import (
 	"github.com/pavlo67/workshop/common/auth/auth_users"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/control"
-	"github.com/pavlo67/workshop/common/libraries/filelib"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/serializer"
 	"github.com/pavlo67/workshop/common/server/server_http/server_http_jschmhr"
@@ -26,6 +22,8 @@ import (
 
 	"github.com/pavlo67/workshop/components/data/data_pg"
 	"github.com/pavlo67/workshop/components/datatagged"
+	"github.com/pavlo67/workshop/components/exporter"
+	"github.com/pavlo67/workshop/components/exporter/exporter_data"
 	"github.com/pavlo67/workshop/components/packs/packs_pg"
 	"github.com/pavlo67/workshop/components/runner_factory/runner_factory_goroutine"
 	"github.com/pavlo67/workshop/components/storage"
@@ -36,7 +34,7 @@ import (
 	"github.com/pavlo67/workshop/components/transport/transport_http"
 	"github.com/pavlo67/workshop/components/transportrouter/transportrouter_stub"
 
-	"github.com/pavlo67/workshop/apps/notebook/notebook_actions"
+	"github.com/pavlo67/workshop/apps/nb/nb_actions"
 )
 
 var (
@@ -45,7 +43,7 @@ var (
 	BuildCommit = "unknown"
 )
 
-const serviceNameDefault = "nb_dev"
+const serviceNameDefault = "nb"
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
@@ -72,15 +70,21 @@ func main() {
 
 	// getting config environments
 
-	currentPath := filelib.CurrentPath()
+	//currentPath := filelib.CurrentPath()
 	configEnv, ok := os.LookupEnv("ENV")
 	if !ok {
 		configEnv = "local"
 	}
 
+	cwd, err := os.Getwd()
+	if err != nil {
+		l.Fatal("can't os.Getwd(): ", err)
+	}
+	l.Info("CWD: ", cwd)
+
 	// routes config
 
-	configCommonPath := currentPath + "../../environments/common." + configEnv + ".yaml"
+	configCommonPath := cwd + "/environments/common." + configEnv + ".yaml"
 	cfgCommon, err := config.Get(configCommonPath, serviceName, serializer.MarshalerYAML)
 	if err != nil {
 		l.Fatal(err)
@@ -100,7 +104,8 @@ func main() {
 
 	// notebook config
 
-	cfgServicePath := currentPath + "../../environments/" + serviceName + "." + configEnv + ".yaml"
+	//cfgServicePath := currentPath + "../../environments/" + serviceName + "." + configEnv + ".yaml"
+	cfgServicePath := cwd + "/environments/" + serviceName + "." + configEnv + ".yaml"
 	cfgService, err := config.Get(cfgServicePath, serviceName, serializer.MarshalerYAML)
 	if err != nil {
 		l.Fatal(err)
@@ -156,7 +161,9 @@ func main() {
 		// {flowcleaner_task.Starter(), common.Map{"cleaner_key": flow.CleanerInterfaceKey, "interface_key": flow.CleanerTaskInterfaceKey, "limit": 300000}},
 
 		// actions starter (connecting specific actions to the corresponding action managers)
-		{notebook_actions.Starter(), common.Map{
+		{nb_actions.Starter(), common.Map{
+			"base_dir": cwd + "/apps/nb/",
+
 			"authorize_handler_key": auth.AuthorizeHandlerKey,
 			"set_creds_handler_key": auth.SetCredsHandlerKey,
 			"get_creds_handler_key": auth.GetCredsHandlerKey,
@@ -175,7 +182,7 @@ func main() {
 	}
 	defer joinerOp.CloseAll()
 
-	notebook_actions.WG.Wait()
+	nb_actions.WG.Wait()
 
 }
 

@@ -5,8 +5,8 @@ After=network.target
 [Service]
 User=pavlo
 LimitNOFILE=1048576
-WorkingDirectory=/home/pavlo/0/go/src/github.com/pavlo67/workshop
-ExecStart=/home/pavlo/0/go/src/github.com/pavlo67/workshop/bin/notebook --service=notebook
+WorkingDirectory=/home/pavlo/0/services
+ExecStart=/home/pavlo/0/services/apps/nb/nb
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=on-failure
 KillMode=control-group

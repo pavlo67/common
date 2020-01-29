@@ -1,4 +1,4 @@
-package notebook_actions
+package nb_actions
 
 import (
 	"fmt"
@@ -14,7 +14,6 @@ import (
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/joiner"
-	"github.com/pavlo67/workshop/common/libraries/filelib"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/scheduler"
 	"github.com/pavlo67/workshop/common/server/server_http"
@@ -34,6 +33,8 @@ var l logger.Operator
 var _ starter.Operator = &workspaceStarter{}
 
 type workspaceStarter struct {
+	baseDir string
+
 	authHandlerKey      joiner.InterfaceKey
 	setCredsHandlerKey  joiner.InterfaceKey
 	getCredsHandlerKey  joiner.InterfaceKey
@@ -57,6 +58,7 @@ func (gs *workspaceStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.O
 		return nil, fmt.Errorf("no logger for %s:-(", gs.Name())
 	}
 
+	gs.baseDir = options.StringDefault("base_dir", "")
 	gs.authHandlerKey = joiner.InterfaceKey(options.StringDefault("auth_handler_key", string(auth.AuthorizeHandlerKey)))
 	gs.setCredsHandlerKey = joiner.InterfaceKey(options.StringDefault("set_creds_handler_key", string(auth.SetCredsHandlerKey)))
 	gs.getCredsHandlerKey = joiner.InterfaceKey(options.StringDefault("get_creds_handler_key", string(auth.SetCredsHandlerKey)))
@@ -158,7 +160,7 @@ func (gs *workspaceStarter) Run(joinerOp joiner.Operator) error {
 		cfg,
 		":"+strconv.Itoa(srvPort),
 		srvOp,
-		filelib.CurrentPath()+"api-docs/",
+		gs.baseDir+"api-docs/",
 		"api-docs",
 		l,
 	)

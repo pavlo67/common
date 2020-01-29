@@ -36,6 +36,7 @@
         },
         methods: {
             getDataItem(id) {
+
                 fetch(cfg.readEp + "/" + encodeURIComponent(id), {
                     method: 'GET', // *GET, POST, PUT, DELETE, etc.
                     headers: {
@@ -51,6 +52,8 @@
                 }).then(response => {
                     return response.json();
                 }).then(data => {
+                    console.log(222222222, cfg.readEp + "/" + encodeURIComponent(id), " ", data)
+
                     this.dataItem = DataView.methods.prepare(data, cfg);
                     console.log("TO SHOW:", this.dataItem);
                 });

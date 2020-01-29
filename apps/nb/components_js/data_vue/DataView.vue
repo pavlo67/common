@@ -58,6 +58,8 @@
 
             prepare(dataItem, cfgCommon) {
                 cfg = cfgCommon || {common: {}};
+
+                return dataItem;
             },
 
             remove() {

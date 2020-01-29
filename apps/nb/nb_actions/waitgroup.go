@@ -1,4 +1,4 @@
-package notebook_actions
+package nb_actions
 
 import "sync"
 
