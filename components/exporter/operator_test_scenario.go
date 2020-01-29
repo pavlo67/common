@@ -37,7 +37,7 @@ func TestCases(exporterOp Operator, dataOp data.Operator, cleanerOp crud.Cleaner
 					Tags:    []tagger.Tag{{Label: "werwe"}},
 					Data: crud.Data{
 						TypeKey: crud.StringTypeKey,
-						Content: []byte("wqer 3wrt5we ewrt"),
+						Content: "wqer 3wrt5we ewrt",
 					},
 				},
 				{
@@ -48,7 +48,7 @@ func TestCases(exporterOp Operator, dataOp data.Operator, cleanerOp crud.Cleaner
 					Tags:    []tagger.Tag{{Label: "werwe1"}},
 					Data: crud.Data{
 						TypeKey: crud.StringTypeKey,
-						Content: []byte("wqer 3wrt5we ewrt1"),
+						Content: "wqer 3wrt5we ewrt1",
 					},
 				},
 			},
@@ -108,7 +108,7 @@ func exportDataItems(t *testing.T, tc TestCase, after string, expectedItems []da
 	require.Equal(t, data.ItemsTypeKey, exportedData.TypeKey)
 
 	var items []data.Item
-	err = json.Unmarshal(exportedData.Content, &items)
+	err = json.Unmarshal([]byte(exportedData.Content), &items)
 	require.NoError(t, err)
 
 	require.Equal(t, len(expectedItems), len(items))
@@ -148,7 +148,7 @@ func exportDataItemsByParts(t *testing.T, tc TestCase, expectedItems []data.Item
 	require.Equal(t, data.ItemsTypeKey, exportedData.TypeKey)
 
 	var items []data.Item
-	err = json.Unmarshal(exportedData.Content, &items)
+	err = json.Unmarshal([]byte(exportedData.Content), &items)
 	require.NoError(t, err)
 
 	require.Equal(t, 1, len(items))
@@ -164,7 +164,7 @@ func exportDataItemsByParts(t *testing.T, tc TestCase, expectedItems []data.Item
 	require.Equal(t, data.ItemsTypeKey, exportedData.TypeKey)
 
 	var itemsRest []data.Item
-	err = json.Unmarshal(exportedData.Content, &itemsRest)
+	err = json.Unmarshal([]byte(exportedData.Content), &itemsRest)
 	require.NoError(t, err)
 
 	require.Equal(t, len(expectedItems)-1, len(itemsRest))

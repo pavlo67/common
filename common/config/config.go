@@ -10,11 +10,25 @@ import (
 // -----------------------------------------------------------------------------
 
 type Config struct {
-	data      map[string]interface{}
-	marshaler serializer.Marshaler
+	serviceName string
+	data        map[string]interface{}
+	marshaler   serializer.Marshaler
 }
 
-func (c Config) Value(key string, target interface{}) error {
+var errNoConfig = errors.New("no config")
+
+func (c *Config) ServiceName() string {
+	if c == nil {
+		return ""
+	}
+
+	return c.serviceName
+}
+
+func (c *Config) Value(key string, target interface{}) error {
+	if c == nil {
+		return errNoConfig
+	}
 	if value, ok := c.data[key]; ok {
 		valueRaw, err := c.marshaler.Marshal(value)
 		if err != nil {
@@ -29,7 +43,7 @@ func (c Config) Value(key string, target interface{}) error {
 
 // -----------------------------------------------------------------------------
 
-func Get(cfgFile string, marshaler serializer.Marshaler) (*Config, error) {
+func Get(cfgFile, serviceName string, marshaler serializer.Marshaler) (*Config, error) {
 
 	if len(cfgFile) < 1 {
 		return nil, errors.New("empty config path")
@@ -40,7 +54,7 @@ func Get(cfgFile string, marshaler serializer.Marshaler) (*Config, error) {
 		return nil, errors.Wrapf(err, "can't read config file from '%s'", cfgFile)
 	}
 
-	cfg := Config{marshaler: marshaler}
+	cfg := Config{serviceName: serviceName, marshaler: marshaler}
 	err = marshaler.Unmarshal(data, &cfg.data)
 	if err != nil {
 		return nil, errors.Wrapf(err, "can't .Unmarshal('%s') from config '%s'", data, cfgFile)

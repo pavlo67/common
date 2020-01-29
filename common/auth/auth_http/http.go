@@ -5,19 +5,17 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/pavlo67/workshop/common/identity"
+	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common/auth"
 	"github.com/pavlo67/workshop/common/server"
-	"github.com/pkg/errors"
-
 	"github.com/pavlo67/workshop/common/server/server_http"
 )
 
 const onNew = "on auth_http.New(): "
 
-func New() (authHandler, initAuthSessionHandler *server_http.Endpoint, err error) {
-	return &authEndpoint, &setCredsEndpoint, nil
+func New() (authorizeHandler, setCredsHandler, getCredsHandler *server_http.Endpoint, err error) {
+	return &authorizeEndpoint, &setCredsEndpoint, &getCredsEndpoint, nil
 }
 
 var setCredsEndpoint = server_http.Endpoint{
@@ -25,43 +23,50 @@ var setCredsEndpoint = server_http.Endpoint{
 	WorkerHTTP: func(user *auth.User, _ server_http.Params, req *http.Request) (server.Response, error) {
 		return server.ResponseRESTError(http.StatusBadRequest, errors.Errorf("the .SetCreds() method is temporary unavailable"))
 
-		if authOpToInit == nil {
-			return server.ResponseRESTOk(map[string]interface{}{})
-		}
-
-		credsJSON, err := ioutil.ReadAll(req.Body)
-		if err != nil {
-			return server.ResponseRESTError(http.StatusBadRequest, errors.Wrap(err, "can't read body"))
-		}
-
-		l.Infof("%s", credsJSON)
-
-		var toInit auth.Creds
-		err = json.Unmarshal(credsJSON, &toInit)
-		if err != nil {
-			return server.ResponseRESTError(http.StatusBadRequest, errors.Wrapf(err, "can't unmarshal body: %s", credsJSON))
-		}
-
-		toInit[auth.CredsIP] = req.RemoteAddr
-
-		var userKey identity.Key
-		if user != nil {
-			userKey = user.Key
-		}
-
-		creds, err := authOpToInit.SetCreds(userKey, toInit)
-		if err != nil {
-			return server.ResponseRESTError(http.StatusForbidden, err)
-		}
-		if creds == nil {
-			return server.ResponseRESTError(http.StatusForbidden, errors.New("no creds to init auth session"))
-		}
-
-		return server.ResponseRESTOk(map[string]interface{}{"creds": *creds})
+		//if authOpToInit == nil {
+		//	return server.ResponseRESTOk(map[string]interface{}{})
+		//}
+		//
+		//credsJSON, err := ioutil.ReadAll(req.Body)
+		//if err != nil {
+		//	return server.ResponseRESTError(http.StatusBadRequest, errors.Wrap(err, "can't read body"))
+		//}
+		//
+		//l.Infof("%s", credsJSON)
+		//
+		//var toInit auth.Creds
+		//err = json.Unmarshal(credsJSON, &toInit)
+		//if err != nil {
+		//	return server.ResponseRESTError(http.StatusBadRequest, errors.Wrapf(err, "can't unmarshal body: %s", credsJSON))
+		//}
+		//
+		//toInit[auth.CredsIP] = req.RemoteAddr
+		//
+		//var userKey identity.Key
+		//if user != nil {
+		//	userKey = user.Key
+		//}
+		//
+		//creds, err := authOpToInit.SetCreds(userKey, toInit)
+		//if err != nil {
+		//	return server.ResponseRESTError(http.StatusForbidden, err)
+		//}
+		//if creds == nil {
+		//	return server.ResponseRESTError(http.StatusForbidden, errors.New("no creds to init auth session"))
+		//}
+		//
+		//return server.ResponseRESTOk(map[string]interface{}{"creds": *creds})
 	},
 }
 
-var authEndpoint = server_http.Endpoint{
+var getCredsEndpoint = server_http.Endpoint{
+	Method: "POST",
+	WorkerHTTP: func(user *auth.User, _ server_http.Params, req *http.Request) (server.Response, error) {
+		return server.ResponseRESTOk(map[string]interface{}{"user": user})
+	},
+}
+
+var authorizeEndpoint = server_http.Endpoint{
 	Method: "POST",
 	WorkerHTTP: func(_ *auth.User, _ server_http.Params, req *http.Request) (server.Response, error) {
 		credsJSON, err := ioutil.ReadAll(req.Body)
@@ -87,7 +92,14 @@ var authEndpoint = server_http.Endpoint{
 			return server.ResponseRESTError(http.StatusForbidden, errors.New("no user authorized"))
 		}
 
-		toAddModified, err := authOpToSetToken.SetCreds(user.Key, auth.Creds{auth.CredsToSet: string(auth.CredsJWT)})
+		toAddModified, err := authOpToSetToken.SetCreds(
+			user.Key,
+			auth.Creds{
+				auth.CredsNickname: user.Creds[auth.CredsNickname],
+				auth.CredsEmail:    user.Creds[auth.CredsEmail],
+				auth.CredsToSet:    string(auth.CredsJWT),
+			},
+		)
 		// TODO!!! add custom toAddModified
 
 		if err != nil {

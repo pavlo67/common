@@ -1,6 +1,10 @@
 package data_pg
 
 import (
+	"strings"
+
+	"github.com/pavlo67/workshop/common/identity"
+
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
@@ -22,6 +26,7 @@ var _ starter.Operator = &dataPgStarter{}
 
 type dataPgStarter struct {
 	config config.Access
+	domain identity.Domain
 	table  string
 
 	interfaceKey joiner.InterfaceKey
@@ -43,6 +48,10 @@ func (dp *dataPgStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Oper
 		return nil, err
 	}
 
+	dp.domain = identity.Domain(strings.TrimSpace(cfg.ServiceName()))
+	if dp.domain == "" {
+		return nil, errors.New("no service name")
+	}
 	dp.config = cfgPG
 	dp.table, _ = options.String("table")
 	dp.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(data.InterfaceKey)))
@@ -82,7 +91,7 @@ func (dp *dataPgStarter) Run(joinerOp joiner.Operator) error {
 		}
 	}
 
-	dataOp, datacleanerOp, err := New(dp.config, dp.table, dp.interfaceKey, taggerOp, taggercleanerOp)
+	dataOp, datacleanerOp, err := New(dp.config, dp.domain, dp.table, dp.interfaceKey, taggerOp, taggercleanerOp)
 	if err != nil {
 		return errors.Wrap(err, "can't init *dataPG as data.Operator")
 	}

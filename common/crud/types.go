@@ -17,7 +17,7 @@ const HRefTypeKey TypeKey = "href"
 
 type Data struct {
 	TypeKey TypeKey `bson:",omitempty" json:",omitempty"`
-	Content []byte  `bson:",omitempty" json:",omitempty"`
+	Content string  `bson:",omitempty" json:",omitempty"`
 }
 
 type Counter map[string]uint64

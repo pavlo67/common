@@ -75,7 +75,7 @@ func OperatorTestScenario(t *testing.T, joinerOp joiner.Operator, transpOp Opera
 		To:   "gatherer",
 		Data: crud.Data{
 			TypeKey: typeKeyTest,
-			Content: paramsToTestBytes,
+			Content: string(paramsToTestBytes),
 		},
 	}
 
@@ -123,7 +123,7 @@ func (r actorReceiverEcho) Run() (info common.Map, posterior []joiner.Link, err 
 	info = common.Map{
 		"response": crud.Data{
 			TypeKey: typeKeyTestResponse,
-			Content: responseContent,
+			Content: string(responseContent),
 		},
 	}
 	return info, nil, nil

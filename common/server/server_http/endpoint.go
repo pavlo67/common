@@ -10,7 +10,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-func InitEndpointsWithSwaggerV2(cfg Config, host string, srvOp Operator, swaggerPath, swaggerFile, swaggerSubpath string, l logger.Operator) error {
+const swaggerFile = "swagger.json"
+
+func InitEndpointsWithSwaggerV2(cfg Config, host string, srvOp Operator, swaggerPath, swaggerSubpath string, l logger.Operator) error {
 	swaggerFilePath := swaggerPath + swaggerFile
 
 	swagger, err := cfg.SwaggerV2(host)
@@ -28,7 +30,7 @@ func InitEndpointsWithSwaggerV2(cfg Config, host string, srvOp Operator, swagger
 	if err != nil {
 		return err
 	}
-	return srvOp.HandleFiles("swagger", cfg.Prefix+"/"+swaggerSubpath+"/*filepath", StaticPath{LocalPath: swaggerPath, MIMEType: nil})
+	return srvOp.HandleFiles("swagger", cfg.Prefix+"/"+swaggerSubpath+"/*filepath", StaticPath{LocalPath: swaggerPath})
 }
 
 func InitEndpoints(cfg Config, srvOp Operator, l logger.Operator) error {

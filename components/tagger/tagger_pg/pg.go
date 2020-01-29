@@ -309,7 +309,7 @@ func (taggerOp *tagsPg) CountTags(key *joiner.InterfaceKey, _ *crud.GetOptions) 
 	}
 	defer rows.Close()
 
-	var counter []tagger.TagCount
+	counter := []tagger.TagCount{} // to return [] to front-end instead null
 
 	for rows.Next() {
 		var count tagger.TagCount

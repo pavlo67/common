@@ -17,18 +17,19 @@ func UserWithRequest(r *http.Request, authOps []auth.Operator) (*auth.User, erro
 	var user *auth.User
 
 	// TOKEN CHECK
-	token := r.Header.Get("Token")
-	if token != "" {
-		user, errs = auth.GetUser(auth.Creds{auth.CredsToken: token}, authOps, errs)
-		if user != nil {
-			return user, errs.Err()
-		}
-		// previous errs is added with auth.GetUser()
-	}
+	//token := r.Header.Get("Token")
+	//if token != "" {
+	//	user, errs = auth.GetUser(auth.Creds{auth.CredsToken: token}, authOps, errs)
+	//	if user != nil {
+	//		return user, errs.Err()
+	//	}
+	//	// previous errs is added with auth.GetUser()
+	//}
+	//
 
-	tokenJWT := r.Header.Get("JWT")
+	tokenJWT := r.Header.Get("authorization")
 	if tokenJWT != "" {
-		user, errs = auth.GetUser(auth.Creds{auth.CredsJWT: token}, authOps, errs)
+		user, errs = auth.GetUser(auth.Creds{auth.CredsJWT: tokenJWT}, authOps, errs)
 		if user != nil {
 			return user, errs.Err()
 		}

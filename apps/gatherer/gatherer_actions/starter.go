@@ -133,7 +133,6 @@ func (gs *gathererStarter) Run(joinerOp joiner.Operator) error {
 		":"+strconv.Itoa(srvPort),
 		srvOp,
 		filelib.CurrentPath()+"api-docs/",
-		"swagger.json",
 		"api-docs",
 		l,
 	)

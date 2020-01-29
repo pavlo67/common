@@ -55,7 +55,7 @@ func OperatorTestScenarioPassword(t *testing.T, testCases []OperatorTestCase, l 
 
 		require.Equal(t, tc.ToSet[CredsNickname], (*userCreds)[CredsNickname])
 
-		// .Authorize() -----------------------------------------
+		// .Authorize() ok -----------------------------------------
 
 		userCreds = &Creds{
 			CredsIP:       testIP,
@@ -69,6 +69,19 @@ func OperatorTestScenarioPassword(t *testing.T, testCases []OperatorTestCase, l 
 		require.NotNil(t, user)
 		require.Equal(t, tc.ToSet[CredsNickname], user.Creds[CredsNickname])
 		require.NotEmpty(t, user.Key)
+
+		// .Authorize() err ----------------------------------------
+
+		userCreds = &Creds{
+			CredsIP:       testIP,
+			CredsLogin:    tc.ToSet[CredsNickname],
+			CredsPassword: tc.ToSet[CredsPassword] + "1",
+		}
+
+		user, err = tc.Authorize(*userCreds)
+
+		require.Error(t, err)
+		require.Nil(t, user)
 	}
 }
 

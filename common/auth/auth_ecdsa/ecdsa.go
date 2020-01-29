@@ -123,9 +123,11 @@ func (is *authECDSA) SetCreds(userKey identity.Key, creds auth.Creds) (*auth.Cre
 	return credsNew, nil
 }
 
+const onAuthorize = "on authECDSA.Authorize(): "
+
 func (is *authECDSA) Authorize(toAuth auth.Creds) (*auth.User, error) {
 	if toAuth[auth.CredsPublicKeyEncoding] != Proto {
-		return nil, auth.ErrEncryptionType
+		return nil, errors.Wrap(auth.ErrEncryptionType, onAuthorize)
 	}
 
 	publKeyBase58 := toAuth[auth.CredsPublicKeyBase58]

@@ -5,6 +5,8 @@ environments/*.yml
 .env
 .env.local
 .env.*.local
+*.key
+
 
 # Dependencies
 node_modules

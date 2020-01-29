@@ -39,6 +39,8 @@ type Operator interface {
 	List(*selectors.Term, *crud.GetOptions) ([]Item, error)
 	Count(*selectors.Term, *crud.GetOptions) (uint64, error)
 
+	CheckPassword(password, passHash string) bool
+
 	Allow() error
 	SetVerification(auth.CredsType, string, bool) error
 	Verify(auth.CredsType, string, common.Errors) error

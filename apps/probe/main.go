@@ -1,11 +1,19 @@
 package main
 
-import "log"
+import (
+	"encoding/json"
+	"log"
+
+	"github.com/pavlo67/workshop/components/data"
+)
 
 func main() {
 	// try here anything
-	var err error
-	a := err.Error()
+	aa := `{"Title":"йцук","URL":"цукцук","Tags":[{"Label":"ууу"}],"Summary":"цукцук","Data":{"TypeKey":"string","Content":" sdrfwsdfg"}}`
+	var d data.Item
 
-	log.Print(a)
+	err := json.Unmarshal([]byte(aa), &d)
+
+	log.Print(err)
+	log.Printf("%#v", d)
 }

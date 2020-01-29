@@ -16,20 +16,22 @@ const CleanerInterfaceKey joiner.InterfaceKey = "datacleaner"
 const ItemsTypeKey crud.TypeKey = "data_items"
 
 const CollectionDefault = "data"
-const KeyFieldName = "data_key"
 
 type Item struct {
 	ID  common.ID    `bson:"_id,omitempty" json:",omitempty"`
 	Key identity.Key `bson:",omitempty"    json:",omitempty"`
 
-	URL      string       `bson:",omitempty"    json:",omitempty"`
-	Title    string       `bson:",omitempty"    json:",omitempty"`
-	Summary  string       `bson:",omitempty"    json:",omitempty"`
-	Embedded []Item       `bson:",omitempty"    json:",omitempty"`
-	Tags     []tagger.Tag `bson:",omitempty"    json:",omitempty"`
-	Data     crud.Data    `bson:",omitempty"    json:",omitempty"`
+	URL      string       `bson:",omitempty" json:",omitempty"`
+	Title    string       `bson:",omitempty" json:",omitempty"`
+	Summary  string       `bson:",omitempty" json:",omitempty"`
+	Embedded []Item       `bson:",omitempty" json:",omitempty"`
+	Tags     []tagger.Tag `bson:",omitempty" json:",omitempty"`
+	Data     crud.Data    `bson:",omitempty" json:",omitempty"`
 
-	History crud.History `bson:",omitempty"    json:",omitempty"`
+	OwnerKey  identity.Key `bson:",omitempty" json:",omitempty"`
+	ViewerKey identity.Key `bson:",omitempty" json:",omitempty"`
+
+	History crud.History `bson:",omitempty" json:",omitempty"`
 }
 
 type Operator interface {

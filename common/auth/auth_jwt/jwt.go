@@ -1,9 +1,7 @@
 package auth_jwt
 
 import (
-	"crypto/rand"
 	"crypto/rsa"
-	"log"
 	"time"
 
 	"github.com/pkg/errors"
@@ -12,6 +10,7 @@ import (
 
 	"github.com/pavlo67/workshop/common/auth"
 	"github.com/pavlo67/workshop/common/identity"
+	"github.com/pavlo67/workshop/common/libraries/encrlib"
 )
 
 const Proto = "jwt"
@@ -28,25 +27,22 @@ type authJWT struct {
 
 // TODO!!! add expiration time
 
-func New() (auth.Operator, error) {
-	privKey, err := rsa.GenerateKey(rand.Reader, 2048)
+const onNew = "on auth_jwt.New()"
+
+func New(pathToStore string) (auth.Operator, error) {
+	privKey, err := encrlib.NewRSAPrivateKey(pathToStore)
 	if err != nil {
-		log.Fatalf("generating random key: %s", err)
+		return nil, errors.Wrap(err, onNew)
 	}
 
-	key := jose.SigningKey{Algorithm: jose.RS256, Key: privKey}
-
-	var signerOpts = jose.SignerOptions{}
-	signerOpts.WithType("JWT")
-	rsaSigner, err := jose.NewSigner(key, &signerOpts)
+	signerOpts := (&jose.SignerOptions{}).WithType("JWT") // signerOpts.WithType("JWT")
+	signingKey := jose.SigningKey{Algorithm: jose.RS256, Key: privKey}
+	rsaSigner, err := jose.NewSigner(signingKey, signerOpts)
 	if err != nil {
-		log.Fatalf("failed to create signer:%+v", err)
+		return nil, errors.Wrapf(err, onNew+": can't jose.NewSigner(%#v, %#v)", signingKey, signerOpts)
 	}
 
-	return &authJWT{
-		privKey: *privKey,
-		builder: jwt.Signed(rsaSigner),
-	}, nil
+	return &authJWT{privKey: *privKey, builder: jwt.Signed(rsaSigner)}, nil
 }
 
 type jwtCreds struct {
@@ -67,8 +63,12 @@ func (authOp *authJWT) SetCreds(userKey identity.Key, creds auth.Creds) (*auth.C
 			// Expiry:   jwt.NewNumericDate(time.Date(2017, 1, 1, 0, 8, 0, 0, time.UTC)),
 		},
 
-		Creds: creds,
+		Creds: auth.Creds{
+			auth.CredsNickname: creds[auth.CredsNickname],
+			// TODO: add some other creds...
+		},
 	}
+
 	// add claims to the Builder
 	builder := authOp.builder.Claims(jc)
 
@@ -76,6 +76,8 @@ func (authOp *authJWT) SetCreds(userKey identity.Key, creds auth.Creds) (*auth.C
 	if err != nil {
 		return nil, errors.Wrap(err, "on authJWT.SetCreds() with builder.CompactSerialize()")
 	}
+
+	delete(creds, auth.CredsToSet)
 
 	creds[auth.CredsJWT] = rawJWT
 

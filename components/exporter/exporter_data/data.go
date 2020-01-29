@@ -78,7 +78,7 @@ func (expOp *exporterData) Export(selector *selectors.Term, afterIDStr string, o
 		return nil, errors.Wrapf(err, onExport+"can't .Marshal(%#v)", items)
 	}
 
-	return &crud.Data{TypeKey: data.ItemsTypeKey, Content: content}, nil
+	return &crud.Data{TypeKey: data.ItemsTypeKey, Content: string(content)}, nil
 }
 
 const onImport = "on data.Import(): "
@@ -89,7 +89,7 @@ func (expOp *exporterData) Import(crudData crud.Data, options *crud.SaveOptions)
 	}
 
 	var items []data.Item
-	err := json.Unmarshal(crudData.Content, &items)
+	err := json.Unmarshal([]byte(crudData.Content), &items)
 	if err != nil {
 		return "", errors.Wrapf(err, onImport+"can't .Unmarshal(%s) into []crudData.Item", crudData.Content)
 	}

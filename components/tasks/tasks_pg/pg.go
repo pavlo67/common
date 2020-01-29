@@ -100,13 +100,13 @@ const onSave = "on tasksPostgres.Save(): "
 
 func (tasksOp *tasksPostgres) Save(item tasks.Item, options *crud.SaveOptions) (common.ID, error) {
 
-	var actor *identity.Key
+	var actorKey identity.Key
 	if options != nil {
-		actor = options.ActorKey
+		actorKey = options.ActorKey
 	}
 
 	item.History = append(item.History, crud.Action{
-		ActorKey: actor,
+		ActorKey: actorKey,
 		Key:      crud.SavedAction,
 		DoneAt:   time.Now(),
 	})

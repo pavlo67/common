@@ -3,14 +3,16 @@ package encrlib
 import (
 	"testing"
 
+	"github.com/pavlo67/workshop/common"
+
 	"fmt"
 
 	"github.com/stretchr/testify/require"
 )
 
 var passwordMinLength = 6
-var testPassword = RandomString(passwordMinLength)
-var testPasswordBad = RandomString(passwordMinLength - 1)
+var testPassword = common.RandomString(passwordMinLength)
+var testPasswordBad = common.RandomString(passwordMinLength - 1)
 
 const testSalt = "$5$1234"
 const testCryptype = SHA256

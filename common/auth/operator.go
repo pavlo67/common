@@ -1,19 +1,29 @@
 package auth
 
 import (
-	"github.com/pavlo67/workshop/common/identity"
-	"github.com/pkg/errors"
+	"errors"
+	"fmt"
 
 	"github.com/pavlo67/workshop/common"
+	"github.com/pavlo67/workshop/common/identity"
 	"github.com/pavlo67/workshop/common/joiner"
 )
 
-const AuthorizeHandlerKey joiner.InterfaceKey = "auth_handler"
-const SetCredsHandlerKey joiner.InterfaceKey = "auth_set_creds_handler"
+const AuthorizeHandlerKey joiner.InterfaceKey = "authorize_handler"
+const SetCredsHandlerKey joiner.InterfaceKey = "set_creds_handler"
+const GetCredsHandlerKey joiner.InterfaceKey = "get_creds_handler"
 
 type User struct {
 	Key   identity.Key `bson:",omitempty" json:",omitempty"`
 	Creds Creds        `bson:",omitempty" json:",omitempty"`
+}
+
+func (user *User) KeyYet() identity.Key {
+	if user == nil {
+		return ""
+	}
+
+	return user.Key
 }
 
 type Operator interface {
@@ -38,7 +48,7 @@ func GetUser(creds Creds, ops []Operator, errs common.Errors) (*User, common.Err
 	for _, op := range ops {
 		user, err := op.Authorize(creds)
 		if err != nil {
-			errs = append(errs, errors.Wrapf(err, onGetUser+`: on identOp.Authorize(%#v)`, creds))
+			errs = append(errs, fmt.Errorf(onGetUser+`: on identOp.Authorize(%#v): %s`, creds, err))
 		}
 
 		if user != nil {

@@ -3,7 +3,6 @@ package auth_users
 import (
 	"regexp"
 
-	"github.com/GehirnInc/crypt"
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common/auth"
@@ -17,9 +16,6 @@ var _ auth.Operator = &authPassUsers{}
 type authPassUsers struct {
 	usersOp             users.Operator
 	maxUsersToAuthCheck int
-
-	crypter crypt.Crypter
-	salt    string
 }
 
 const onNew = "on authPassUsers.New"
@@ -35,13 +31,10 @@ func New(usersOp users.Operator, maxUsersToAuthCheck int, salt string) (auth.Ope
 	return &authPassUsers{
 		usersOp:             usersOp,
 		maxUsersToAuthCheck: maxUsersToAuthCheck,
-
-		crypter: crypt.SHA256.New(),
-		salt:    salt,
 	}, nil
 }
 
-const onSetCreds = "on authPassUsers.SetCreds: "
+const onSetCreds = "on authUsers.SetCreds(): "
 
 func (authOp *authPassUsers) SetCreds(userKey identity.Key, toSet auth.Creds) (*auth.Creds, error) {
 	var err error
@@ -94,7 +87,7 @@ func (authOp *authPassUsers) SetCreds(userKey identity.Key, toSet auth.Creds) (*
 	return &items[0].Creds, nil
 }
 
-const onAuthorize = "on authPassUsers.Authorize"
+const onAuthorize = "on authUsers.Authorize(): "
 
 var reEmail = regexp.MustCompile("@")
 
@@ -112,7 +105,8 @@ func (authOp *authPassUsers) Authorize(toAuth auth.Creds) (*auth.User, error) {
 	} else if nickname, ok := toAuth[auth.CredsNickname]; ok {
 		selector = selectors.Binary(selectors.Eq, users.NicknameFieldName, selectors.Value{nickname})
 	} else {
-		return nil, errors.New(onAuthorize + "no login to auth")
+		return nil, nil
+		// return nil, errors.New(onAuthorize + "no login to auth")
 	}
 
 	//selector = logic.AND(
@@ -137,10 +131,15 @@ func (authOp *authPassUsers) Authorize(toAuth auth.Creds) (*auth.User, error) {
 			continue
 		}
 
-		user := items[i]
+		item := items[i]
 
-		if authOp.crypter.Verify(user.Creds[auth.CredsPasshash], []byte(toAuth[auth.CredsPassword])) == nil {
-			return &user.User, nil
+		if authOp.usersOp.CheckPassword(toAuth[auth.CredsPassword], item.Creds[auth.CredsPasshash]) {
+			user := item.User
+			user.Creds = auth.Creds{
+				auth.CredsNickname: item.Creds[auth.CredsNickname],
+			}
+
+			return &user, nil
 		}
 	}
 

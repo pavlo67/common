@@ -3,6 +3,8 @@ package storage_server_http
 import (
 	"fmt"
 
+	"github.com/pavlo67/workshop/components/exporter"
+
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
@@ -16,11 +18,14 @@ import (
 )
 
 var dataTaggedOp datatagged.Operator
+var exporterOp exporter.Operator
 var l logger.Operator
 
 var _ starter.Operator = &dataTaggedServerHTTPStarter{}
 
 type dataTaggedServerHTTPStarter struct {
+	dataKey     joiner.InterfaceKey
+	exporterKey joiner.InterfaceKey
 	// interfaceKey joiner.DataInterfaceKey
 }
 
@@ -28,38 +33,40 @@ func Starter() starter.Operator {
 	return &dataTaggedServerHTTPStarter{}
 }
 
-func (ss *dataTaggedServerHTTPStarter) Name() string {
+func (dtsh *dataTaggedServerHTTPStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *dataTaggedServerHTTPStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
-	var errs common.Errors
-
+func (dtsh *dataTaggedServerHTTPStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	l = lCommon
 	if l == nil {
-		errs = append(errs, fmt.Errorf("no logger for %s:-(", ss.Name()))
+		return nil, fmt.Errorf("no logger for %s:-(", dtsh.Name())
 	}
 
-	// interfaceKey = joiner.DataInterfaceKey(options.StringDefault("interface_key", string(server_http.DataInterfaceKey)))
+	dtsh.dataKey = joiner.InterfaceKey(options.StringDefault("data_key", string(storage.InterfaceKey)))
+	dtsh.exporterKey = joiner.InterfaceKey(options.StringDefault("exporter_key", string(exporter.InterfaceKey)))
 
-	return nil, errs.Err()
+	return nil, nil
 }
 
-func (ss *dataTaggedServerHTTPStarter) Setup() error {
+func (dtsh *dataTaggedServerHTTPStarter) Setup() error {
 	return nil
 }
 
-func (ss *dataTaggedServerHTTPStarter) Run(joinerOp joiner.Operator) error {
-
-	var ok bool
-	dataTaggedOp, ok = joinerOp.Interface(storage.InterfaceKey).(datatagged.Operator)
-	if !ok {
-		return errors.Errorf("no data_tagged.ActorKey with key %s", storage.InterfaceKey)
+func (dtsh *dataTaggedServerHTTPStarter) Run(joinerOp joiner.Operator) error {
+	dataTaggedOp, _ = joinerOp.Interface(dtsh.dataKey).(datatagged.Operator)
+	if dataTaggedOp == nil {
+		return errors.Errorf("no data_tagged.Operator with key %s", dtsh.dataKey)
 	}
 
-	err := joinerOp.Join(&listEndpoint, storage.ListInterfaceKey)
+	exporterOp, _ = joinerOp.Interface(dtsh.exporterKey).(exporter.Operator)
+	if exporterOp == nil {
+		return errors.Errorf("no exporter.Operator with key %s", dtsh.exporterKey)
+	}
+
+	err := joinerOp.Join(&recentEndpoint, storage.RecentInterfaceKey)
 	if err != nil {
-		return errors.Wrapf(err, "can't join listEndpoint as server_http.Endpoint with key '%s'", storage.ListInterfaceKey)
+		return errors.Wrapf(err, "can't join recentEndpoint as server_http.Endpoint with key '%s'", storage.RecentInterfaceKey)
 	}
 
 	err = joinerOp.Join(&readEndpoint, storage.ReadInterfaceKey)
@@ -77,14 +84,19 @@ func (ss *dataTaggedServerHTTPStarter) Run(joinerOp joiner.Operator) error {
 		return errors.Wrapf(err, "can't join removeEndpoint as server_http.Endpoint with key '%s'", storage.RemoveInterfaceKey)
 	}
 
-	err = joinerOp.Join(&countTagsEndpoint, storage.CountTagsInterfaceKey)
+	err = joinerOp.Join(&listTagsEndpoint, storage.ListTagsInterfaceKey)
 	if err != nil {
-		return errors.Wrapf(err, "can't join countTagsEndpoint as server_http.Endpoint with key '%s'", storage.CountTagsInterfaceKey)
+		return errors.Wrapf(err, "can't join listTagsEndpoint as server_http.Endpoint with key '%s'", storage.ListTagsInterfaceKey)
 	}
 
-	err = joinerOp.Join(&listWithTagEndpoint, storage.ListWithTagInterfaceKey)
+	err = joinerOp.Join(&listTaggedEndpoint, storage.ListTaggedInterfaceKey)
 	if err != nil {
-		return errors.Wrapf(err, "can't join listWithTagEndpoint as server_http.Endpoint with key '%s'", storage.ListWithTagInterfaceKey)
+		return errors.Wrapf(err, "can't join listTaggedEndpoint as server_http.Endpoint with key '%s'", storage.ListTaggedInterfaceKey)
+	}
+
+	err = joinerOp.Join(&exportEndpoint, storage.ExportInterfaceKey)
+	if err != nil {
+		return errors.Wrapf(err, "can't join exportEndpoint as server_http.Endpoint with key '%s'", storage.ExportInterfaceKey)
 	}
 
 	return nil

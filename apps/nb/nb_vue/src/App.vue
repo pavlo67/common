@@ -1,0 +1,148 @@
+<template>
+  <div id="app">
+    <div id="nav">
+      <li v-for="item in menu" class="menu_item">
+        {{ item.preface }} <router-link v-bind:key="item.path" :to="item.path">
+          {{ typeof item.title === "function" ? item.title() : item.title }}<br>
+        </router-link>
+      </li>
+    </div>
+
+    <div id="message"/>
+
+    <div id="view">
+      <router-view/>
+    </div>
+  </div>
+</template>
+
+<style lang="scss">
+  #app {
+    font-family: 'Avenir', Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-align: center;
+    color: #2c3e50;
+  }
+
+  #nav {
+    padding: 10px;
+    width: 300px;
+    font-size: small;
+    float: left;
+    min-height: 100vh;
+    text-align: left;
+    background-color: #f2dede;
+  }
+
+  #nav a {
+    color: #4414ff;
+  }
+
+  .menu_item {
+    min-height: 25px;
+  }
+
+  .table_right {
+    font-size: x-small;
+    border-style: solid;
+    border-color: black;
+    border-width: 1px;
+    margin: 3px;
+  }
+
+  .title {
+    font-size: large;
+    min-height: 50px;
+  }
+
+  .time {
+    color: brown;
+  }
+
+  .control {
+    color: blue;
+  }
+
+  .small {
+    font-size: small;
+  }
+
+  .smaller {
+    font-size: x-small;
+  }
+
+  .smallest {
+    font-size: xx-small;
+  }
+
+  a {
+    text-decoration: none;
+    color: #820cff;
+    /*
+    &.transportrouter-link-exact-active {
+     color: #42b983;
+    }
+    */
+  }
+
+  #message {
+    margin: 0px 0px 10px 330px;
+    padding: 10px;
+    text-align: center;
+    font-size: small;
+    border-color: green;
+    border-width: 1px;
+    border-style: solid;
+    position: absolute;
+    visibility: hidden;
+  }
+
+  #view {
+    margin-left: 320px;
+    padding: 5px 10px 10px 10px;
+    text-align: left;
+    font-size: small;
+  }
+
+</style>
+
+
+<script>
+  import Vue from 'vue';
+
+  let eventBus = new Vue();
+
+  function show(id, html, color) {
+    let el = document.getElementById(id);
+    if (el) {
+      el.innerHTML = html;
+      el.style.position = "relative";
+      el.style.visibility = "visible";
+      el.style["border-color"] = color || "green";
+    }
+  }
+
+  function hide(id) {
+    let el = document.getElementById(id);
+    if (el) {
+      el.style.visibility = "hidden";
+      el.style.position = "absolute";
+    }
+  }
+
+  export default {
+    eventBus,
+    mounted() {
+      eventBus.$on('message', message => {
+        show("message", message);
+        setTimeout(() => { hide("message"); }, 3000);
+      });
+      eventBus.$on('error', message => {
+        show("message", message, "red");
+        setTimeout(() => { hide("message"); }, 3000);
+      });
+    },
+
+  };
+</script>

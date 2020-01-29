@@ -52,7 +52,6 @@ func ECDSAVerify(data string, publKey, signature []byte) bool {
 }
 
 func ECDSASerialize(privKey ecdsa.PrivateKey) ([]byte, error) {
-
 	privKey.Curve = nil
 
 	return json.Marshal(privKey)

@@ -29,29 +29,34 @@ var authOpToSetToken auth.Operator
 // var authOpToRegister auth.Operator
 
 type authHTTPStarter struct {
-	interfaceKey       joiner.InterfaceKey
-	authHandlerKey     joiner.InterfaceKey
-	setCredsHandlerKey joiner.InterfaceKey
+	interfaceKey        joiner.InterfaceKey
+	authorizeHandlerKey joiner.InterfaceKey
+	setCredsHandlerKey  joiner.InterfaceKey
+	getCredsHandlerKey  joiner.InterfaceKey
 }
 
-func (th *authHTTPStarter) Name() string {
+func (ah *authHTTPStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (th *authHTTPStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
+func (ah *authHTTPStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
+	if lCommon == nil {
+		return nil, errors.New("no logger")
+	}
 	l = lCommon
-	th.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
-	th.authHandlerKey = joiner.InterfaceKey(options.StringDefault("auth_handler_key", string(auth.AuthorizeHandlerKey)))
-	th.setCredsHandlerKey = joiner.InterfaceKey(options.StringDefault("auth_init_handler_key", string(auth.SetCredsHandlerKey)))
+	ah.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
+	ah.authorizeHandlerKey = joiner.InterfaceKey(options.StringDefault("authorize_handler_key", string(auth.AuthorizeHandlerKey)))
+	ah.setCredsHandlerKey = joiner.InterfaceKey(options.StringDefault("set_creds_handler_key", string(auth.SetCredsHandlerKey)))
+	ah.getCredsHandlerKey = joiner.InterfaceKey(options.StringDefault("get_creds_handler_key", string(auth.GetCredsHandlerKey)))
 
 	return nil, nil
 }
 
-func (th *authHTTPStarter) Setup() error {
+func (ah *authHTTPStarter) Setup() error {
 	return nil
 }
 
-func (th *authHTTPStarter) Run(joinerOp joiner.Operator) error {
+func (ah *authHTTPStarter) Run(joinerOp joiner.Operator) error {
 	authOpNil := auth.Operator(nil)
 
 	authComps := joinerOp.InterfacesAll(&authOpNil)
@@ -74,19 +79,24 @@ func (th *authHTTPStarter) Run(joinerOp joiner.Operator) error {
 		return errors.New("no auth_jwt.ActorKey")
 	}
 
-	authEndpoint, authInitEndpoint, err := New()
+	authorizeEndpoint, setCredsEndpoint, getCredsEndpoint, err := New()
 	if err != nil {
-		return errors.Wrap(err, "can'th init auth.ActorKey")
+		return errors.Wrap(err, "can'ah init auth.ActorKey")
 	}
 
-	err = joinerOp.Join(authEndpoint, th.authHandlerKey)
+	err = joinerOp.Join(authorizeEndpoint, ah.authorizeHandlerKey)
 	if err != nil {
-		return errors.Wrapf(err, "can't join authEndpoint as server_http.Endpoint with key '%s'", th.authHandlerKey)
+		return errors.Wrapf(err, "can't join authorizeEndpoint as server_http.Endpoint with key '%s'", ah.authorizeHandlerKey)
 	}
 
-	err = joinerOp.Join(authInitEndpoint, th.setCredsHandlerKey)
+	err = joinerOp.Join(setCredsEndpoint, ah.setCredsHandlerKey)
 	if err != nil {
-		return errors.Wrapf(err, "can't join authInitSessionEndpoint as server_http.Endpoint with key '%s'", th.setCredsHandlerKey)
+		return errors.Wrapf(err, "can't join setCredsEndpoint as server_http.Endpoint with key '%s'", ah.setCredsHandlerKey)
+	}
+
+	err = joinerOp.Join(getCredsEndpoint, ah.getCredsHandlerKey)
+	if err != nil {
+		return errors.Wrapf(err, "can't join getCredsEndpoint as server_http.Endpoint with key '%s'", ah.getCredsHandlerKey)
 	}
 
 	return nil

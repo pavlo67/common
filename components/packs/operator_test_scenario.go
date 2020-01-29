@@ -36,7 +36,7 @@ func TestCases(PacksOp Operator, cleanerOp crud.Cleaner) []OperatorTestCase {
 				Options: common.Map{"1": float64(2)},
 				Data: crud.Data{
 					TypeKey: "no_type",
-					Content: []byte(`{"6": ";klj"}`),
+					Content: `{"6": ";klj"}`,
 				},
 				History: crud.History{},
 			},
