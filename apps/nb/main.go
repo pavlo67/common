@@ -34,7 +34,7 @@ import (
 	"github.com/pavlo67/workshop/components/transport/transport_http"
 	"github.com/pavlo67/workshop/components/transportrouter/transportrouter_stub"
 
-	"github.com/pavlo67/workshop/apps/nb/nb_actions"
+	"github.com/pavlo67/workshop/apps/nb/nb_api"
 )
 
 var (
@@ -161,7 +161,7 @@ func main() {
 		// {flowcleaner_task.Starter(), common.Map{"cleaner_key": flow.CleanerInterfaceKey, "interface_key": flow.CleanerTaskInterfaceKey, "limit": 300000}},
 
 		// actions starter (connecting specific actions to the corresponding action managers)
-		{nb_actions.Starter(), common.Map{
+		{nb_api.Starter(), common.Map{
 			"base_dir": cwd + "/apps/nb/",
 
 			"authorize_handler_key": auth.AuthorizeHandlerKey,
@@ -182,7 +182,7 @@ func main() {
 	}
 	defer joinerOp.CloseAll()
 
-	nb_actions.WG.Wait()
+	nb_api.WG.Wait()
 
 }
 

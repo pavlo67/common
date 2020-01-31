@@ -1,4 +1,4 @@
-package nb_actions
+package nb_api
 
 import (
 	"fmt"

@@ -12,7 +12,13 @@
                 </div>
 
                 <div v-else-if="field.type === 'textarea'">
-                    <textarea v-model="dataItem[field.key]" v-bind:placeholder="' ' + (field.placeholder || field.title)" class="edit_field" v-bind:rows="field.lines || 2"/>
+                    <textarea  v-model="dataItem[field.key]" v-bind:rows="field.lines || 2" v-bind:placeholder="' ' + (field.placeholder || field.title)" class="edit_field" />
+                </div>
+
+                <div v-else-if="field.type === 'editor'">
+                    <vue-editor id="aaa" v-model="dataItem[field.key]" v-bind:rows="field.lines || 2" v-bind:placeholder="' ' + (field.placeholder || field.title)" />
+                    <!-- class="edit_field" -->
+                    <!-- <froala :tag="'textarea'" v-model="dataItem[field.key]" v-bind:rows="field.lines || 2" :config="config"></froala> -->
                 </div>
 
                 <div v-else-if="field.type === 'select'">
@@ -42,7 +48,17 @@
     </div>
 </template>
 
+
+
 <script>
+
+    // http://www.vue-tags-input.com/#/
+    // https://www.froala.com/wysiwyg-editor/docs/framework-plugins/vue
+
+    // import VueFroala from 'vue-froala-wysiwyg';
+
+    import {VueEditor} from "vue2-editor";
+
     import b    from '../basis';
     import Auth from '../auth_vue/Auth.vue';
 
@@ -59,17 +75,26 @@
         {key: "URL",      title: "URL",},
         {key: "Summary",  title: "короткий зміст, анонс", type: "textarea", lines: 3},
         {key: "_tags",    title: "теґи",                  type: "tags"},
-        {key: "_content", title: "сам запис"            , type: "textarea", lines: 30},
+        {key: "_content", title: "сам запис"            , type: "editor",   lines: 30},
     ]);
 
     let cfg = {};
 
     export default {
         name: 'DataEdit',
+        components: {VueEditor},
         data: () => {
             return {
                 tag: '',
                 fields,
+                config: {
+                    events: {
+                        'froalaEditor.initialized': () => {
+                            console.log('FROALA initialized')
+                        }
+                    }
+                },
+
             };
         },
         props: ["dataItem"],
@@ -93,7 +118,7 @@
                 dataItem['select.' + accessKey] = user.Key;
 
                 if (dataItem.Tags instanceof Array) {
-                    dataItem._tags = dataItem.Tags.map(t => t.Label);
+                    dataItem._tags = dataItem.Tags.map(t => ({text: t.Label}));
                     delete dataItem.Tags;
                 }
 
@@ -197,29 +222,3 @@
     /*}*/
 
 </style>
-
-
-<!--<template>-->
-<!--    <div>-->
-<!--        <vue-tags-input-->
-<!--                v-model="tag"-->
-<!--                :tags="tags"-->
-<!--                @tags-changed="newTags => tags = newTags"-->
-<!--        />-->
-<!--    </div>-->
-<!--</template>-->
-<!--<script>-->
-<!--    import VueTagsInput from '@johmun/vue-tags-input';-->
-
-<!--    export default {-->
-<!--        components: {-->
-<!--            VueTagsInput,-->
-<!--        },-->
-<!--        data() {-->
-<!--            return {-->
-<!--                tag: '',-->
-<!--                tags: [],-->
-<!--            };-->
-<!--        },-->
-<!--    };-->
-<!--</script>-->
