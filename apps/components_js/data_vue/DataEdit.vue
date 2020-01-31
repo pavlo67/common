@@ -12,11 +12,29 @@
                 </div>
 
                 <div v-else-if="field.type === 'textarea'">
-                    <textarea  v-model="dataItem[field.key]" v-bind:rows="field.lines || 2" v-bind:placeholder="' ' + (field.placeholder || field.title)" class="edit_field" />
+                    <textarea v-model="dataItem[field.key]" v-bind:rows="field.lines || 2" v-bind:placeholder="' ' + (field.placeholder || field.title)" class="edit_field" />
                 </div>
 
                 <div v-else-if="field.type === 'editor'">
-                    <vue-editor id="aaa" v-model="dataItem[field.key]" v-bind:rows="field.lines || 2" v-bind:placeholder="' ' + (field.placeholder || field.title)" />
+                    <editor
+                        api-key="no-api-key"
+                        v-model="dataItem[field.key]"
+                        :init="{
+                            height: 500,
+                            menubar: false,
+                            plugins: [
+                                'advlist autolink lists link image charmap print preview anchor',
+                                'searchreplace visualblocks code fullscreen',
+                                'insertdatetime media table paste code help wordcount'
+                            ],
+                            toolbar:
+                                'undo redo | formatselect | bold italic backcolor | \
+                                alignleft aligncenter alignright alignjustify | \
+                                bullist numlist outdent indent | removeformat | table | help'
+                        }"
+                    ></editor>
+
+                    <!-- <vue-editor id="aaa" v-model="dataItem[field.key]" v-bind:rows="field.lines || 2" v-bind:placeholder="' ' + (field.placeholder || field.title)" />-->
                     <!-- class="edit_field" -->
                     <!-- <froala :tag="'textarea'" v-model="dataItem[field.key]" v-bind:rows="field.lines || 2" :config="config"></froala> -->
                 </div>
@@ -56,8 +74,8 @@
     // https://www.froala.com/wysiwyg-editor/docs/framework-plugins/vue
 
     // import VueFroala from 'vue-froala-wysiwyg';
-
-    import {VueEditor} from "vue2-editor";
+    // import {VueEditor} from "vue2-editor";
+    import Editor from '@tinymce/tinymce-vue'
 
     import b    from '../basis';
     import Auth from '../auth_vue/Auth.vue';
@@ -82,7 +100,7 @@
 
     export default {
         name: 'DataEdit',
-        components: {VueEditor},
+        components: {editor: Editor},
         data: () => {
             return {
                 tag: '',

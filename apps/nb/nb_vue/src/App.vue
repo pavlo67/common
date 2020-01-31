@@ -48,7 +48,7 @@
     border-style: solid;
     border-color: black;
     border-width: 1px;
-    margin: 3px;
+    margin: 0 0 3px 3px;
   }
 
   .title {

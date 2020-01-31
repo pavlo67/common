@@ -36,6 +36,7 @@
 
         <span v-if="dataItem.Data instanceof Object">
             <p v-html="dataItem.Data.Content"></p>
+            <!-- {{ dataItem.Data.Content }}-->
 
         </span>
 
