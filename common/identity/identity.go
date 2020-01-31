@@ -124,3 +124,8 @@ func (key Key) Full(domain string) Key {
 func IsEqual(identity *Item, is Key, domain string) bool {
 	return identity != nil && is == identity.Key()
 }
+
+type Name struct {
+	Key
+	Name string
+}
