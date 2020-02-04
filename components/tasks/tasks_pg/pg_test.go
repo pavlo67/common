@@ -25,8 +25,8 @@ func TestCRUD(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, l)
 
-	configPath := filelib.CurrentPath() + "../../../environments/" + serviceName + "." + env + ".yaml"
-	cfg, err := config.Get(configPath, serializer.MarshalerYAML)
+	configPath := filelib.CurrentPath() + "../../../apps/_environments/" + serviceName + "." + env + ".yaml"
+	cfg, err := config.Get(configPath, serviceName, serializer.MarshalerYAML)
 	require.NoError(t, err)
 	require.NotNil(t, cfg)
 

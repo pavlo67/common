@@ -25,7 +25,7 @@ func CountTags(user *auth.User, _ server_http.Params, req *http.Request) (server
 		interfaceKeyPtr = &interfaceKey
 	}
 
-	counter, err := dataTaggedOp.CountTags(interfaceKeyPtr, &crud.GetOptions{ActorKey: user.KeyYet()})
+	counter, err := dataTaggedOp.IndexTags(interfaceKeyPtr, &crud.GetOptions{ActorKey: user.KeyYet()})
 	if err != nil {
 		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on GET storage/...CountTags (%#v): %s", req.URL.Query(), err))
 	}

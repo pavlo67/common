@@ -119,6 +119,8 @@ func (dataOp *dataPg) Save(item data.Item, options *crud.SaveOptions) (common.ID
 		return "", errors.Errorf(onSave + "no user")
 	}
 
+	optionsToGet := &crud.GetOptions{ActorKey: options.ActorKey}
+
 	item.ID = item.ID.Normalize()
 	itemIdent := item.Key.Identity()
 	if itemIdent != nil && itemIdent.Domain == dataOp.domain && itemIdent.Path == string(dataOp.interfaceKey) {
@@ -177,7 +179,7 @@ func (dataOp *dataPg) Save(item data.Item, options *crud.SaveOptions) (common.ID
 		id = common.ID(strconv.FormatUint(lastInsertId, 10))
 
 		if dataOp.taggerOp != nil && len(item.Tags) > 0 {
-			err = dataOp.taggerOp.AddTags(joiner.Link{dataOp.interfaceKey, id}, item.Tags, nil)
+			err = dataOp.taggerOp.AddTags(joiner.Link{dataOp.interfaceKey, id}, item.Tags, options)
 			if err != nil {
 				return "", errors.Wrapf(err, onSave+": can't .AddTags(%#v)", item.Tags)
 			}
@@ -186,7 +188,7 @@ func (dataOp *dataPg) Save(item data.Item, options *crud.SaveOptions) (common.ID
 	} else {
 		id = item.ID
 
-		itemOld, err := dataOp.Read(id, &crud.GetOptions{ActorKey: options.ActorKey})
+		itemOld, err := dataOp.Read(id, optionsToGet)
 		if err != nil {
 			return "", errors.Wrapf(err, onSave+"can't read old item with id = %s", id)
 		}
@@ -215,9 +217,18 @@ func (dataOp *dataPg) Save(item data.Item, options *crud.SaveOptions) (common.ID
 		}
 
 		if dataOp.taggerOp != nil {
-			err = dataOp.taggerOp.ReplaceTags(joiner.Link{dataOp.interfaceKey, item.ID}, item.Tags, nil)
+			// TODO: use one common transaction
+
+			linkToTagged := joiner.Link{dataOp.interfaceKey, item.ID}
+
+			err = dataOp.taggerOp.RemoveTagsAll(linkToTagged, options)
 			if err != nil {
-				return "", errors.Wrapf(err, onSave+": can't .ReplaceTags(%#v)", item.Tags)
+				return "", errors.Wrapf(err, onSave+": can't .RemoveTagsAll(%#v, %#v)", linkToTagged, options)
+			}
+
+			err = dataOp.taggerOp.AddTags(linkToTagged, item.Tags, options)
+			if err != nil {
+				return "", errors.Wrapf(err, onSave+": can't .AddTags(%#v, %#v, %#v)", linkToTagged, item.Tags, options)
 			}
 		}
 
@@ -310,6 +321,10 @@ func (dataOp *dataPg) Read(id common.ID, options *crud.GetOptions) (*data.Item, 
 const onRemove = "on dataPg.Remove()"
 
 func (dataOp *dataPg) Remove(id common.ID, options *crud.RemoveOptions) error {
+	if options == nil || options.ActorKey == "" {
+		return errors.Errorf(onRemove + "no user")
+	}
+
 	if len(id) < 1 {
 		return errors.New(onRemove + "empty Key")
 	}
@@ -319,15 +334,10 @@ func (dataOp *dataPg) Remove(id common.ID, options *crud.RemoveOptions) error {
 		return errors.Errorf(onRemove+"wrong Key (%s)", id)
 	}
 
-	var ownerKey identity.Key
-	if options != nil {
-		ownerKey = options.ActorKey
-	}
-
 	// TODO: check owner_key for groups
 	// TODO: deny the action if owner_key is empty
 
-	values := []interface{}{idNum, ownerKey}
+	values := []interface{}{idNum, options.ActorKey}
 
 	_, err = dataOp.stmRemove.Exec(values...)
 	if err != nil {
@@ -335,7 +345,7 @@ func (dataOp *dataPg) Remove(id common.ID, options *crud.RemoveOptions) error {
 	}
 
 	if dataOp.taggerOp != nil {
-		err = dataOp.taggerOp.ReplaceTags(joiner.Link{dataOp.interfaceKey, id}, nil, nil)
+		err = dataOp.taggerOp.RemoveTagsAll(joiner.Link{dataOp.interfaceKey, id}, &crud.SaveOptions{ActorKey: options.ActorKey})
 		if err != nil {
 			return errors.Wrapf(err, onRemove+": can't .ReplaceTags(%#v)", nil)
 		}

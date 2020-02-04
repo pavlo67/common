@@ -44,15 +44,17 @@ var (
 )
 
 const serviceNameDefault = "nb"
+const appsSubpathDefault = "apps/"
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
 	var versionOnly, copyFlow bool
-	var serviceName string
+	var serviceName, appsSubpath string
 	flag.BoolVar(&versionOnly, "version_only", false, "show build vars only")
 	flag.BoolVar(&copyFlow, "copy_flow", false, "copy flow data immediately")
 	flag.StringVar(&serviceName, "service", serviceNameDefault, "service name")
+	flag.StringVar(&appsSubpath, "apps_subpath", appsSubpathDefault, "subpath to /apps directory")
 	flag.Parse()
 
 	log.Printf("builded: %s, tag: %s, commit: %s\n", BuildDate, BuildTag, BuildCommit)
@@ -80,11 +82,12 @@ func main() {
 	if err != nil {
 		l.Fatal("can't os.Getwd(): ", err)
 	}
+	cwd += "/"
 	l.Info("CWD: ", cwd)
 
 	// routes config
 
-	configCommonPath := cwd + "/environments/common." + configEnv + ".yaml"
+	configCommonPath := cwd + appsSubpath + "_environments/common." + configEnv + ".yaml"
 	cfgCommon, err := config.Get(configCommonPath, serviceName, serializer.MarshalerYAML)
 	if err != nil {
 		l.Fatal(err)
@@ -104,8 +107,7 @@ func main() {
 
 	// notebook config
 
-	//cfgServicePath := currentPath + "../../environments/" + serviceName + "." + configEnv + ".yaml"
-	cfgServicePath := cwd + "/environments/" + serviceName + "." + configEnv + ".yaml"
+	cfgServicePath := cwd + appsSubpath + "_environments/" + serviceName + "." + configEnv + ".yaml"
 	cfgService, err := config.Get(cfgServicePath, serviceName, serializer.MarshalerYAML)
 	if err != nil {
 		l.Fatal(err)
@@ -162,7 +164,7 @@ func main() {
 
 		// actions starter (connecting specific actions to the corresponding action managers)
 		{nb_api.Starter(), common.Map{
-			"base_dir": cwd + "/apps/nb/",
+			// "base_dir": cwd + appsSubpath + "nb/",
 
 			"authorize_handler_key": auth.AuthorizeHandlerKey,
 			"set_creds_handler_key": auth.SetCredsHandlerKey,

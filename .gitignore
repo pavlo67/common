@@ -1,7 +1,16 @@
 # Environments
+apps/environments/*.json5
+apps/environments/*.yaml
+apps/environments/*.yml
+apps/_environments/*.json5
+apps/_environments/*.yaml
+apps/_environments/*.yml
 environments/*.json5
 environments/*.yaml
 environments/*.yml
+_environments/*.json5
+_environments/*.yaml
+_environments/*.yml
 .env
 .env.local
 .env.*.local

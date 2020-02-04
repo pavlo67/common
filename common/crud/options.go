@@ -1,10 +1,18 @@
 package crud
 
-import "github.com/pavlo67/workshop/common/identity"
+import (
+	"database/sql"
+
+	"github.com/pavlo67/workshop/common/identity"
+)
 
 type SaveOptions struct {
 	ActorKey identity.Key
-	// TODO??? check if .Key exists and if it should be existing (insert vs. replace)
+
+	// TODO!!! use some general (non-SQL-specific) interface
+	Tx *sql.Tx
+
+	// TODO??? check if item.Key exists and if it should be existing (insert vs. replace)
 }
 
 type GetOptions struct {

@@ -84,9 +84,8 @@ func QueryTagsTestCases(taggerOp Operator) []TestCase {
 				},
 				{
 					TagsToChange: TagsToChange{
-						Action: "replace",
+						Action: "remove",
 						ToTag:  joiner.Link{InterfaceKey: InterfaceKey, ID: id1},
-						Tags:   nil,
 					},
 					TagsToCheck: []TagToCheck{
 						{Tag: Tag{"1", nil}, Tagged: Index{}},
@@ -120,10 +119,10 @@ func OperatorTestScenario(t *testing.T, testCases []TestCase, cleanerOp crud.Cle
 			switch step.Action {
 			case "add":
 				err = tc.Operator.AddTags(step.ToTag, step.Tags, nil)
-			//case "remove":
-			//	err = tc.ActorKey.RemoveTags(step.Key, step.Key, step.Tags, nil)
-			case "replace":
-				err = tc.Operator.ReplaceTags(step.ToTag, step.Tags, nil)
+			case "remove":
+				err = tc.Operator.RemoveTagsAll(step.ToTag, nil)
+			//case "replace":
+			//	err = tc.Operator.ReplaceTags(step.ToTag, step.Tags, nil)
 			case "tags":
 				var tags []Tag
 				tags, err = tc.Operator.ListTags(step.ToTag, nil)

@@ -8,8 +8,8 @@ Vue.config.productionTip = false;
 
 // TODO: use config to find the appropriate swagger file
 
-import swagger   from '../../api-docs/swagger';
-import {convert} from '../../../components_js/swagger_convertor';
+import swagger   from '../../nb_api/api-docs/swagger';
+import {convert} from '../../../_components_js/swagger_convertor';
 let backend = convert(swagger);
 
 
@@ -27,26 +27,26 @@ Vue.component("vue-tags-input", VueTagsInput);
 
 // common components -------------------------------------------------------------------------------
 
-import ActionSteps  from '../../../components_js/helpers_vue/ActionSteps';
+import ActionSteps  from '../../../_components_js/helpers_vue/ActionSteps';
 Vue.component(ActionSteps.name,    ActionSteps);
 
-import DataItemView from '../../../components_js/data_vue/DataView';
+import DataItemView from '../../../_components_js/data_vue/DataView';
 Vue.component(DataItemView.name,   DataItemView);
 
-import DataItemEdit from '../../../components_js/data_vue/DataEdit';
+import DataItemEdit from '../../../_components_js/data_vue/DataEdit';
 Vue.component(DataItemEdit.name,   DataItemEdit);
 
-import DataList     from '../../../components_js/data_vue/DataList';
+import DataList     from '../../../_components_js/data_vue/DataList';
 Vue.component(DataList.name,       DataList);
 
-import DataListTags from '../../../components_js/data_vue/DataListTags';
+import DataListTags from '../../../_components_js/data_vue/DataListTags';
 Vue.component(DataListTags.name,   DataListTags);
 
 
 // application parts initiated with backend and event bus ------------------------------------------
 
-import auth     from '../../../components_js/auth_vue/routes';
-import notebook from '../../../components_js/notebook_vue/routes';
+import auth     from '../../../_components_js/auth_vue/routes';
+import notebook from '../../../_components_js/notebook_vue/routes';
 
 let parts = [
   ...auth,

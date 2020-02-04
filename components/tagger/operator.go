@@ -31,10 +31,11 @@ type Index map[joiner.InterfaceKey][]Tagged
 
 type Operator interface {
 	AddTags(joiner.Link, []Tag, *crud.SaveOptions) error
-	ReplaceTags(joiner.Link, []Tag, *crud.SaveOptions) error // or remove in particlar
-	ListTags(joiner.Link, *crud.GetOptions) ([]Tag, error)   // i.e. parent sections if joiner.HandlerKey == "tagger"
+	RemoveTag(joiner.Link, Tag, *crud.SaveOptions) error
+	RemoveTagsAll(joiner.Link, *crud.SaveOptions) error
+	ListTags(joiner.Link, *crud.GetOptions) ([]Tag, error) // returns "parent sections" if joiner.HandlerKey == "tagger"
 
-	CountTags(*joiner.InterfaceKey, *crud.GetOptions) ([]TagCount, error)
+	IndexTags(*joiner.InterfaceKey, *crud.GetOptions) ([]TagCount, error)
 	IndexTagged(*joiner.InterfaceKey, string, *crud.GetOptions) (Index, error)
 }
 
