@@ -46,7 +46,7 @@
 
 <script>
     import e  from '../elements';
-    import {createdAt} from './data';
+    import {createdAt} from '../date';
 
     let cfg = {};
 

@@ -25,7 +25,7 @@ var fieldsToCountTags = []string{"tag", "is_internal", "parted_size"}
 var fieldsToCountTagsStr = strings.Join(fieldsToCountTags, ", ")
 var fieldsToUpdateTagsStr = sqllib_pg.WildcardsForUpdate(fieldsToCountTags)
 
-var fieldsToSave = []string{"joiner_key", "id", "tag", "relation"}
+var fieldsToSave = []string{"owner_key", "viewer_key", "joiner_key", "id", "tag", "relation"}
 var fieldsToInsertStr = strings.Join(fieldsToSave, ", ")
 var fieldsToUpdateStr = sqllib_pg.WildcardsForUpdate(fieldsToSave)
 
@@ -63,7 +63,7 @@ func New(access config.Access, ownInterfaceKey joiner.InterfaceKey) (tagger.Oper
 		ownInterfaceKey: ownInterfaceKey,
 
 		sqlAddTagged: "INSERT INTO " + tableTagged + " (" + fieldsToInsertStr + ") VALUES (" + sqllib_pg.WildcardsForInsert(fieldsToSave) + ")" +
-			" ON CONFLICT (joiner_key, id, tag) DO UPDATE SET " + fieldsToUpdateStr,
+			" ON CONFLICT (owner_key, joiner_key, id, tag) DO UPDATE SET " + fieldsToUpdateStr,
 
 		sqlRemoveTaggedAll: "DELETE                         FROM " + tableTagged + " WHERE joiner_key = $1 AND id = $2",
 		sqlRemoveTagged:    "DELETE                         FROM " + tableTagged + " WHERE joiner_key = $1 AND id = $2 AND tag = $3",
@@ -103,7 +103,11 @@ func New(access config.Access, ownInterfaceKey joiner.InterfaceKey) (tagger.Oper
 
 const onAddTags = "on tagsPg.AddTags(): "
 
-func (taggerOp *tagsPg) AddTags(toTag joiner.Link, items []tagger.Tag, _ *crud.SaveOptions) error {
+func (taggerOp *tagsPg) AddTags(toTag joiner.Link, items []tagger.Tag, options *crud.SaveOptions) error {
+	if options == nil || options.ActorKey == "" {
+		return errors.Errorf(onAddTags + "no user")
+	}
+
 	var tagsFiltered []tagger.Tag
 	for _, tag := range items {
 		tag.Label = strings.TrimSpace(tag.Label)
@@ -137,7 +141,9 @@ func (taggerOp *tagsPg) AddTags(toTag joiner.Link, items []tagger.Tag, _ *crud.S
 			}
 		}
 
-		values := []interface{}{toTag.InterfaceKey, toTag.ID, tag.Label, params}
+		// TODO: allow public tags
+
+		values := []interface{}{options.ActorKey, options.ActorKey, toTag.InterfaceKey, toTag.ID, tag.Label, params}
 
 		if _, err = stmAddTags.Exec(values...); err != nil {
 			err = errors.Wrapf(err, onAddTags+": on stmAddTags(%s).Exec(%#v)", taggerOp.sqlAddTagged, values)

@@ -42,7 +42,7 @@
 <script>
     import b from '../basis';
     import e from '../elements';
-    import {createdAt} from './data';
+    import {createdAt} from '../date';
     import DataEdit from "./DataEdit";
 
     let cfg = {};

@@ -260,12 +260,13 @@ func (dataOp *dataPg) Read(id common.ID, options *crud.GetOptions) (*data.Item, 
 
 	item := data.Item{ID: id}
 	var embedded, tags, history []byte
-	var createdAtStr string
+	// var createdAtStr string
+	var createdAt time.Time
 	var updatedAtPtr *string
 
 	err = dataOp.stmRead.QueryRow(values...).Scan(
 		&item.Key, &item.URL, &item.Title, &item.Summary, &embedded, &tags, &item.Data.TypeKey, &item.Data.Content, &item.OwnerKey, &item.ViewerKey, &history, &updatedAtPtr,
-		&createdAtStr,
+		&createdAt,
 	)
 
 	if err == sql.ErrNoRows {
@@ -300,12 +301,16 @@ func (dataOp *dataPg) Read(id common.ID, options *crud.GetOptions) (*data.Item, 
 		}
 	}
 
-	createdAt, err := time.Parse(time.RFC3339, createdAtStr)
-	if err != nil {
-		// TODO??? return &item, errors.Wrapf(err, onRead+"can't parse .CreatedAt (%s)", createdAtStr)
-	} else {
-		item.History = item.History.SaveAction(crud.Action{Key: crud.CreatedAction, DoneAt: createdAt, Related: &joiner.Link{InterfaceKey: data.InterfaceKey, ID: id}})
-	}
+	l.Info(createdAt)
+
+	//createdAt, err := time.Parse(time.RFC3339, createdAtStr)
+	//if err != nil {
+	//	// TODO??? return &item, errors.Wrapf(err, onRead+"can't parse .CreatedAt (%s)", createdAtStr)
+	//} else {
+	//	item.History = item.History.SaveAction(crud.Action{Key: crud.CreatedAction, DoneAt: createdAt, Related: &joiner.Link{InterfaceKey: data.InterfaceKey, ID: id}})
+	//}
+
+	item.History = item.History.SaveAction(crud.Action{Key: crud.CreatedAction, DoneAt: createdAt, Related: &joiner.Link{InterfaceKey: data.InterfaceKey, ID: id}})
 
 	if updatedAtPtr != nil {
 		updatedAt, err := time.Parse(time.RFC3339, *updatedAtPtr)

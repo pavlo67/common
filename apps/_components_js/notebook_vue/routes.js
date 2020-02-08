@@ -2,8 +2,8 @@ import Home from './Home.vue';
 import ListTags   from './ListTags.vue';
 import ListRecent from './ListRecent.vue';
 import ListTagged from './ListTagged.vue';
-import NoteNew    from './NoteNew.vue';
-import NoteView   from './NoteView.vue';
+import NoteNew    from './New.vue';
+import NoteView   from './View.vue';
 import {init}     from './init';
 
 export default [
@@ -50,11 +50,11 @@ export default [
     {
         path:     '/notebook/note_edit/:id',
         name:     'NoteEdit',
-        component: () => import('./NoteEdit.vue'),
+        component: () => import('./Edit.vue'),
     },
     {
         path:      '/notebook/note_import',
         name:      'NoteImport',
-        component: () => import('./NoteImport.vue'),
+        component: () => import('./Import.vue'),
     },
 ];

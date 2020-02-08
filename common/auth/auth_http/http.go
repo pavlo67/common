@@ -116,7 +116,7 @@ var authorizeEndpoint = server_http.Endpoint{
 			}
 		}
 
-		l.Infof("user: %#v", user)
+		l.Infof("user authorized: %#v", user)
 
 		return server.ResponseRESTOk(map[string]interface{}{"user": user})
 	},

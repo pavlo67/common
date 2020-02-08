@@ -1,4 +1,4 @@
-import b from "../basis";
+import b from "./basis";
 
 function createdAt(item) {
     if (!(item instanceof Object && item.History instanceof Array)) return "";
