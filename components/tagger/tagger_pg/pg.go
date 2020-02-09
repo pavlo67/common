@@ -1,5 +1,7 @@
 package tagger_pg
 
+// select translations.id, tag, tag is null from translations  join tagged on translations.id = tagged.id and tag != 'no article';
+
 import (
 	"database/sql"
 	"encoding/json"

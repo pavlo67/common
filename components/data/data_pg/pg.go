@@ -378,12 +378,13 @@ func (dataOp *dataPg) List(term *selectors.Term, options *crud.GetOptions) ([]da
 	}
 
 	query := sqllib_pg.CorrectWildcards(sqllib.SQLList(dataOp.table, fieldsToListStr, condition, options))
+
+	// l.Infof("%s / %#v\n%s", condition, values, query)
+
 	stm, err := dataOp.db.Prepare(query)
 	if err != nil {
 		return nil, errors.Wrapf(err, onList+": can't db.Prepare(%s)", query)
 	}
-
-	// l.Infof("%s / %#v\n%s", condition, values, query)
 
 	rows, err := stm.Query(values...)
 

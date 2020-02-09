@@ -1,10 +1,10 @@
 CREATE TABLE tagged (
-  joiner_key TEXT NOT NULL,
-  id         TEXT NOT NULL,
-  tag        TEXT NOT NULL,
-  relation   TEXT NOT NULL,
-  owner_key  TEXT NOT NULL,
-  viewer_key TEXT NOT NULL
+  joiner_key TEXT   NOT NULL,
+  id         TEXT   NOT NULL,
+  tag        TEXT   NOT NULL,
+  relation   TEXT   NOT NULL,
+  owner_key  TEXT   NOT NULL,
+  viewer_key TEXT   NOT NULL
 
 );
 
