@@ -21,7 +21,6 @@ import (
 	"github.com/pavlo67/workshop/common/users/users_stub"
 
 	"github.com/pavlo67/workshop/components/data/data_pg"
-	"github.com/pavlo67/workshop/components/datatagged"
 	"github.com/pavlo67/workshop/components/exporter"
 	"github.com/pavlo67/workshop/components/exporter/exporter_data"
 	"github.com/pavlo67/workshop/components/packs/packs_pg"
@@ -147,9 +146,8 @@ func main() {
 
 		// database
 		{tagger_pg.Starter(), nil},
-		{data_pg.Starter(), common.Map{"table": storage.CollectionDefault, "interface_key": storage.DataInterfaceKey}},
-		{datatagged.Starter(), common.Map{"data_key": storage.DataInterfaceKey, "interface_key": storage.InterfaceKey}},
-		{exporter_data.Starter(), common.Map{"data_key": storage.DataInterfaceKey, "interface_key": exporter.InterfaceKey}},
+		{data_pg.Starter(), common.Map{"table": storage.CollectionDefault, "interface_key": storage.InterfaceKey}},
+		{exporter_data.Starter(), common.Map{"data_key": storage.InterfaceKey, "interface_key": exporter.InterfaceKey}},
 		{storage_server_http.Starter(), common.Map{"data_key": storage.InterfaceKey, "exporter_key": exporter.InterfaceKey}},
 
 		// TODO: pass the interface_key of data_pg to front_end

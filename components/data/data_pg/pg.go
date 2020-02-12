@@ -7,20 +7,19 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pavlo67/workshop/common/selectors/logic"
-
-	"github.com/pavlo67/workshop/common/identity"
+	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/crud"
+	"github.com/pavlo67/workshop/common/identity"
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/libraries/sqllib"
 	"github.com/pavlo67/workshop/common/libraries/sqllib/sqllib_pg"
 	"github.com/pavlo67/workshop/common/libraries/strlib"
 	"github.com/pavlo67/workshop/common/selectors"
+	"github.com/pavlo67/workshop/common/selectors/logic"
 	"github.com/pavlo67/workshop/common/selectors/selectors_sql"
-	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/components/data"
 	"github.com/pavlo67/workshop/components/tagger"
@@ -489,6 +488,14 @@ func (dataOp *dataPg) Count(term *selectors.Term, options *crud.GetOptions) (uin
 	}
 
 	return num, nil
+}
+
+func (dataOp *dataPg) Tagger() tagger.Operator {
+	return dataOp.taggerOp
+}
+
+func (dataOp *dataPg) ListTagged(tagLabel string, term *selectors.Term, options *crud.GetOptions) ([]data.Item, error) {
+	return data.ListTagged(dataOp, dataOp.taggerOp, &dataOp.interfaceKey, tagLabel, term, options)
 }
 
 func (dataOp *dataPg) Close() error {

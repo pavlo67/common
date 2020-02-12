@@ -1,51 +1,27 @@
-package datatagged
+package data
 
 import (
+	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/crud"
-	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/selectors"
 	"github.com/pavlo67/workshop/common/selectors/logic"
-	"github.com/pavlo67/workshop/components/data"
-	"github.com/pavlo67/workshop/components/hypertext"
 	"github.com/pavlo67/workshop/components/tagger"
 )
 
-var _ Operator = &dataTagged{}
-
-// var _ crud.Cleaner = &dataTagged{}
-
-type dataTagged struct {
-	data.Operator
-	DataKey joiner.InterfaceKey
-	Tagger
-}
-
-const onNewWorkspace = "on New(): "
-
-func New(dataOp data.Operator, dataKey joiner.InterfaceKey, taggerOp tagger.Operator) (Operator, crud.Cleaner, error) {
-	if dataOp == nil {
-		return nil, nil, errors.New(onNewWorkspace + ": no data.Operatoe")
-	}
-
-	dtOp := dataTagged{
-		Operator: dataOp,
-		DataKey:  dataKey,
-		Tagger:   taggerOp,
-	}
-	return &dtOp, nil, nil
-}
-
 const onListWithTag = "on dataTagged.ListTagged(): "
 
-func (wsOp *dataTagged) ListTagged(tagLabel string, selector *selectors.Term, options *crud.GetOptions) ([]data.Item, error) {
-	if wsOp.Tagger == nil {
+func ListTagged(dataOp Operator, taggerOp tagger.Operator, dataKey *joiner.InterfaceKey, tagLabel string, selector *selectors.Term, options *crud.GetOptions) ([]Item, error) {
+	if dataOp == nil {
+		return nil, errors.New(onListWithTag + ": no data.Operator")
+	}
+
+	if taggerOp == nil {
 		return nil, errors.New(onListWithTag + ": no tagger.Operator")
 	}
 
-	index, err := wsOp.IndexTagged(&wsOp.DataKey, tagLabel, options)
+	index, err := taggerOp.IndexTagged(dataKey, tagLabel, options)
 	if err != nil {
 		return nil, errors.Wrap(err, onListWithTag)
 	}
@@ -62,15 +38,9 @@ func (wsOp *dataTagged) ListTagged(tagLabel string, selector *selectors.Term, op
 	}
 
 	// l.Infof("%#v\n%#v", selectorTagged, options)
-	return wsOp.List(selectorTagged, options)
+	return dataOp.List(selectorTagged, options)
 
 	// TODO: check if all item.TypeKey are correct in the result of wsOp.ListTags
-}
-
-// const onListWithText = "on dataTagged.ListWithText(): "
-
-func (wsOp *dataTagged) ListWithText(hypertext.ToSearch, *selectors.Term, *crud.GetOptions) ([]data.Item, error) {
-	return nil, common.ErrNotImplemented
 }
 
 //// Search -----------------------------------------------------------------------------------------

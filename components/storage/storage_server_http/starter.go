@@ -3,8 +3,6 @@ package storage_server_http
 import (
 	"fmt"
 
-	"github.com/pavlo67/workshop/components/exporter"
-
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
@@ -13,31 +11,32 @@ import (
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/starter"
 
-	"github.com/pavlo67/workshop/components/datatagged"
+	"github.com/pavlo67/workshop/components/data"
+	"github.com/pavlo67/workshop/components/exporter"
 	"github.com/pavlo67/workshop/components/storage"
 )
 
-var dataTaggedOp datatagged.Operator
+var dataOp data.Operator
 var exporterOp exporter.Operator
 var l logger.Operator
 
-var _ starter.Operator = &dataTaggedServerHTTPStarter{}
+var _ starter.Operator = &dataServerHTTPStarter{}
 
-type dataTaggedServerHTTPStarter struct {
+type dataServerHTTPStarter struct {
 	dataKey     joiner.InterfaceKey
 	exporterKey joiner.InterfaceKey
 	// interfaceKey joiner.DataInterfaceKey
 }
 
 func Starter() starter.Operator {
-	return &dataTaggedServerHTTPStarter{}
+	return &dataServerHTTPStarter{}
 }
 
-func (dtsh *dataTaggedServerHTTPStarter) Name() string {
+func (dtsh *dataServerHTTPStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (dtsh *dataTaggedServerHTTPStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
+func (dtsh *dataServerHTTPStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	l = lCommon
 	if l == nil {
 		return nil, fmt.Errorf("no logger for %s:-(", dtsh.Name())
@@ -49,13 +48,13 @@ func (dtsh *dataTaggedServerHTTPStarter) Init(cfgCommon, cfg *config.Config, lCo
 	return nil, nil
 }
 
-func (dtsh *dataTaggedServerHTTPStarter) Setup() error {
+func (dtsh *dataServerHTTPStarter) Setup() error {
 	return nil
 }
 
-func (dtsh *dataTaggedServerHTTPStarter) Run(joinerOp joiner.Operator) error {
-	dataTaggedOp, _ = joinerOp.Interface(dtsh.dataKey).(datatagged.Operator)
-	if dataTaggedOp == nil {
+func (dtsh *dataServerHTTPStarter) Run(joinerOp joiner.Operator) error {
+	dataOp, _ = joinerOp.Interface(dtsh.dataKey).(data.Operator)
+	if dataOp == nil {
 		return errors.Errorf("no data_tagged.Operator with key %s", dtsh.dataKey)
 	}
 

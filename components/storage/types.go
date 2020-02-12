@@ -6,7 +6,6 @@ import (
 
 const CollectionDefault = "storage"
 
-const DataInterfaceKey joiner.InterfaceKey = "storage_data"
 const InterfaceKey joiner.InterfaceKey = "storage"
 
 const RecentInterfaceKey joiner.InterfaceKey = "storage_list"

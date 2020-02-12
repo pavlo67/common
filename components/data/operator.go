@@ -6,7 +6,6 @@ import (
 	"github.com/pavlo67/workshop/common/identity"
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/selectors"
-
 	"github.com/pavlo67/workshop/components/tagger"
 )
 
@@ -40,6 +39,11 @@ type Operator interface {
 	Read(common.ID, *crud.GetOptions) (*Item, error)
 	List(*selectors.Term, *crud.GetOptions) ([]Item, error)
 	Count(*selectors.Term, *crud.GetOptions) (uint64, error)
+
+	Tagger() tagger.Operator
+	ListTagged(string, *selectors.Term, *crud.GetOptions) ([]Item, error)
+
+	//ListWithText(hypertext.ToSearch, *selectors.Term, *crud.GetOptions) ([]data.Item, error)
 }
 
 type Convertor interface {
