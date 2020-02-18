@@ -17,9 +17,6 @@ import (
 	"github.com/pavlo67/workshop/common/libraries/sqllib"
 	"github.com/pavlo67/workshop/common/libraries/sqllib/sqllib_pg"
 	"github.com/pavlo67/workshop/common/libraries/strlib"
-	"github.com/pavlo67/workshop/common/selectors"
-	"github.com/pavlo67/workshop/common/selectors/logic"
-	"github.com/pavlo67/workshop/common/selectors/selectors_sql"
 
 	"github.com/pavlo67/workshop/components/data"
 	"github.com/pavlo67/workshop/components/tagger"
@@ -34,7 +31,8 @@ var fieldsToRead = append(fieldsToUpdate, "updated_at", "created_at")
 var fieldsToReadStr = strings.Join(fieldsToRead, ", ")
 
 var fieldsToList = append([]string{"id"}, fieldsToRead...)
-var fieldsToListStr = strings.Join(fieldsToList, ", ")
+
+// var fieldsToListStr = strings.Join(fieldsToList, ", ")
 
 var _ data.Operator = &dataPg{}
 
@@ -42,8 +40,9 @@ type dataPg struct {
 	domain       identity.Domain
 	interfaceKey joiner.InterfaceKey
 
-	db    *sql.DB
-	table string
+	db              *sql.DB
+	table           string
+	fieldsToListStr string
 
 	sqlInsert, sqlUpdate, sqlRead, sqlRemove, sqlClean string
 	stmInsert, stmUpdate, stmRead, stmRemove           *sql.Stmt
@@ -54,8 +53,7 @@ type dataPg struct {
 
 const onNew = "on dataPg.New(): "
 
-func New(access config.Access, domain identity.Domain, table string, interfaceKey joiner.InterfaceKey, taggerOp tagger.Operator, taggerCleaner crud.Cleaner,
-) (data.Operator, crud.Cleaner, error) {
+func New(access config.Access, domain identity.Domain, table string, interfaceKey joiner.InterfaceKey, taggerOp tagger.Operator, taggerCleaner crud.Cleaner) (data.Operator, crud.Cleaner, error) {
 
 	domain = domain.Normalize()
 	if domain == "" {
@@ -71,11 +69,17 @@ func New(access config.Access, domain identity.Domain, table string, interfaceKe
 		table = data.CollectionDefault
 	}
 
+	var fieldsToListTabled []string
+	for _, f := range fieldsToList {
+		fieldsToListTabled = append(fieldsToListTabled, table+"."+f)
+	}
+
 	dataOp := dataPg{
 		domain: domain,
 
-		db:    db,
-		table: table,
+		db:              db,
+		table:           table,
+		fieldsToListStr: strings.Join(fieldsToListTabled, ","),
 
 		sqlInsert: "INSERT INTO " + table + " (" + fieldsToInsertStr + ") VALUES (" + sqllib_pg.WildcardsForInsert(fieldsToInsert) + ") RETURNING id",
 		sqlUpdate: "UPDATE " + table + " SET " + sqllib_pg.WildcardsForUpdate(fieldsToUpdate) +
@@ -251,6 +255,9 @@ func (dataOp *dataPg) Read(id common.ID, options *crud.GetOptions) (*data.Item, 
 	var viewerKey identity.Key
 	if options != nil {
 		viewerKey = options.ActorKey
+
+		// TODO!!! check if options.Term == nil
+
 	}
 
 	// TODO: check viewer_key for groups
@@ -360,23 +367,14 @@ func (dataOp *dataPg) Remove(id common.ID, options *crud.RemoveOptions) error {
 
 const onList = "on dataPg.List()"
 
-func (dataOp *dataPg) List(term *selectors.Term, options *crud.GetOptions) ([]data.Item, error) {
+func (dataOp *dataPg) List(options *crud.GetOptions) ([]data.Item, error) {
 
 	// TODO!!! use default key's value searching data with empty .Key
 
-	var viewerKey identity.Key
-	if options != nil {
-		viewerKey = options.ActorKey
-	}
-
-	term = logic.AND(term, selectors.In("viewer_key", viewerKey))
-
-	condition, values, err := selectors_sql.Use(term)
+	query, values, err := sqllib.SQLList(dataOp.table, dataOp.fieldsToListStr, options, sqllib_pg.CorrectWildcards)
 	if err != nil {
-		return nil, errors.Errorf(onList+"wrong selector (%#v): %s", term, err)
+		return nil, errors.Errorf(onList+"can't sqllib.SQLList(%s, %s, %#v, sqllib_pg.CorrectWildcards): %s", dataOp.table, dataOp.fieldsToListStr, options, err)
 	}
-
-	query := sqllib_pg.CorrectWildcards(sqllib.SQLList(dataOp.table, fieldsToListStr, condition, options))
 
 	// l.Infof("%s / %#v\n%s", condition, values, query)
 
@@ -464,17 +462,15 @@ func (dataOp *dataPg) List(term *selectors.Term, options *crud.GetOptions) ([]da
 
 const onCount = "on dataPg.Count(): "
 
-func (dataOp *dataPg) Count(term *selectors.Term, options *crud.GetOptions) (uint64, error) {
+func (dataOp *dataPg) Count(options *crud.GetOptions) (uint64, error) {
 
 	// TODO: check viewer_key
 
-	condition, values, err := selectors_sql.Use(term)
+	query, values, err := sqllib.SQLCount(dataOp.table, options, sqllib_pg.CorrectWildcards)
 	if err != nil {
-		termStr, _ := json.Marshal(term)
-		return 0, errors.Wrapf(err, onCount+": can't selectors_sql.Use(%s)", termStr)
+		return 0, errors.Wrapf(err, onCount+": can't sqllib.SQLCount(%s, %#v, sqllib_pg.CorrectWildcards)", dataOp.table, options)
 	}
 
-	query := sqllib_pg.CorrectWildcards(sqllib.SQLCount(dataOp.table, condition, options))
 	stm, err := dataOp.db.Prepare(query)
 	if err != nil {
 		return 0, errors.Wrapf(err, onCount+": can't db.Prepare(%s)", query)
@@ -494,8 +490,25 @@ func (dataOp *dataPg) Tagger() tagger.Operator {
 	return dataOp.taggerOp
 }
 
-func (dataOp *dataPg) ListTagged(tagLabel string, term *selectors.Term, options *crud.GetOptions) ([]data.Item, error) {
-	return data.ListTagged(dataOp, dataOp.taggerOp, &dataOp.interfaceKey, tagLabel, term, options)
+const onListTagged = "on dataPg.ListTagged(): "
+
+func (dataOp *dataPg) ListTagged(tagLabel string, options *crud.GetOptions) ([]data.Item, error) {
+	if dataOp.taggerOp == nil {
+		return nil, errors.New(onListTagged + ": no tagger.Operator")
+	}
+
+	// select storage.* from storage join tagged on storage.id::text = tagged.id and tag = 'www';
+	if options == nil {
+		options = &crud.GetOptions{}
+	}
+	options.JoinTo = crud.JoinTo{
+		Clause: "join tagged on " + dataOp.table + ".id::text = tagged.id and tag = ?",
+		Values: []interface{}{tagLabel},
+	}
+
+	return dataOp.List(options)
+
+	//return data.ListTagged(dataOp, dataOp.taggerOp, &dataOp.interfaceKey, tagLabel, options)
 }
 
 func (dataOp *dataPg) Close() error {

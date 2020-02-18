@@ -16,16 +16,6 @@ import (
 	"github.com/pavlo67/workshop/components/tagger"
 )
 
-// select translations.id, tag, tag is null from translations  join tagged on translations.id = tagged.id and tag != 'no article';
-
-//SELECT * FROM table WHERE myint = mytext::int8
-//The :: cast operator is historical but convenient. Postgres also conforms to the SQL standard syntax
-//
-//myint = cast ( mytext as int8)
-//If you have literal text you want to compare with an int, cast the int to text:
-//
-//SELECT * FROM table WHERE myint::varchar(255) = mytext
-
 const tableTaggedDefault = "tagged"
 const tableTagsDefault = "tags"
 

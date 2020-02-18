@@ -2,12 +2,16 @@ package sqllib
 
 import (
 	"database/sql"
+	"encoding/json"
 	"strconv"
-
 	"strings"
 
-	"github.com/pavlo67/workshop/common/crud"
 	"github.com/pkg/errors"
+
+	"github.com/pavlo67/workshop/common/crud"
+	"github.com/pavlo67/workshop/common/selectors"
+	"github.com/pavlo67/workshop/common/selectors/logic"
+	"github.com/pavlo67/workshop/common/selectors/selectors_sql"
 )
 
 const CantPrepare = "can't .Prepare(%s)"
@@ -22,17 +26,37 @@ const RowsError = "error on .Rows ('%s', %#v)"
 
 var ErrNoTable = errors.New("table doesn't exist")
 
-func SQLList(table, fields, condition string, options *crud.GetOptions) string {
-	if strings.TrimSpace(condition) != "" {
-		condition = " WHERE " + condition
-	}
+type CorrectWildcards func(query string) string
 
-	var limit string
+const onSQLList = "on sqllib.SQLList(): "
 
-	order := "created_at DESC"
-	if options != nil {
+func SQLList(table, fields string, options *crud.GetOptions, correctWildcards CorrectWildcards) (string, []interface{}, error) {
+
+	var join, order, limit string
+	var values []interface{}
+
+	var term *selectors.Term
+
+	if options == nil {
+		term = selectors.In("viewer_key", "")
+
+	} else {
+		viewerKey := options.ActorKey
+		if options.Term == nil {
+			term = selectors.In("viewer_key", "")
+		} else {
+			term = logic.AND(term, selectors.In("viewer_key", viewerKey))
+		}
+
+		if strings.TrimSpace(options.JoinTo.Clause) != "" {
+			join = options.JoinTo.Clause
+			values = options.JoinTo.Values
+		} else if len(options.JoinTo.Values) > 0 {
+			return "", nil, errors.Errorf(onSQLList+"wrong .JoinTo: %#v", options.JoinTo)
+		}
+
 		if len(options.OrderBy) > 0 {
-			order = strings.Join(options.OrderBy, ", ")
+			order = " ORDER BY " + strings.Join(options.OrderBy, ", ")
 		}
 
 		if options.Offset+options.Limit > 0 {
@@ -48,61 +72,45 @@ func SQLList(table, fields, condition string, options *crud.GetOptions) string {
 		}
 	}
 
-	return "SELECT " + fields + " FROM " + table + condition + " ORDER BY " + order + limit
-}
-
-func SQLCount(table, condition string, _ *crud.GetOptions) string {
-	query := "SELECT COUNT(*) FROM " + table
+	condition, valuesTerm, err := selectors_sql.Use(term)
+	if err != nil {
+		return "", nil, errors.Errorf(onSQLList+"wrong selector (%#v): %s", term, err)
+	}
 
 	if strings.TrimSpace(condition) != "" {
-		return query + " WHERE " + condition
+		condition = " WHERE " + condition
 	}
 
-	return query
+	return "SELECT " + fields + " FROM " + table + join + condition + order + limit, append(values, valuesTerm...), nil
 }
 
-const defaultPageLengthStr = "200"
+const onSQLCount = "on sqllib.SQLCount(): "
 
-func OrderAndLimit(sortBy []string, limits []uint64) string {
-	var sortStr, limitsStr string
-	if len(sortBy) > 0 {
-		for _, s := range sortBy {
-			if s == "" {
-				continue
-			}
-			desc := ""
-			if s[len(s)-1:] == "-" {
-				s = s[:len(s)-1]
-				desc = " DESC"
-			} else if s[len(s)-1:] == "+" {
-				s = s[:len(s)-1]
-			}
-			if sortStr != "" {
-				sortStr += ", "
-			}
-			sortStr += "`" + s + "`" + desc
-		}
-		if sortStr != "" {
-			sortStr = " ORDER BY " + sortStr
-		}
+func SQLCount(table string, options *crud.GetOptions, correctWildcards CorrectWildcards) (string, []interface{}, error) {
+	var term *selectors.Term
+	if options == nil {
+		term = selectors.In("viewer_key", "")
+
+	} else if options.Term != nil {
+		term = logic.AND(options.Term, selectors.In("viewer_key", options.ActorKey))
+
+	} else {
+		term = selectors.In("viewer_key", options.ActorKey)
+
 	}
-	if len(limits) > 1 {
-		// limit[0] can be equal to 0
-		var pageLengthStr string
-		if limits[1] > 0 {
-			pageLengthStr = strconv.FormatUint(limits[1], 10)
-		} else {
-			pageLengthStr = defaultPageLengthStr
-		}
-		limitsStr = " LIMIT " + strconv.FormatUint(limits[0], 10) + ", " + pageLengthStr
-	} else if len(limits) > 0 {
-		if limits[0] > 0 {
-			limitsStr = " LIMIT " + strconv.FormatUint(limits[0], 10)
-		} else {
-			limitsStr = " LIMIT " + defaultPageLengthStr
-		}
+
+	condition, values, err := selectors_sql.Use(term)
+	if err != nil {
+		termStr, _ := json.Marshal(term)
+		return "", nil, errors.Wrapf(err, onSQLCount+": can't selectors_sql.Use(%s)", termStr)
 	}
-	return sortStr + limitsStr
+
+	query := "SELECT COUNT(*) FROM " + table
+	if strings.TrimSpace(condition) != "" {
+		query += " WHERE " + condition
+	}
+
+	return query, values, nil
 }
 
 type SqlStmt struct {
@@ -149,29 +157,29 @@ func Query(dbh *sql.DB, sqlQuery string, values ...interface{}) (*sql.Rows, erro
 	return rows, nil
 }
 
-func QueryStrings(stmt *sql.Stmt, sql string, values ...interface{}) (results []string, err error) {
-	rows, err := stmt.Query(values...)
-	if err != nil {
-		return nil, errors.Wrapf(err, CantExec, sql, values)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var r string
-		if err := rows.Scan(&r); err != nil {
-			return results, errors.Wrapf(err, CantScanQueryRow, sql, values)
-		}
-
-		results = append(results, r)
-	}
-
-	err = rows.Err()
-	if err != nil {
-		return results, errors.Wrapf(err, CantScanQueryRow, sql, values)
-	}
-
-	return results, nil
-}
+//func QueryStrings(stmt *sql.Stmt, sql string, values ...interface{}) (results []string, err error) {
+//	rows, err := stmt.Query(values...)
+//	if err != nil {
+//		return nil, errors.Wrapf(err, CantExec, sql, values)
+//	}
+//	defer rows.Close()
+//
+//	for rows.Next() {
+//		var r string
+//		if err := rows.Scan(&r); err != nil {
+//			return results, errors.Wrapf(err, CantScanQueryRow, sql, values)
+//		}
+//
+//		results = append(results, r)
+//	}
+//
+//	err = rows.Err()
+//	if err != nil {
+//		return results, errors.Wrapf(err, CantScanQueryRow, sql, values)
+//	}
+//
+//	return results, nil
+//}
 
 //func QueryIDs(stmt *sql.Stmt, sql string, values ...interface{}) (ids []uint64, err error) {
 //	rows, err := stmt.Query(values...)

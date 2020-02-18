@@ -1,47 +1,43 @@
 package data
 
-import (
-	"github.com/pavlo67/workshop/common/joiner"
-	"github.com/pkg/errors"
-
-	"github.com/pavlo67/workshop/common/crud"
-	"github.com/pavlo67/workshop/common/selectors"
-	"github.com/pavlo67/workshop/common/selectors/logic"
-	"github.com/pavlo67/workshop/components/tagger"
-)
-
-const onListWithTag = "on dataTagged.ListTagged(): "
-
-func ListTagged(dataOp Operator, taggerOp tagger.Operator, dataKey *joiner.InterfaceKey, tagLabel string, selector *selectors.Term, options *crud.GetOptions) ([]Item, error) {
-	if dataOp == nil {
-		return nil, errors.New(onListWithTag + ": no data.Operator")
-	}
-
-	if taggerOp == nil {
-		return nil, errors.New(onListWithTag + ": no tagger.Operator")
-	}
-
-	index, err := taggerOp.IndexTagged(dataKey, tagLabel, options)
-	if err != nil {
-		return nil, errors.Wrap(err, onListWithTag)
-	}
-	var taggedIDs []interface{}
-	for _, i := range index {
-		for _, tagged := range i {
-			taggedIDs = append(taggedIDs, string(tagged.ID))
-		}
-	}
-
-	selectorTagged := selectors.In("id", taggedIDs...)
-	if selector != nil {
-		selectorTagged = logic.AND(selectorTagged, selector)
-	}
-
-	// l.Infof("%#v\n%#v", selectorTagged, options)
-	return dataOp.List(selectorTagged, options)
-
-	// TODO: check if all item.TypeKey are correct in the result of wsOp.ListTags
-}
+//const onListWithTag = "on dataTagged.ListTagged(): "
+//
+//func ListTagged(dataOp Operator, taggerOp tagger.Operator, dataKey *joiner.InterfaceKey, tagLabel string, options *crud.GetOptions) ([]Item, error) {
+//	if dataOp == nil {
+//		return nil, errors.New(onListWithTag + ": no data.Operator")
+//	}
+//
+//	if taggerOp == nil {
+//		return nil, errors.New(onListWithTag + ": no tagger.Operator")
+//	}
+//
+//	index, err := taggerOp.IndexTagged(dataKey, tagLabel, options)
+//	if err != nil {
+//		return nil, errors.Wrap(err, onListWithTag)
+//	}
+//	var taggedIDs []interface{}
+//	for _, i := range index {
+//		for _, tagged := range i {
+//			taggedIDs = append(taggedIDs, string(tagged.ID))
+//		}
+//	}
+//
+//	selectorTagged := selectors.In("id", taggedIDs...)
+//
+//	if options == nil {
+//		options = &crud.GetOptions{Term: selectorTagged}
+//	} else if options.Term != nil {
+//		options.Term = logic.AND(selectorTagged, options.Term)
+//	} else {
+//		options.Term = selectorTagged
+//	}
+//
+//	// l.Infof("%#v\n%#v", selectorTagged, options)
+//
+//	return dataOp.List(options)
+//
+//	// TODO: check if all item.TypeKey are correct in the result of wsOp.ListTags
+//}
 
 //// Search -----------------------------------------------------------------------------------------
 //
