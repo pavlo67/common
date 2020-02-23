@@ -40,6 +40,7 @@ type Operator interface {
 	Count(*crud.GetOptions) (uint64, error)
 
 	ListTagged(string, *crud.GetOptions) ([]Item, error)
+	ListUntagged(string, *crud.GetOptions) ([]Item, error)
 	Tagger() tagger.Operator
 
 	//ListWithText(hypertext.ToSearch, *selectors.Term, *crud.GetOptions) ([]data.Item, error)

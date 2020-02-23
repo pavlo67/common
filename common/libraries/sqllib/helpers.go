@@ -81,7 +81,12 @@ func SQLList(table, fields string, options *crud.GetOptions, correctWildcards Co
 		condition = " WHERE " + condition
 	}
 
-	return "SELECT " + fields + " FROM " + table + join + condition + order + limit, append(values, valuesTerm...), nil
+	query := "SELECT " + fields + " FROM " + table + join + condition + order + limit
+	if correctWildcards != nil {
+		query = correctWildcards(query)
+	}
+
+	return query, append(values, valuesTerm...), nil
 }
 
 const onSQLCount = "on sqllib.SQLCount(): "

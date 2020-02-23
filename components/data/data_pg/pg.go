@@ -7,6 +7,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pavlo67/workshop/common/selectors"
+	"github.com/pavlo67/workshop/common/selectors/logic"
+
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
@@ -504,6 +507,32 @@ func (dataOp *dataPg) ListTagged(tagLabel string, options *crud.GetOptions) ([]d
 	options.JoinTo = crud.JoinTo{
 		Clause: "join tagged on " + dataOp.table + ".id::text = tagged.id and tag = ?",
 		Values: []interface{}{tagLabel},
+	}
+
+	return dataOp.List(options)
+
+	//return data.ListTagged(dataOp, dataOp.taggerOp, &dataOp.interfaceKey, tagLabel, options)
+}
+
+const onListUntagged = "on dataPg.ListTagged(): "
+
+func (dataOp *dataPg) ListUntagged(tagLabel string, options *crud.GetOptions) ([]data.Item, error) {
+	if dataOp.taggerOp == nil {
+		return nil, errors.New(onListTagged + ": no tagger.Operator")
+	}
+
+	// select storage.* from storage join tagged on storage.id::text = tagged.id and tag = 'www';
+	if options == nil {
+		options = &crud.GetOptions{}
+	}
+	options.JoinTo = crud.JoinTo{
+		Clause: "LEFT JOIN tagged ON " + dataOp.table + ".id::text = tagged.id AND tag = ?",
+		Values: []interface{}{tagLabel},
+	}
+	if options.Term == nil {
+		options.Term = selectors.String("tag IS NULL")
+	} else {
+		options.Term = logic.AND(options.Term, selectors.String("tag IS NULL"))
 	}
 
 	return dataOp.List(options)
