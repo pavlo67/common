@@ -10,7 +10,7 @@ environments/*.yml
 
 # Dependencies
 node_modules
-#vendor
+vendor
 
 # Test files & executables
 bin/*

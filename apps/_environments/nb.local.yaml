@@ -1,0 +1,28 @@
+pg:
+  user: msq
+  pass: msq_psw1
+  path: nb_prod
+
+sqlite:
+  path: "/home/pavlo/0/_datastore/notebook_dev.sqlite"
+
+server_http:
+  host: localhost
+  port: 3003
+  testers: ["127.0.0.1"]
+
+
+#mongo:
+#  host: "localhost"
+#  port: 27017
+#
+#smtp:
+#  host: "smtp.mailtrap.io"
+#  port: 2525
+#  user: "c889a7509fd7e7"
+#  pass: "117335db87915f"
+#
+#pop3:
+#  host: "pop.zoho.com:995"
+#  user: "pavlo67@zoho.com"
+#  pass: "p@dzfsamuZ1"
