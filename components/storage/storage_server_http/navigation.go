@@ -19,13 +19,18 @@ const tagLabelParamName = "tag"
 var listTagsEndpoint = server_http.Endpoint{Method: "GET", QueryParams: []string{interfaceKeyParamName}, WorkerHTTP: CountTags}
 
 func CountTags(user *auth.User, _ server_http.Params, req *http.Request) (server.Response, error) {
+	taggerOp := dataOp.Tagger()
+	if taggerOp == nil {
+		return server.ResponseRESTOk(nil)
+	}
+
 	var interfaceKeyPtr *joiner.InterfaceKey
 	if key := req.URL.Query().Get(interfaceKeyParamName); key != "" {
 		interfaceKey := joiner.InterfaceKey(key)
 		interfaceKeyPtr = &interfaceKey
 	}
 
-	counter, err := dataTaggedOp.CountTags(interfaceKeyPtr, &crud.GetOptions{ActorKey: user.KeyYet()})
+	counter, err := taggerOp.IndexTags(interfaceKeyPtr, &crud.GetOptions{ActorKey: user.KeyYet()})
 	if err != nil {
 		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on GET storage/...CountTags (%#v): %s", req.URL.Query(), err))
 	}
@@ -44,7 +49,7 @@ func ListTagged(user *auth.User, _ server_http.Params, req *http.Request) (serve
 
 	tagLabel := req.URL.Query().Get(tagLabelParamName)
 
-	items, err := dataTaggedOp.ListTagged(tagLabel, nil, &crud.GetOptions{ActorKey: user.KeyYet()})
+	items, err := dataOp.ListTagged(tagLabel, nil, &crud.GetOptions{ActorKey: user.KeyYet()})
 
 	if err != nil {
 		return server.ResponseRESTError(http.StatusInternalServerError, errors.Errorf("ERROR on GET storage/...ListTagged (%#v): %s", req.URL.Query(), err))

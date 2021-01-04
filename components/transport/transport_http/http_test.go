@@ -40,8 +40,8 @@ func TestReceiverServerHTTP(t *testing.T) {
 
 	currentPath := filelib.CurrentPath()
 
-	configCommonPath := currentPath + "../../../environments/common." + env + ".yaml"
-	cfgCommon, err := config.Get(configCommonPath, serializer.MarshalerYAML)
+	configCommonPath := currentPath + "../../../apps/_environments/common." + env + ".yaml"
+	cfgCommon, err := config.Get(configCommonPath, serviceName, serializer.MarshalerYAML)
 	require.NoError(t, err)
 
 	var routesCfg map[string]config.Access
@@ -55,8 +55,8 @@ func TestReceiverServerHTTP(t *testing.T) {
 
 	// gatherer config
 
-	cfgServicePath := currentPath + "../../../environments/" + serviceName + "." + env + ".yaml"
-	cfgService, err := config.Get(cfgServicePath, serializer.MarshalerYAML)
+	cfgServicePath := currentPath + "../../../apps/_environments/" + serviceName + "." + env + ".yaml"
+	cfgService, err := config.Get(cfgServicePath, serviceName, serializer.MarshalerYAML)
 	require.NoError(t, err)
 
 	// running starters

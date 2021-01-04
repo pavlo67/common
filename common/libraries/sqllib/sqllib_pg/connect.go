@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/pavlo67/workshop/common/libraries/sqllib"
+
 	_ "github.com/lib/pq"
 	"github.com/pkg/errors"
 
@@ -36,6 +38,8 @@ func AddressPostgres(e config.Access) (string, error) {
 	), nil
 
 }
+
+var _ sqllib.CorrectWildcards = CorrectWildcards
 
 var reQuestionMark = regexp.MustCompile("\\?")
 

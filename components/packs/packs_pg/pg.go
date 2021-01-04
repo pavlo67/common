@@ -219,7 +219,12 @@ func (packsOp *packsPg) List(term *selectors.Term, options *crud.GetOptions) ([]
 	stm := packsOp.stmList
 
 	if condition != "" || options != nil {
-		query = sqllib_pg.CorrectWildcards(sqllib.SQLList(packsOp.table, fieldsToListStr, condition, options))
+		query0, values0, err0 := sqllib.SQLList(packsOp.table, fieldsToListStr, condition, options)
+		if err0 != nil {
+			return nil, errors.Errorf(onList+"wrong selector (%#v): %s", term, err)
+		}
+
+		query = sqllib_pg.CorrectWildcards(query)
 
 		stm, err = packsOp.db.Prepare(query)
 		if err != nil {

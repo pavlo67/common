@@ -25,7 +25,7 @@ var fieldsToCountTags = []string{"tag", "is_internal", "parted_size"}
 var fieldsToCountTagsStr = strings.Join(fieldsToCountTags, ", ")
 var fieldsToUpdateTagsStr = sqllib_pg.WildcardsForUpdate(fieldsToCountTags)
 
-var fieldsToSave = []string{"joiner_key", "id", "tag", "relation"}
+var fieldsToSave = []string{"owner_key", "viewer_key", "joiner_key", "id", "tag", "relation"}
 var fieldsToInsertStr = strings.Join(fieldsToSave, ", ")
 var fieldsToUpdateStr = sqllib_pg.WildcardsForUpdate(fieldsToSave)
 
@@ -41,7 +41,7 @@ type tagsPg struct {
 	stmList, stmIndexTagged, stmIndexTaggedAll, stmCountJoinerKeys, stmCountTags, stmCountTagsAll, stmTagPartedSize *sql.Stmt
 
 	// sqlSetTag, sqlGetTag
-	sqlAddTag, sqlAddTagged, sqlRemoveTagged string
+	sqlAddTag, sqlAddTagged, sqlRemoveTagged, sqlRemoveTaggedAll string
 }
 
 const onNew = "on tagsPg.New(): "
@@ -63,9 +63,11 @@ func New(access config.Access, ownInterfaceKey joiner.InterfaceKey) (tagger.Oper
 		ownInterfaceKey: ownInterfaceKey,
 
 		sqlAddTagged: "INSERT INTO " + tableTagged + " (" + fieldsToInsertStr + ") VALUES (" + sqllib_pg.WildcardsForInsert(fieldsToSave) + ")" +
-			" ON CONFLICT (joiner_key, id, tag) DO UPDATE SET " + fieldsToUpdateStr,
+			" ON CONFLICT (owner_key, joiner_key, id, tag) DO UPDATE SET " + fieldsToUpdateStr,
 
-		sqlRemoveTagged:   "DELETE                          FROM " + tableTagged + " WHERE joiner_key = $1 AND id = $2",
+		sqlRemoveTaggedAll: "DELETE                         FROM " + tableTagged + " WHERE joiner_key = $1 AND id = $2",
+		sqlRemoveTagged:    "DELETE                         FROM " + tableTagged + " WHERE joiner_key = $1 AND id = $2 AND tag = $3",
+
 		sqlList:           "SELECT tag, relation            FROM " + tableTagged + " WHERE joiner_key = $1 AND id = $2 ORDER BY tag",
 		sqlIndexTagged:    "SELECT joiner_key, id, relation FROM " + tableTagged + " WHERE joiner_key = $1 AND tag = $2",
 		sqlIndexTaggedAll: "SELECT joiner_key, id, relation FROM " + tableTagged + " WHERE                     tag = $1                                   ORDER BY joiner_key",
@@ -101,7 +103,11 @@ func New(access config.Access, ownInterfaceKey joiner.InterfaceKey) (tagger.Oper
 
 const onAddTags = "on tagsPg.AddTags(): "
 
-func (taggerOp *tagsPg) AddTags(toTag joiner.Link, items []tagger.Tag, _ *crud.SaveOptions) error {
+func (taggerOp *tagsPg) AddTags(toTag joiner.Link, items []tagger.Tag, options *crud.SaveOptions) error {
+	if options == nil || options.ActorKey == "" {
+		return errors.Errorf(onAddTags + "no user")
+	}
+
 	var tagsFiltered []tagger.Tag
 	for _, tag := range items {
 		tag.Label = strings.TrimSpace(tag.Label)
@@ -135,7 +141,9 @@ func (taggerOp *tagsPg) AddTags(toTag joiner.Link, items []tagger.Tag, _ *crud.S
 			}
 		}
 
-		values := []interface{}{toTag.InterfaceKey, toTag.ID, tag.Label, params}
+		// TODO: allow public tags
+
+		values := []interface{}{options.ActorKey, options.ActorKey, toTag.InterfaceKey, toTag.ID, tag.Label, params}
 
 		if _, err = stmAddTags.Exec(values...); err != nil {
 			err = errors.Wrapf(err, onAddTags+": on stmAddTags(%s).Exec(%#v)", taggerOp.sqlAddTagged, values)
@@ -163,71 +171,32 @@ ROLLBACK:
 	return err
 }
 
-const onReplaceTags = "on tagsPg.ReplaceTags(): "
+const onRemoveTag = "on tagsPg.RepmoveTag(): "
 
-func (taggerOp *tagsPg) ReplaceTags(toTag joiner.Link, items []tagger.Tag, options *crud.SaveOptions) error {
+func (taggerOp *tagsPg) RemoveTag(toTag joiner.Link, tag tagger.Tag, options *crud.SaveOptions) error {
 
-	var tagsFiltered []tagger.Tag
-	for _, tag := range items {
-		tag.Label = strings.TrimSpace(tag.Label)
-		if tag.Label != "" {
-			tagsFiltered = append(tagsFiltered, tag)
-		}
-	}
-
-	tagsOld, err := taggerOp.ListTags(toTag, nil) // TODO!!! use correct options
-	if err != nil {
-		return errors.Wrap(err, onReplaceTags)
-	}
-	var tagLabelsRemoved []string
-	for _, tag := range tagsOld {
-		tagLabelsRemoved = append(tagLabelsRemoved, strings.TrimSpace(tag.Label))
-	}
-
-	if len(tagsFiltered) < 1 && len(tagLabelsRemoved) < 1 {
+	tag.Label = strings.TrimSpace(tag.Label)
+	if tag.Label == "" {
+		// TODO??? return an error
 		return nil
 	}
 
 	tx, err := taggerOp.db.Begin()
 	if err != nil {
-		return errors.Wrap(err, onReplaceTags+": on taggerOp.db.Begin()")
-	}
-
-	stmAddTags, err := tx.Prepare(taggerOp.sqlAddTagged)
-	if err != nil {
-		return errors.Wrapf(err, onReplaceTags+": on tx.Prepare(%s)", taggerOp.sqlAddTagged)
+		return errors.Wrap(err, onRemoveTag+": on taggerOp.db.Begin()")
 	}
 
 	//var add []string
 
-	values := []interface{}{toTag.InterfaceKey, toTag.ID}
+	values := []interface{}{toTag.InterfaceKey, toTag.ID, tag.Label}
 	_, err = tx.Exec(taggerOp.sqlRemoveTagged, values...)
 	if err != nil {
-		err = errors.Wrapf(err, onReplaceTags+": on tx.Exec(%s, %#v)", taggerOp.sqlRemoveTagged, values)
+		err = errors.Wrapf(err, onRemoveTag+": on tx.Exec(%s, %#v)", taggerOp.sqlRemoveTagged, values)
 		goto ROLLBACK
 	}
 
-	for _, tag := range tagsFiltered {
-
-		var params []byte
-		if len(tag.Params) > 0 {
-			params, err = json.Marshal(tag.Params)
-			if err != nil {
-				return errors.Wrapf(err, onAddTags+"can't marshal .Params(%#v)", tag)
-			}
-		}
-
-		values := []interface{}{toTag.InterfaceKey, toTag.ID, tag.Label, params}
-
-		_, err = stmAddTags.Exec(values...)
-		if err != nil {
-			err = errors.Wrapf(err, onReplaceTags+": on tx.Exec(%s, %#v)", taggerOp.sqlAddTagged, values)
-			goto ROLLBACK
-		}
-	}
-
-	if err = taggerOp.countTagChanged(toTag, tagLabelsRemoved, tx); err != nil {
-		err = errors.Wrap(err, onReplaceTags)
+	if err = taggerOp.countTagChanged(toTag, []string{tag.Label}, tx); err != nil {
+		err = errors.Wrap(err, onRemoveTag)
 		goto ROLLBACK
 	}
 
@@ -235,12 +204,64 @@ func (taggerOp *tagsPg) ReplaceTags(toTag joiner.Link, items []tagger.Tag, optio
 	if err == nil {
 		return nil
 	}
-	err = errors.Wrap(err, onReplaceTags+": on tx.Commit()")
+	err = errors.Wrap(err, onRemoveTag+": on tx.Commit()")
 
 ROLLBACK:
 	errRollback := tx.Rollback()
 	if errRollback != nil {
-		return errors.Wrapf(err, onReplaceTags+": on tx.Rollback(): %s", errRollback)
+		return errors.Wrapf(err, onRemoveTag+": on tx.Rollback(): %s", errRollback)
+	}
+	return err
+}
+
+const onRemoveTagsAll = "on tagsPg.RemoveTagsAll(): "
+
+func (taggerOp *tagsPg) RemoveTagsAll(toTag joiner.Link, options *crud.SaveOptions) error {
+	var getOptions *crud.GetOptions
+	if options != nil && options.ActorKey != "" {
+		getOptions = &crud.GetOptions{ActorKey: options.ActorKey}
+	}
+
+	tagsOld, err := taggerOp.ListTags(toTag, getOptions)
+	if err != nil {
+		return errors.Wrap(err, onRemoveTagsAll)
+	}
+	var tagLabelsRemoved []string
+	for _, tag := range tagsOld {
+		tagLabelsRemoved = append(tagLabelsRemoved, strings.TrimSpace(tag.Label))
+	}
+
+	if len(tagLabelsRemoved) < 1 {
+		return nil
+	}
+
+	tx, err := taggerOp.db.Begin()
+	if err != nil {
+		return errors.Wrap(err, onRemoveTagsAll+": on taggerOp.db.Begin()")
+	}
+
+	values := []interface{}{toTag.InterfaceKey, toTag.ID}
+	_, err = tx.Exec(taggerOp.sqlRemoveTaggedAll, values...)
+	if err != nil {
+		err = errors.Wrapf(err, onRemoveTagsAll+": on tx.Exec(%s, %#v)", taggerOp.sqlRemoveTaggedAll, values)
+		goto ROLLBACK
+	}
+
+	if err = taggerOp.countTagChanged(toTag, tagLabelsRemoved, tx); err != nil {
+		err = errors.Wrap(err, onRemoveTagsAll)
+		goto ROLLBACK
+	}
+
+	err = tx.Commit()
+	if err == nil {
+		return nil
+	}
+	err = errors.Wrap(err, onRemoveTagsAll+": on tx.Commit()")
+
+ROLLBACK:
+	errRollback := tx.Rollback()
+	if errRollback != nil {
+		return errors.Wrapf(err, onRemoveTagsAll+": on tx.Rollback(): %s", errRollback)
 	}
 	return err
 }
@@ -287,7 +308,7 @@ func (taggerOp *tagsPg) ListTags(toTag joiner.Link, _ *crud.GetOptions) ([]tagge
 
 const onCountTags = "on tagsPg.CountTags(): "
 
-func (taggerOp *tagsPg) CountTags(key *joiner.InterfaceKey, _ *crud.GetOptions) ([]tagger.TagCount, error) {
+func (taggerOp *tagsPg) IndexTags(key *joiner.InterfaceKey, _ *crud.GetOptions) ([]tagger.TagCount, error) {
 	var values []interface{}
 	var query string
 	var stm *sql.Stmt

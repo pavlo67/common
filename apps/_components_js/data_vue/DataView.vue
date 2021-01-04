@@ -35,8 +35,9 @@
         </span>
 
         <span v-if="dataItem.Data instanceof Object">
-            <p/>
-            {{ dataItem.Data.Content }}
+            <p v-html="dataItem.Data.Content"></p>
+            <!-- {{ dataItem.Data.Content }}-->
+
         </span>
 
     </div>
@@ -45,7 +46,7 @@
 
 <script>
     import e  from '../elements';
-    import {createdAt} from './data';
+    import {createdAt} from '../date';
 
     let cfg = {};
 

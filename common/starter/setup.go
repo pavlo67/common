@@ -45,7 +45,7 @@ func Setup(cfg *config.Config, starters []Starter, components []string, label st
 
 		log.Println("  ---------- setup component: ", c.Name(), "   -----------")
 
-		_, err := c.Init(nil, cfg, logger.Get(), c.Options)
+		_, err := c.Init(cfg, logger.Get(), c.Options)
 		if err != nil {
 			return fmt.Errorf("error calling .Init() for component (%s): %s", c.Name(), err)
 		}

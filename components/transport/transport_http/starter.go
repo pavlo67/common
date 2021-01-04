@@ -35,7 +35,7 @@ func (th *transportHTTPStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (th *transportHTTPStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
+func (th *transportHTTPStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	l = lCommon
 	th.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(transport.InterfaceKey)))
 	th.handlerKey = joiner.InterfaceKey(options.StringDefault("handler_key", string(transport.HandlerInterfaceKey)))

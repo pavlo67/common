@@ -30,7 +30,7 @@ func (apu *authPassUsersStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (apu *authPassUsersStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
+func (apu *authPassUsersStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	if lCommon == nil {
 		return nil, errors.New("no logger")
 	}

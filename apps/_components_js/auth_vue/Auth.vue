@@ -16,8 +16,7 @@
 </template>
 
 <script>
-  const unauthorized = undefined;
-  const whoAmI       = 'я???';
+  const whoAmI = 'я???';
 
   // import b     from '../basis';
   import {cfg} from './init';
@@ -35,7 +34,7 @@
 
     } else {
       menuTitle = whoAmI;
-      cfg.common.user = unauthorized;
+      cfg.common.user = null;
 
     }
 
@@ -44,8 +43,8 @@
       console.log("USER TO BE EMITTED: ", cfg.common.user);
       cfg.eventBus.$emit("user", cfg.common.user);
     }
-    if (cfg.vue instanceof Object && typeof cfg.vue.$forceUpdate === "function") {
-      cfg.vue.$forceUpdate();
+    if (cfg.common instanceof Object && cfg.common.vue instanceof Object) {
+      cfg.common.vue.$forceUpdate();
     }
   }
 
@@ -53,7 +52,8 @@
     let user;
 
     let userStored = localStorage.getItem('user');
-    if (userStored) {
+    if (userStored && userStored.length > 0) {
+
       try {
         user = JSON.parse(userStored);
       } catch (err) {
@@ -67,7 +67,7 @@
   function saveUser(user) {
     setUser(user);
 
-    localStorage.setItem('user', JSON.stringify(cfg.common.user));
+    localStorage.setItem('user', cfg.common.user ? JSON.stringify(cfg.common.user) : null);
   }
 
   // -------------------------------------------------------------------------------------------------------
@@ -119,7 +119,7 @@
 
           } else {
             console.log("what is the data from /authorize?", data)
-            saveUser(unauthorized);
+            saveUser(null);
           }
 
           this.user = user = cfg.common.user;
@@ -142,7 +142,7 @@
       // },
 
       signOut: function () {
-        saveUser(unauthorized);
+        saveUser(null);
         this.user = user = cfg.common.user;
 
       },
@@ -155,11 +155,3 @@
 <style lang="scss">
 </style>
 
-
-
-<!--<style lang="scss">-->
-<!--  #auth {-->
-<!--    background-color: #ffffff;-->
-<!--    padding: 5px;-->
-<!--  }-->
-<!--</style>-->

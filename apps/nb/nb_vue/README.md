@@ -2,7 +2,11 @@
 
 ## Project setup
 ```
-npm install
+ln -s ../../_components_js/node_modules
+
+and/or
+
+npm install 
 ```
 
 ### Compiles and hot-reloads for development

@@ -16,12 +16,12 @@ import (
 	"github.com/pavlo67/workshop/common/control"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/serializer"
+	"github.com/pavlo67/workshop/common/server"
 	"github.com/pavlo67/workshop/common/server/server_http/server_http_jschmhr"
 	"github.com/pavlo67/workshop/common/starter"
 	"github.com/pavlo67/workshop/common/users/users_stub"
 
 	"github.com/pavlo67/workshop/components/data/data_pg"
-	"github.com/pavlo67/workshop/components/datatagged"
 	"github.com/pavlo67/workshop/components/exporter"
 	"github.com/pavlo67/workshop/components/exporter/exporter_data"
 	"github.com/pavlo67/workshop/components/packs/packs_pg"
@@ -34,7 +34,7 @@ import (
 	"github.com/pavlo67/workshop/components/transport/transport_http"
 	"github.com/pavlo67/workshop/components/transportrouter/transportrouter_stub"
 
-	"github.com/pavlo67/workshop/apps/nb/nb_actions"
+	"github.com/pavlo67/workshop/apps/nb/nb_api"
 )
 
 var (
@@ -44,15 +44,17 @@ var (
 )
 
 const serviceNameDefault = "nb"
+const appsSubpathDefault = "apps/"
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
 	var versionOnly, copyFlow bool
-	var serviceName string
+	var serviceName, appsSubpath string
 	flag.BoolVar(&versionOnly, "version_only", false, "show build vars only")
 	flag.BoolVar(&copyFlow, "copy_flow", false, "copy flow data immediately")
 	flag.StringVar(&serviceName, "service", serviceNameDefault, "service name")
+	flag.StringVar(&appsSubpath, "apps_subpath", appsSubpathDefault, "subpath to /apps directory")
 	flag.Parse()
 
 	log.Printf("builded: %s, tag: %s, commit: %s\n", BuildDate, BuildTag, BuildCommit)
@@ -80,33 +82,19 @@ func main() {
 	if err != nil {
 		l.Fatal("can't os.Getwd(): ", err)
 	}
+	cwd += "/"
 	l.Info("CWD: ", cwd)
-
-	// routes config
-
-	configCommonPath := cwd + "/environments/common." + configEnv + ".yaml"
-	cfgCommon, err := config.Get(configCommonPath, serviceName, serializer.MarshalerYAML)
-	if err != nil {
-		l.Fatal(err)
-	}
-	var routesCfg map[string]config.Access
-	err = cfgCommon.Value("routes", &routesCfg)
-	if err != nil {
-		l.Fatal(err)
-	}
-
-	var port int
-	if serviceAccess, ok := routesCfg[serviceName]; ok {
-		port = serviceAccess.Port
-	} else {
-		l.Fatalf("no access config for key %s (%#v)", serviceName, routesCfg)
-	}
 
 	// notebook config
 
-	//cfgServicePath := currentPath + "../../environments/" + serviceName + "." + configEnv + ".yaml"
-	cfgServicePath := cwd + "/environments/" + serviceName + "." + configEnv + ".yaml"
+	cfgServicePath := cwd + appsSubpath + "_environments/" + serviceName + "." + configEnv + ".yaml"
 	cfgService, err := config.Get(cfgServicePath, serviceName, serializer.MarshalerYAML)
+	if err != nil {
+		l.Fatal(err)
+	}
+
+	var cfgServerHTTP server.Config
+	err = cfgService.Value("server_http", &cfgServerHTTP)
 	if err != nil {
 		l.Fatal(err)
 	}
@@ -136,7 +124,7 @@ func main() {
 
 		// action managers
 		//{scheduler_timeout.Starter(), nil},
-		{server_http_jschmhr.Starter(), common.Map{"port": port}},
+		{server_http_jschmhr.Starter(), common.Map{"port": cfgServerHTTP.Port}},
 
 		// transport system
 		{packs_pg.Starter(), nil},
@@ -145,9 +133,8 @@ func main() {
 
 		// database
 		{tagger_pg.Starter(), nil},
-		{data_pg.Starter(), common.Map{"table": storage.CollectionDefault, "interface_key": storage.DataInterfaceKey}},
-		{datatagged.Starter(), common.Map{"data_key": storage.DataInterfaceKey, "interface_key": storage.InterfaceKey}},
-		{exporter_data.Starter(), common.Map{"data_key": storage.DataInterfaceKey, "interface_key": exporter.InterfaceKey}},
+		{data_pg.Starter(), common.Map{"table": storage.CollectionDefault, "interface_key": storage.InterfaceKey}},
+		{exporter_data.Starter(), common.Map{"data_key": storage.InterfaceKey, "interface_key": exporter.InterfaceKey}},
 		{storage_server_http.Starter(), common.Map{"data_key": storage.InterfaceKey, "exporter_key": exporter.InterfaceKey}},
 
 		// TODO: pass the interface_key of data_pg to front_end
@@ -161,8 +148,8 @@ func main() {
 		// {flowcleaner_task.Starter(), common.Map{"cleaner_key": flow.CleanerInterfaceKey, "interface_key": flow.CleanerTaskInterfaceKey, "limit": 300000}},
 
 		// actions starter (connecting specific actions to the corresponding action managers)
-		{nb_actions.Starter(), common.Map{
-			"base_dir": cwd + "/apps/nb/",
+		{nb_api.Starter(), common.Map{
+			// "base_dir": cwd + appsSubpath + "nb/",
 
 			"authorize_handler_key": auth.AuthorizeHandlerKey,
 			"set_creds_handler_key": auth.SetCredsHandlerKey,
@@ -176,13 +163,13 @@ func main() {
 		}},
 	}
 
-	joinerOp, err := starter.Run(starters, cfgCommon, cfgService, os.Args[1:], label)
+	joinerOp, err := starter.Run(starters, cfgService, os.Args[1:], label)
 	if err != nil {
 		l.Fatal(err)
 	}
 	defer joinerOp.CloseAll()
 
-	nb_actions.WG.Wait()
+	nb_api.WG.Wait()
 
 }
 

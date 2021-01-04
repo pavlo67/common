@@ -1,18 +1,3 @@
-// exports.int        = int;
-//
-// exports.nn         = nn;
-// exports.str        = str;
-// exports.cut        = cut;
-// exports.escapeXml  = escapeXml;  // npm i html-entities
-//
-// exports.array      = array;
-// exports.first      = first;
-// exports.second     = second;
-// exports.order      = order;
-//
-// exports.object     = object;
-// exports.copy       = copy;
-
 export default {
   int, nn, str, cut, escapeXml, array, first, second, order, object, copy, dateStr, i, ii, iii,
 }

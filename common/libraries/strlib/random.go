@@ -1,4 +1,4 @@
-package common
+package strlib
 
 import (
 	"math/rand"

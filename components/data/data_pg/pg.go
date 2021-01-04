@@ -7,23 +7,19 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pavlo67/workshop/common/selectors/logic"
-
-	"github.com/pavlo67/workshop/common/identity"
-
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/crud"
+	"github.com/pavlo67/workshop/common/identity"
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/libraries/sqllib"
 	"github.com/pavlo67/workshop/common/libraries/sqllib/sqllib_pg"
 	"github.com/pavlo67/workshop/common/libraries/strlib"
 	"github.com/pavlo67/workshop/common/selectors"
-	"github.com/pavlo67/workshop/common/selectors/selectors_sql"
-	"github.com/pkg/errors"
-
+	"github.com/pavlo67/workshop/common/selectors/logic"
 	"github.com/pavlo67/workshop/components/data"
 	"github.com/pavlo67/workshop/components/tagger"
+	"github.com/pkg/errors"
 )
 
 var fieldsToInsert = []string{"data_key", "url", "title", "summary", "embedded", "tags", "type_key", "content", "owner_key", "viewer_key", "history"}
@@ -35,7 +31,8 @@ var fieldsToRead = append(fieldsToUpdate, "updated_at", "created_at")
 var fieldsToReadStr = strings.Join(fieldsToRead, ", ")
 
 var fieldsToList = append([]string{"id"}, fieldsToRead...)
-var fieldsToListStr = strings.Join(fieldsToList, ", ")
+
+// var fieldsToListStr = strings.Join(fieldsToList, ", ")
 
 var _ data.Operator = &dataPg{}
 
@@ -43,8 +40,9 @@ type dataPg struct {
 	domain       identity.Domain
 	interfaceKey joiner.InterfaceKey
 
-	db    *sql.DB
-	table string
+	db              *sql.DB
+	table           string
+	fieldsToListStr string
 
 	sqlInsert, sqlUpdate, sqlRead, sqlRemove, sqlClean string
 	stmInsert, stmUpdate, stmRead, stmRemove           *sql.Stmt
@@ -55,8 +53,7 @@ type dataPg struct {
 
 const onNew = "on dataPg.New(): "
 
-func New(access config.Access, domain identity.Domain, table string, interfaceKey joiner.InterfaceKey, taggerOp tagger.Operator, taggerCleaner crud.Cleaner,
-) (data.Operator, crud.Cleaner, error) {
+func New(access config.Access, domain identity.Domain, table string, interfaceKey joiner.InterfaceKey, taggerOp tagger.Operator, taggerCleaner crud.Cleaner) (data.Operator, crud.Cleaner, error) {
 
 	domain = domain.Normalize()
 	if domain == "" {
@@ -72,11 +69,17 @@ func New(access config.Access, domain identity.Domain, table string, interfaceKe
 		table = data.CollectionDefault
 	}
 
+	var fieldsToListTabled []string
+	for _, f := range fieldsToList {
+		fieldsToListTabled = append(fieldsToListTabled, table+"."+f)
+	}
+
 	dataOp := dataPg{
 		domain: domain,
 
-		db:    db,
-		table: table,
+		db:              db,
+		table:           table,
+		fieldsToListStr: strings.Join(fieldsToListTabled, ","),
 
 		sqlInsert: "INSERT INTO " + table + " (" + fieldsToInsertStr + ") VALUES (" + sqllib_pg.WildcardsForInsert(fieldsToInsert) + ") RETURNING id",
 		sqlUpdate: "UPDATE " + table + " SET " + sqllib_pg.WildcardsForUpdate(fieldsToUpdate) +
@@ -118,6 +121,8 @@ func (dataOp *dataPg) Save(item data.Item, options *crud.SaveOptions) (common.ID
 	if options == nil || options.ActorKey == "" {
 		return "", errors.Errorf(onSave + "no user")
 	}
+
+	optionsToGet := &crud.GetOptions{ActorKey: options.ActorKey}
 
 	item.ID = item.ID.Normalize()
 	itemIdent := item.Key.Identity()
@@ -177,7 +182,7 @@ func (dataOp *dataPg) Save(item data.Item, options *crud.SaveOptions) (common.ID
 		id = common.ID(strconv.FormatUint(lastInsertId, 10))
 
 		if dataOp.taggerOp != nil && len(item.Tags) > 0 {
-			err = dataOp.taggerOp.AddTags(joiner.Link{dataOp.interfaceKey, id}, item.Tags, nil)
+			err = dataOp.taggerOp.AddTags(joiner.Link{dataOp.interfaceKey, id}, item.Tags, options)
 			if err != nil {
 				return "", errors.Wrapf(err, onSave+": can't .AddTags(%#v)", item.Tags)
 			}
@@ -186,7 +191,7 @@ func (dataOp *dataPg) Save(item data.Item, options *crud.SaveOptions) (common.ID
 	} else {
 		id = item.ID
 
-		itemOld, err := dataOp.Read(id, &crud.GetOptions{ActorKey: options.ActorKey})
+		itemOld, err := dataOp.Read(id, optionsToGet)
 		if err != nil {
 			return "", errors.Wrapf(err, onSave+"can't read old item with id = %s", id)
 		}
@@ -215,9 +220,18 @@ func (dataOp *dataPg) Save(item data.Item, options *crud.SaveOptions) (common.ID
 		}
 
 		if dataOp.taggerOp != nil {
-			err = dataOp.taggerOp.ReplaceTags(joiner.Link{dataOp.interfaceKey, item.ID}, item.Tags, nil)
+			// TODO: use one common transaction
+
+			linkToTagged := joiner.Link{dataOp.interfaceKey, item.ID}
+
+			err = dataOp.taggerOp.RemoveTagsAll(linkToTagged, options)
 			if err != nil {
-				return "", errors.Wrapf(err, onSave+": can't .ReplaceTags(%#v)", item.Tags)
+				return "", errors.Wrapf(err, onSave+": can't .RemoveTagsAll(%#v, %#v)", linkToTagged, options)
+			}
+
+			err = dataOp.taggerOp.AddTags(linkToTagged, item.Tags, options)
+			if err != nil {
+				return "", errors.Wrapf(err, onSave+": can't .AddTags(%#v, %#v, %#v)", linkToTagged, item.Tags, options)
 			}
 		}
 
@@ -241,6 +255,9 @@ func (dataOp *dataPg) Read(id common.ID, options *crud.GetOptions) (*data.Item, 
 	var viewerKey identity.Key
 	if options != nil {
 		viewerKey = options.ActorKey
+
+		// TODO!!! check if options.Term == nil
+
 	}
 
 	// TODO: check viewer_key for groups
@@ -249,12 +266,13 @@ func (dataOp *dataPg) Read(id common.ID, options *crud.GetOptions) (*data.Item, 
 
 	item := data.Item{ID: id}
 	var embedded, tags, history []byte
-	var createdAtStr string
+	// var createdAtStr string
+	var createdAt time.Time
 	var updatedAtPtr *string
 
 	err = dataOp.stmRead.QueryRow(values...).Scan(
 		&item.Key, &item.URL, &item.Title, &item.Summary, &embedded, &tags, &item.Data.TypeKey, &item.Data.Content, &item.OwnerKey, &item.ViewerKey, &history, &updatedAtPtr,
-		&createdAtStr,
+		&createdAt,
 	)
 
 	if err == sql.ErrNoRows {
@@ -289,12 +307,16 @@ func (dataOp *dataPg) Read(id common.ID, options *crud.GetOptions) (*data.Item, 
 		}
 	}
 
-	createdAt, err := time.Parse(time.RFC3339, createdAtStr)
-	if err != nil {
-		// TODO??? return &item, errors.Wrapf(err, onRead+"can't parse .CreatedAt (%s)", createdAtStr)
-	} else {
-		item.History = item.History.SaveAction(crud.Action{Key: crud.CreatedAction, DoneAt: createdAt, Related: &joiner.Link{InterfaceKey: data.InterfaceKey, ID: id}})
-	}
+	l.Info(createdAt)
+
+	//createdAt, err := time.Parse(time.RFC3339, createdAtStr)
+	//if err != nil {
+	//	// TODO??? return &item, errors.Wrapf(err, onRead+"can't parse .CreatedAt (%s)", createdAtStr)
+	//} else {
+	//	item.History = item.History.SaveAction(crud.Action{Key: crud.CreatedAction, DoneAt: createdAt, Related: &joiner.Link{InterfaceKey: data.InterfaceKey, ID: id}})
+	//}
+
+	item.History = item.History.SaveAction(crud.Action{Key: crud.CreatedAction, DoneAt: createdAt, Related: &joiner.Link{InterfaceKey: data.InterfaceKey, ID: id}})
 
 	if updatedAtPtr != nil {
 		updatedAt, err := time.Parse(time.RFC3339, *updatedAtPtr)
@@ -310,6 +332,10 @@ func (dataOp *dataPg) Read(id common.ID, options *crud.GetOptions) (*data.Item, 
 const onRemove = "on dataPg.Remove()"
 
 func (dataOp *dataPg) Remove(id common.ID, options *crud.RemoveOptions) error {
+	if options == nil || options.ActorKey == "" {
+		return errors.Errorf(onRemove + "no user")
+	}
+
 	if len(id) < 1 {
 		return errors.New(onRemove + "empty Key")
 	}
@@ -319,15 +345,10 @@ func (dataOp *dataPg) Remove(id common.ID, options *crud.RemoveOptions) error {
 		return errors.Errorf(onRemove+"wrong Key (%s)", id)
 	}
 
-	var ownerKey identity.Key
-	if options != nil {
-		ownerKey = options.ActorKey
-	}
-
 	// TODO: check owner_key for groups
 	// TODO: deny the action if owner_key is empty
 
-	values := []interface{}{idNum, ownerKey}
+	values := []interface{}{idNum, options.ActorKey}
 
 	_, err = dataOp.stmRemove.Exec(values...)
 	if err != nil {
@@ -335,7 +356,7 @@ func (dataOp *dataPg) Remove(id common.ID, options *crud.RemoveOptions) error {
 	}
 
 	if dataOp.taggerOp != nil {
-		err = dataOp.taggerOp.ReplaceTags(joiner.Link{dataOp.interfaceKey, id}, nil, nil)
+		err = dataOp.taggerOp.RemoveTagsAll(joiner.Link{dataOp.interfaceKey, id}, &crud.SaveOptions{ActorKey: options.ActorKey})
 		if err != nil {
 			return errors.Wrapf(err, onRemove+": can't .ReplaceTags(%#v)", nil)
 		}
@@ -346,29 +367,21 @@ func (dataOp *dataPg) Remove(id common.ID, options *crud.RemoveOptions) error {
 
 const onList = "on dataPg.List()"
 
-func (dataOp *dataPg) List(term *selectors.Term, options *crud.GetOptions) ([]data.Item, error) {
+func (dataOp *dataPg) List(options *crud.GetOptions) ([]data.Item, error) {
 
 	// TODO!!! use default key's value searching data with empty .Key
 
-	var viewerKey identity.Key
-	if options != nil {
-		viewerKey = options.ActorKey
-	}
-
-	term = logic.AND(term, selectors.In("viewer_key", viewerKey))
-
-	condition, values, err := selectors_sql.Use(term)
+	query, values, err := sqllib.SQLList(dataOp.table, dataOp.fieldsToListStr, options, sqllib_pg.CorrectWildcards)
 	if err != nil {
-		return nil, errors.Errorf(onList+"wrong selector (%#v): %s", term, err)
+		return nil, errors.Errorf(onList+"can't sqllib.SQLList(%s, %s, %#v, sqllib_pg.CorrectWildcards): %s", dataOp.table, dataOp.fieldsToListStr, options, err)
 	}
 
-	query := sqllib_pg.CorrectWildcards(sqllib.SQLList(dataOp.table, fieldsToListStr, condition, options))
+	// l.Infof("%s / %#v\n%s", condition, values, query)
+
 	stm, err := dataOp.db.Prepare(query)
 	if err != nil {
 		return nil, errors.Wrapf(err, onList+": can't db.Prepare(%s)", query)
 	}
-
-	// l.Infof("%s / %#v\n%s", condition, values, query)
 
 	rows, err := stm.Query(values...)
 
@@ -449,17 +462,15 @@ func (dataOp *dataPg) List(term *selectors.Term, options *crud.GetOptions) ([]da
 
 const onCount = "on dataPg.Count(): "
 
-func (dataOp *dataPg) Count(term *selectors.Term, options *crud.GetOptions) (uint64, error) {
+func (dataOp *dataPg) Count(options *crud.GetOptions) (uint64, error) {
 
 	// TODO: check viewer_key
 
-	condition, values, err := selectors_sql.Use(term)
+	query, values, err := sqllib.SQLCount(dataOp.table, options, sqllib_pg.CorrectWildcards)
 	if err != nil {
-		termStr, _ := json.Marshal(term)
-		return 0, errors.Wrapf(err, onCount+": can't selectors_sql.Use(%s)", termStr)
+		return 0, errors.Wrapf(err, onCount+": can't sqllib.SQLCount(%s, %#v, sqllib_pg.CorrectWildcards)", dataOp.table, options)
 	}
 
-	query := sqllib_pg.CorrectWildcards(sqllib.SQLCount(dataOp.table, condition, options))
 	stm, err := dataOp.db.Prepare(query)
 	if err != nil {
 		return 0, errors.Wrapf(err, onCount+": can't db.Prepare(%s)", query)
@@ -473,6 +484,57 @@ func (dataOp *dataPg) Count(term *selectors.Term, options *crud.GetOptions) (uin
 	}
 
 	return num, nil
+}
+
+func (dataOp *dataPg) Tagger() tagger.Operator {
+	return dataOp.taggerOp
+}
+
+const onListTagged = "on dataPg.ListTagged(): "
+
+func (dataOp *dataPg) ListTagged(tagLabel string, options *crud.GetOptions) ([]data.Item, error) {
+	if dataOp.taggerOp == nil {
+		return nil, errors.New(onListTagged + ": no tagger.Operator")
+	}
+
+	// select storage.* from storage join tagged on storage.id::text = tagged.id and tag = 'www';
+	if options == nil {
+		options = &crud.GetOptions{}
+	}
+	options.JoinTo = crud.JoinTo{
+		Clause: "join tagged on " + dataOp.table + ".id::text = tagged.id and tag = ?",
+		Values: []interface{}{tagLabel},
+	}
+
+	return dataOp.List(options)
+
+	//return data.ListTagged(dataOp, dataOp.taggerOp, &dataOp.interfaceKey, tagLabel, options)
+}
+
+const onListUntagged = "on dataPg.ListTagged(): "
+
+func (dataOp *dataPg) ListUntagged(tagLabel string, options *crud.GetOptions) ([]data.Item, error) {
+	if dataOp.taggerOp == nil {
+		return nil, errors.New(onListTagged + ": no tagger.Operator")
+	}
+
+	// select storage.* from storage join tagged on storage.id::text = tagged.id and tag = 'www';
+	if options == nil {
+		options = &crud.GetOptions{}
+	}
+	options.JoinTo = crud.JoinTo{
+		Clause: "LEFT JOIN tagged ON " + dataOp.table + ".id::text = tagged.id AND tag = ?",
+		Values: []interface{}{tagLabel},
+	}
+	if options.Term == nil {
+		options.Term = selectors.String("tag IS NULL")
+	} else {
+		options.Term = logic.AND(options.Term, selectors.String("tag IS NULL"))
+	}
+
+	return dataOp.List(options)
+
+	//return data.ListTagged(dataOp, dataOp.taggerOp, &dataOp.interfaceKey, tagLabel, options)
 }
 
 func (dataOp *dataPg) Close() error {
