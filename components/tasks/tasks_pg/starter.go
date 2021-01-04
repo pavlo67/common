@@ -29,7 +29,7 @@ func (ts *tasksPgStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ts *tasksPgStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
+func (ts *tasksPgStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	l = lCommon
 
 	var cfgPg config.Access

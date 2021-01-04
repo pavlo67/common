@@ -29,7 +29,7 @@ func (ss *identity_ecdsa) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *identity_ecdsa) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) (info []common.Map, err error) {
+func (ss *identity_ecdsa) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) (info []common.Map, err error) {
 	if lCommon == nil {
 		return nil, errors.New("no logger")
 	}

@@ -36,7 +36,7 @@ func (dtsh *dataServerHTTPStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (dtsh *dataServerHTTPStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
+func (dtsh *dataServerHTTPStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	l = lCommon
 	if l == nil {
 		return nil, fmt.Errorf("no logger for %s:-(", dtsh.Name())

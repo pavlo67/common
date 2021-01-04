@@ -197,7 +197,7 @@ func (s *serverHTTPJschmhr) HandleEndpoint(key, serverPath string, endpoint serv
 		responseData, err := endpoint.WorkerHTTP(user, params, r)
 		if err != nil {
 			l.Error(err)
-			http.Error(w, err.Error(), responseData.Status)
+			http.Error(w, string(responseData.Data), responseData.Status)
 			return
 		}
 		w.Header().Set("Content-TypeKey", responseData.MIMEType)
@@ -206,7 +206,7 @@ func (s *serverHTTPJschmhr) HandleEndpoint(key, serverPath string, endpoint serv
 			w.Header().Set("Content-Disposition", "attachment; filename="+responseData.FileName)
 		}
 
-		if responseData.Status <= 0 {
+		if responseData.Status > 0 {
 			w.WriteHeader(responseData.Status)
 		} else {
 			w.WriteHeader(http.StatusOK)

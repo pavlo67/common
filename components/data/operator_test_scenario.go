@@ -321,7 +321,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		//
 		//	// TODO: selector.InStr(keyFields[0], ids...)
 
-		briefsAll, err := tc.List(nil, &crud.GetOptions{ActorKey: actorKey, OrderBy: []string{"id"}})
+		briefsAll, err := tc.List(&crud.GetOptions{ActorKey: actorKey, OrderBy: []string{"id"}})
 		require.NoError(t, err)
 		require.True(t, len(briefsAll) == numRepeats)
 
@@ -337,7 +337,7 @@ func OperatorTestScenario(t *testing.T, testCases []OperatorTestCase, l logger.O
 		require.Error(t, err)
 		require.Nil(t, readDeleted)
 
-		briefsAll, err = tc.List(nil, &crud.GetOptions{ActorKey: actorKey})
+		briefsAll, err = tc.List(&crud.GetOptions{ActorKey: actorKey})
 		require.NoError(t, err)
 		require.True(t, len(briefsAll) == numRepeats-1)
 

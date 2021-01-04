@@ -28,7 +28,7 @@ func (ts *taggerPgStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ts *taggerPgStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
+func (ts *taggerPgStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	l = lCommon
 
 	cfgPg := config.Access{}

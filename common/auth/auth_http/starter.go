@@ -39,7 +39,7 @@ func (ah *authHTTPStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ah *authHTTPStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
+func (ah *authHTTPStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	if lCommon == nil {
 		return nil, errors.New("no logger")
 	}

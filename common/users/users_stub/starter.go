@@ -38,7 +38,7 @@ func (sc *users_stubStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (sc *users_stubStarter) Init(_, _ *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
+func (sc *users_stubStarter) Init(_ *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	if lCommon == nil {
 		return nil, errors.New("no logger.Operator")
 	}

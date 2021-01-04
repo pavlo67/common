@@ -7,11 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pavlo67/workshop/common/selectors"
-	"github.com/pavlo67/workshop/common/selectors/logic"
-
-	"github.com/pkg/errors"
-
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/crud"
@@ -20,9 +15,11 @@ import (
 	"github.com/pavlo67/workshop/common/libraries/sqllib"
 	"github.com/pavlo67/workshop/common/libraries/sqllib/sqllib_pg"
 	"github.com/pavlo67/workshop/common/libraries/strlib"
-
+	"github.com/pavlo67/workshop/common/selectors"
+	"github.com/pavlo67/workshop/common/selectors/logic"
 	"github.com/pavlo67/workshop/components/data"
 	"github.com/pavlo67/workshop/components/tagger"
+	"github.com/pkg/errors"
 )
 
 var fieldsToInsert = []string{"data_key", "url", "title", "summary", "embedded", "tags", "type_key", "content", "owner_key", "viewer_key", "history"}

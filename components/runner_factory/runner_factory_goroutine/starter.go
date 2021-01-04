@@ -29,7 +29,7 @@ func (rfs *runnerFactoryStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (rfs *runnerFactoryStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
+func (rfs *runnerFactoryStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	l = lCommon
 	rfs.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(runner.FactoryInterfaceKey)))
 

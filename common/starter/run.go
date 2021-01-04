@@ -12,7 +12,7 @@ import (
 	"github.com/pavlo67/workshop/common/logger"
 )
 
-func StartComponent(c Starter, cfgCommon, cfg *config.Config, args []string, joinerOp joiner.Operator) error {
+func StartComponent(c Starter, cfg *config.Config, args []string, joinerOp joiner.Operator) error {
 	l := logger.Get()
 
 	name := c.Name()
@@ -25,7 +25,7 @@ func StartComponent(c Starter, cfgCommon, cfg *config.Config, args []string, joi
 
 	startOptions := c.CorrectedOptions(ReadOptions(args))
 
-	info, err := c.Init(cfgCommon, cfg, l, startOptions)
+	info, err := c.Init(cfg, l, startOptions)
 	for _, i := range info {
 		log.Println(i)
 	}
@@ -47,12 +47,12 @@ func ReadOptions(args []string) common.Map {
 	return nil
 }
 
-func Run(starters []Starter, cfgCommon, cfg *config.Config, args []string, label string) (joiner.Operator, error) {
+func Run(starters []Starter, cfg *config.Config, args []string, label string) (joiner.Operator, error) {
 	l := logger.Get()
 
 	joinerOp := joiner.New()
 	for _, c := range starters {
-		err := StartComponent(c, cfgCommon, cfg, args, joinerOp)
+		err := StartComponent(c, cfg, args, joinerOp)
 		if err != nil {
 			return joinerOp, err
 		}

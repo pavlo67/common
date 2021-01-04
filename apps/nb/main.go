@@ -16,6 +16,7 @@ import (
 	"github.com/pavlo67/workshop/common/control"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/serializer"
+	"github.com/pavlo67/workshop/common/server"
 	"github.com/pavlo67/workshop/common/server/server_http/server_http_jschmhr"
 	"github.com/pavlo67/workshop/common/starter"
 	"github.com/pavlo67/workshop/common/users/users_stub"
@@ -84,30 +85,16 @@ func main() {
 	cwd += "/"
 	l.Info("CWD: ", cwd)
 
-	// routes config
-
-	configCommonPath := cwd + appsSubpath + "_environments/common." + configEnv + ".yaml"
-	cfgCommon, err := config.Get(configCommonPath, serviceName, serializer.MarshalerYAML)
-	if err != nil {
-		l.Fatal(err)
-	}
-	var routesCfg map[string]config.Access
-	err = cfgCommon.Value("routes", &routesCfg)
-	if err != nil {
-		l.Fatal(err)
-	}
-
-	var port int
-	if serviceAccess, ok := routesCfg[serviceName]; ok {
-		port = serviceAccess.Port
-	} else {
-		l.Fatalf("no access config for key %s (%#v)", serviceName, routesCfg)
-	}
-
 	// notebook config
 
 	cfgServicePath := cwd + appsSubpath + "_environments/" + serviceName + "." + configEnv + ".yaml"
 	cfgService, err := config.Get(cfgServicePath, serviceName, serializer.MarshalerYAML)
+	if err != nil {
+		l.Fatal(err)
+	}
+
+	var cfgServerHTTP server.Config
+	err = cfgService.Value("server_http", &cfgServerHTTP)
 	if err != nil {
 		l.Fatal(err)
 	}
@@ -137,7 +124,7 @@ func main() {
 
 		// action managers
 		//{scheduler_timeout.Starter(), nil},
-		{server_http_jschmhr.Starter(), common.Map{"port": port}},
+		{server_http_jschmhr.Starter(), common.Map{"port": cfgServerHTTP.Port}},
 
 		// transport system
 		{packs_pg.Starter(), nil},
@@ -176,7 +163,7 @@ func main() {
 		}},
 	}
 
-	joinerOp, err := starter.Run(starters, cfgCommon, cfgService, os.Args[1:], label)
+	joinerOp, err := starter.Run(starters, cfgService, os.Args[1:], label)
 	if err != nil {
 		l.Fatal(err)
 	}

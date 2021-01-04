@@ -3,9 +3,8 @@ package crud
 import (
 	"database/sql"
 
-	"github.com/pavlo67/workshop/common/selectors"
-
 	"github.com/pavlo67/workshop/common/identity"
+	"github.com/pavlo67/workshop/common/selectors"
 )
 
 type SaveOptions struct {
