@@ -30,7 +30,7 @@ type CorrectWildcards func(query string) string
 
 const onSQLList = "on sqllib.SQLList(): "
 
-func SQLList(table, fields string, options *crud.GetOptions, correctWildcards CorrectWildcards) (string, []interface{}, error) {
+func SQLList(table, fields string, options *crud.Options, correctWildcards CorrectWildcards) (string, []interface{}, error) {
 
 	var join, order, limit string
 	var values []interface{}
@@ -91,7 +91,7 @@ func SQLList(table, fields string, options *crud.GetOptions, correctWildcards Co
 
 const onSQLCount = "on sqllib.SQLCount(): "
 
-func SQLCount(table string, options *crud.GetOptions, correctWildcards CorrectWildcards) (string, []interface{}, error) {
+func SQLCount(table string, options *crud.Options, correctWildcards CorrectWildcards) (string, []interface{}, error) {
 	var term *selectors.Term
 	if options == nil {
 		term = selectors.In("viewer_key", "")

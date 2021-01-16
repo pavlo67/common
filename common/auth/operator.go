@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/pavlo67/workshop/common"
+
 	"github.com/pavlo67/workshop/common/identity"
 	"github.com/pavlo67/workshop/common/joiner"
 )

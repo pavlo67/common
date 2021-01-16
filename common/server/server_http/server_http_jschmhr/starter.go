@@ -1,9 +1,10 @@
 package server_http_jschmhr
 
 import (
+	"github.com/pavlo67/workshop/common"
+	"github.com/pavlo67/workshop/common/data"
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/joiner"
 
@@ -33,7 +34,7 @@ func (ss *server_http_jschmhrStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *server_http_jschmhrStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
+func (ss *server_http_jschmhrStarter) Init(cfg *config.Config, lCommon logger.Operator, options data.Map) ([]data.Map, error) {
 	var errs common.Errors
 	l = lCommon
 

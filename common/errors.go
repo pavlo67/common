@@ -26,6 +26,10 @@ var ErrTest = errors.New("помилка на тесті")
 
 // Errors ---------------------------------------------------------------------------------------------------------------
 
+type Error interface {
+	error
+}
+
 type Errors []error
 
 // it's would be not good to use Errors as an error interface directly because of:

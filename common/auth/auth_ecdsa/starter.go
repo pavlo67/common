@@ -3,9 +3,10 @@ package auth_ecdsa
 import (
 	"time"
 
+	"github.com/pavlo67/workshop/common/data"
+
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/logger"
@@ -29,7 +30,7 @@ func (ss *identity_ecdsa) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *identity_ecdsa) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) (info []common.Map, err error) {
+func (ss *identity_ecdsa) Init(cfg *config.Config, lCommon logger.Operator, options data.Map) (info []data.Map, err error) {
 	if lCommon == nil {
 		return nil, errors.New("no logger")
 	}

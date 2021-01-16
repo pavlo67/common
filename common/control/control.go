@@ -5,7 +5,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/pavlo67/workshop/common"
+	"github.com/pavlo67/workshop/common/data"
+
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/logger"
@@ -25,7 +26,7 @@ func (ws *controlStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ws *controlStarter) Init(_ *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
+func (ws *controlStarter) Init(_ *config.Config, lCommon logger.Operator, options data.Map) ([]data.Map, error) {
 	l = lCommon
 	return nil, nil
 }

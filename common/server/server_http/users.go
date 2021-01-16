@@ -3,9 +3,10 @@ package server_http
 import (
 	"net/http"
 
+	"github.com/pavlo67/workshop/common"
+
 	"github.com/pkg/errors"
 
-	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/auth"
 )
 

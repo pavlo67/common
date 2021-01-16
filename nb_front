@@ -1,3 +1,0 @@
-cd apps/nb/nb_vue
-
-./node_modules/.bin/vue-cli-service serve

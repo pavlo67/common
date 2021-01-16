@@ -5,6 +5,6 @@ import (
 )
 
 type Cleaner interface {
-	SelectToClean(*RemoveOptions) (*selectors.Term, error)
-	Clean(*selectors.Term, *RemoveOptions) error
+	SelectToClean(*Options) (*selectors.Term, error)
+	Clean(*selectors.Term, *Options) error
 }

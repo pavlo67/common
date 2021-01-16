@@ -6,7 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/pavlo67/workshop/common"
+	"github.com/pavlo67/workshop/common/data"
+
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/logger"
@@ -41,7 +42,7 @@ func StartComponent(c Starter, cfg *config.Config, args []string, joinerOp joine
 	return nil
 }
 
-func ReadOptions(args []string) common.Map {
+func ReadOptions(args []string) data.Map {
 	// TODO!!!
 
 	return nil

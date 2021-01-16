@@ -4,11 +4,12 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/pavlo67/workshop/common"
+
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common/joiner"
 
-	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/identity"
 )
 

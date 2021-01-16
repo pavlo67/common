@@ -4,7 +4,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/pavlo67/workshop/common"
+	"github.com/pavlo67/workshop/common/data"
+
 	"github.com/pavlo67/workshop/common/libraries/strlib"
 )
 
@@ -15,9 +16,9 @@ func (d Domain) Normalize() Domain {
 }
 
 type Item struct {
-	Domain Domain    `bson:"domain,omitempty"  json:"domain,omitempty"`
-	Path   string    `bson:"path,omitempty"    json:"path,omitempty"`
-	ID     common.ID `bson:"id,omitempty"      json:"id,omitempty"`
+	Domain Domain  `bson:"domain,omitempty"  json:"domain,omitempty"`
+	Path   string  `bson:"path,omitempty"    json:"path,omitempty"`
+	ID     data.ID `bson:"id,omitempty"      json:"id,omitempty"`
 }
 
 const PathDelim = `/`
@@ -46,10 +47,6 @@ func FromURLRaw(urlRaw string) Item {
 
 // Key is a string representation of Item.
 type Key string
-
-//func (key Key) NotEmpty() bool {
-//
-//}
 
 func (item *Item) IsValid() bool {
 	if item == nil {
@@ -103,7 +100,7 @@ func (key Key) Identity() *Item {
 	return &Item{
 		Domain: Domain(domain),
 		Path:   path,
-		ID:     common.ID(id),
+		ID:     data.ID(id),
 	}
 }
 
