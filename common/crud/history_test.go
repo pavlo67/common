@@ -4,7 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/pavlo67/workshop/common/identity"
+	"github.com/pavlo67/workshop/common"
+
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/stretchr/testify/require"
 )
@@ -14,9 +15,9 @@ func TestHistoryCheckOn(t *testing.T) {
 
 	interfaceKey0 := joiner.InterfaceKey("0")
 
-	actorKey0 := identity.Key("0")
+	actorKey0 := common.Key("0")
 
-	actorKey1 := identity.Key("1")
+	actorKey1 := common.Key("1")
 
 	hOld := History{
 		{

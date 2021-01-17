@@ -9,7 +9,6 @@ import (
 	"gopkg.in/square/go-jose.v2/jwt"
 
 	"github.com/pavlo67/workshop/common/auth"
-	"github.com/pavlo67/workshop/common/identity"
 	"github.com/pavlo67/workshop/common/libraries/encrlib"
 )
 
@@ -51,7 +50,7 @@ type jwtCreds struct {
 }
 
 // 	SetCreds ignores all input parameters, creates new "BTC identity" and returns it
-func (authOp *authJWT) SetCreds(userKey identity.Key, creds auth.Creds) (*auth.Creds, error) {
+func (authOp *authJWT) SetCreds(userKey auth.Key, creds auth.Creds) (*auth.Creds, error) {
 
 	jc := jwtCreds{
 		Claims: &jwt.Claims{
@@ -102,7 +101,7 @@ func (authOp *authJWT) Authorize(toAuth auth.Creds) (*auth.User, error) {
 	}
 
 	return &auth.User{
-		Key:   identity.Key(res.ID),
+		Key:   auth.Key(res.ID),
 		Creds: res.Creds,
 	}, nil
 }

@@ -1,7 +1,7 @@
 package auth_jwt
 
 import (
-	"github.com/pavlo67/workshop/common/data"
+	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/libraries/filelib"
 	"github.com/pkg/errors"
 
@@ -28,7 +28,7 @@ func (ss *identity_jwtStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *identity_jwtStarter) Init(cfg *config.Config, lCommon logger.Operator, options data.Map) (info []data.Map, err error) {
+func (ss *identity_jwtStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) (info []common.Map, err error) {
 	if lCommon == nil {
 		return nil, errors.New("no logger")
 	}

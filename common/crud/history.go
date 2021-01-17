@@ -9,8 +9,6 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common/joiner"
-
-	"github.com/pavlo67/workshop/common/identity"
 )
 
 type ActionKey string
@@ -21,7 +19,7 @@ const CreatedAction ActionKey = "created"
 const UpdatedAction ActionKey = "updated"
 
 type Action struct {
-	ActorKey identity.Key  `bson:",omitempty" json:",omitempty"`
+	ActorKey common.Key    `bson:",omitempty" json:",omitempty"`
 	Key      ActionKey     `bson:",omitempty" json:",omitempty"`
 	DoneAt   time.Time     `bson:",omitempty" json:",omitempty"`
 	Related  *joiner.Link  `bson:",omitempty" json:",omitempty"`

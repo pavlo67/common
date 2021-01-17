@@ -1,7 +1,7 @@
 package auth_server_http
 
 import (
-	"github.com/pavlo67/workshop/common/data"
+	"github.com/pavlo67/workshop/common"
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common/auth"
@@ -39,7 +39,7 @@ func (ah *authHTTPStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ah *authHTTPStarter) Init(cfg *config.Config, lCommon logger.Operator, options data.Map) ([]data.Map, error) {
+func (ah *authHTTPStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	if lCommon == nil {
 		return nil, errors.New("no logger")
 	}

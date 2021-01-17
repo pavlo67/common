@@ -10,8 +10,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/pavlo67/workshop/common/identity"
-
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/pkg/errors"
 
@@ -64,7 +62,7 @@ func New(numbersLimit int, maxSessionDuration time.Duration, acceptableIDs []str
 }
 
 // 	SetCreds creates either session-generated key or new "BTC identity" and returns it
-func (is *authECDSA) SetCreds(userKey identity.Key, creds auth.Creds) (*auth.Creds, error) {
+func (is *authECDSA) SetCreds(userKey auth.Key, creds auth.Creds) (*auth.Creds, error) {
 	toSet := auth.CredsType(creds[auth.CredsToSet])
 
 	if toSet == auth.CredsKeyToSignature {
@@ -123,7 +121,7 @@ func (is *authECDSA) SetCreds(userKey identity.Key, creds auth.Creds) (*auth.Cre
 	return credsNew, nil
 }
 
-const onAuthorize = "on authECDSA.Authorize(): "
+const onAuthorize = "on authECDSA.Authenticate(): "
 
 func (is *authECDSA) Authorize(toAuth auth.Creds) (*auth.User, error) {
 	if toAuth[auth.CredsPublicKeyEncoding] != Proto {
@@ -178,7 +176,7 @@ func (is *authECDSA) Authorize(toAuth auth.Creds) (*auth.User, error) {
 	}
 
 	return &auth.User{
-		Key:   identity.Key(Proto + "://" + publKeyBase58),
+		Key:   auth.Key(Proto + "://" + publKeyBase58),
 		Creds: auth.Creds{auth.CredsNickname: nickname},
 	}, nil
 }

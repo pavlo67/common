@@ -1,6 +1,4 @@
-package data
-
-import "github.com/pavlo67/workshop/common"
+package common
 
 type Type struct {
 	Key      TypeKey
@@ -16,12 +14,12 @@ type Description interface {
 	Fields() []Field
 	Required() []string
 	Essential() []string
-	IsEqualTo(Description) common.Error
-	ValuesAreEqual(value1, value2 interface{}) common.Error
+	IsEqualTo(Description) Error
+	ValuesAreEqual(value1, value2 interface{}) Error
 }
 
 type Content interface {
 	NewEmpty() Content
-	Import(List, Description) common.Error
-	Export() (List, Description, common.Error)
+	Import(List, Description) Error
+	Export() (List, Description, Error)
 }

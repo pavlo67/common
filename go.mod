@@ -11,6 +11,7 @@ require (
 	github.com/stretchr/testify v1.6.1
 	github.com/yosuke-furukawa/json5 v0.1.1
 	go.uber.org/zap v1.16.0
+	golang.org/x/text v0.3.0
 	gopkg.in/square/go-jose.v2 v2.5.1
 	gopkg.in/yaml.v2 v2.4.0
 )

@@ -3,7 +3,8 @@ package crud
 import (
 	"database/sql"
 
-	"github.com/pavlo67/workshop/common/identity"
+	"github.com/pavlo67/workshop/common"
+
 	"github.com/pavlo67/workshop/common/selectors"
 )
 
@@ -13,7 +14,7 @@ type JoinTo struct {
 }
 
 type Options struct {
-	ActorKey identity.Key
+	ActorKey common.Key
 
 	Term    *selectors.Term
 	JoinTo  JoinTo

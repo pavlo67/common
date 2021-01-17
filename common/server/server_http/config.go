@@ -4,8 +4,11 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/pavlo67/workshop/common/joiner"
+	"github.com/pavlo67/workshop/common"
+
 	"github.com/pkg/errors"
+
+	"github.com/pavlo67/workshop/common/joiner"
 )
 
 type EndpointConfig struct {
@@ -30,8 +33,8 @@ type Swagger map[string]interface{}
 
 // type SwaggerEndpoint struct {}
 
-func (c Config) SwaggerV2(port string) ([]byte, error) {
-	paths := map[string]map[string]map[string]interface{}{}
+func (c Config) SwaggerV2(port string, noHTTPS bool) ([]byte, error) {
+	paths := map[string]common.Map{} // map[string]map[string]map[string]interface{}{}
 
 	for key, ep := range c.Endpoints {
 		if ep.Handler == nil {
@@ -41,7 +44,7 @@ func (c Config) SwaggerV2(port string) ([]byte, error) {
 		path := c.Prefix + ep.Handler.PathTemplateBraced(ep.Path)
 		method := strings.ToLower(ep.Handler.Method)
 
-		epDescr := map[string]interface{}{
+		epDescr := common.Map{
 			"operationId": key,
 			"tags":        ep.Tags,
 		}
@@ -52,12 +55,16 @@ func (c Config) SwaggerV2(port string) ([]byte, error) {
 			epDescr["produces"] = []string{"application/json"}
 		}
 
-		var parameters []map[string]interface{}
+		var parameters []interface{} // []map[string]interface{}
 
 		for _, pp := range ep.Handler.PathParams {
+			if len(pp) > 0 && pp[0] == '*' {
+				pp = pp[1:]
+			}
+
 			parameters = append(
 				parameters,
-				map[string]interface{}{
+				common.Map{
 					"in":          "path",
 					"required":    true,
 					"name":        pp,
@@ -69,7 +76,7 @@ func (c Config) SwaggerV2(port string) ([]byte, error) {
 		for _, qp := range ep.Handler.QueryParams {
 			parameters = append(
 				parameters,
-				map[string]interface{}{
+				common.Map{
 					"in":          "query",
 					"required":    false, // TODO!!!
 					"name":        qp,
@@ -80,15 +87,16 @@ func (c Config) SwaggerV2(port string) ([]byte, error) {
 		}
 
 		if method == "post" {
-			parameters = append(
-				parameters,
-				map[string]interface{}{
+			if len(ep.Handler.BodyParams) > 0 {
+				parameters = append(parameters, ep.Handler.BodyParams)
+			} else {
+				parameters = append(parameters, common.Map{
 					"in":       "body",
 					"required": true,
 					"name":     "body_item",
 					"type":     "string",
-				},
-			)
+				})
+			}
 		}
 
 		if len(parameters) > 0 {
@@ -96,13 +104,20 @@ func (c Config) SwaggerV2(port string) ([]byte, error) {
 		}
 
 		if epDescrPrev, ok := paths[path][method]; ok {
-			return nil, errors.Errorf("duplicate endpoint description (%s/%s): %#v vs. %#v", path, method, epDescrPrev, epDescr)
+			return nil, errors.Errorf("duplicate endpoint description (%s %s): \n%#v\nvs.\n%#v", method, path, epDescrPrev, epDescr)
 		}
 		if _, ok := paths[path]; ok { // pathPrev
 			paths[path][method] = epDescr
 		} else {
-			paths[path] = map[string]map[string]interface{}{method: epDescr}
+			paths[path] = common.Map{method: epDescr} // map[string]map[string]interface{}
 		}
+	}
+
+	var schemes []string
+	if noHTTPS {
+		schemes = []string{"http"}
+	} else {
+		schemes = []string{"https", "http"}
 	}
 
 	swagger := Swagger{
@@ -112,7 +127,7 @@ func (c Config) SwaggerV2(port string) ([]byte, error) {
 			"version": c.Version,
 		},
 		// "basePath": c.Prefix,
-		"schemes": []string{"http", "https"},
+		"schemes": schemes,
 		"port":    port,
 		"paths":   paths,
 	}

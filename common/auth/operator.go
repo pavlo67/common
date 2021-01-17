@@ -6,7 +6,6 @@ import (
 
 	"github.com/pavlo67/workshop/common"
 
-	"github.com/pavlo67/workshop/common/identity"
 	"github.com/pavlo67/workshop/common/joiner"
 )
 
@@ -14,50 +13,60 @@ const AuthorizeHandlerKey joiner.InterfaceKey = "authorize_handler"
 const SetCredsHandlerKey joiner.InterfaceKey = "set_creds_handler"
 const GetCredsHandlerKey joiner.InterfaceKey = "get_creds_handler"
 
-type User struct {
-	Key   identity.Key `bson:",omitempty" json:",omitempty"`
-	Creds Creds        `bson:",omitempty" json:",omitempty"`
-}
+//type User struct {
+//	Key   Key   `bson:",omitempty" json:",omitempty"`
+//	Creds Creds `bson:",omitempty" json:",omitempty"`
+//}
 
-func (user *User) KeyYet() identity.Key {
-	if user == nil {
-		return ""
-	}
-
-	return user.Key
-}
+//func (user *User) KeyYet() Key {
+//	if user == nil {
+//		return ""
+//	}
+//
+//	return user.Key
+//}
 
 type Operator interface {
 	// SetCreds sets user's own or temporary (session-generated) creds
-	SetCreds(userKey identity.Key, toSet Creds) (*Creds, error)
+	SetCreds(identity *Identity, toSet Creds) (*Creds, error)
 
 	// Authorize can require to do .SetCreds first and to usa some session-generated creds
-	Authorize(toAuth Creds) (*User, error)
+	Authenticate(toAuth Creds) (*Identity, error)
 }
 
 // to use with map[CredsType]identity.ActorKey  --------------------------------------------------------------------
 
 var ErrNoIdentityOp = errors.New("no identity.ActorKey")
 
-const onGetUser = "on GetUser()"
+const onGetIdentity = "on GetIdentity()"
 
-func GetUser(creds Creds, ops []Operator, errs common.Errors) (*User, common.Errors) {
+func GetIdentity(creds Creds, ops []Operator, useOperatorAuth bool, errs common.Errors) (*Identity, common.ErrorKey, common.Errors) {
 	if len(creds) < 1 {
-		return nil, append(errs, ErrNoCreds)
+		return nil, common.NoCredsErr, append(errs, ErrNoCreds)
 	}
 
 	for _, op := range ops {
-		user, err := op.Authorize(creds)
+		identity, err := op.Authenticate(creds)
 		if err != nil {
-			errs = append(errs, fmt.Errorf(onGetUser+`: on identOp.Authorize(%#v): %s`, creds, err))
+			errs = append(errs, fmt.Errorf(onGetIdentity+`: on identOp.Authenticate(%#v): %s`, creds, err))
+		}
+		if identity != nil {
+			return identity, "", errs
 		}
 
-		if user != nil {
-			return user, errs
-		}
+		//realm := op.Realm()
+		//if (useOperatorAuth && realm == OperatorRealmKey) || (!useOperatorAuth && realm != OperatorRealmKey) {
+		//	identity, err := op.Authenticate(creds)
+		//	if err != nil {
+		//		errs = append(errs, fmt.Errorf(onGetIdentity+`: on identOp.Authenticate(%#v): %s`, creds, err))
+		//	}
+		//	if identity != nil {
+		//		return identity, "", errs
+		//	}
+		//}
 	}
 
-	return nil, errs
+	return nil, common.InvalidCredsErr, errs
 }
 
 // callbacks can be used for partial implementations of identity.ActorKey (in their own interfaces)
