@@ -1,0 +1,46 @@
+{
+ "info": {
+  "title": "Demo REST API",
+  "version": "0.0.1"
+ },
+ "paths": {
+  "/backend/auth": {
+   "post": {
+    "operationId": "authenticate_with_creds",
+    "parameters": [
+     {
+      "in": "body",
+      "name": "credentials",
+      "description": "user's email/login \u0026 password'",
+      "schema": {
+       "type": "object",
+       "required": "password",
+       "properties": {
+        "email": {
+         "type": "string"
+        },
+        "nickname": {
+         "type": "string"
+        },
+        "password": {
+         "type": "string"
+        }
+       }
+      }
+     }
+    ],
+    "produces": [
+     "application/json"
+    ],
+    "tags": [
+     "unauthorized"
+    ]
+   }
+  }
+ },
+ "port": ":3001",
+ "schemes": [
+  "http"
+ ],
+ "swagger": "2.0"
+}

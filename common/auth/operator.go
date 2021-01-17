@@ -5,13 +5,7 @@ import (
 	"fmt"
 
 	"github.com/pavlo67/workshop/common"
-
-	"github.com/pavlo67/workshop/common/joiner"
 )
-
-const AuthorizeHandlerKey joiner.InterfaceKey = "authorize_handler"
-const SetCredsHandlerKey joiner.InterfaceKey = "set_creds_handler"
-const GetCredsHandlerKey joiner.InterfaceKey = "get_creds_handler"
 
 //type User struct {
 //	Key   Key   `bson:",omitempty" json:",omitempty"`
@@ -28,9 +22,9 @@ const GetCredsHandlerKey joiner.InterfaceKey = "get_creds_handler"
 
 type Operator interface {
 	// SetCreds sets user's own or temporary (session-generated) creds
-	SetCreds(identity *Identity, toSet Creds) (*Creds, error)
+	SetCreds(userID ID, toSet Creds) (*Creds, error)
 
-	// Authorize can require to do .SetCreds first and to usa some session-generated creds
+	// Authenticate can require to do .SetCreds first and to usa some session-generated creds
 	Authenticate(toAuth Creds) (*Identity, error)
 }
 

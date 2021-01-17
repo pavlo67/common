@@ -1,6 +1,6 @@
 package auth_server_http
 
-//func workerRegister(_ *auth.User, _ server_http.Params, req *http.Request) (server.Response, error) {
+//func workerRegister(_ *auth.Identity, _ server_http.Params, req *http.Request) (server.Response, error) {
 //
 //	var testModePath string
 //
@@ -48,7 +48,7 @@ package auth_server_http
 //	return server.ResponseRESTOk(map[string]interface{}{"user": nil})
 //}
 //
-//func workerModify(user *auth.User, _ server_http.Params, req *http.Request) (server.Response, error) {
+//func workerModify(user *auth.Identity, _ server_http.Params, req *http.Request) (server.Response, error) {
 //	if user == nil {
 //		return server.ResponseRESTError(http.StatusForbidden, errors.New("no user authorized"))
 //	}
