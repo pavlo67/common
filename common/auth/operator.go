@@ -7,19 +7,6 @@ import (
 	"github.com/pavlo67/workshop/common"
 )
 
-//type User struct {
-//	Key   Key   `bson:",omitempty" json:",omitempty"`
-//	Creds Creds `bson:",omitempty" json:",omitempty"`
-//}
-
-//func (user *User) KeyYet() Key {
-//	if user == nil {
-//		return ""
-//	}
-//
-//	return user.Key
-//}
-
 type Operator interface {
 	// SetCreds sets user's own or temporary (session-generated) creds
 	SetCreds(userID ID, toSet Creds) (*Creds, error)
