@@ -1,6 +1,10 @@
 package common
 
-type ErrorKey = Key
+import "errors"
+
+type Key string
+
+type ErrorKey Key
 
 const CantPerformErr ErrorKey = ""
 
@@ -17,3 +21,7 @@ const NotFoundErr ErrorKey = "not_found"
 const WrongIDErr ErrorKey = "wrong_id"
 const WrongJSONErr ErrorKey = "wrong_json"
 const NotImplementedErr ErrorKey = "not_implemented"
+
+var ErrNotImplemented = errors.New("isn't implemented yet")
+var ErrNotFound = errors.New("not found")
+var ErrNullItem = errors.New("item is null")

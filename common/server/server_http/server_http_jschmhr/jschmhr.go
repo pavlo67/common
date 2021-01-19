@@ -69,47 +69,10 @@ func New(port int, certFileTLS, keyFileTLS string, authOps []auth.Operator, noEv
 	}, nil
 }
 
-//const onNotifyByREST = "on serverHTTPJschmhr.NotifyByREST()"
-//
-//func (s *serverHTTPJschmhr) NotifyByREST(identity *auth.Identity, responseBytes []byte) []byte {
-//	if s.eventsOpSystem == nil {
-//		return responseBytes
-//	}
-//
-//	crudOptions := crud.Options{Identity: identity}
-//
-//	eventsToNotify, err := s.eventsOp.ListEventsToNotify(false, &crudOptions)
-//	if err != nil {
-//		l.Error(onNotifyByREST + ": " + err.Error())
-//	}
-//
-//	if len(eventsToNotify) < 1 {
-//		return responseBytes
-//	}
-//
-//	// l.Infof("EVENTS TO NOTIFY: %#v, %#v", crudOptions, eventsToNotify)
-//
-//	responseBytesChanged, err := jsonlib.AddKeyValue(responseBytes, "Alerts", eventsToNotify)
-//	if err != nil {
-//		l.Errorf(onNotifyByREST+": %s (%s)", err, responseBytes)
-//		responseBytesChanged = responseBytes
-//	} else {
-//		// l.Infof(onNotifyByREST+": %s", responseBytesChanged)
-//	}
-//
-//	for _, eventToNotify := range eventsToNotify {
-//		if err2 := s.eventsOpSystem.SaveNotification(eventToNotify.ID, alerts.PopUp, err); err2 != nil {
-//			l.Errorf(onNotifyByREST+": %s", err2)
-//		}
-//	}
-//
-//	return responseBytesChanged
-//}
-
 // start wraps and verbalizes http.Server.ListenAndServe method.
 func (s *serverHTTPJschmhr) Start() error {
 	if s == nil {
-		return errors.Errorf("no serverOp to start")
+		return errors.New("no serverOp to start")
 	}
 
 	s.httpServer.Addr = ":" + strconv.Itoa(s.port)
@@ -124,13 +87,16 @@ func (s *serverHTTPJschmhr) Start() error {
 	return s.httpServer.ListenAndServe()
 }
 
-func (s *serverHTTPJschmhr) ResponseRESTError(identity *auth.Identity, status int, keyableErr common.Error, req ...*http.Request) (server.Response, error) {
-	if keyableErr == nil {
-		keyableErr = common.KeyableError("", nil, errors.Errorf("unknown error with status %d", status))
-	}
-	key := keyableErr.Key()
+func (s *serverHTTPJschmhr) ResponseRESTError(identity *auth.Identity, status int, err error, req ...*http.Request) (server.Response, error) {
+	commonErr := common.CommonError(err)
+	//
+	//if keyableErr == nil {
+	//	keyableErr = common.KeyableError("", nil, errors.Errorf("unknown error with status %d", status))
+	//}
 
+	key := commonErr.Key()
 	data := common.Map{server.ErrorKey: key}
+
 	if key == common.NoCredsErr || key == common.InvalidCredsErr {
 		status = http.StatusUnauthorized
 	} else if key == common.OverdueRightsErr || key == common.NoUserErr || key == common.NoRightsErr {
@@ -140,21 +106,17 @@ func (s *serverHTTPJschmhr) ResponseRESTError(identity *auth.Identity, status in
 	}
 
 	if os.Getenv("ENV") != "production" {
-		data["details"] = keyableErr.Error()
+		data["details"] = commonErr.Error()
 	}
 
-	var err error
 	if len(req) > 0 && req[0] != nil {
-		err = errors.Errorf("ERROR on %s %s, got: %s", req[0].Method, req[0].URL, keyableErr.Err())
+		err = errors.Errorf("ERROR on %s %s, got: %s", req[0].Method, req[0].URL, commonErr.Error())
 		// TODO: add body[:2048] for debugging
 	} else {
-		err = keyableErr.Err()
+		err = commonErr
 	}
 
 	jsonBytes, _ := json.Marshal(data)
-	//if identity != nil {
-	//	jsonBytes = s.NotifyByREST(identity, jsonBytes)
-	//}
 	return server.Response{Status: status, Data: jsonBytes}, err
 }
 

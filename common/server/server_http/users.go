@@ -49,7 +49,7 @@ func IdentityWithRequest(r *http.Request, authOps []auth.Operator) (*auth.Identi
 //if token != "" {
 //	user, errs = auth.GetIdentity(auth.Creds{auth.CredsToken: token}, authOps, errs)
 //	if user != nil {
-//		return user, errs.Err()
+//		return user, errs.Error()
 //	}
 //	// previous errs is added with auth.GetIdentity()
 //}
@@ -60,7 +60,7 @@ func IdentityWithRequest(r *http.Request, authOps []auth.Operator) (*auth.Identi
 //if c != nil && c.Left != "" {
 //	user, errs = auth.GetIdentity([]auth.Creds{{TypeKey: auth.CredsToken, Left: c.Left}}, authOps, errs)
 //	if user != nil {
-//		return user, errs.Err()
+//		return user, errs.Error()
 //	}
 //	// previous errs is added with auth.GetIdentity()
 //}
