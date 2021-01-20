@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/pkg/errors"
+	"github.com/pavlo67/workshop/common/errors"
 
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/logger"

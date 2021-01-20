@@ -8,7 +8,7 @@ import (
 	"github.com/pavlo67/workshop/common/libraries/sqllib"
 
 	_ "github.com/lib/pq"
-	"github.com/pkg/errors"
+	"github.com/pavlo67/workshop/common/errors"
 
 	"strconv"
 

@@ -2,6 +2,7 @@ package server_http_jschmhr
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -10,11 +11,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pavlo67/workshop/common/crud"
+
 	"github.com/julienschmidt/httprouter"
-	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/auth"
+	"github.com/pavlo67/workshop/common/errors"
 	"github.com/pavlo67/workshop/common/libraries/strlib"
 	"github.com/pavlo67/workshop/common/server"
 	"github.com/pavlo67/workshop/common/server/server_http"
@@ -36,7 +39,7 @@ type serverHTTPJschmhr struct {
 
 func New(port int, certFileTLS, keyFileTLS string, authOps []auth.Operator, noEventsOp bool) (server_http.Operator, error) {
 	if port <= 0 {
-		return nil, errors.Errorf("on server_http_jschmhr.New(): wrong port = %d", port)
+		return nil, fmt.Errorf("on server_http_jschmhr.New(): wrong port = %d", port)
 	}
 
 	if !noEventsOp {
@@ -87,19 +90,19 @@ func (s *serverHTTPJschmhr) Start() error {
 	return s.httpServer.ListenAndServe()
 }
 
-func (s *serverHTTPJschmhr) ResponseRESTError(identity *auth.Identity, status int, err error, req ...*http.Request) (server.Response, error) {
-	commonErr := common.CommonError(err)
+func (s *serverHTTPJschmhr) ResponseRESTError(options *crud.Options, status int, err error, req ...*http.Request) (server.Response, error) {
+	commonErr := errors.CommonError(err)
 	//
 	//if keyableErr == nil {
-	//	keyableErr = common.KeyableError("", nil, errors.Errorf("unknown error with status %d", status))
+	//	keyableErr = common.KeyableError("", nil, fmt.Errorf("unknown error with status %d", status))
 	//}
 
 	key := commonErr.Key()
 	data := common.Map{server.ErrorKey: key}
 
-	if key == common.NoCredsErr || key == common.InvalidCredsErr {
+	if key == errors.NoCredsErr || key == errors.InvalidCredsErr {
 		status = http.StatusUnauthorized
-	} else if key == common.OverdueRightsErr || key == common.NoUserErr || key == common.NoRightsErr {
+	} else if key == errors.OverdueRightsErr || key == errors.NoUserErr || key == errors.NoRightsErr {
 		status = http.StatusForbidden
 	} else if status == 0 || status == http.StatusOK {
 		status = http.StatusInternalServerError
@@ -110,7 +113,7 @@ func (s *serverHTTPJschmhr) ResponseRESTError(identity *auth.Identity, status in
 	}
 
 	if len(req) > 0 && req[0] != nil {
-		err = errors.Errorf("ERROR on %s %s, got: %s", req[0].Method, req[0].URL, commonErr.Error())
+		err = fmt.Errorf("ERROR on %s %s, got: %s", req[0].Method, req[0].URL, commonErr.Error())
 		// TODO: add body[:2048] for debugging
 	} else {
 		err = commonErr
@@ -120,7 +123,7 @@ func (s *serverHTTPJschmhr) ResponseRESTError(identity *auth.Identity, status in
 	return server.Response{Status: status, Data: jsonBytes}, err
 }
 
-func (s *serverHTTPJschmhr) ResponseRESTOk(identity *auth.Identity, data interface{}) (server.Response, error) {
+func (s *serverHTTPJschmhr) ResponseRESTOk(options *crud.Options, data interface{}) (server.Response, error) {
 	if data == nil {
 		return server.Response{Status: http.StatusOK}, nil
 	}
@@ -226,7 +229,7 @@ func (s *serverHTTPJschmhr) HandleEndpoint(key, serverPath string, endpoint serv
 		w.Header().Set("Access-Control-Allow-Methods", server_http.CORSAllowMethods)
 		w.Header().Set("Access-Control-Allow-Credentials", server_http.CORSAllowCredentials)
 
-		responseData, err := endpoint.WorkerHTTP(s, identity, params, r)
+		responseData, err := endpoint.WorkerHTTP(s, &crud.Options{Identity: identity}, params, r)
 		if err != nil {
 			l.Error(err)
 
@@ -281,7 +284,7 @@ func (s *serverHTTPJschmhr) HandleEndpoint(key, serverPath string, endpoint serv
 //	s.handleFunc("GET", serverRoute, func(w http.ResponseWriter, r *http.Request, params httprouter.Content) {
 //		if mimeType != nil {
 //			// "application/javascript"
-//			w.Header().Set("Content-TypeKey", *mimeType)
+//			w.Header().Set("Content-Type", *mimeType)
 //		}
 //		w.Write([]byte(str))
 //	})

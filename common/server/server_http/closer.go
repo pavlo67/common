@@ -1,4 +1,4 @@
-package common
+package server_http
 
 import (
 	"io"

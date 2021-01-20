@@ -5,8 +5,6 @@ import (
 
 	"github.com/pavlo67/workshop/common/crud"
 
-	"github.com/pavlo67/workshop/common/auth"
-
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/server"
 )
@@ -24,8 +22,8 @@ type StaticPath struct {
 }
 
 type Operator interface {
-	ResponseRESTError(identity *auth.Identity, status int, err error, req ...*http.Request) (server.Response, error)
-	ResponseRESTOk(identity *auth.Identity, data interface{}) (server.Response, error)
+	ResponseRESTError(options *crud.Options, status int, err error, req ...*http.Request) (server.Response, error)
+	ResponseRESTOk(options *crud.Options, data interface{}) (server.Response, error)
 	HandleEndpoint(key, serverPath string, endpoint Endpoint) error
 	HandleFiles(key, serverPath string, staticPath StaticPath) error
 

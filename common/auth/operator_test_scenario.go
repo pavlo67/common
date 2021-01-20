@@ -3,7 +3,9 @@ package auth
 import (
 	"log"
 	"os"
+	"strconv"
 	"testing"
+	"time"
 
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/stretchr/testify/require"
@@ -17,7 +19,6 @@ type OperatorTestCase struct {
 	ToSet  Creds
 }
 
-const testNick = "nick1"
 const testIP = "1.2.3.4"
 
 //var testCases = []OperatorTestCase{
@@ -54,73 +55,78 @@ const testIP = "1.2.3.4"
 //
 //		// .SetCreds() ------------------------------------------
 //
-//		userCreds, err := tc.SetCreds("", tc.ToSet)
+//		userCreds, err := operator.SetCreds("", tc)
 //		require.NoError(t, err)
 //		require.NotNil(t, userCreds)
 //
 //		log.Printf("           creds: %#v", *userCreds)
 //
-//		require.Equal(t, tc.ToSet[CredsNickname], (*userCreds)[CredsNickname])
+//		require.Equal(t, tc[CredsNickname], (*userCreds)[CredsNickname])
 //
 //		// .Authenticate() ok -----------------------------------------
 //
 //		userCreds = &Creds{
 //			CredsIP:       testIP,
-//			CredsLogin:    tc.ToSet[CredsNickname],
-//			CredsPassword: tc.ToSet[CredsPassword],
+//			CredsLogin:    tc[CredsNickname],
+//			CredsPassword: tc[CredsPassword],
 //		}
 //
-//		user, err := tc.Authenticate(*userCreds)
+//		user, err := operator.Authenticate(*userCreds)
 //
 //		require.NoError(t, err)
 //		require.NotNil(t, user)
-//		require.Equal(t, tc.ToSet[CredsNickname], user.Creds[CredsNickname])
+//		require.Equal(t, tc[CredsNickname], user.Creds[CredsNickname])
 //		require.NotEmpty(t, user.Key)
 //
 //		// .Authenticate() err ----------------------------------------
 //
 //		userCreds = &Creds{
 //			CredsIP:       testIP,
-//			CredsLogin:    tc.ToSet[CredsNickname],
-//			CredsPassword: tc.ToSet[CredsPassword] + "1",
+//			CredsLogin:    tc[CredsNickname],
+//			CredsPassword: tc[CredsPassword] + "1",
 //		}
 //
-//		user, err = tc.Authenticate(*userCreds)
+//		user, err = operator.Authenticate(*userCreds)
 //
 //		require.Error(t, err)
 //		require.Nil(t, user)
 //	}
 //}
 //
-//func OperatorTestScenarioToken(t *testing.T, testCases []OperatorTestCase, l logger.Operator) {
-//	if env, ok := os.LookupEnv("ENV"); !ok || env != "test" {
-//		t.Fatal("No test environment!!!")
-//	}
-//
-//	for i, tc := range testCases {
-//		l.Info(i)
-//
-//		// .SetCreds() ------------------------------------------
-//
-//		userCreds, err := tc.SetCreds(testUserKey, tc.ToSet)
-//		require.NoError(t, err)
-//		require.NotNil(t, userCreds)
-//
-//		log.Printf("           creds: %#v", *userCreds)
-//		require.Equal(t, tc.ToSet[CredsNickname], (*userCreds)[CredsNickname])
-//
-//		// .Authenticate() -----------------------------------------
-//
-//		(*userCreds)[CredsIP] = testIP
-//
-//		user, err := tc.Authenticate(*userCreds)
-//
-//		require.NoError(t, err)
-//		require.NotNil(t, user)
-//		require.Equal(t, tc.ToSet[CredsNickname], user.Creds[CredsNickname])
-//		require.Equal(t, testUserKey, user.Key)
-//	}
-//}
+func OperatorTestScenarioToken(t *testing.T, operator Operator, l logger.Operator) {
+	if env, ok := os.LookupEnv("ENV"); !ok || env != "test" {
+		t.Fatal("No test environment!!!")
+	}
+
+	testCreds := []Creds{
+		{
+			CredsNickname: "nickname" + strconv.FormatInt(time.Now().Unix(), 10),
+		},
+	}
+
+	for i, tc := range testCreds {
+		l.Info(i)
+
+		// .SetCreds() ------------------------------------------
+
+		userCreds, err := operator.SetCreds("", tc)
+		require.NoError(t, err)
+		require.NotNil(t, userCreds)
+
+		log.Printf("           creds: %#v", *userCreds)
+		require.Equal(t, tc[CredsNickname], (*userCreds)[CredsNickname])
+
+		// .Authenticate() -----------------------------------------
+
+		(*userCreds)[CredsIP] = testIP
+
+		user, err := operator.Authenticate(*userCreds)
+
+		require.NoError(t, err)
+		require.NotNil(t, user)
+		require.Equal(t, tc[CredsNickname], user.Nickname)
+	}
+}
 
 func OperatorTestScenarioPublicKey(t *testing.T, operator Operator, l logger.Operator) {
 	if env, ok := os.LookupEnv("ENV"); !ok || env != "test" {
@@ -136,7 +142,7 @@ func OperatorTestScenarioPublicKey(t *testing.T, operator Operator, l logger.Ope
 
 		// .SetCreds() ------------------------------------------
 
-		// tc.ToSet[CredsToSet] = CredsPrivateKey
+		// tc[CredsToSet] = CredsPrivateKey
 
 		userCreds, err := operator.SetCreds("", tc)
 		require.NoError(t, err)
@@ -146,7 +152,7 @@ func OperatorTestScenarioPublicKey(t *testing.T, operator Operator, l logger.Ope
 
 		log.Printf("            creds: %#v", userCreds)
 
-		// require.Equal(t, tc.ToSet[CredsNickname], userCreds.StringDefault(CredsNickname, ""))
+		// require.Equal(t, tc[CredsNickname], userCreds.StringDefault(CredsNickname, ""))
 		// nickname := (*userCreds)[CredsNickname]
 
 		// .InitAuth() -----------------------------------

@@ -4,10 +4,10 @@ import (
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/auth"
 	"github.com/pavlo67/workshop/common/config"
+	"github.com/pavlo67/workshop/common/errors"
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/starter"
-	"github.com/pkg/errors"
 )
 
 const InterfaceKey joiner.InterfaceKey = "auth_http"

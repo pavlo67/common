@@ -2,11 +2,12 @@ package server_http
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"regexp"
 	"strings"
 
-	"github.com/pkg/errors"
+	"github.com/pavlo67/workshop/common/errors"
 
 	"github.com/pavlo67/workshop/common/logger"
 )
@@ -19,12 +20,12 @@ func InitEndpointsWithSwaggerV2(cfg Config, host string, noHTTPS bool, srvOp Ope
 	swagger, err := cfg.SwaggerV2(host, noHTTPS)
 	if err != nil {
 		l.Errorf("%#v", cfg)
-		return errors.Errorf("on .SwaggerV2(): %s", err) //
+		return fmt.Errorf("on .SwaggerV2(): %s", err) //
 	}
 
 	err = ioutil.WriteFile(swaggerFilePath, swagger, 0644)
 	if err != nil {
-		return errors.Errorf("on ioutil.WriteFile(%s, %s, 0755): %s", swaggerFilePath, swagger, err)
+		return fmt.Errorf("on ioutil.WriteFile(%s, %s, 0755): %s", swaggerFilePath, swagger, err)
 	}
 	l.Infof("%d bytes are written into %s", len(swagger), swaggerFilePath)
 
@@ -45,12 +46,12 @@ func InitEndpoints(cfg Config, srvOp Operator, l logger.Operator) error {
 		//	continue
 		//}
 		if ep.Handler == nil {
-			return errors.Errorf("on InitEndpoints: no .Handler %#v", ep)
+			return fmt.Errorf("on InitEndpoints: no .Handler %#v", ep)
 		}
 
 		err := srvOp.HandleEndpoint(key, cfg.Prefix+ep.Path, *ep.Handler)
 		if err != nil {
-			return errors.Errorf("on srvOp.HandleEndpoint(%s, %s, %#v): %s", key, ep.Path, ep.Handler, err)
+			return fmt.Errorf("on srvOp.HandleEndpoint(%s, %s, %#v): %s", key, ep.Path, ep.Handler, err)
 		}
 	}
 

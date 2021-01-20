@@ -8,7 +8,7 @@ import (
 
 	"github.com/pavlo67/workshop/common"
 
-	"github.com/pkg/errors"
+	"github.com/pavlo67/workshop/common/errors"
 )
 
 func RequestJSON(method, url string, data []byte, headers map[string]string) (common.Map, error) {
@@ -36,7 +36,7 @@ func RequestJSON(method, url string, data []byte, headers map[string]string) (co
 
 	// log.Printf("%s", body)
 
-	result := common.Map{}
+	result := data.Map{}
 	err = json.Unmarshal(body, &result)
 	if err != nil {
 		return result, errors.Wrapf(err, "can't unmarsal: %s", body)

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
+	"github.com/pavlo67/workshop/common/errors"
 	"gopkg.in/square/go-jose.v2"
 	"gopkg.in/square/go-jose.v2/jwt"
 
@@ -131,17 +131,17 @@ func (authOp *authJWT) Realm() string {
 }
 
 func (authOp *authJWT) AuthenticateSocial(idpID, idpToken string) (*auth.Identity, error) {
-	return nil, common.ErrNotImplemented
+	return nil, errors.NotImplemented
 }
 
 func (authOp *authJWT) ForgotPassword(toRemember auth.Creds) (bool, error) {
-	return false, common.ErrNotImplemented
+	return false, errors.NotImplemented
 }
 
 func (authOp *authJWT) ChangePassword(confirmationCode string, toSet auth.Creds) (bool, error) {
-	return false, common.ErrNotImplemented
+	return false, errors.NotImplemented
 }
 
 func (authOp *authJWT) DiscoverIDP(nickname string) (string, error) {
-	return "", common.ErrNotImplemented
+	return "", errors.NotImplemented
 }

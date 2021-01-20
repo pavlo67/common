@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/btcsuite/btcutil/base58"
-	"github.com/pkg/errors"
+	"github.com/pavlo67/workshop/common/errors"
 
 	"github.com/pavlo67/workshop/common/auth"
 	"github.com/pavlo67/workshop/common/libraries/encrlib"

@@ -1,11 +1,10 @@
 package server_http_jschmhr
 
 import (
-	"github.com/pkg/errors"
-
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/auth"
 	"github.com/pavlo67/workshop/common/config"
+	"github.com/pavlo67/workshop/common/errors"
 	"github.com/pavlo67/workshop/common/joiner"
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/server"
@@ -33,7 +32,7 @@ func (ss *server_http_jschmhrStarter) Name() string {
 }
 
 func (ss *server_http_jschmhrStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
-	var errs common.Errors
+	var errs errors.Errors
 	l = lCommon
 
 	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(server_http.InterfaceKey)))
@@ -71,12 +70,12 @@ func (ss *server_http_jschmhrStarter) Run(joinerOp joiner.Operator) error {
 	//if !ss.noEventsOp {
 	//	eventsOpSystem, _ = joinerOp.Interface(events.InterfaceSystemKey).(events.OperatorSystem)
 	//	if eventsOpSystem == nil {
-	//		return errors.Errorf("no events.OperatorSystem with key %s", events.InterfaceSystemKey)
+	//		return fmt.Errorf("no events.OperatorSystem with key %s", events.InterfaceSystemKey)
 	//	}
 	//
 	//	eventsOp, _ = joinerOp.Interface(events.InterfaceKey).(events.Operator)
 	//	if eventsOp == nil {
-	//		return errors.Errorf("no events.Operator with key %s", events.InterfaceKey)
+	//		return fmt.Errorf("no events.Operator with key %s", events.InterfaceKey)
 	//	}
 	//}
 

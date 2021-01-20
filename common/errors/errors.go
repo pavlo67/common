@@ -1,15 +1,17 @@
-package common
+package errors
 
 import (
 	"encoding/json"
 	"errors"
 	"strings"
+
+	"github.com/pavlo67/workshop/common"
 )
 
 type Error interface {
 	error
-	Key() ErrorKey
-	Data() Map
+	Key() Key
+	Data() common.Map
 	Append(interface{}) Error
 }
 
@@ -23,7 +25,7 @@ func CommonError(any ...interface{}) Error {
 	return err
 }
 
-func KeyableError(err error, key ErrorKey, data Map) Error {
+func KeyableError(err error, key Key, data common.Map) Error {
 	return &commonError{
 		errs: Errors{err},
 		key:  key,
@@ -37,8 +39,8 @@ var _ Error = &commonError{}
 
 type commonError struct {
 	errs Errors
-	key  ErrorKey
-	data Map
+	key  Key
+	data common.Map
 }
 
 func (ce *commonError) Error() string {
@@ -48,7 +50,7 @@ func (ce *commonError) Error() string {
 	return ce.errs.String()
 }
 
-func (ce *commonError) Key() ErrorKey {
+func (ce *commonError) Key() Key {
 	if ce == nil {
 		return ""
 	}
@@ -56,7 +58,7 @@ func (ce *commonError) Key() ErrorKey {
 	return ce.key
 }
 
-func (ce *commonError) Data() Map {
+func (ce *commonError) Data() common.Map {
 	if ce == nil {
 		return nil
 	}

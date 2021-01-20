@@ -1,6 +1,7 @@
 package filelib
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path"
@@ -10,7 +11,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/pkg/errors"
+	"github.com/pavlo67/workshop/common/errors"
 )
 
 func RelativePath(pathFull, pathBase, pathPrefix string) string {
@@ -98,5 +99,5 @@ func SubDirUnique(path string) (string, error) {
 		}
 	}
 
-	return "", errors.Errorf("can't create unique subpath %d times, last try was '%s'", maxRetries, subpath)
+	return "", fmt.Errorf("can't create unique subpath %d times, last try was '%s'", maxRetries, subpath)
 }

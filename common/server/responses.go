@@ -16,7 +16,7 @@ type Response struct {
 
 //func ResponseRESTError(identity,status int, key Key, err error) (Response, error) {
 //	if err == nil {
-//		err = errors.Errorf("unknown error with status %d", status)
+//		err = fmt.Errorf("unknown error with status %d", status)
 //	}
 //	if status == 0 || status == http.StatusOK {
 //		status = http.StatusInternalServerError

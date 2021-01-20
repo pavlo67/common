@@ -1,10 +1,9 @@
 package auth
 
 import (
-	"errors"
 	"fmt"
 
-	"github.com/pavlo67/workshop/common"
+	"github.com/pavlo67/workshop/common/errors"
 )
 
 type Operator interface {
@@ -21,9 +20,9 @@ var ErrNoIdentityOp = errors.New("no identity.ActorKey")
 
 const onGetIdentity = "on GetIdentity()"
 
-func GetIdentity(creds Creds, ops []Operator, useOperatorAuth bool, errs common.Errors) (*Identity, common.ErrorKey, common.Errors) {
+func GetIdentity(creds Creds, ops []Operator, useOperatorAuth bool, errs errors.Errors) (*Identity, errors.Key, errors.Errors) {
 	if len(creds) < 1 {
-		return nil, common.NoCredsErr, append(errs, ErrNoCreds)
+		return nil, errors.NoCredsErr, append(errs, ErrNoCreds)
 	}
 
 	for _, op := range ops {
@@ -47,7 +46,7 @@ func GetIdentity(creds Creds, ops []Operator, useOperatorAuth bool, errs common.
 		//}
 	}
 
-	return nil, common.InvalidCredsErr, errs
+	return nil, errors.InvalidCredsErr, errs
 }
 
 // callbacks can be used for partial implementations of identity.ActorKey (in their own interfaces)

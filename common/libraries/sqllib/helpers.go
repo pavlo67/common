@@ -3,10 +3,11 @@ package sqllib
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"strings"
 
-	"github.com/pkg/errors"
+	"github.com/pavlo67/workshop/common/errors"
 
 	"github.com/pavlo67/workshop/common/crud"
 	"github.com/pavlo67/workshop/common/selectors"
@@ -52,7 +53,7 @@ func SQLList(table, fields string, options *crud.Options, correctWildcards Corre
 			join = options.JoinTo.Clause
 			values = options.JoinTo.Values
 		} else if len(options.JoinTo.Values) > 0 {
-			return "", nil, errors.Errorf(onSQLList+"wrong .JoinTo: %#v", options.JoinTo)
+			return "", nil, fmt.Errorf(onSQLList+"wrong .JoinTo: %#v", options.JoinTo)
 		}
 
 		if len(options.OrderBy) > 0 {
@@ -74,7 +75,7 @@ func SQLList(table, fields string, options *crud.Options, correctWildcards Corre
 
 	condition, valuesTerm, err := selectors_sql.Use(term)
 	if err != nil {
-		return "", nil, errors.Errorf(onSQLList+"wrong selector (%#v): %s", term, err)
+		return "", nil, fmt.Errorf(onSQLList+"wrong selector (%#v): %s", term, err)
 	}
 
 	if strings.TrimSpace(condition) != "" {

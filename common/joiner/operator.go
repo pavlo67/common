@@ -1,13 +1,14 @@
 package joiner
 
 import (
+	"fmt"
 	"log"
 	"reflect"
 	"sync"
 
 	"github.com/pavlo67/workshop/common"
 
-	"github.com/pkg/errors"
+	"github.com/pavlo67/workshop/common/errors"
 )
 
 type InterfaceKey string
@@ -16,6 +17,8 @@ type Component struct {
 	InterfaceKey
 	Interface interface{}
 }
+
+type ID common.IDStr
 
 type Operator interface {
 	Join(interface{}, InterfaceKey) error
@@ -26,7 +29,7 @@ type Operator interface {
 
 type Link struct {
 	InterfaceKey InterfaceKey `bson:",omitempty" json:",omitempty"`
-	ID           common.ID    `bson:",omitempty" json:",omitempty"`
+	ID           ID           `bson:",omitempty" json:",omitempty"`
 }
 
 var _ Operator = &joiner{}
@@ -48,7 +51,7 @@ var ErrJoiningDuplicate = errors.New("can't join interface over joined before")
 
 func (j *joiner) Join(intrfc interface{}, interfaceKey InterfaceKey) error {
 	if j == nil {
-		return errors.Errorf("got nil on .Join(%s)", interfaceKey)
+		return fmt.Errorf("got nil on .Join(%s)", interfaceKey)
 	}
 	if intrfc == nil {
 		return errors.Wrapf(ErrJoiningNil, "on .Join(%s)", interfaceKey)

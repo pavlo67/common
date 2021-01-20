@@ -2,11 +2,10 @@ package server_http
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"github.com/pavlo67/workshop/common"
-
-	"github.com/pkg/errors"
 
 	"github.com/pavlo67/workshop/common/joiner"
 )
@@ -104,7 +103,7 @@ func (c Config) SwaggerV2(port string, noHTTPS bool) ([]byte, error) {
 		}
 
 		if epDescrPrev, ok := paths[path][method]; ok {
-			return nil, errors.Errorf("duplicate endpoint description (%s %s): \n%#v\nvs.\n%#v", method, path, epDescrPrev, epDescr)
+			return nil, fmt.Errorf("duplicate endpoint description (%s %s): \n%#v\nvs.\n%#v", method, path, epDescrPrev, epDescr)
 		}
 		if _, ok := paths[path]; ok { // pathPrev
 			paths[path][method] = epDescr

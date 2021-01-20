@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/pavlo67/workshop/common"
+
 	"github.com/pavlo67/workshop/common/auth"
 	"github.com/pavlo67/workshop/common/config"
 	"github.com/pavlo67/workshop/common/joiner"
@@ -12,8 +13,6 @@ import (
 	"github.com/pavlo67/workshop/common/logger"
 	"github.com/pavlo67/workshop/common/server/server_http"
 	"github.com/pavlo67/workshop/common/starter"
-
-	"github.com/pkg/errors"
 )
 
 func Starter() starter.Operator {
@@ -65,17 +64,17 @@ var Endpoints = server_http.Endpoints{
 func (ss *demoStarter) Run(joinerOp joiner.Operator) error {
 	srvOp, ok := joinerOp.Interface(server_http.InterfaceKey).(server_http.Operator)
 	if !ok {
-		return errors.Errorf("no server_http.UserKey with key %s", server_http.InterfaceKey)
+		return fmt.Errorf("no server_http.UserKey with key %s", server_http.InterfaceKey)
 	}
 
 	srvPort, ok := joinerOp.Interface(server_http.PortInterfaceKey).(int)
 	if !ok {
-		return errors.Errorf("no server_http.Port with key %s", server_http.PortInterfaceKey)
+		return fmt.Errorf("no server_http.Port with key %s", server_http.PortInterfaceKey)
 	}
 
 	noHTTPS := joinerOp.Interface(server_http.NoHTTPSInterfaceKey).(bool)
 	if !ok {
-		return errors.Errorf("no server_http.NoHTTPS with key %s", server_http.NoHTTPSInterfaceKey)
+		return fmt.Errorf("no server_http.NoHTTPS with key %s", server_http.NoHTTPSInterfaceKey)
 	}
 
 	for key, ep := range Endpoints {
@@ -86,7 +85,7 @@ func (ss *demoStarter) Run(joinerOp joiner.Operator) error {
 			//	ep.Skip = true
 			//	Endpoints[key] = ep
 		} else {
-			return errors.Errorf("no server_http.Endpoint with key %s", ep.HandlerKey)
+			return fmt.Errorf("no server_http.Endpoint with key %s", ep.HandlerKey)
 		}
 	}
 

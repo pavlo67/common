@@ -3,12 +3,13 @@ package server_http
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 
-	"github.com/pkg/errors"
+	"github.com/pavlo67/workshop/common/errors"
 
 	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/auth"
@@ -32,7 +33,7 @@ type ResponseBinary struct {
 func Request(serverURL string, ep EndpointConfig, requestData, responseData interface{}, identity *auth.Identity, logfile string) error {
 	client := &http.Client{}
 	if ep.Handler == nil {
-		return errors.Errorf("no ep.Handler: %#v", ep)
+		return fmt.Errorf("no ep.Handler: %#v", ep)
 	}
 	method := ep.Handler.Method
 
@@ -76,9 +77,9 @@ func Request(serverURL string, ep EndpointConfig, requestData, responseData inte
 		req, err := http.NewRequest(method, serverURL, requestBodyReader)
 		if err != nil || req == nil {
 			logger.LogRequest(logfile, nil, method, serverURL, nil, requestBody, nil, nil, err, 0)
-			return errors.Errorf("can't create request %s %s, got %#v, %s", method, serverURL, req, err)
+			return fmt.Errorf("can't create request %s %s, got %#v, %s", method, serverURL, req, err)
 		} else if req.Body != nil {
-			defer common.Close(req.Body, client, nil)
+			defer Close(req.Body, client, nil)
 		}
 
 		if identity != nil && identity.JWT != "" {
@@ -89,7 +90,7 @@ func Request(serverURL string, ep EndpointConfig, requestData, responseData inte
 
 		resp, err := client.Do(req)
 		if resp != nil && resp.Body != nil {
-			defer common.Close(resp.Body, client, nil)
+			defer Close(resp.Body, client, nil)
 		}
 
 		if err != nil {
@@ -132,8 +133,8 @@ func Request(serverURL string, ep EndpointConfig, requestData, responseData inte
 				return errors.Wrapf(err, "can't unmarshal body from %s %s: status = %d, body = %s", method, serverURL, resp.StatusCode, responseBody)
 			}
 
-			errorKey := common.ErrorKey(data.StringDefault(server.ErrorKey, ""))
-			return common.KeyableError(errorKey, data, errors.Errorf("can't %s %s: status = %d, body = %s", method, serverURL, resp.StatusCode, responseBody))
+			errorKey := errors.Key(data.StringDefault(server.ErrorKey, ""))
+			return errors.KeyableError(fmt.Errorf("can't %s %s: status = %d, body = %s", method, serverURL, resp.StatusCode, responseBody), errorKey, data)
 		}
 
 		if dataBytes, ok := responseData.(*[]byte); ok {

@@ -4,18 +4,17 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/pavlo67/workshop/common"
 	"github.com/pavlo67/workshop/common/auth"
 
-	"github.com/pkg/errors"
+	"github.com/pavlo67/workshop/common/errors"
 )
 
 var errNoIdentityOpsMap = errors.New("no map[CredsType]identity.UserKey")
 
-func IdentityWithRequest(r *http.Request, authOps []auth.Operator) (*auth.Identity, common.ErrorKey, error) {
+func IdentityWithRequest(r *http.Request, authOps []auth.Operator) (*auth.Identity, errors.Key, error) {
 
-	var errs common.Errors
-	var errorKey common.ErrorKey
+	var errs errors.Errors
+	var errorKey errors.Key
 	var identity *auth.Identity
 
 	tokenJWT := r.Header.Get("Authorization")
@@ -37,7 +36,7 @@ func IdentityWithRequest(r *http.Request, authOps []auth.Operator) (*auth.Identi
 		// previous errs is added with auth.GetIdentity()
 
 	} else {
-		errorKey = common.NoCredsErr
+		errorKey = errors.NoCredsErr
 
 	}
 
