@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/pavlo67/workshop/common/errors"
+	"github.com/pavlo67/common/common/errors"
 )
 
 func RelativePath(pathFull, pathBase, pathPrefix string) string {

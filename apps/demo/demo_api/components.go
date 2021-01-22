@@ -1,12 +1,12 @@
 package demo_api
 
 import (
-	"github.com/pavlo67/workshop/common"
-	"github.com/pavlo67/workshop/common/auth/auth_jwt"
-	"github.com/pavlo67/workshop/common/auth/auth_server_http"
-	"github.com/pavlo67/workshop/common/control"
-	"github.com/pavlo67/workshop/common/server/server_http/server_http_jschmhr"
-	"github.com/pavlo67/workshop/common/starter"
+	"github.com/pavlo67/common/common"
+	"github.com/pavlo67/common/common/auth/auth_jwt"
+	"github.com/pavlo67/common/common/auth/auth_server_http"
+	"github.com/pavlo67/common/common/control"
+	"github.com/pavlo67/common/common/server/server_http/server_http_jschmhr"
+	"github.com/pavlo67/common/common/starter"
 )
 
 const prefix = "/backend"

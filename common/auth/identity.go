@@ -3,8 +3,8 @@ package auth
 import (
 	"time"
 
-	"github.com/pavlo67/workshop/common"
-	"github.com/pavlo67/workshop/common/rbac"
+	"github.com/pavlo67/common/common"
+	"github.com/pavlo67/common/common/rbac"
 )
 
 type ID = common.IDStr

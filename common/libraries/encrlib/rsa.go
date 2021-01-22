@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/pavlo67/workshop/common/errors"
+	"github.com/pavlo67/common/common/errors"
 )
 
 const onNewRSAPrivateKey = "on encrlib.NewRSAPrivateKey()"

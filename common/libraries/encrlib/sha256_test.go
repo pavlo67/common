@@ -3,7 +3,7 @@ package encrlib
 import (
 	"testing"
 
-	"github.com/pavlo67/workshop/common"
+	"github.com/pavlo67/common/common"
 
 	"fmt"
 

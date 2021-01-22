@@ -5,12 +5,12 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/pavlo67/workshop/common"
+	"github.com/pavlo67/common/common"
 
-	"github.com/pavlo67/workshop/common/config"
-	"github.com/pavlo67/workshop/common/joiner"
-	"github.com/pavlo67/workshop/common/logger"
-	"github.com/pavlo67/workshop/common/starter"
+	"github.com/pavlo67/common/common/config"
+	"github.com/pavlo67/common/common/joiner"
+	"github.com/pavlo67/common/common/logger"
+	"github.com/pavlo67/common/common/starter"
 )
 
 func Starter() starter.Operator {

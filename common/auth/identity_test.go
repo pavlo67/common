@@ -5,7 +5,7 @@ import (
 	"log"
 	"testing"
 
-	"github.com/pavlo67/workshop/common/rbac"
+	"github.com/pavlo67/common/common/rbac"
 )
 
 func TestJSON(t *testing.T) {

@@ -10,8 +10,8 @@ import (
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/stretchr/testify/require"
 
-	"github.com/pavlo67/workshop/common/libraries/encrlib"
-	"github.com/pavlo67/workshop/common/logger"
+	"github.com/pavlo67/common/common/libraries/encrlib"
+	"github.com/pavlo67/common/common/logger"
 )
 
 type OperatorTestCase struct {

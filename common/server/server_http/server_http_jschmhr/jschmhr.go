@@ -11,16 +11,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pavlo67/workshop/common/crud"
-
 	"github.com/julienschmidt/httprouter"
 
-	"github.com/pavlo67/workshop/common"
-	"github.com/pavlo67/workshop/common/auth"
-	"github.com/pavlo67/workshop/common/errors"
-	"github.com/pavlo67/workshop/common/libraries/strlib"
-	"github.com/pavlo67/workshop/common/server"
-	"github.com/pavlo67/workshop/common/server/server_http"
+	"github.com/pavlo67/common/common"
+	"github.com/pavlo67/common/common/errors"
+	"github.com/pavlo67/common/common/libraries/strlib"
+	"github.com/pavlo67/common/common/server"
+	"github.com/pavlo67/common/common/server/server_http"
 )
 
 var _ server_http.Operator = &serverHTTPJschmhr{}
@@ -30,24 +27,26 @@ type serverHTTPJschmhr struct {
 	httpServeMux *httprouter.Router
 
 	port        int
-	certFileTLS string
-	keyFileTLS  string
-	authOps     []auth.Operator
+	tlsCertFile string
+	tlsKeyFile  string
 
-	handledOptions []string
+	requestOptions server_http.RequestOptions
+
+	secretENVsToLower []string
 }
 
-func New(port int, certFileTLS, keyFileTLS string, authOps []auth.Operator, noEventsOp bool) (server_http.Operator, error) {
+func New(port int, tlsCertFile, tlsKeyFile string, requestOptions server_http.RequestOptions, secretENVs []string) (server_http.Operator, error) {
 	if port <= 0 {
 		return nil, fmt.Errorf("on server_http_jschmhr.New(): wrong port = %d", port)
 	}
 
-	if !noEventsOp {
-		//if eventsOpSystem == nil {
-		//	return nil, errors.New("on server_http_jschmhr.New(): no events.OperatorSystem")
-		//} else if eventsOp == nil {
-		//	return nil, errors.New("on server_http_jschmhr.New(): no events.Operator")
-		//}
+	if requestOptions == nil {
+		return nil, errors.New("on server_http_jschmhr.New(): no requestOptions")
+	}
+
+	var secretENVsToLower []string
+	for _, secretENV := range secretENVs {
+		secretENVsToLower = append(secretENVsToLower, strings.ToLower(secretENV))
 	}
 
 	router := httprouter.New()
@@ -60,15 +59,13 @@ func New(port int, certFileTLS, keyFileTLS string, authOps []auth.Operator, noEv
 			MaxHeaderBytes: 1 << 20,
 		},
 		httpServeMux: router,
+		port:         port,
+		tlsCertFile:  tlsCertFile,
+		tlsKeyFile:   tlsKeyFile,
 
-		port: port,
+		requestOptions: requestOptions,
 
-		certFileTLS: certFileTLS,
-		keyFileTLS:  keyFileTLS,
-
-		authOps: authOps,
-		//eventsOp:       eventsOp,
-		//eventsOpSystem: eventsOpSystem,
+		secretENVsToLower: secretENVsToLower,
 	}, nil
 }
 
@@ -79,71 +76,149 @@ func (s *serverHTTPJschmhr) Start() error {
 	}
 
 	s.httpServer.Addr = ":" + strconv.Itoa(s.port)
-
 	l.Info("Server is starting on address ", s.httpServer.Addr)
 
-	if s.certFileTLS != "" && s.keyFileTLS != "" {
-		go http.ListenAndServe(":80", http.HandlerFunc(server_http.Redirect))
-		return s.httpServer.ListenAndServeTLS(s.certFileTLS, s.keyFileTLS)
+	if s.tlsCertFile != "" && s.tlsKeyFile != "" {
+		return s.httpServer.ListenAndServeTLS(s.tlsCertFile, s.tlsKeyFile)
 	}
 
 	return s.httpServer.ListenAndServe()
 }
 
-func (s *serverHTTPJschmhr) ResponseRESTError(options *crud.Options, status int, err error, req ...*http.Request) (server.Response, error) {
+//func (s *serverHTTPJschmhr) ServerHTTP() *http.Server {
+//	return s.httpServer
+//}
+
+func (s *serverHTTPJschmhr) ResponseRESTError(status int, err error, req *http.Request) (server.Response, error) {
 	commonErr := errors.CommonError(err)
-	//
-	//if keyableErr == nil {
-	//	keyableErr = common.KeyableError("", nil, fmt.Errorf("unknown error with status %d", status))
-	//}
 
 	key := commonErr.Key()
 	data := common.Map{server.ErrorKey: key}
 
-	if key == errors.NoCredsErr || key == errors.InvalidCredsErr {
-		status = http.StatusUnauthorized
-	} else if key == errors.OverdueRightsErr || key == errors.NoUserErr || key == errors.NoRightsErr {
-		status = http.StatusForbidden
-	} else if status == 0 || status == http.StatusOK {
-		status = http.StatusInternalServerError
+	if status == 0 || status == http.StatusOK {
+		if key == errors.NoCredsErr || key == errors.InvalidCredsErr {
+			status = http.StatusUnauthorized
+		} else if key == errors.OverdueRightsErr || key == errors.NoUserErr || key == errors.NoRightsErr {
+			status = http.StatusForbidden
+		} else if status == 0 || status == http.StatusOK {
+			status = http.StatusInternalServerError
+
+		} else {
+			status = http.StatusInternalServerError
+		}
 	}
 
-	if os.Getenv("ENV") != "production" {
+	if !strlib.In(s.secretENVsToLower, strings.ToLower(os.Getenv("ENV"))) {
 		data["details"] = commonErr.Error()
 	}
 
-	if len(req) > 0 && req[0] != nil {
-		err = fmt.Errorf("ERROR on %s %s, got: %s", req[0].Method, req[0].URL, commonErr.Error())
+	if req != nil {
+		err = fmt.Errorf("ERROR on %s %s, got: %s", req.Method, req.URL, commonErr.Error())
 		// TODO: add body[:2048] for debugging
 	} else {
 		err = commonErr
 	}
 
-	jsonBytes, _ := json.Marshal(data)
+	jsonBytes, errJSON := json.Marshal(data)
+	if errJSON != nil {
+		l.Errorf("ERROR marshalling error data (%#v): %s", data, errJSON)
+	}
 	return server.Response{Status: status, Data: jsonBytes}, err
 }
 
-func (s *serverHTTPJschmhr) ResponseRESTOk(options *crud.Options, data interface{}) (server.Response, error) {
+func (s *serverHTTPJschmhr) ResponseRESTOk(status int, data interface{}) (server.Response, error) {
+	if status == 0 {
+		status = http.StatusOK
+	}
+
 	if data == nil {
-		return server.Response{Status: http.StatusOK}, nil
+		return server.Response{Status: status}, nil
 	}
 
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
-		return server.Response{Status: http.StatusInternalServerError}, errors.Wrapf(err, "can't marshal pbxm (%#v)", data)
+		return server.Response{Status: http.StatusInternalServerError}, errors.Wrapf(err, "can't marshal json (%#v)", data)
 	}
-	//if identity != nil {
-	//	jsonBytes = s.NotifyByREST(identity, jsonBytes)
-	//}
 
-	return server.Response{Status: http.StatusOK, Data: jsonBytes}, nil
+	return server.Response{Status: status, Data: jsonBytes}, nil
+}
+
+func (s *serverHTTPJschmhr) HandleEndpoint(key, serverPath string, endpoint server_http.Endpoint) error {
+
+	method := strings.ToUpper(endpoint.Method)
+	path := endpoint.PathTemplate(serverPath)
+
+	if endpoint.WorkerHTTP == nil {
+		return errors.New(method + ": " + path + "\t!!! NULL workerHTTP ISN'T DISPATCHED !!!")
+	}
+
+	s.HandleOptions(key, path)
+
+	handler := func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
+		options, err := s.requestOptions(r)
+		if err != nil {
+			l.Error(err)
+		}
+
+		var params server_http.Params
+		if len(paramsHR) > 0 {
+			params = server_http.Params{}
+			for _, p := range paramsHR {
+				params[p.Key] = p.Value
+			}
+		}
+
+		w.Header().Set("Access-Control-Allow-Origin", server_http.CORSAllowOrigin)
+		w.Header().Set("Access-Control-Allow-Headers", server_http.CORSAllowHeaders)
+		w.Header().Set("Access-Control-Allow-Methods", server_http.CORSAllowMethods)
+		w.Header().Set("Access-Control-Allow-Credentials", server_http.CORSAllowCredentials)
+
+		responseData, err := endpoint.WorkerHTTP(s, r, params, options)
+		if err != nil {
+			l.Error(err)
+		}
+
+		if responseData.MIMEType != "" {
+			w.Header().Set("Content-Type", responseData.MIMEType)
+		}
+		w.Header().Set("Content-Length", strconv.Itoa(len(responseData.Data)))
+		if responseData.FileName != "" {
+			w.Header().Set("Content-Disposition", "attachment; filename="+responseData.FileName)
+		}
+
+		if responseData.Status > 0 {
+			w.WriteHeader(responseData.Status)
+		} else {
+			w.WriteHeader(http.StatusOK)
+		}
+
+		if _, err := w.Write(responseData.Data); err != nil {
+			l.Error("can't write response", err)
+		}
+	}
+
+	l.Infof("%-10s: %s %s", key, method, path)
+	switch method {
+	case "GET":
+		s.httpServeMux.GET(path, handler)
+	case "POST":
+		s.httpServeMux.POST(path, handler)
+	case "PUT":
+		s.httpServeMux.PUT(path, handler)
+	case "DELETE":
+		s.httpServeMux.DELETE(path, handler)
+	default:
+		l.Error(method, " isn't supported!")
+	}
+
+	return nil
 }
 
 func (s *serverHTTPJschmhr) HandleOptions(key, serverPath string) {
-	if strlib.In(s.handledOptions, serverPath) {
-		//l.Infof("- %#v", s.handledOptions)
-		return
-	}
+	//if strlib.In(s.handledOptions, serverPath) {
+	//	//l.Infof("- %#v", s.handledOptions)
+	//	return
+	//}
 
 	s.httpServeMux.OPTIONS(serverPath, func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		l.Infof("%-10s: OPTIONS %s", key, serverPath)
@@ -153,7 +228,7 @@ func (s *serverHTTPJschmhr) HandleOptions(key, serverPath string) {
 		w.Header().Set("Access-Control-Allow-Credentials", server_http.CORSAllowCredentials)
 	})
 
-	s.handledOptions = append(s.handledOptions, serverPath)
+	//s.handledOptions = append(s.handledOptions, serverPath)
 }
 
 var reHTMLExt = regexp.MustCompile(`\.html?$`)
@@ -195,82 +270,6 @@ func (s *serverHTTPJschmhr) HandleFiles(key, serverPath string, staticPath serve
 		//}
 		//fileServer.ServeHTTP(w, r)
 	})
-
-	return nil
-}
-
-func (s *serverHTTPJschmhr) HandleEndpoint(key, serverPath string, endpoint server_http.Endpoint) error {
-
-	method := strings.ToUpper(endpoint.Method)
-	path := endpoint.PathTemplate(serverPath)
-
-	if endpoint.WorkerHTTP == nil {
-		return errors.New(method + ": " + path + "\t!!! NULL workerHTTP ISN'T DISPATCHED !!!")
-	}
-
-	s.HandleOptions(key, path)
-
-	handler := func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
-		identity, _, err := server_http.IdentityWithRequest(r, s.authOps)
-		if err != nil {
-			l.Error(err)
-		}
-
-		var params server_http.Params
-		if len(paramsHR) > 0 {
-			params = server_http.Params{}
-			for _, p := range paramsHR {
-				params[p.Key] = p.Value
-			}
-		}
-
-		w.Header().Set("Access-Control-Allow-Origin", server_http.CORSAllowOrigin)
-		w.Header().Set("Access-Control-Allow-Headers", server_http.CORSAllowHeaders)
-		w.Header().Set("Access-Control-Allow-Methods", server_http.CORSAllowMethods)
-		w.Header().Set("Access-Control-Allow-Credentials", server_http.CORSAllowCredentials)
-
-		responseData, err := endpoint.WorkerHTTP(s, &crud.Options{Identity: identity}, params, r)
-		if err != nil {
-			l.Error(err)
-
-			//http.Critical(w, string(responseData.AccountData), responseData.Status)
-			//return
-		}
-
-		// l.Infof("responseData: %#v", responseData)
-
-		if responseData.MIMEType != "" {
-			w.Header().Set("Content-Type", responseData.MIMEType)
-		}
-		w.Header().Set("Content-Length", strconv.Itoa(len(responseData.Data)))
-		if responseData.FileName != "" {
-			w.Header().Set("Content-Disposition", "attachment; filename="+responseData.FileName)
-		}
-
-		if responseData.Status > 0 {
-			w.WriteHeader(responseData.Status)
-		} else {
-			w.WriteHeader(http.StatusOK)
-		}
-
-		if _, err := w.Write(responseData.Data); err != nil {
-			l.Error("can't write response", err)
-		}
-	}
-
-	l.Infof("%-10s: %s %s", key, method, path)
-	switch method {
-	case "GET":
-		s.httpServeMux.GET(path, handler)
-	case "POST":
-		s.httpServeMux.POST(path, handler)
-	case "PUT":
-		s.httpServeMux.PUT(path, handler)
-	case "DELETE":
-		s.httpServeMux.DELETE(path, handler)
-	default:
-		l.Error(method, " isn't supported!")
-	}
 
 	return nil
 }

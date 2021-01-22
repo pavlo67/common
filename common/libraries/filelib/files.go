@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pavlo67/workshop/common/errors"
+	"github.com/pavlo67/common/common/errors"
 )
 
 func CurrentFile(removeExt bool) string {

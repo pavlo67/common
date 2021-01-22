@@ -3,11 +3,11 @@ package selectors_sql
 import (
 	"fmt"
 
-	"github.com/pavlo67/workshop/common/errors"
+	"github.com/pavlo67/common/common/errors"
 
 	"strings"
 
-	"github.com/pavlo67/workshop/common/selectors"
+	"github.com/pavlo67/common/common/selectors"
 )
 
 func Use(term *selectors.Term) (sqlCondition string, values []interface{}, err error) {

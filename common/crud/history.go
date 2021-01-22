@@ -5,9 +5,9 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/pavlo67/workshop/common"
-	"github.com/pavlo67/workshop/common/errors"
-	"github.com/pavlo67/workshop/common/joiner"
+	"github.com/pavlo67/common/common"
+	"github.com/pavlo67/common/common/errors"
+	"github.com/pavlo67/common/common/joiner"
 )
 
 type ActionKey string

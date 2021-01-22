@@ -6,9 +6,9 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/pavlo67/workshop/common"
+	"github.com/pavlo67/common/common"
 
-	"github.com/pavlo67/workshop/common/errors"
+	"github.com/pavlo67/common/common/errors"
 )
 
 type InterfaceKey string

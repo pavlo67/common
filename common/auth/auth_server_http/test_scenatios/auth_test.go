@@ -7,8 +7,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/pavlo67/workshop/common"
-	"github.com/pavlo67/workshop/common/auth"
+	"github.com/pavlo67/common/common"
+	"github.com/pavlo67/common/common/auth"
 )
 
 func TestAuth(t *testing.T) {

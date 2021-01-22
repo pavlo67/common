@@ -5,19 +5,17 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/pavlo67/workshop/common"
-	"github.com/pavlo67/workshop/common/auth"
-	"github.com/pavlo67/workshop/common/crud"
-	"github.com/pavlo67/workshop/common/server"
-	"github.com/pavlo67/workshop/common/server/server_http"
+	"github.com/pavlo67/common/common"
+	"github.com/pavlo67/common/common/auth"
+	"github.com/pavlo67/common/common/crud"
+	"github.com/pavlo67/common/common/server"
+	"github.com/pavlo67/common/common/server/server_http"
 
-	"github.com/pavlo67/workshop/common/errors"
+	"github.com/pavlo67/common/common/errors"
 )
 
-var authEndpoint = server_http.Endpoint{
-	Method: "POST",
-	BodyParams: json.RawMessage(`{
-    "in": "body",
+var bodyParams = json.RawMessage(`{
+   "in": "body",
 	"name": "credentials",
 	"description": "user's email/login & password'",
 	"schema": {
@@ -30,30 +28,24 @@ var authEndpoint = server_http.Endpoint{
 		}
 	}
 
-}`),
+}`)
 
-	WorkerHTTP: func(serverOp server_http.Operator, options *crud.Options, _ server_http.Params, req *http.Request) (server.Response, error) {
+var authEndpoint = server_http.Endpoint{
+	Method:     "POST",
+	BodyParams: bodyParams,
+	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, _ server_http.Params, _ *crud.Options) (server.Response, error) {
 
 		credsJSON, err := ioutil.ReadAll(req.Body)
 		if err != nil {
-			return serverOp.ResponseRESTError(options, http.StatusBadRequest, errors.KeyableError(errors.Wrap(err, "can't read body"), errors.WrongBodyErr, nil))
+			return serverOp.ResponseRESTError(http.StatusBadRequest, errors.KeyableError(errors.Wrap(err, "can't read body"), errors.WrongBodyErr, nil), req)
 		}
 
-		// l.Debugf("%s", credsJSON)
-
 		var toAuth auth.Creds
-		err = json.Unmarshal(credsJSON, &toAuth)
-		if err != nil {
-			return serverOp.ResponseRESTError(options, http.StatusBadRequest, errors.KeyableError(errors.Wrapf(err, "can't unmarshal body: %s", credsJSON),
-				errors.WrongJSONErr, nil))
+		if err = json.Unmarshal(credsJSON, &toAuth); err != nil {
+			return serverOp.ResponseRESTError(http.StatusBadRequest, errors.KeyableError(errors.Wrapf(err, "can't unmarshal body: %s", credsJSON), errors.WrongJSONErr, nil), req)
 		}
 
 		toAuth[auth.CredsIP] = req.RemoteAddr
-
-		//for _, authOp := range authOps {
-		//	l.Infof("%#v", authOp)
-		//}
-		//l.Infof("authOps length = %d", len(authOps))
 
 		identity, errorKey, errs := auth.GetIdentity(toAuth, authOps, false, nil)
 		if identity != nil {
@@ -64,7 +56,7 @@ var authEndpoint = server_http.Endpoint{
 			if len(errs) > 0 {
 				result["errors"] = errs.Err()
 			}
-			return serverOp.ResponseRESTOk(options, result)
+			return serverOp.ResponseRESTOk(http.StatusOK, result)
 		}
 
 		if errorKey == "" {
@@ -72,10 +64,10 @@ var authEndpoint = server_http.Endpoint{
 		}
 
 		if len(errs) > 0 {
-			return serverOp.ResponseRESTError(options, 0, errors.KeyableError(errs.Err(), errorKey, nil))
+			return serverOp.ResponseRESTError(0, errors.KeyableError(errs.Err(), errorKey, nil), req)
 		}
 
-		return serverOp.ResponseRESTError(options, 0, errors.KeyableError(errors.New("no identity authorized"), errorKey, nil))
+		return serverOp.ResponseRESTError(0, errors.KeyableError(errors.New("no identity authorized"), errorKey, nil), req)
 	},
 }
 

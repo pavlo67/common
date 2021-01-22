@@ -5,14 +5,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pavlo67/workshop/common/errors"
+	"github.com/pavlo67/common/common/errors"
 	"gopkg.in/square/go-jose.v2"
 	"gopkg.in/square/go-jose.v2/jwt"
 
-	"github.com/pavlo67/workshop/common"
-	"github.com/pavlo67/workshop/common/auth"
-	"github.com/pavlo67/workshop/common/libraries/encrlib"
-	"github.com/pavlo67/workshop/common/rbac"
+	"github.com/pavlo67/common/common"
+	"github.com/pavlo67/common/common/auth"
+	"github.com/pavlo67/common/common/libraries/encrlib"
+	"github.com/pavlo67/common/common/rbac"
 )
 
 const Proto = "jwt"

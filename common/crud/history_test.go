@@ -4,9 +4,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/pavlo67/workshop/common"
+	"github.com/pavlo67/common/common"
 
-	"github.com/pavlo67/workshop/common/joiner"
+	"github.com/pavlo67/common/common/joiner"
 	"github.com/stretchr/testify/require"
 )
 

@@ -5,9 +5,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/pavlo67/workshop/common/config"
-	"github.com/pavlo67/workshop/common/libraries/sqllib"
-	"github.com/pavlo67/workshop/common/libraries/sqllib/sqllib_pg"
+	"github.com/pavlo67/common/common/config"
+	"github.com/pavlo67/common/common/libraries/sqllib"
+	"github.com/pavlo67/common/common/libraries/sqllib/sqllib_pg"
 )
 
 func main() {

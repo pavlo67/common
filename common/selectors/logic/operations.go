@@ -1,6 +1,6 @@
 package logic
 
-import "github.com/pavlo67/workshop/common/selectors"
+import "github.com/pavlo67/common/common/selectors"
 
 func AND(value0, value1 *selectors.Term) *selectors.Term {
 	if value0 == nil {

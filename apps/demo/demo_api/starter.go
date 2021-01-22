@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/pavlo67/workshop/common"
+	"github.com/pavlo67/common/common"
 
-	"github.com/pavlo67/workshop/common/auth"
-	"github.com/pavlo67/workshop/common/config"
-	"github.com/pavlo67/workshop/common/joiner"
-	"github.com/pavlo67/workshop/common/libraries/filelib"
-	"github.com/pavlo67/workshop/common/logger"
-	"github.com/pavlo67/workshop/common/server/server_http"
-	"github.com/pavlo67/workshop/common/starter"
+	"github.com/pavlo67/common/common/auth"
+	"github.com/pavlo67/common/common/config"
+	"github.com/pavlo67/common/common/joiner"
+	"github.com/pavlo67/common/common/libraries/filelib"
+	"github.com/pavlo67/common/common/logger"
+	"github.com/pavlo67/common/common/server/server_http"
+	"github.com/pavlo67/common/common/starter"
 )
 
 func Starter() starter.Operator {

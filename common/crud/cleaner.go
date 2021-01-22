@@ -1,7 +1,7 @@
 package crud
 
 import (
-	"github.com/pavlo67/workshop/common/selectors"
+	"github.com/pavlo67/common/common/selectors"
 )
 
 type Cleaner interface {

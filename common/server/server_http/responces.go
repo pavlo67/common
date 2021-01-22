@@ -3,7 +3,7 @@ package server_http
 import (
 	"net/http"
 
-	"github.com/pavlo67/workshop/common/errors"
+	"github.com/pavlo67/common/common/errors"
 )
 
 const (

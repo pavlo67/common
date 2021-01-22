@@ -7,12 +7,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/pavlo67/workshop/common/errors"
+	"github.com/pavlo67/common/common/errors"
 
-	"github.com/pavlo67/workshop/common/crud"
-	"github.com/pavlo67/workshop/common/selectors"
-	"github.com/pavlo67/workshop/common/selectors/logic"
-	"github.com/pavlo67/workshop/common/selectors/selectors_sql"
+	"github.com/pavlo67/common/common/crud"
+	"github.com/pavlo67/common/common/selectors"
+	"github.com/pavlo67/common/common/selectors/logic"
+	"github.com/pavlo67/common/common/selectors/selectors_sql"
 )
 
 const CantPrepare = "can't .Prepare(%s)"

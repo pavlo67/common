@@ -7,8 +7,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/pavlo67/workshop/common/starter/configr/config"
-	"github.com/pavlo67/workshop/libraries/filelib"
+	"github.com/pavlo67/common/common/starter/configr/config"
+	"github.com/pavlo67/common/libraries/filelib"
 )
 
 func TestMain(m *testing.M) {

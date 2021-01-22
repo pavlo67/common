@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/pavlo67/workshop/common/logger"
+	"github.com/pavlo67/common/common/logger"
 )
 
 func Close(readCloser io.Closer, client *http.Client, l logger.Operator) {

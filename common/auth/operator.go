@@ -3,7 +3,7 @@ package auth
 import (
 	"fmt"
 
-	"github.com/pavlo67/workshop/common/errors"
+	"github.com/pavlo67/common/common/errors"
 )
 
 type Operator interface {

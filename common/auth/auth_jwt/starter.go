@@ -3,16 +3,16 @@ package auth_jwt
 import (
 	"strings"
 
-	"github.com/pavlo67/workshop/common"
+	"github.com/pavlo67/common/common"
 
-	"github.com/pavlo67/workshop/common/errors"
+	"github.com/pavlo67/common/common/errors"
 
-	"github.com/pavlo67/workshop/common/config"
-	"github.com/pavlo67/workshop/common/joiner"
-	"github.com/pavlo67/workshop/common/libraries/filelib"
-	"github.com/pavlo67/workshop/common/logger"
-	"github.com/pavlo67/workshop/common/server"
-	"github.com/pavlo67/workshop/common/starter"
+	"github.com/pavlo67/common/common/config"
+	"github.com/pavlo67/common/common/joiner"
+	"github.com/pavlo67/common/common/libraries/filelib"
+	"github.com/pavlo67/common/common/logger"
+	"github.com/pavlo67/common/common/server"
+	"github.com/pavlo67/common/common/starter"
 )
 
 const InterfaceKey joiner.InterfaceKey = "auth_jwt"

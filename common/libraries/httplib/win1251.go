@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"regexp"
 
-	"github.com/pavlo67/workshop/common/libraries/strlib"
+	"github.com/pavlo67/common/common/libraries/strlib"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/transform"
 )

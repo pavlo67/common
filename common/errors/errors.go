@@ -5,7 +5,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/pavlo67/workshop/common"
+	"github.com/pavlo67/common/common"
 )
 
 type Error interface {

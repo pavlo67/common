@@ -5,16 +5,16 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/pavlo67/workshop/common/libraries/sqllib"
+	"github.com/pavlo67/common/common/libraries/sqllib"
 
 	_ "github.com/lib/pq"
-	"github.com/pavlo67/workshop/common/errors"
+	"github.com/pavlo67/common/common/errors"
 
 	"strconv"
 
 	"regexp"
 
-	"github.com/pavlo67/workshop/common/config"
+	"github.com/pavlo67/common/common/config"
 )
 
 func AddressPostgres(e config.Access) (string, error) {

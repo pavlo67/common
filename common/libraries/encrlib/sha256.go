@@ -2,7 +2,7 @@ package encrlib
 
 import (
 	"github.com/GehirnInc/crypt"
-	"github.com/pavlo67/workshop/common/errors"
+	"github.com/pavlo67/common/common/errors"
 )
 
 func SHA256Hash(str, salt string) (string, error) {

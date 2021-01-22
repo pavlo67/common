@@ -5,12 +5,12 @@ import (
 	"log"
 	"os"
 
-	"github.com/pavlo67/workshop/common/config"
-	"github.com/pavlo67/workshop/common/logger"
-	"github.com/pavlo67/workshop/common/serializer"
-	"github.com/pavlo67/workshop/common/starter"
+	"github.com/pavlo67/common/common/config"
+	"github.com/pavlo67/common/common/logger"
+	"github.com/pavlo67/common/common/serializer"
+	"github.com/pavlo67/common/common/starter"
 
-	"github.com/pavlo67/workshop/apps/demo/demo_api"
+	"github.com/pavlo67/common/apps/demo/demo_api"
 )
 
 var (
@@ -72,13 +72,16 @@ func main() {
 
 	label := "DEMO/PG/REST BUILD"
 
-	// TODO: rename production ENV value
-
-	joinerOp, err := starter.Run(demo_api.Components(envPath, true, false), cfgService, os.Args[1:], label)
+	joinerOp, err := starter.Run(demo_api.Components(envPath, true, false), cfgService, label)
 	if err != nil {
 		l.Fatal(err)
 	}
 	defer joinerOp.CloseAll()
+
+	// serverOp.Start()
+	//if ss.config.TLSCertFile != "" && ss.config.TLSKeyFile != "" {
+	//	go http.ListenAndServe(":80", http.HandlerFunc(server_http.Redirect))
+	//}
 
 	demo_api.WG.Wait()
 }

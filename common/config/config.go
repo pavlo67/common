@@ -3,8 +3,8 @@ package config
 import (
 	"io/ioutil"
 
-	"github.com/pavlo67/workshop/common/errors"
-	"github.com/pavlo67/workshop/common/serializer"
+	"github.com/pavlo67/common/common/errors"
+	"github.com/pavlo67/common/common/serializer"
 )
 
 // -----------------------------------------------------------------------------

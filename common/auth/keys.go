@@ -1,6 +1,6 @@
 package auth
 
-import "github.com/pavlo67/workshop/common/joiner"
+import "github.com/pavlo67/common/common/joiner"
 
 const InterfaceKey joiner.InterfaceKey = "auth"
 const InterfaceOperatorKey joiner.InterfaceKey = "auth_operator"

@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/pavlo67/workshop/common"
+	"github.com/pavlo67/common/common"
 
-	"github.com/pavlo67/workshop/common/joiner"
+	"github.com/pavlo67/common/common/joiner"
 )
 
 type EndpointConfig struct {

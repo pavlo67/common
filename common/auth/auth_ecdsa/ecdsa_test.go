@@ -6,8 +6,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/pavlo67/workshop/common/auth"
-	"github.com/pavlo67/workshop/common/logger"
+	"github.com/pavlo67/common/common/auth"
+	"github.com/pavlo67/common/common/logger"
 )
 
 const serviceName = ""
