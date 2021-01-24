@@ -23,14 +23,12 @@ func InitEndpointsWithSwaggerV2(cfg Config, host string, noHTTPS bool, srvOp Ope
 		return fmt.Errorf("on .SwaggerV2(): %s", err) //
 	}
 
-	err = ioutil.WriteFile(swaggerFilePath, swagger, 0644)
-	if err != nil {
+	if err = ioutil.WriteFile(swaggerFilePath, swagger, 0644); err != nil {
 		return fmt.Errorf("on ioutil.WriteFile(%s, %s, 0755): %s", swaggerFilePath, swagger, err)
 	}
 	l.Infof("%d bytes are written into %s", len(swagger), swaggerFilePath)
 
-	err = InitEndpoints(cfg, srvOp, l)
-	if err != nil {
+	if err = InitEndpoints(cfg, srvOp, l); err != nil {
 		return err
 	}
 	return srvOp.HandleFiles("swagger", cfg.Prefix+"/"+swaggerSubpath+"/*filepath", StaticPath{LocalPath: swaggerPath})

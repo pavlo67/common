@@ -78,10 +78,5 @@ func main() {
 	}
 	defer joinerOp.CloseAll()
 
-	// serverOp.Start()
-	//if ss.config.TLSCertFile != "" && ss.config.TLSKeyFile != "" {
-	//	go http.ListenAndServe(":80", http.HandlerFunc(server_http.Redirect))
-	//}
-
 	demo_api.WG.Wait()
 }

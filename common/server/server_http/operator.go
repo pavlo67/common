@@ -8,13 +8,18 @@ import (
 	"github.com/pavlo67/common/common/server"
 )
 
+const OnRequestInterfaceKey joiner.InterfaceKey = "server_http_on_request"
+
 const InterfaceKey joiner.InterfaceKey = "server_http"
 const PortInterfaceKey joiner.InterfaceKey = "server_http_port"
-const NoHTTPSInterfaceKey joiner.InterfaceKey = "server_http_no_https"
+const HTTPSInterfaceKey joiner.InterfaceKey = "server_http_https"
 
 type Params map[string]string
-type RequestOptions func(r *http.Request) (*crud.Options, error)
 type WorkerHTTP func(Operator, *http.Request, Params, *crud.Options) (server.Response, error)
+
+type OnRequest interface {
+	Options(r *http.Request) (*crud.Options, error)
+}
 
 type StaticPath struct {
 	LocalPath string

@@ -30,18 +30,18 @@ type serverHTTPJschmhr struct {
 	tlsCertFile string
 	tlsKeyFile  string
 
-	requestOptions server_http.RequestOptions
+	onRequest server_http.OnRequest
 
 	secretENVsToLower []string
 }
 
-func New(port int, tlsCertFile, tlsKeyFile string, requestOptions server_http.RequestOptions, secretENVs []string) (server_http.Operator, error) {
+func New(port int, tlsCertFile, tlsKeyFile string, onRequest server_http.OnRequest, secretENVs []string) (server_http.Operator, error) {
 	if port <= 0 {
 		return nil, fmt.Errorf("on server_http_jschmhr.New(): wrong port = %d", port)
 	}
 
-	if requestOptions == nil {
-		return nil, errors.New("on server_http_jschmhr.New(): no requestOptions")
+	if onRequest == nil {
+		return nil, errors.New("on server_http_jschmhr.New(): no server_http.OnRequest")
 	}
 
 	var secretENVsToLower []string
@@ -63,7 +63,7 @@ func New(port int, tlsCertFile, tlsKeyFile string, requestOptions server_http.Re
 		tlsCertFile:  tlsCertFile,
 		tlsKeyFile:   tlsKeyFile,
 
-		requestOptions: requestOptions,
+		onRequest: onRequest,
 
 		secretENVsToLower: secretENVsToLower,
 	}, nil
@@ -155,7 +155,7 @@ func (s *serverHTTPJschmhr) HandleEndpoint(key, serverPath string, endpoint serv
 	s.HandleOptions(key, path)
 
 	handler := func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
-		options, err := s.requestOptions(r)
+		options, err := s.onRequest.Options(r)
 		if err != nil {
 			l.Error(err)
 		}

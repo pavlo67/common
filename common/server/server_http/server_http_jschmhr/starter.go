@@ -1,8 +1,9 @@
 package server_http_jschmhr
 
 import (
+	"fmt"
+
 	"github.com/pavlo67/common/common"
-	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/joiner"
@@ -44,37 +45,31 @@ func (ss *server_http_jschmhrStarter) Init(cfg *config.Config, lCommon logger.Op
 
 func (ss *server_http_jschmhrStarter) Run(joinerOp joiner.Operator) error {
 
-	authOpNil := auth.Operator(nil)
-	authComps := joinerOp.InterfacesAll(&authOpNil)
+	l.Infof("!!! %#v", joinerOp.Interface(server_http.OnRequestInterfaceKey))
 
-	var authOps []auth.Operator
-	for _, authComp := range authComps {
-		if authOp, ok := authComp.Interface.(auth.Operator); ok {
-			authOps = append(authOps, authOp)
-		}
+	onRequest, _ := joinerOp.Interface(server_http.OnRequestInterfaceKey).(server_http.OnRequest)
+	if onRequest == nil {
+		return fmt.Errorf("no server_http.OnRequest with key %s", server_http.OnRequestInterfaceKey)
 	}
 
-	var requestOptions server_http.RequestOptions
+	// TODO!!! customize it
 	var secretENVs []string
 
-	srvOp, err := New(ss.config.Port, ss.config.TLSCertFile, ss.config.TLSKeyFile, requestOptions, secretENVs)
+	srvOp, err := New(ss.config.Port, ss.config.TLSCertFile, ss.config.TLSKeyFile, onRequest, secretENVs)
 	if err != nil {
-		return errors.Wrap(err, "can't init serverHTTPJschmhr.UserKey")
+		return errors.Wrap(err, "on server_http_jschmhr.New()")
 	}
 
-	err = joinerOp.Join(srvOp, ss.interfaceKey)
-	if err != nil {
-		return errors.Wrapf(err, "can't join serverHTTPJschmhr srvOp as server.UserKey with key '%s'", ss.interfaceKey)
+	if err = joinerOp.Join(srvOp, ss.interfaceKey); err != nil {
+		return errors.Wrapf(err, "can't join *serverHTTPJschmhr{} as server_http.Operator with key '%s'", ss.interfaceKey)
 	}
 
-	err = joinerOp.Join(ss.config.Port, server_http.PortInterfaceKey)
-	if err != nil {
+	if err = joinerOp.Join(ss.config.TLSCertFile != "" && ss.config.TLSKeyFile != "", server_http.HTTPSInterfaceKey); err != nil {
+		return errors.Wrapf(err, "can't join HTTPS info with key '%s'", server_http.HTTPSInterfaceKey)
+	}
+
+	if err = joinerOp.Join(ss.config.Port, server_http.PortInterfaceKey); err != nil {
 		return errors.Wrapf(err, "can't join port with key '%s'", server_http.PortInterfaceKey)
-	}
-
-	err = joinerOp.Join(ss.config.NoHTTPS, server_http.NoHTTPSInterfaceKey)
-	if err != nil {
-		return errors.Wrapf(err, "can't join no_https with key '%s'", server_http.NoHTTPSInterfaceKey)
 	}
 
 	return nil

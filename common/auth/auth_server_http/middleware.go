@@ -1,42 +1,46 @@
 package auth_server_http
 
 import (
+	"net/http"
+	"strings"
+
+	"github.com/pavlo67/common/common/auth"
+	"github.com/pavlo67/common/common/crud"
 	"github.com/pavlo67/common/common/errors"
+	"github.com/pavlo67/common/common/server/server_http"
 )
 
-var errNoIdentityOpsMap = errors.New("no map[CredsType]identity.UserKey")
+var _ server_http.OnRequest = &onRequest{}
 
-//func OptionsFromRequest(r *http.Request) (*crud.Options, error) {
-//
-//	var errs errors.Errors
-//	var errorKey errors.Key
-//	var identity *auth.Identity
-//
-//	tokenJWT := r.Header.Get("Authorization")
-//
-//	if tokenJWT != "" {
-//		tokenJWT = strings.Replace(tokenJWT, "Bearer ", "", 1)
-//
-//		var postfix string
-//		if len(tokenJWT) >= len(OperatorJWTKey) && tokenJWT[len(tokenJWT)-len(OperatorJWTKey):] == OperatorJWTKey {
-//			postfix = OperatorJWTKey
-//			identity, errorKey, errs = auth.GetIdentity(auth.Creds{auth.CredsJWT: tokenJWT[:len(tokenJWT)-len(OperatorJWTKey)]}, authOps, true, errs)
-//		} else {
-//			identity, errorKey, errs = auth.GetIdentity(auth.Creds{auth.CredsJWT: tokenJWT}, authOps, false, errs)
-//		}
-//
-//		if identity != nil {
-//			identity.JWT += postfix
-//		}
-//		// previous errs is added with auth.GetIdentity()
-//
-//	} else {
-//		errorKey = errors.NoCredsErr
-//
-//	}
-//
-//	return identity, errs.Err()
-//}
+type onRequest struct{}
+
+func (*onRequest) Options(r *http.Request) (*crud.Options, error) {
+	//if r == nil {
+	//	return nil, errors.New("no server_http.Request in RequestOptions(...)")
+	//}
+
+	var errorKey errors.Key
+	var errs errors.Errors
+	var identity *auth.Identity
+
+	tokenJWT := r.Header.Get("Authorization")
+
+	if tokenJWT != "" {
+		tokenJWT = strings.Replace(tokenJWT, "Bearer ", "", 1)
+		identity, errorKey, errs = auth.GetIdentity(auth.Creds{auth.CredsJWT: tokenJWT}, authOps, false, errs)
+
+	} else {
+		errorKey = errors.NoCredsErr
+
+	}
+
+	err := errors.KeyableError(errs.Err(), errorKey, nil)
+	if identity == nil {
+		return nil, err
+	}
+
+	return &crud.Options{Identity: identity}, err
+}
 
 // TOKEN CHECK
 //token := r.Header.Get("Token")
@@ -77,3 +81,4 @@ var errNoIdentityOpsMap = errors.New("no map[CredsType]identity.UserKey")
 //	user, errs = auth.GetIdentity(credsSignature, authOps, errs)
 //	// previous errs is added by auth.GetIdentity()
 //}
+//var errNoIdentityOpsMap = errors.New("no map[CredsType]identity.UserKey")

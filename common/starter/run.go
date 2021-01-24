@@ -33,7 +33,7 @@ func StartComponent(c Starter, cfg *config.Config, joinerOp joiner.Operator) err
 	}
 
 	if err = c.Run(joinerOp); err != nil {
-		return fmt.Errorf("error calling .Prepare() for component (%s): %s", name, err)
+		return fmt.Errorf("error calling .Run() for component (%s): %s", name, err)
 	}
 
 	return nil

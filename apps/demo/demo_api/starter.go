@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/pavlo67/common/common"
-
 	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/joiner"
@@ -67,15 +66,24 @@ func (ss *demoStarter) Run(joinerOp joiner.Operator) error {
 		return fmt.Errorf("no server_http.UserKey with key %s", server_http.InterfaceKey)
 	}
 
-	srvPort, ok := joinerOp.Interface(server_http.PortInterfaceKey).(int)
-	if !ok {
+	srvPort, _ := joinerOp.Interface(server_http.PortInterfaceKey).(int)
+	if srvPort <= 0 {
 		return fmt.Errorf("no server_http.Port with key %s", server_http.PortInterfaceKey)
 	}
 
-	noHTTPS := joinerOp.Interface(server_http.NoHTTPSInterfaceKey).(bool)
+	isHTTPS, ok := joinerOp.Interface(server_http.HTTPSInterfaceKey).(bool)
 	if !ok {
-		return fmt.Errorf("no server_http.NoHTTPS with key %s", server_http.NoHTTPSInterfaceKey)
+		return fmt.Errorf("no server_http.HTTPS info with key %s", server_http.HTTPSInterfaceKey)
 	}
+
+	//err = joinerOp.Join(ss.config.NoHTTPS, server_http.SwaggerNoHTTPSKey)
+	//if err != nil {
+	//	return errors.Wrapf(err, "can't join no_https with key '%s'", server_http.SwaggerNoHTTPSKey)
+	//}
+	//noHTTPS := joinerOp.Interface(server_http.SwaggerNoHTTPSKey).(bool)
+	//if !ok {
+	//	return fmt.Errorf("no server_http.NoHTTPS with key %s", server_http.SwaggerNoHTTPSKey)
+	//}
 
 	for key, ep := range Endpoints {
 		ep.Handler, ok = joinerOp.Interface(ep.HandlerKey).(*server_http.Endpoint)
@@ -96,27 +104,31 @@ func (ss *demoStarter) Run(joinerOp joiner.Operator) error {
 		Endpoints: Endpoints,
 	}
 
-	err := server_http.InitEndpointsWithSwaggerV2(
+	if err := server_http.InitEndpointsWithSwaggerV2(
 		cfg,
 		":"+strconv.Itoa(srvPort),
-		noHTTPS,
+		!isHTTPS,
 		srvOp,
 		filelib.CurrentPath()+"api-docs/",
 		"api-docs",
 		l,
-	)
-	if err != nil {
+	); err != nil {
 		l.Error("on server_http.InitEndpointsWithSwaggerV2(): ", err)
 	}
 
 	WG.Add(1)
 
+	// TODO!!! customize it
+	// if isHTTPS {
+	//	go http.ListenAndServe(":80", http.HandlerFunc(server_http.Redirect))
+	// }
+
 	go func() {
 		defer WG.Done()
-		err := srvOp.Start()
-		if err != nil {
+		if err := srvOp.Start(); err != nil {
 			l.Error("on srvOp.Start(): ", err)
 		}
 	}()
+
 	return nil
 }
