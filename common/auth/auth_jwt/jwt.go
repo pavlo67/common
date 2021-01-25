@@ -37,7 +37,7 @@ func New(pathToStore string) (auth.Operator, error) {
 		return nil, errors.Wrap(err, onNew)
 	}
 
-	signerOpts := (&jose.SignerOptions{}).WithType("JWT") // signerOpts.WithType("JWT")
+	signerOpts := (&jose.SignerOptions{}).WithType("Token") // signerOpts.WithType("Token")
 	signingKey := jose.SigningKey{Algorithm: jose.RS256, Key: privKey}
 	rsaSigner, err := jose.NewSigner(signingKey, signerOpts)
 	if err != nil {
@@ -110,7 +110,7 @@ func (authOp *authJWT) Authenticate(toAuth auth.Creds) (*auth.Identity, error) {
 
 	parsedJWT, err := jwt.ParseSigned(credsJWT)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to parse JWT: %s", credsJWT)
+		return nil, errors.Wrapf(err, "failed to parse Token: %s", credsJWT)
 	}
 
 	res := JWTCreds{}

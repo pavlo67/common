@@ -10,5 +10,5 @@ require (
 	github.com/yosuke-furukawa/json5 v0.1.1
 	go.uber.org/zap v1.16.0
 	gopkg.in/square/go-jose.v2 v2.5.1
-	gopkg.in/yaml.v2 v2.2.2
+	gopkg.in/yaml.v2 v2.2.7
 )

@@ -25,9 +25,9 @@ func CommonError(any ...interface{}) Error {
 	return err
 }
 
-func KeyableError(err error, key Key, data common.Map) Error {
+func KeyableError(key Key, data common.Map) Error {
 	return &commonError{
-		errs: Errors{err},
+		errs: Errors{New(string(key))},
 		key:  key,
 		data: data,
 	}

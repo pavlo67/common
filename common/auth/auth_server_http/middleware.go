@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/pavlo67/common/common"
+
 	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/crud"
 	"github.com/pavlo67/common/common/errors"
@@ -34,7 +36,7 @@ func (*onRequest) Options(r *http.Request) (*crud.Options, error) {
 
 	}
 
-	err := errors.KeyableError(errs.Err(), errorKey, nil)
+	err := errors.KeyableError(errorKey, common.Map{"error": errs.Err()})
 	if identity == nil {
 		return nil, err
 	}

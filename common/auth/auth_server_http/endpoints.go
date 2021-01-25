@@ -37,12 +37,12 @@ var authEndpoint = server_http.Endpoint{
 
 		credsJSON, err := ioutil.ReadAll(req.Body)
 		if err != nil {
-			return serverOp.ResponseRESTError(http.StatusBadRequest, errors.KeyableError(errors.Wrap(err, "can't read body"), errors.WrongBodyErr, nil), req)
+			return serverOp.ResponseRESTError(http.StatusBadRequest, errors.KeyableError(errors.WrongBodyErr, common.Map{"error": errors.Wrap(err, "can't read body")}), req)
 		}
 
 		var toAuth auth.Creds
 		if err = json.Unmarshal(credsJSON, &toAuth); err != nil {
-			return serverOp.ResponseRESTError(http.StatusBadRequest, errors.KeyableError(errors.Wrapf(err, "can't unmarshal body: %s", credsJSON), errors.WrongJSONErr, nil), req)
+			return serverOp.ResponseRESTError(http.StatusBadRequest, errors.KeyableError(errors.WrongJSONErr, common.Map{"error": errors.Wrapf(err, "can't unmarshal body: %s", credsJSON)}), req)
 		}
 
 		toAuth[auth.CredsIP] = req.RemoteAddr
@@ -64,14 +64,14 @@ var authEndpoint = server_http.Endpoint{
 		}
 
 		if len(errs) > 0 {
-			return serverOp.ResponseRESTError(0, errors.KeyableError(errs.Err(), errorKey, nil), req)
+			return serverOp.ResponseRESTError(0, errors.KeyableError(errorKey, common.Map{"error": errs.Err()}), req)
 		}
 
-		return serverOp.ResponseRESTError(0, errors.KeyableError(errors.New("no identity authorized"), errorKey, nil), req)
+		return serverOp.ResponseRESTError(0, errors.KeyableError(errorKey, common.Map{"error": "no identity authorized"}), req)
 	},
 }
 
-//if identity.JWT == "" && authOpToSetToken != nil {
+//if identity.Token == "" && authOpToSetToken != nil {
 //	toAddModified, err := authOpToSetToken.SetCreds(
 //		identity.ID,
 //		auth.Creds{
@@ -81,8 +81,8 @@ var authEndpoint = server_http.Endpoint{
 //		},
 //	)
 //	if err != nil || toAddModified == nil {
-//		return serverOp.ResponseRESTError(identity, 0, fmt.Errorf("can't create JWT. got %s / %#v", err, toAddModified), req)
+//		return serverOp.ResponseRESTError(identity, 0, fmt.Errorf("can't create Token. got %s / %#v", err, toAddModified), req)
 //	}
-//	identity.JWT, _ = toAddModified.String(auth.CredsJWT)
+//	identity.Token, _ = toAddModified.String(auth.CredsJWT)
 //	// TODO!!! add CompanyID, OperatorAccountID
 //}

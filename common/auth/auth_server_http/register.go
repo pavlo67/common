@@ -36,7 +36,7 @@ package auth_server_http
 //	//
 //	//toAddModified, err := confidence_routes.authOpToSetToken.SetCreds(*user, auth.Creds{}) // TODO!!! add custom toAddModified
 //	//if err != nil {
-//	//	return server.ResponseRESTError(http.StatusInternalServerError, errors.Wrap(err, "can't create JWT"))
+//	//	return server.ResponseRESTError(http.StatusInternalServerError, errors.Wrap(err, "can't create Token"))
 //	//}
 //	//
 //	//if toAddModified != nil {
@@ -69,7 +69,7 @@ package auth_server_http
 //	// !!! previous user.Creds are ignored here
 //	toReplaceModified, err := confidence_routes.AuthOpToSetToken.SetCreds(*user, toReplace) // TODO!!! add custom toReplace
 //	if err != nil {
-//		return server.ResponseRESTError(http.StatusInternalServerError, errors.Wrap(err, "can't create JWT"))
+//		return server.ResponseRESTError(http.StatusInternalServerError, errors.Wrap(err, "can't create Token"))
 //	}
 //
 //	if toReplaceModified != nil {

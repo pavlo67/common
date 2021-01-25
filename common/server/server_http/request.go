@@ -82,8 +82,8 @@ func Request(serverURL string, ep EndpointConfig, requestData, responseData inte
 			defer Close(req.Body, client, nil)
 		}
 
-		if identity != nil && identity.JWT != "" {
-			req.Header.Add("Authorization", identity.JWT)
+		if identity != nil && identity.Token != "" {
+			req.Header.Add("Authorization", identity.Token)
 		}
 
 		var responseBody []byte
@@ -113,7 +113,7 @@ func Request(serverURL string, ep EndpointConfig, requestData, responseData inte
 		}
 
 		if resp.StatusCode == http.StatusUnauthorized && doReAuth {
-			if identity.JWT = reAuthJWT(*identity); identity.JWT != "" {
+			if identity.Token = reAuthJWT(*identity); identity.Token != "" {
 				continue
 			}
 		}
@@ -133,8 +133,14 @@ func Request(serverURL string, ep EndpointConfig, requestData, responseData inte
 				return errors.Wrapf(err, "can't unmarshal body from %s %s: status = %d, body = %s", method, serverURL, resp.StatusCode, responseBody)
 			}
 
+			errCommon := fmt.Sprintf("can't %s %s: status = %d, body = %s", method, serverURL, resp.StatusCode, responseBody)
+			if data["error"] != nil {
+				data["error"] = errors.CommonError(data["error"], errCommon)
+			} else {
+				data["error"] = errCommon
+			}
 			errorKey := errors.Key(data.StringDefault(server.ErrorKey, ""))
-			return errors.KeyableError(fmt.Errorf("can't %s %s: status = %d, body = %s", method, serverURL, resp.StatusCode, responseBody), errorKey, data)
+			return errors.KeyableError(errorKey, data)
 		}
 
 		if dataBytes, ok := responseData.(*[]byte); ok {
@@ -160,9 +166,9 @@ func Request(serverURL string, ep EndpointConfig, requestData, responseData inte
 }
 
 func reAuthJWT(identity auth.Identity) string {
-	authOp, _ := identity.ReAuthData[ReAuthOpKey].(auth.Operator)
-	nickname := identity.ReAuthData.StringDefault(auth.CredsNickname, "")
-	password := identity.ReAuthData.StringDefault(auth.CredsPassword, "")
+	authOp, _ := identity.InternalData[ReAuthOpKey].(auth.Operator)
+	nickname := identity.InternalData.StringDefault(auth.CredsNickname, "")
+	password := identity.InternalData.StringDefault(auth.CredsPassword, "")
 
 	if authOp == nil { // || nickname == "" || password == ""
 		return ""
@@ -176,7 +182,7 @@ func reAuthJWT(identity auth.Identity) string {
 		return ""
 	}
 
-	return identityNew.JWT + identity.ReAuthData.StringDefault(ReAuthSuffix, "")
+	return identityNew.Token + identity.InternalData.StringDefault(ReAuthSuffix, "")
 }
 
 //TRIES_ON_OVERLOAD:
