@@ -1,30 +1,29 @@
 package errors
 
-import "errors"
-
 type Key string
 
-const CantPerformErr Key = "cant_perform"
+const CantPerformKey Key = "cant_perform"
 
-const NoCredsErr Key = "no_creds"
-const InvalidCredsErr Key = "invalid_creds"
-const NoUserErr Key = "no_user"
-const DuplicateUserErr Key = "duplicate_user"
-const NoRightsErr Key = "no_rights"
-const OverdueRightsErr Key = "overdue_rights"
+const NoCredsKey Key = "no_creds"
+const InvalidCredsKey Key = "invalid_creds"
+const NoUserKey Key = "no_user"
+const DuplicateUserKey Key = "duplicate_user"
+const NoRightsKey Key = "no_rights"
 
-const NotUniqueEmailErr Key = "not_unique_email"
-const WrongPathErr Key = "wrong_path"
-const WrongBodyErr Key = "wrong_body"
-const WrongIDErr Key = "wrong_id"
-const WrongJSONErr Key = "wrong_json"
+const NotUniqueEmailKey Key = "not_unique_email"
+const WrongPathKey Key = "wrong_path"
+const WrongBodyKey Key = "wrong_body"
+const WrongIDKey Key = "wrong_id"
+const WrongJSONKey Key = "wrong_json"
 
-const NotFoundErr Key = "not_found"
+const NotFoundKey Key = "not_found"
 
-var NotFound = errors.New(string(NotFoundErr))
+// var NotFound = errors.New(string(NotFoundKey))
 
-var NullItem = errors.New("item is null")
+const NullItemKey Key = "null_item"
 
-const NotImplementedErr Key = "not_implemented"
+// var NullItem = errors.New(string(NullItemKey))
 
-var NotImplemented = errors.New(string(NotImplementedErr))
+const NotImplementedKey Key = "not_implemented"
+
+var NotImplemented = New(string(NotImplementedKey))

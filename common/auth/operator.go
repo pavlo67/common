@@ -22,7 +22,7 @@ const onGetIdentity = "on GetIdentity()"
 
 func GetIdentity(creds Creds, ops []Operator, useOperatorAuth bool, errs errors.Errors) (*Identity, errors.Key, errors.Errors) {
 	if len(creds) < 1 {
-		return nil, errors.NoCredsErr, append(errs, ErrNoCreds)
+		return nil, errors.NoCredsKey, append(errs, ErrNoCreds)
 	}
 
 	for _, op := range ops {
@@ -46,7 +46,7 @@ func GetIdentity(creds Creds, ops []Operator, useOperatorAuth bool, errs errors.
 		//}
 	}
 
-	return nil, errors.InvalidCredsErr, errs
+	return nil, errors.InvalidCredsKey, errs
 }
 
 // callbacks can be used for partial implementations of identity.ActorKey (in their own interfaces)

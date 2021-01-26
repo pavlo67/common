@@ -96,9 +96,9 @@ func (s *serverHTTPJschmhr) ResponseRESTError(status int, err error, req *http.R
 	data := common.Map{server.ErrorKey: key}
 
 	if status == 0 || status == http.StatusOK {
-		if key == errors.NoCredsErr || key == errors.InvalidCredsErr {
+		if key == errors.NoCredsKey || key == errors.InvalidCredsKey {
 			status = http.StatusUnauthorized
-		} else if key == errors.OverdueRightsErr || key == errors.NoUserErr || key == errors.NoRightsErr {
+		} else if key == errors.OverdueRightsErr || key == errors.NoUserKey || key == errors.NoRightsKey {
 			status = http.StatusForbidden
 		} else if status == 0 || status == http.StatusOK {
 			status = http.StatusInternalServerError

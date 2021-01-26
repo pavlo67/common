@@ -49,10 +49,6 @@ func (uks *personsFSStubStarter) Init(cfg *config.Config, lCommon logger.Operato
 	return nil, nil
 }
 
-func (uks *personsFSStubStarter) Setup() error {
-	return nil
-}
-
 func (uks *personsFSStubStarter) Run(joiner joiner.Operator) error {
 	personsOp, personsCleanerOp, err := New(uks.cfg)
 	if err != nil {

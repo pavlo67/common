@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 
 	"github.com/pavlo67/common/common/errors"
@@ -82,10 +81,14 @@ func Request(serverURL string, ep EndpointConfig, requestData, responseData inte
 			defer Close(req.Body, client, nil)
 		}
 
-		if identity != nil && identity.Token != "" {
-			req.Header.Add("Authorization", identity.Token)
-		}
+		if identity != nil {
+			if jwt := identity.Creds.StringDefault(auth.CredsJWT, ""); jwt != "" {
+				req.Header.Add("Authorization", jwt)
+			} else if token := identity.Creds.StringDefault(auth.CredsToken, ""); token != "" {
+				req.Header.Add("Authorization", token)
+			}
 
+		}
 		var responseBody []byte
 
 		resp, err := client.Do(req)
@@ -113,9 +116,9 @@ func Request(serverURL string, ep EndpointConfig, requestData, responseData inte
 		}
 
 		if resp.StatusCode == http.StatusUnauthorized && doReAuth {
-			if identity.Token = reAuthJWT(*identity); identity.Token != "" {
-				continue
-			}
+			//if identity.Token = reAuthJWT(*identity); identity.Token != "" {
+			//	continue
+			//}
 		}
 
 		if resp.StatusCode != http.StatusOK {
@@ -165,25 +168,25 @@ func Request(serverURL string, ep EndpointConfig, requestData, responseData inte
 	return nil
 }
 
-func reAuthJWT(identity auth.Identity) string {
-	authOp, _ := identity.InternalData[ReAuthOpKey].(auth.Operator)
-	nickname := identity.InternalData.StringDefault(auth.CredsNickname, "")
-	password := identity.InternalData.StringDefault(auth.CredsPassword, "")
-
-	if authOp == nil { // || nickname == "" || password == ""
-		return ""
-	}
-
-	creds := auth.Creds{auth.CredsNickname: nickname, auth.CredsPassword: password}
-	identityNew, err := authOp.Authenticate(creds)
-	if err != nil || identityNew == nil {
-		// TODO: do it prettily
-		log.Printf("on authOp.Authenticate(%#v): got %#v / %s", creds, identityNew, err)
-		return ""
-	}
-
-	return identityNew.Token + identity.InternalData.StringDefault(ReAuthSuffix, "")
-}
+//func reAuthJWT(identity auth.Identity) string {
+//	authOp, _ := identity.InternalData[ReAuthOpKey].(auth.Operator)
+//	nickname := identity.InternalData.StringDefault(auth.CredsNickname, "")
+//	password := identity.InternalData.StringDefault(auth.CredsPassword, "")
+//
+//	if authOp == nil { // || nickname == "" || password == ""
+//		return ""
+//	}
+//
+//	creds := auth.Creds{auth.CredsNickname: nickname, auth.CredsPassword: password}
+//	identityNew, err := authOp.Authenticate(creds)
+//	if err != nil || identityNew == nil {
+//		// TODO: do it prettily
+//		log.Printf("on authOp.Authenticate(%#v): got %#v / %s", creds, identityNew, err)
+//		return ""
+//	}
+//
+//	return identityNew.Token + identity.InternalData.StringDefault(ReAuthSuffix, "")
+//}
 
 //TRIES_ON_OVERLOAD:
 //	for n := 1; n <= maxTriesOnOverload; n++ {

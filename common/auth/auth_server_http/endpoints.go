@@ -37,12 +37,12 @@ var authEndpoint = server_http.Endpoint{
 
 		credsJSON, err := ioutil.ReadAll(req.Body)
 		if err != nil {
-			return serverOp.ResponseRESTError(http.StatusBadRequest, errors.KeyableError(errors.WrongBodyErr, common.Map{"error": errors.Wrap(err, "can't read body")}), req)
+			return serverOp.ResponseRESTError(http.StatusBadRequest, errors.KeyableError(errors.WrongBodyKey, common.Map{"error": errors.Wrap(err, "can't read body")}), req)
 		}
 
 		var toAuth auth.Creds
 		if err = json.Unmarshal(credsJSON, &toAuth); err != nil {
-			return serverOp.ResponseRESTError(http.StatusBadRequest, errors.KeyableError(errors.WrongJSONErr, common.Map{"error": errors.Wrapf(err, "can't unmarshal body: %s", credsJSON)}), req)
+			return serverOp.ResponseRESTError(http.StatusBadRequest, errors.KeyableError(errors.WrongJSONKey, common.Map{"error": errors.Wrapf(err, "can't unmarshal body: %s", credsJSON)}), req)
 		}
 
 		toAuth[auth.CredsIP] = req.RemoteAddr
@@ -60,7 +60,7 @@ var authEndpoint = server_http.Endpoint{
 		}
 
 		if errorKey == "" {
-			errorKey = errors.NoCredsErr
+			errorKey = errors.NoCredsKey
 		}
 
 		if len(errs) > 0 {

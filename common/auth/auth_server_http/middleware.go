@@ -32,7 +32,7 @@ func (*onRequest) Options(r *http.Request) (*crud.Options, error) {
 		identity, errorKey, errs = auth.GetIdentity(auth.Creds{auth.CredsJWT: tokenJWT}, authOps, false, errs)
 
 	} else {
-		errorKey = errors.NoCredsErr
+		errorKey = errors.NoCredsKey
 
 	}
 
