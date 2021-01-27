@@ -3,10 +3,9 @@ package selectors_sql
 import (
 	"fmt"
 
-	"github.com/pavlo67/common/common/errors"
-
 	"strings"
 
+	"github.com/pavlo67/common/common/errata"
 	"github.com/pavlo67/common/common/selectors"
 )
 
@@ -21,12 +20,12 @@ func Use(term *selectors.Term) (sqlCondition string, values []interface{}, err e
 
 	sqlCondition, values, err = use(term.Left)
 	if err != nil {
-		return "", nil, errors.Wrapf(err, "on selectors_sql.use(%#v)", term.Left)
+		return "", nil, errata.Wrapf(err, "on selectors_sql.use(%#v)", term.Left)
 	}
 
 	sqlConditionRight, valuesNext, err := use(term.Right)
 	if err != nil {
-		return "", nil, errors.Wrapf(err, "on selectors_sql.use(%#v)", term.Right)
+		return "", nil, errata.Wrapf(err, "on selectors_sql.use(%#v)", term.Right)
 	}
 
 	//sqlCondition = "(" + sqlCondition + ")"
@@ -108,7 +107,7 @@ func use(value interface{}) (sqlCondition string, values []interface{}, err erro
 
 	sqlCondition, values, err = use(termUnary.ValueUnary)
 	if err != nil {
-		return "", nil, errors.Wrapf(err, "on selectors_sql.use(%#v)", termUnary.ValueUnary)
+		return "", nil, errata.Wrapf(err, "on selectors_sql.use(%#v)", termUnary.ValueUnary)
 	}
 
 	// sqlCondition = "(" + sqlCondition + ")"

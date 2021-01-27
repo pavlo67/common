@@ -14,7 +14,6 @@ import (
 	"github.com/julienschmidt/httprouter"
 
 	"github.com/pavlo67/common/common"
-	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/libraries/strlib"
 	"github.com/pavlo67/common/common/server"
 	"github.com/pavlo67/common/common/server/server_http"
@@ -41,7 +40,7 @@ func New(port int, tlsCertFile, tlsKeyFile string, onRequest server_http.OnReque
 	}
 
 	if onRequest == nil {
-		return nil, errors.New("on server_http_jschmhr.New(): no server_http.OnRequest")
+		return nil, errata.New("on server_http_jschmhr.New(): no server_http.OnRequest")
 	}
 
 	var secretENVsToLower []string
@@ -72,7 +71,7 @@ func New(port int, tlsCertFile, tlsKeyFile string, onRequest server_http.OnReque
 // start wraps and verbalizes http.Server.ListenAndServe method.
 func (s *serverHTTPJschmhr) Start() error {
 	if s == nil {
-		return errors.New("no serverOp to start")
+		return errata.New("no serverOp to start")
 	}
 
 	s.httpServer.Addr = ":" + strconv.Itoa(s.port)
@@ -90,15 +89,15 @@ func (s *serverHTTPJschmhr) Start() error {
 //}
 
 func (s *serverHTTPJschmhr) ResponseRESTError(status int, err error, req *http.Request) (server.Response, error) {
-	commonErr := errors.CommonError(err)
+	commonErr := errata.CommonError(err)
 
 	key := commonErr.Key()
 	data := common.Map{server.ErrorKey: key}
 
 	if status == 0 || status == http.StatusOK {
-		if key == errors.NoCredsKey || key == errors.InvalidCredsKey {
+		if key == errata.NoCredsKey || key == errata.InvalidCredsKey {
 			status = http.StatusUnauthorized
-		} else if key == errors.OverdueRightsErr || key == errors.NoUserKey || key == errors.NoRightsKey {
+		} else if key == errata.OverdueRightsErr || key == errata.NoUserKey || key == errata.NoRightsKey {
 			status = http.StatusForbidden
 		} else if status == 0 || status == http.StatusOK {
 			status = http.StatusInternalServerError
@@ -137,7 +136,7 @@ func (s *serverHTTPJschmhr) ResponseRESTOk(status int, data interface{}) (server
 
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
-		return server.Response{Status: http.StatusInternalServerError}, errors.Wrapf(err, "can't marshal json (%#v)", data)
+		return server.Response{Status: http.StatusInternalServerError}, errata.Wrapf(err, "can't marshal json (%#v)", data)
 	}
 
 	return server.Response{Status: status, Data: jsonBytes}, nil
@@ -149,7 +148,7 @@ func (s *serverHTTPJschmhr) HandleEndpoint(key, serverPath string, endpoint serv
 	path := endpoint.PathTemplate(serverPath)
 
 	if endpoint.WorkerHTTP == nil {
-		return errors.New(method + ": " + path + "\t!!! NULL workerHTTP ISN'T DISPATCHED !!!")
+		return errata.New(method + ": " + path + "\t!!! NULL workerHTTP ISN'T DISPATCHED !!!")
 	}
 
 	s.HandleOptions(key, path)

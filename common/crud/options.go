@@ -40,6 +40,14 @@ func (options *Options) HasRole(oneOfRoles ...rbac.Role) bool {
 	return options.Identity.Roles.Has(oneOfRoles...)
 }
 
+func OptionsWithRoles(roles ...rbac.Role) *Options {
+	return &Options{
+		Identity: &auth.Identity{
+			Roles: roles,
+		},
+	}
+}
+
 //type Counter map[string]uint64
 //
 //type Index map[string][]ID

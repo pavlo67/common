@@ -3,7 +3,7 @@ package auth
 import (
 	"fmt"
 
-	"github.com/pavlo67/common/common/errors"
+	"github.com/pavlo67/common/common/errata"
 )
 
 type Operator interface {
@@ -16,13 +16,13 @@ type Operator interface {
 
 // to use with map[CredsType]identity.ActorKey  --------------------------------------------------------------------
 
-var ErrNoIdentityOp = errors.New("no identity.ActorKey")
+var ErrNoIdentityOp = errata.New("no identity.ActorKey")
 
 const onGetIdentity = "on GetIdentity()"
 
-func GetIdentity(creds Creds, ops []Operator, useOperatorAuth bool, errs errors.Errors) (*Identity, errors.Key, errors.Errors) {
+func GetIdentity(creds Creds, ops []Operator, useOperatorAuth bool, errs errata.Errors) (*Identity, errata.Key, errata.Errors) {
 	if len(creds) < 1 {
-		return nil, errors.NoCredsKey, append(errs, ErrNoCreds)
+		return nil, errata.NoCredsKey, append(errs, ErrNoCreds)
 	}
 
 	for _, op := range ops {
@@ -46,7 +46,7 @@ func GetIdentity(creds Creds, ops []Operator, useOperatorAuth bool, errs errors.
 		//}
 	}
 
-	return nil, errors.InvalidCredsKey, errs
+	return nil, errata.InvalidCredsKey, errs
 }
 
 // callbacks can be used for partial implementations of identity.ActorKey (in their own interfaces)

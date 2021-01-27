@@ -5,12 +5,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pavlo67/common/common/errors"
 	"gopkg.in/square/go-jose.v2"
 	"gopkg.in/square/go-jose.v2/jwt"
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/auth"
+	"github.com/pavlo67/common/common/errata"
 	"github.com/pavlo67/common/common/libraries/encrlib"
 	"github.com/pavlo67/common/common/rbac"
 )
@@ -34,14 +34,14 @@ const onNew = "on auth_jwt.New()"
 func New(pathToStore string) (auth.Operator, error) {
 	privKey, err := encrlib.NewRSAPrivateKey(pathToStore)
 	if err != nil {
-		return nil, errors.Wrap(err, onNew)
+		return nil, errata.Wrap(err, onNew)
 	}
 
 	signerOpts := (&jose.SignerOptions{}).WithType("Token") // signerOpts.WithType("Token")
 	signingKey := jose.SigningKey{Algorithm: jose.RS256, Key: privKey}
 	rsaSigner, err := jose.NewSigner(signingKey, signerOpts)
 	if err != nil {
-		return nil, errors.Wrapf(err, onNew+": can't jose.NewSigner(%#v, %#v)", signingKey, signerOpts)
+		return nil, errata.Wrapf(err, onNew+": can't jose.NewSigner(%#v, %#v)", signingKey, signerOpts)
 	}
 
 	return &authJWT{privKey: *privKey, builder: jwt.Signed(rsaSigner)}, nil
@@ -90,7 +90,7 @@ func (authOp *authJWT) SetCreds(userID auth.ID, creds auth.Creds) (*auth.Creds, 
 
 	rawJWT, err := builder.CompactSerialize()
 	if err != nil {
-		return nil, errors.Wrap(err, "on authJWT.SetCreds() with builder.CompactSerialize()")
+		return nil, errata.Wrap(err, "on authJWT.SetCreds() with builder.CompactSerialize()")
 	}
 
 	delete(creds, auth.CredsToSet)
@@ -110,13 +110,13 @@ func (authOp *authJWT) Authenticate(toAuth auth.Creds) (*auth.Identity, error) {
 
 	parsedJWT, err := jwt.ParseSigned(credsJWT)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to parse Token: %s", credsJWT)
+		return nil, errata.Wrapf(err, "failed to parse Token: %s", credsJWT)
 	}
 
 	res := JWTCreds{}
 	err = parsedJWT.Claims(&authOp.privKey.PublicKey, &res)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to get claims: %#v", parsedJWT)
+		return nil, errata.Wrapf(err, "failed to get claims: %#v", parsedJWT)
 	}
 
 	return &auth.Identity{
@@ -131,17 +131,17 @@ func (authOp *authJWT) Realm() string {
 }
 
 func (authOp *authJWT) AuthenticateSocial(idpID, idpToken string) (*auth.Identity, error) {
-	return nil, errors.NotImplemented
+	return nil, errata.NotImplemented
 }
 
 func (authOp *authJWT) ForgotPassword(toRemember auth.Creds) (bool, error) {
-	return false, errors.NotImplemented
+	return false, errata.NotImplemented
 }
 
 func (authOp *authJWT) ChangePassword(confirmationCode string, toSet auth.Creds) (bool, error) {
-	return false, errors.NotImplemented
+	return false, errata.NotImplemented
 }
 
 func (authOp *authJWT) DiscoverIDP(nickname string) (string, error) {
-	return "", errors.NotImplemented
+	return "", errata.NotImplemented
 }

@@ -5,7 +5,7 @@ import (
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
-	"github.com/pavlo67/common/common/errors"
+	"github.com/pavlo67/common/common/errata"
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/server"
@@ -57,19 +57,19 @@ func (ss *server_http_jschmhrStarter) Run(joinerOp joiner.Operator) error {
 
 	srvOp, err := New(ss.config.Port, ss.config.TLSCertFile, ss.config.TLSKeyFile, onRequest, secretENVs)
 	if err != nil {
-		return errors.Wrap(err, "on server_http_jschmhr.New()")
+		return errata.Wrap(err, "on server_http_jschmhr.New()")
 	}
 
 	if err = joinerOp.Join(srvOp, ss.interfaceKey); err != nil {
-		return errors.Wrapf(err, "can't join *serverHTTPJschmhr{} as server_http.Operator with key '%s'", ss.interfaceKey)
+		return errata.Wrapf(err, "can't join *serverHTTPJschmhr{} as server_http.Operator with key '%s'", ss.interfaceKey)
 	}
 
 	if err = joinerOp.Join(ss.config.TLSCertFile != "" && ss.config.TLSKeyFile != "", server_http.HTTPSInterfaceKey); err != nil {
-		return errors.Wrapf(err, "can't join HTTPS info with key '%s'", server_http.HTTPSInterfaceKey)
+		return errata.Wrapf(err, "can't join HTTPS info with key '%s'", server_http.HTTPSInterfaceKey)
 	}
 
 	if err = joinerOp.Join(ss.config.Port, server_http.PortInterfaceKey); err != nil {
-		return errors.Wrapf(err, "can't join port with key '%s'", server_http.PortInterfaceKey)
+		return errata.Wrapf(err, "can't join port with key '%s'", server_http.PortInterfaceKey)
 	}
 
 	return nil

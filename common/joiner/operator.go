@@ -7,8 +7,7 @@ import (
 	"sync"
 
 	"github.com/pavlo67/common/common"
-
-	"github.com/pavlo67/common/common/errors"
+	"github.com/pavlo67/common/common/errata"
 )
 
 type InterfaceKey string
@@ -46,22 +45,22 @@ type joiner struct {
 	mutex      *sync.RWMutex
 }
 
-var ErrJoiningNil = errors.New("can't join nil interface")
-var ErrJoiningDuplicate = errors.New("can't join interface over joined before")
+var ErrJoiningNil = errata.New("can't join nil interface")
+var ErrJoiningDuplicate = errata.New("can't join interface over joined before")
 
 func (j *joiner) Join(intrfc interface{}, interfaceKey InterfaceKey) error {
 	if j == nil {
 		return fmt.Errorf("got nil on .Join(%s)", interfaceKey)
 	}
 	if intrfc == nil {
-		return errors.Wrapf(ErrJoiningNil, "on .Join(%s)", interfaceKey)
+		return errata.Wrapf(ErrJoiningNil, "on .Join(%s)", interfaceKey)
 	}
 
 	j.mutex.Lock()
 	defer j.mutex.Unlock()
 
 	if _, ok := j.components[interfaceKey]; ok {
-		return errors.Wrapf(ErrJoiningDuplicate, "on .Join(%s)", interfaceKey)
+		return errata.Wrapf(ErrJoiningDuplicate, "on .Join(%s)", interfaceKey)
 	}
 
 	j.components[interfaceKey] = intrfc

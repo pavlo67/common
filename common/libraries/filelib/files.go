@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pavlo67/common/common/errors"
+	"github.com/pavlo67/common/common/errata"
 )
 
 func CurrentFile(removeExt bool) string {
@@ -46,10 +46,10 @@ func BackupFile(fileName string) error {
 
 	if os.IsNotExist(err) {
 		err = CopyFile(fileName, backupName)
-		return errors.Wrapf(err, "on copying '%s' to '%s'", fileName, backupName)
+		return errata.Wrapf(err, "on copying '%s' to '%s'", fileName, backupName)
 	}
 
-	return errors.Wrapf(err, "on copying '%s' to '%s'", fileName, backupName)
+	return errata.Wrapf(err, "on copying '%s' to '%s'", fileName, backupName)
 }
 
 func CopyFile(src, dst string) error {

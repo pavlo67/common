@@ -8,10 +8,9 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/pavlo67/common/common/errors"
-
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/auth"
+	"github.com/pavlo67/common/common/errata"
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/server"
 )
@@ -63,7 +62,7 @@ func Request(serverURL string, ep EndpointConfig, requestData, responseData inte
 				requestBody = []byte(*v)
 			default:
 				if requestBody, err = json.Marshal(requestData); err != nil {
-					return errors.Wrapf(err, onRequest+": can't marshal request responseData (%#v)", requestData)
+					return errata.Wrapf(err, onRequest+": can't marshal request responseData (%#v)", requestData)
 				}
 			}
 
@@ -106,13 +105,13 @@ func Request(serverURL string, ep EndpointConfig, requestData, responseData inte
 			}
 
 			logger.LogRequest(logfile, nil, method, serverURL, req.Header, requestBody, responseHeaders, responseBody, err, statusCode)
-			return errors.Wrapf(err, "can't %s %s", method, serverURL)
+			return errata.Wrapf(err, "can't %s %s", method, serverURL)
 		}
 
 		responseBody, err = ioutil.ReadAll(resp.Body)
 		logger.LogRequest(logfile, nil, method, serverURL, req.Header, requestBody, resp.Header, responseBody, err, resp.StatusCode)
 		if err != nil {
-			return errors.Wrapf(err, "can't read body from %s %s", method, serverURL)
+			return errata.Wrapf(err, "can't read body from %s %s", method, serverURL)
 		}
 
 		if resp.StatusCode == http.StatusUnauthorized && doReAuth {
@@ -133,17 +132,17 @@ func Request(serverURL string, ep EndpointConfig, requestData, responseData inte
 				if len(responseBody) > bodyLogLimit {
 					responseBody = responseBody[:bodyLogLimit]
 				}
-				return errors.Wrapf(err, "can't unmarshal body from %s %s: status = %d, body = %s", method, serverURL, resp.StatusCode, responseBody)
+				return errata.Wrapf(err, "can't unmarshal body from %s %s: status = %d, body = %s", method, serverURL, resp.StatusCode, responseBody)
 			}
 
 			errCommon := fmt.Sprintf("can't %s %s: status = %d, body = %s", method, serverURL, resp.StatusCode, responseBody)
 			if data["error"] != nil {
-				data["error"] = errors.CommonError(data["error"], errCommon)
+				data["error"] = errata.CommonError(data["error"], errCommon)
 			} else {
 				data["error"] = errCommon
 			}
-			errorKey := errors.Key(data.StringDefault(server.ErrorKey, ""))
-			return errors.KeyableError(errorKey, data)
+			errorKey := errata.Key(data.StringDefault(server.ErrorKey, ""))
+			return errata.KeyableError(errorKey, data)
 		}
 
 		if dataBytes, ok := responseData.(*[]byte); ok {
@@ -158,7 +157,7 @@ func Request(serverURL string, ep EndpointConfig, requestData, responseData inte
 				if len(responseBody) > bodyLogLimit {
 					responseBody = responseBody[:bodyLogLimit]
 				}
-				return errors.Wrapf(err, "can't unmarshal body from %s %s: %s", method, serverURL, responseBody)
+				return errata.Wrapf(err, "can't unmarshal body from %s %s: %s", method, serverURL, responseBody)
 			}
 		}
 

@@ -3,7 +3,7 @@ package config
 import (
 	"io/ioutil"
 
-	"github.com/pavlo67/common/common/errors"
+	"github.com/pavlo67/common/common/errata"
 	"github.com/pavlo67/common/common/serializer"
 )
 
@@ -15,7 +15,7 @@ type Config struct {
 	marshaler   serializer.Marshaler
 }
 
-var errNoConfig = errors.New("no config")
+var errNoConfig = errata.New("no config")
 
 func (c *Config) ServiceName() string {
 	if c == nil {
@@ -32,7 +32,7 @@ func (c *Config) Value(key string, target interface{}) error {
 	if value, ok := c.data[key]; ok {
 		valueRaw, err := c.marshaler.Marshal(value)
 		if err != nil {
-			return errors.Wrapf(err, "can't marshal value (%s / %#v) to raw bytes", key, value)
+			return errata.Wrapf(err, "can't marshal value (%s / %#v) to raw bytes", key, value)
 		}
 
 		return c.marshaler.Unmarshal(valueRaw, target)
@@ -46,18 +46,18 @@ func (c *Config) Value(key string, target interface{}) error {
 func Get(cfgFile, serviceName string, marshaler serializer.Marshaler) (*Config, error) {
 
 	if len(cfgFile) < 1 {
-		return nil, errors.New("empty config path")
+		return nil, errata.New("empty config path")
 	}
 
 	data, err := ioutil.ReadFile(cfgFile)
 	if err != nil {
-		return nil, errors.Wrapf(err, "can't read config file from '%s'", cfgFile)
+		return nil, errata.Wrapf(err, "can't read config file from '%s'", cfgFile)
 	}
 
 	cfg := Config{serviceName: serviceName, marshaler: marshaler}
 	err = marshaler.Unmarshal(data, &cfg.data)
 	if err != nil {
-		return nil, errors.Wrapf(err, "can't .Unmarshal('%s') from config '%s'", data, cfgFile)
+		return nil, errata.Wrapf(err, "can't .Unmarshal('%s') from config '%s'", data, cfgFile)
 	}
 
 	return &cfg, nil

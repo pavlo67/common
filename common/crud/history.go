@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/pavlo67/common/common"
-	"github.com/pavlo67/common/common/errors"
+	"github.com/pavlo67/common/common/errata"
 	"github.com/pavlo67/common/common/joiner"
 )
 
@@ -22,7 +22,7 @@ type Action struct {
 	Key      ActionKey     `bson:",omitempty" json:",omitempty"`
 	DoneAt   time.Time     `bson:",omitempty" json:",omitempty"`
 	Related  *joiner.Link  `bson:",omitempty" json:",omitempty"`
-	Errors   errors.Errors `bson:",omitempty" json:",omitempty"`
+	Errors   errata.Errors `bson:",omitempty" json:",omitempty"`
 }
 
 type History []Action

@@ -8,7 +8,7 @@ import (
 
 	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/crud"
-	"github.com/pavlo67/common/common/errors"
+	"github.com/pavlo67/common/common/errata"
 	"github.com/pavlo67/common/common/server/server_http"
 )
 
@@ -21,8 +21,8 @@ func (*onRequest) Options(r *http.Request) (*crud.Options, error) {
 	//	return nil, errors.New("no server_http.Request in RequestOptions(...)")
 	//}
 
-	var errorKey errors.Key
-	var errs errors.Errors
+	var errorKey errata.Key
+	var errs errata.Errors
 	var identity *auth.Identity
 
 	tokenJWT := r.Header.Get("Authorization")
@@ -32,11 +32,11 @@ func (*onRequest) Options(r *http.Request) (*crud.Options, error) {
 		identity, errorKey, errs = auth.GetIdentity(auth.Creds{auth.CredsJWT: tokenJWT}, authOps, false, errs)
 
 	} else {
-		errorKey = errors.NoCredsKey
+		errorKey = errata.NoCredsKey
 
 	}
 
-	err := errors.KeyableError(errorKey, common.Map{"error": errs.Err()})
+	err := errata.KeyableError(errorKey, common.Map{"error": errs.Err()})
 	if identity == nil {
 		return nil, err
 	}

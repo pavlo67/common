@@ -4,7 +4,7 @@ import (
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/config"
-	"github.com/pavlo67/common/common/errors"
+	"github.com/pavlo67/common/common/errata"
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/server/server_http"
@@ -38,7 +38,7 @@ func (ah *authHTTPStarter) Name() string {
 
 func (ah *authHTTPStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	if lCommon == nil {
-		return nil, errors.New("no logger")
+		return nil, errata.New("no logger")
 	}
 	l = lCommon
 	ah.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
@@ -69,11 +69,11 @@ func (ah *authHTTPStarter) Run(joinerOp joiner.Operator) error {
 	//}
 
 	if err := joinerOp.Join(&onRequest{}, server_http.OnRequestInterfaceKey); err != nil {
-		return errors.Wrapf(err, "can't join RequestOptions as server_http.onRequest with key '%s'", server_http.OnRequestInterfaceKey)
+		return errata.Wrapf(err, "can't join RequestOptions as server_http.onRequest with key '%s'", server_http.OnRequestInterfaceKey)
 	}
 
 	if err := joinerOp.Join(&authEndpoint, auth.AuthHandlerKey); err != nil {
-		return errors.Wrapf(err, "can't join authEndpoint as server_http.Endpoint with key '%s'", auth.AuthHandlerKey)
+		return errata.Wrapf(err, "can't join authEndpoint as server_http.Endpoint with key '%s'", auth.AuthHandlerKey)
 	}
 
 	return nil

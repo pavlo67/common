@@ -2,9 +2,9 @@ package auth_ecdsa
 
 import (
 	"github.com/pavlo67/common/common"
-	"github.com/pavlo67/common/common/errors"
 
 	"github.com/pavlo67/common/common/config"
+	"github.com/pavlo67/common/common/errata"
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/starter"
@@ -29,7 +29,7 @@ func (ss *auth_ecdsa) Name() string {
 
 func (ss *auth_ecdsa) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) (info []common.Map, err error) {
 	if l = lCommon; lCommon == nil {
-		return nil, errors.New("no logger")
+		return nil, errata.New("no logger")
 	}
 
 	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
@@ -48,7 +48,7 @@ func (ss *auth_ecdsa) Run(joinerOp joiner.Operator) error {
 	}
 
 	if err = joinerOp.Join(identOp, ss.interfaceKey); err != nil {
-		return errors.Wrapf(err, "can't join auth_ecdsa identOp as auth.Operator with key '%s'", ss.interfaceKey)
+		return errata.Wrapf(err, "can't join auth_ecdsa identOp as auth.Operator with key '%s'", ss.interfaceKey)
 	}
 
 	return nil
