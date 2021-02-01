@@ -56,8 +56,6 @@ func (ss *demoStarter) Setup() error {
 
 var Endpoints = server_http.Endpoints{
 	auth.EPAuth: {Path: "/auth", Tags: []string{"unauthorized"}, HandlerKey: auth.AuthHandlerKey},
-
-	//imitator.EPImitatorPayTransaction:    {Path: "/pay/transaction", Tags: []string{"imitator"}, HandlerKey: imitator.ImitatorPayTransactionHandlerKey},
 }
 
 func (ss *demoStarter) Run(joinerOp joiner.Operator) error {
