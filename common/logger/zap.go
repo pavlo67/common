@@ -52,8 +52,8 @@ func zapLevel(level Level) zapcore.Level {
 		return zapcore.WarnLevel
 	case ErrorLevel:
 		return zapcore.ErrorLevel
-	case PanicLevel:
-		return zapcore.PanicLevel
+	//case PanicLevel:
+	//	return zapcore.PanicLevel
 	case FatalLevel:
 		return zapcore.FatalLevel
 	default:

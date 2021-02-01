@@ -17,7 +17,8 @@ const DebugLevel Level = -1
 const InfoLevel Level = 0
 const WarnLevel Level = 1
 const ErrorLevel Level = 2
-const PanicLevel Level = 3
+
+// const PanicLevel Level = 3
 const FatalLevel Level = 4
 
 type Operator interface {
@@ -36,8 +37,8 @@ type Operator interface {
 	Error(args ...interface{})
 	Errorf(template string, args ...interface{})
 
-	Panic(args ...interface{})
-	Panicf(template string, args ...interface{})
+	//Panic(args ...interface{})
+	//Panicf(template string, args ...interface{})
 
 	Fatal(args ...interface{})
 	Fatalf(template string, args ...interface{})
@@ -59,4 +60,8 @@ func Init(loggerCfg Config) (Operator, error) {
 
 func Get() Operator {
 	return Operator(zapGet())
+}
+
+type OperatorComments interface {
+	Comment(text string)
 }

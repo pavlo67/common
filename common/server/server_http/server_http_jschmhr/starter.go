@@ -1,17 +1,16 @@
 package server_http_jschmhr
 
 import (
-	"github.com/pkg/errors"
+	"fmt"
 
-	"github.com/pavlo67/workshop/common"
-	"github.com/pavlo67/workshop/common/config"
-	"github.com/pavlo67/workshop/common/joiner"
-
-	"github.com/pavlo67/workshop/common/auth"
-	"github.com/pavlo67/workshop/common/logger"
-	"github.com/pavlo67/workshop/common/server"
-	"github.com/pavlo67/workshop/common/server/server_http"
-	"github.com/pavlo67/workshop/common/starter"
+	"github.com/pavlo67/common/common"
+	"github.com/pavlo67/common/common/config"
+	"github.com/pavlo67/common/common/errata"
+	"github.com/pavlo67/common/common/joiner"
+	"github.com/pavlo67/common/common/logger"
+	"github.com/pavlo67/common/common/server"
+	"github.com/pavlo67/common/common/server/server_http"
+	"github.com/pavlo67/common/common/starter"
 )
 
 func Starter() starter.Operator {
@@ -23,67 +22,53 @@ var _ starter.Operator = &server_http_jschmhrStarter{}
 
 type server_http_jschmhrStarter struct {
 	config server.Config
-	port   int
 
-	interfaceKey     joiner.InterfaceKey
-	portInterfaceKey joiner.InterfaceKey
+	interfaceKey joiner.InterfaceKey
 }
 
 func (ss *server_http_jschmhrStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *server_http_jschmhrStarter) Init(cfgCommon, cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
-	var errs common.Errors
+func (ss *server_http_jschmhrStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
 	l = lCommon
 
 	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(server_http.InterfaceKey)))
-	ss.portInterfaceKey = joiner.InterfaceKey(options.StringDefault("port_interface_key", string(server_http.PortInterfaceKey)))
 
-	var cfgServerHTTP server.Config
-	err := cfg.Value("server_http", &cfgServerHTTP)
-	if err != nil {
+	configKey := options.StringDefault("config_key", "server_http")
+	if err := cfg.Value(configKey, &ss.config); err != nil {
 		return nil, err
 	}
 
-	ss.config = cfgServerHTTP
-	ss.port, _ = options.Int("port")
-
-	return nil, errs.Err()
-}
-
-func (ss *server_http_jschmhrStarter) Setup() error {
-	return nil
+	return nil, nil
 }
 
 func (ss *server_http_jschmhrStarter) Run(joinerOp joiner.Operator) error {
-
-	authOpNil := auth.Operator(nil)
-	authComps := joinerOp.InterfacesAll(&authOpNil)
-
-	var authOps []auth.Operator
-	for _, authComp := range authComps {
-		if authOp, ok := authComp.Interface.(auth.Operator); ok {
-			authOps = append(authOps, authOp)
-		}
+	onRequest, _ := joinerOp.Interface(server_http.OnRequestInterfaceKey).(server_http.OnRequest)
+	if onRequest == nil {
+		return fmt.Errorf("no server_http.OnRequest with key %s", server_http.OnRequestInterfaceKey)
 	}
 
-	srvOp, err := New(ss.port, ss.config.TLSCertFile, ss.config.TLSKeyFile, authOps)
+	// TODO!!! customize it
+	var secretENVs []string
+
+	srvOp, err := New(ss.config.Port, ss.config.TLSCertFile, ss.config.TLSKeyFile, onRequest, secretENVs)
 	if err != nil {
-		return errors.Wrap(err, "can't init serverHTTPJschmhr.ActorKey")
+		return errata.Wrap(err, "on server_http_jschmhr.New()")
 	}
 
-	err = joinerOp.Join(srvOp, ss.interfaceKey)
-	if err != nil {
-		return errors.Wrapf(err, "can't join serverHTTPJschmhr srvOp as server.ActorKey with key '%s'", ss.interfaceKey)
+	if err = joinerOp.Join(srvOp, ss.interfaceKey); err != nil {
+		return errata.Wrapf(err, "can't join *serverHTTPJschmhr{} as server_http.Operator with key '%s'", ss.interfaceKey)
 	}
 
-	err = joinerOp.Join(ss.port, ss.portInterfaceKey)
-	if err != nil {
-		return errors.Wrapf(err, "can't join serverHTTPJschmhr srvOp as server.ActorKey with key '%s'", ss.interfaceKey)
+	if err = joinerOp.Join(ss.config.TLSCertFile != "" && ss.config.TLSKeyFile != "", server_http.HTTPSInterfaceKey); err != nil {
+		return errata.Wrapf(err, "can't join HTTPS info with key '%s'", server_http.HTTPSInterfaceKey)
+	}
+
+	if err = joinerOp.Join(ss.config.Port, server_http.PortInterfaceKey); err != nil {
+		return errata.Wrapf(err, "can't join port with key '%s'", server_http.PortInterfaceKey)
 	}
 
 	return nil
-	// return srvOp.Start()
 
 }

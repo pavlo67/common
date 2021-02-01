@@ -3,160 +3,179 @@ package auth
 import (
 	"log"
 	"os"
+	"strconv"
 	"testing"
+	"time"
 
 	"github.com/btcsuite/btcutil/base58"
-
 	"github.com/stretchr/testify/require"
 
-	"github.com/pavlo67/workshop/common/identity"
-	"github.com/pavlo67/workshop/common/libraries/encrlib"
-	"github.com/pavlo67/workshop/common/logger"
+	"github.com/pavlo67/common/common/libraries/encrlib"
+	"github.com/pavlo67/common/common/logger"
 )
 
 type OperatorTestCase struct {
-	Operator
-	UserKey identity.Key
-	ToSet   Creds
+	UserID ID
+	ToSet  Creds
 }
 
 const testIP = "1.2.3.4"
-const testNick = "nick1"
-const testUserKey = identity.Key("nick1@aaa")
 
-func TestCases(authOp Operator) []OperatorTestCase {
-	return []OperatorTestCase{
+//var testCases = []OperatorTestCase{
+//	{
+//		ToSet: Creds{
+//			CredsPassword: "pass1",
+//			CredsNickname: testNick,
+//		},
+//	},
+//}
+
+//const testUserKey = Key("nick1@aaa")
+//
+//func TestCases(authOp Operator) []OperatorTestCase {
+//	return []OperatorTestCase{
+//		{
+//			Operator: authOp,
+//
+//			ToSet: Creds{
+//				CredsPassword: "pass1",
+//				CredsNickname: testNick,
+//			},
+//		},
+//	}
+//}
+//
+//func OperatorTestScenarioPassword(t *testing.T, testCases []OperatorTestCase, l logger.Operator) {
+//	if env, ok := os.LookupEnv("ENV"); !ok || env != "test" {
+//		t.Fatal("No test environment!!!")
+//	}
+//
+//	for i, tc := range testCases {
+//		l.Info(i)
+//
+//		// .SetCreds() ------------------------------------------
+//
+//		userCreds, err := operator.SetCreds("", tc)
+//		require.NoError(t, err)
+//		require.NotNil(t, userCreds)
+//
+//		log.Printf("           creds: %#v", *userCreds)
+//
+//		require.Equal(t, tc[CredsNickname], (*userCreds)[CredsNickname])
+//
+//		// .Authenticate() ok -----------------------------------------
+//
+//		userCreds = &Creds{
+//			CredsIP:       testIP,
+//			CredsLogin:    tc[CredsNickname],
+//			CredsPassword: tc[CredsPassword],
+//		}
+//
+//		user, err := operator.Authenticate(*userCreds)
+//
+//		require.NoError(t, err)
+//		require.NotNil(t, user)
+//		require.Equal(t, tc[CredsNickname], user.Creds[CredsNickname])
+//		require.NotEmpty(t, user.Key)
+//
+//		// .Authenticate() err ----------------------------------------
+//
+//		userCreds = &Creds{
+//			CredsIP:       testIP,
+//			CredsLogin:    tc[CredsNickname],
+//			CredsPassword: tc[CredsPassword] + "1",
+//		}
+//
+//		user, err = operator.Authenticate(*userCreds)
+//
+//		require.Error(t, err)
+//		require.Nil(t, user)
+//	}
+//}
+//
+func OperatorTestScenarioToken(t *testing.T, operator Operator, l logger.Operator) {
+	if env, ok := os.LookupEnv("ENV"); !ok || env != "test" {
+		t.Fatal("No test environment!!!")
+	}
+
+	testCreds := []Creds{
 		{
-			Operator: authOp,
-
-			ToSet: Creds{
-				CredsPassword: "pass1",
-				CredsNickname: testNick,
-			},
+			CredsNickname: "nickname" + strconv.FormatInt(time.Now().Unix(), 10),
 		},
 	}
-}
 
-func OperatorTestScenarioPassword(t *testing.T, testCases []OperatorTestCase, l logger.Operator) {
-	if env, ok := os.LookupEnv("ENV"); !ok || env != "test" {
-		t.Fatal("No test environment!!!")
-	}
-
-	for i, tc := range testCases {
+	for i, tc := range testCreds {
 		l.Info(i)
 
 		// .SetCreds() ------------------------------------------
 
-		userCreds, err := tc.SetCreds("", tc.ToSet)
+		userCreds, err := operator.SetCreds("", tc)
 		require.NoError(t, err)
 		require.NotNil(t, userCreds)
 
 		log.Printf("           creds: %#v", *userCreds)
+		require.Equal(t, tc[CredsNickname], (*userCreds)[CredsNickname])
 
-		require.Equal(t, tc.ToSet[CredsNickname], (*userCreds)[CredsNickname])
-
-		// .Authorize() ok -----------------------------------------
-
-		userCreds = &Creds{
-			CredsIP:       testIP,
-			CredsLogin:    tc.ToSet[CredsNickname],
-			CredsPassword: tc.ToSet[CredsPassword],
-		}
-
-		user, err := tc.Authorize(*userCreds)
-
-		require.NoError(t, err)
-		require.NotNil(t, user)
-		require.Equal(t, tc.ToSet[CredsNickname], user.Creds[CredsNickname])
-		require.NotEmpty(t, user.Key)
-
-		// .Authorize() err ----------------------------------------
-
-		userCreds = &Creds{
-			CredsIP:       testIP,
-			CredsLogin:    tc.ToSet[CredsNickname],
-			CredsPassword: tc.ToSet[CredsPassword] + "1",
-		}
-
-		user, err = tc.Authorize(*userCreds)
-
-		require.Error(t, err)
-		require.Nil(t, user)
-	}
-}
-
-func OperatorTestScenarioToken(t *testing.T, testCases []OperatorTestCase, l logger.Operator) {
-	if env, ok := os.LookupEnv("ENV"); !ok || env != "test" {
-		t.Fatal("No test environment!!!")
-	}
-
-	for i, tc := range testCases {
-		l.Info(i)
-
-		// .SetCreds() ------------------------------------------
-
-		userCreds, err := tc.SetCreds(testUserKey, tc.ToSet)
-		require.NoError(t, err)
-		require.NotNil(t, userCreds)
-
-		log.Printf("           creds: %#v", *userCreds)
-		require.Equal(t, tc.ToSet[CredsNickname], (*userCreds)[CredsNickname])
-
-		// .Authorize() -----------------------------------------
+		// .Authenticate() -----------------------------------------
 
 		(*userCreds)[CredsIP] = testIP
 
-		user, err := tc.Authorize(*userCreds)
+		user, err := operator.Authenticate(*userCreds)
 
 		require.NoError(t, err)
 		require.NotNil(t, user)
-		require.Equal(t, tc.ToSet[CredsNickname], user.Creds[CredsNickname])
-		require.Equal(t, testUserKey, user.Key)
+		require.Equal(t, tc[CredsNickname], user.Nickname)
 	}
 }
 
-func OperatorTestScenarioPublicKey(t *testing.T, testCases []OperatorTestCase, l logger.Operator) {
+func OperatorTestScenarioPublicKey(t *testing.T, operator Operator, l logger.Operator) {
 	if env, ok := os.LookupEnv("ENV"); !ok || env != "test" {
 		t.Fatal("No test environment!!!")
 	}
 
-	for i, tc := range testCases {
+	testCreds := []Creds{
+		{},
+	}
+
+	for i, tc := range testCreds {
 		l.Info(i)
 
 		// .SetCreds() ------------------------------------------
 
-		tc.ToSet[CredsToSet] = string(CredsPrivateKey)
+		// tc[CredsToSet] = CredsPrivateKey
 
-		userCreds, err := tc.SetCreds("", tc.ToSet)
+		userCreds, err := operator.SetCreds("", tc)
 		require.NoError(t, err)
 		require.NotNil(t, userCreds)
+		require.NotEmpty(t, (*userCreds)[CredsPublicKeyBase58])
+		require.NotEmpty(t, (*userCreds)[CredsPublicKeyBase58], (*userCreds)[CredsNickname])
 
 		log.Printf("            creds: %#v", userCreds)
 
-		require.Equal(t, tc.ToSet[CredsNickname], (*userCreds)[CredsNickname])
-		nickname := (*userCreds)[CredsNickname]
+		// require.Equal(t, tc[CredsNickname], userCreds.StringDefault(CredsNickname, ""))
+		// nickname := (*userCreds)[CredsNickname]
 
 		// .InitAuth() -----------------------------------
 
-		privKeySerialization := []byte((*userCreds)[CredsPrivateKey])
+		privKeySerialization := []byte(userCreds.StringDefault(CredsPrivateKey, ""))
 		privKey, err := encrlib.ECDSADeserialize(privKeySerialization)
 		require.NoError(t, err)
 		require.NotNil(t, privKey)
 
-		publicKeyBase58 := (*userCreds)[CredsPublicKeyBase58]
+		publicKeyBase58 := userCreds.StringDefault(CredsPublicKeyBase58, "")
 		log.Printf("public key base58: %s", publicKeyBase58)
 
-		credsToInit := Creds{CredsIP: testIP, CredsToSet: string(CredsKeyToSignature)}
-
-		sessionCreds, err := tc.SetCreds("", credsToInit)
+		credsToSet := Creds{CredsToSet: CredsKeyToSignature} // CredsIP: testIP,
+		sessionCreds, err := operator.SetCreds("", credsToSet)
 		require.NoError(t, err)
 		require.NotNil(t, sessionCreds)
 
 		// ---------------------------------------------------------------------
 
-		keyToSignature := (*sessionCreds)[CredsKeyToSignature]
-		log.Printf(" key to signature: %s", keyToSignature)
-		require.True(t, len(keyToSignature) > 0)
+		keyToSignature := testIP
+
+		//log.Printf(" key to signature: %s", keyToSignature)
+		//require.True(t, len(keyToSignature) > 0)
 
 		signature, err := encrlib.ECDSASign(keyToSignature, *privKey)
 		require.NoError(t, err)
@@ -169,18 +188,17 @@ func OperatorTestScenarioPublicKey(t *testing.T, testCases []OperatorTestCase, l
 		ok := encrlib.ECDSAVerify(keyToSignature, publKey, signature)
 		require.True(t, ok)
 
-		// .Authorize() -----------------------------------------
+		// .Authenticate() -----------------------------------------
 
 		(*userCreds)[CredsIP] = testIP
-		(*userCreds)[CredsNickname] = nickname
 		(*userCreds)[CredsKeyToSignature] = keyToSignature
 		(*userCreds)[CredsSignature] = string(signature)
 
-		user, err := tc.Authorize(*userCreds)
+		user, err := operator.Authenticate(*userCreds)
 
 		require.NoError(t, err)
 		require.NotNil(t, user)
-		require.Equal(t, nickname, user.Creds[CredsNickname])
-		require.NotEmpty(t, user.Key)
+		// require.Equal(t, nickname, user.Creds[CredsNickname])
+		require.NotEmpty(t, user.ID)
 	}
 }

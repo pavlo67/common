@@ -3,16 +3,23 @@ package server_http
 import (
 	"net/http"
 
-	"github.com/pavlo67/workshop/common/auth"
-	"github.com/pavlo67/workshop/common/joiner"
-	"github.com/pavlo67/workshop/common/server"
+	"github.com/pavlo67/common/common/crud"
+	"github.com/pavlo67/common/common/joiner"
+	"github.com/pavlo67/common/common/server"
 )
+
+const OnRequestInterfaceKey joiner.InterfaceKey = "server_http_on_request"
 
 const InterfaceKey joiner.InterfaceKey = "server_http"
 const PortInterfaceKey joiner.InterfaceKey = "server_http_port"
+const HTTPSInterfaceKey joiner.InterfaceKey = "server_http_https"
 
 type Params map[string]string
-type WorkerHTTP func(*auth.User, Params, *http.Request) (server.Response, error)
+type WorkerHTTP func(Operator, *http.Request, Params, *crud.Options) (server.Response, error)
+
+type OnRequest interface {
+	Options(r *http.Request) (*crud.Options, error)
+}
 
 type StaticPath struct {
 	LocalPath string
@@ -20,47 +27,11 @@ type StaticPath struct {
 }
 
 type Operator interface {
+	ResponseRESTOk(status int, data interface{}) (server.Response, error)
+	ResponseRESTError(status int, err error, req *http.Request) (server.Response, error)
 	HandleEndpoint(key, serverPath string, endpoint Endpoint) error
 	HandleFiles(key, serverPath string, staticPath StaticPath) error
 
+	// ServerHTTP() *http.Server
 	Start() error
 }
-
-//type Param struct {
-//	Name  string
-//	Left string
-//}
-//
-//type Content []Param
-//
-//func (p Content) ByName(name string) string {
-//	for i := range p {
-//		if p[i].Name == name {
-//			return p[i].Left
-//		}
-//	}
-//	return ""
-//}
-//
-//func (p Content) ByNum(num uint) string {
-//	if int(num) >= len(p) {
-//		return ""
-//	}
-//
-//	return p[num].Left
-//}
-
-//func (p Info) AllExcept(names ...string) []string {
-//	var values []string
-//
-//PARAM:
-//	for _, param := range p {
-//		for _, name := range names {
-//			if param.Title == name {
-//				continue PARAM
-//			}
-//			values = append(values, param.Left)
-//		}
-//	}
-//	return values
-//}

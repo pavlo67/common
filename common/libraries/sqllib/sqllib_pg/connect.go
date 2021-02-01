@@ -5,14 +5,16 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/pavlo67/common/common/errata"
+	"github.com/pavlo67/common/common/libraries/sqllib"
+
 	_ "github.com/lib/pq"
-	"github.com/pkg/errors"
 
 	"strconv"
 
 	"regexp"
 
-	"github.com/pavlo67/workshop/common/config"
+	"github.com/pavlo67/common/common/config"
 )
 
 func AddressPostgres(e config.Access) (string, error) {
@@ -36,6 +38,8 @@ func AddressPostgres(e config.Access) (string, error) {
 	), nil
 
 }
+
+var _ sqllib.CorrectWildcards = CorrectWildcards
 
 var reQuestionMark = regexp.MustCompile("\\?")
 
@@ -75,7 +79,7 @@ func WildcardsForInsert(fields []string) string {
 
 func Connect(access config.Access) (*sql.DB, error) {
 	if strings.TrimSpace(access.Path) == "" {
-		return nil, errors.New("no path to Postgres database is defined")
+		return nil, errata.New("no path to Postgres database is defined")
 	}
 
 	address, err := AddressPostgres(access)
@@ -85,12 +89,12 @@ func Connect(access config.Access) (*sql.DB, error) {
 
 	db, err := sql.Open("postgres", address)
 	if err != nil {
-		return nil, errors.Wrapf(err, "wrong db connect (access = %#v)", access)
+		return nil, errata.Wrapf(err, "wrong db connect (access = %#v)", access)
 	}
 
 	err = db.Ping()
 	if err != nil {
-		return nil, errors.Wrapf(err, "wrong .Ping on db connect (access = %#v)", access)
+		return nil, errata.Wrapf(err, "wrong .Ping on db connect (access = %#v)", access)
 	}
 
 	return db, nil

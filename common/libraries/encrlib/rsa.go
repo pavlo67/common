@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/pkg/errors"
+	"github.com/pavlo67/common/common/errata"
 )
 
 const onNewRSAPrivateKey = "on encrlib.NewRSAPrivateKey()"
@@ -17,13 +17,13 @@ func NewRSAPrivateKey(pathToStore string) (*rsa.PrivateKey, error) {
 		if _, err := os.Stat(pathToStore); !os.IsNotExist(err) {
 			keyJSON, err := ioutil.ReadFile(pathToStore)
 			if err != nil {
-				return nil, errors.Wrapf(err, onNewRSAPrivateKey+": can't read file (%s)", pathToStore)
+				return nil, errata.Wrapf(err, onNewRSAPrivateKey+": can't read file (%s)", pathToStore)
 			}
 
 			var privateKey rsa.PrivateKey
 			err = json.Unmarshal(keyJSON, &privateKey)
 			if err != nil {
-				return nil, errors.Wrapf(err, onNewRSAPrivateKey+": can't .json.Unmarshal file (%s --> %s)", pathToStore, keyJSON)
+				return nil, errata.Wrapf(err, onNewRSAPrivateKey+": can't .json.Unmarshal file (%s --> %s)", pathToStore, keyJSON)
 			}
 
 			return &privateKey, nil
@@ -32,21 +32,21 @@ func NewRSAPrivateKey(pathToStore string) (*rsa.PrivateKey, error) {
 
 	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
-		return nil, errors.Wrap(err, onNewRSAPrivateKey)
+		return nil, errata.Wrap(err, onNewRSAPrivateKey)
 	}
 
 	if privateKey == nil {
-		return nil, errors.New(onNewRSAPrivateKey + ": nil key was generated")
+		return nil, errata.New(onNewRSAPrivateKey + ": nil key was generated")
 	}
 
 	keyJSON, err := json.Marshal(privateKey)
 	if err != nil {
-		return nil, errors.Wrapf(err, onNewRSAPrivateKey+": can't .json.Marshal key (%#v)", privateKey)
+		return nil, errata.Wrapf(err, onNewRSAPrivateKey+": can't .json.Marshal key (%#v)", privateKey)
 	}
 
 	err = ioutil.WriteFile(pathToStore, keyJSON, 0644)
 	if err != nil {
-		return nil, errors.Wrapf(err, onNewRSAPrivateKey+": can't write file (%s)", pathToStore)
+		return nil, errata.Wrapf(err, onNewRSAPrivateKey+": can't write file (%s)", pathToStore)
 	}
 
 	return privateKey, nil

@@ -6,8 +6,8 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/pavlo67/workshop/common"
-	"github.com/pkg/errors"
+	"github.com/pavlo67/common/common"
+	"github.com/pavlo67/common/common/errata"
 )
 
 func RequestJSON(method, url string, data []byte, headers map[string]string) (common.Map, error) {
@@ -35,10 +35,10 @@ func RequestJSON(method, url string, data []byte, headers map[string]string) (co
 
 	// log.Printf("%s", body)
 
-	result := common.Map{}
+	result := data.Map{}
 	err = json.Unmarshal(body, &result)
 	if err != nil {
-		return result, errors.Wrapf(err, "can't unmarsal: %s", body)
+		return result, errata.Wrapf(err, "can't unmarsal: %s", body)
 	}
 
 	return result, nil

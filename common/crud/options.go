@@ -1,22 +1,53 @@
 package crud
 
-import "github.com/pavlo67/workshop/common/identity"
+import (
+	"database/sql"
 
-type SaveOptions struct {
-	ActorKey identity.Key
-	// TODO??? check if .Key exists and if it should be existing (insert vs. replace)
+	"github.com/pavlo67/common/common/rbac"
+
+	"github.com/pavlo67/common/common/auth"
+
+	"github.com/pavlo67/common/common/selectors"
+)
+
+type JoinTo struct {
+	Clause string
+	Values []interface{}
 }
 
-type GetOptions struct {
-	ActorKey identity.Key
-	GroupBy  []string
-	OrderBy  []string
-	Offset   uint64
-	Limit    uint64
+type Options struct {
+	Identity *auth.Identity
+
+	// ActorKey common.Key
+
+	Term    *selectors.Term
+	JoinTo  JoinTo
+	GroupBy []string
+	OrderBy []string
+	Offset  int64
+
+	Tx *sql.Tx // TODO!!! use some general (non-SQL-specific) interface
+
+	Limit  int64
+	Delete bool
 }
 
-type RemoveOptions struct {
-	ActorKey identity.Key
-	Limit    uint64
-	Delete   bool
+func (options *Options) HasRole(oneOfRoles ...rbac.Role) bool {
+	if options == nil || options.Identity == nil {
+		return false
+	}
+
+	return options.Identity.Roles.Has(oneOfRoles...)
 }
+
+func OptionsWithRoles(roles ...rbac.Role) *Options {
+	return &Options{
+		Identity: &auth.Identity{
+			Roles: roles,
+		},
+	}
+}
+
+//type Counter map[string]uint64
+//
+//type Index map[string][]ID

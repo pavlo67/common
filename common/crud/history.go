@@ -1,15 +1,13 @@
 package crud
 
 import (
+	"fmt"
 	"reflect"
 	"time"
 
-	"github.com/pkg/errors"
-
-	"github.com/pavlo67/workshop/common/joiner"
-
-	"github.com/pavlo67/workshop/common"
-	"github.com/pavlo67/workshop/common/identity"
+	"github.com/pavlo67/common/common"
+	"github.com/pavlo67/common/common/errata"
+	"github.com/pavlo67/common/common/joiner"
 )
 
 type ActionKey string
@@ -20,11 +18,11 @@ const CreatedAction ActionKey = "created"
 const UpdatedAction ActionKey = "updated"
 
 type Action struct {
-	ActorKey identity.Key  `bson:",omitempty" json:",omitempty"`
+	ActorKey common.Key    `bson:",omitempty" json:",omitempty"`
 	Key      ActionKey     `bson:",omitempty" json:",omitempty"`
 	DoneAt   time.Time     `bson:",omitempty" json:",omitempty"`
 	Related  *joiner.Link  `bson:",omitempty" json:",omitempty"`
-	Errors   common.Errors `bson:",omitempty" json:",omitempty"`
+	Errors   errata.Errors `bson:",omitempty" json:",omitempty"`
 }
 
 type History []Action
@@ -69,5 +67,5 @@ func (h History) CheckOn(hOld History) error {
 		}
 	}
 
-	return errors.Errorf("history (%#v) is inappropriate to the old one (... %#v)", h, actionLast)
+	return fmt.Errorf("history (%#v) is inappropriate to the old one (... %#v)", h, actionLast)
 }

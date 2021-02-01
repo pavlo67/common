@@ -3,12 +3,11 @@
 package filelib
 
 import (
+	"fmt"
 	"log"
 	"os/exec"
 	"strings"
 	"testing"
-
-	"github.com/pkg/errors"
 )
 
 func TestCurrentPath(t *testing.T) {
@@ -21,6 +20,6 @@ func TestCurrentPath(t *testing.T) {
 	currentPath := strings.Trim(string(currentPath_), "\t\n\r") + "/"
 
 	if currentPath != path {
-		t.Error(errors.Errorf("bad current path: %v vs. %v", path, currentPath))
+		t.Error(fmt.Errorf("bad current path: %v vs. %v", path, currentPath))
 	}
 }

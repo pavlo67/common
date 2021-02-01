@@ -6,13 +6,9 @@ TAG=$(shell git describe --tags $(git rev-list --tags --max-count=1))
 LDFLAGS=-ldflags '-s -w -X "main.BuildTag=${TAG}" -X "main.BuildCommit=${COMMIT}" -X "main.BuildDate=${BUILD_TIME}"'
 
 b:
-	                        go build -o bin/nb           -v ${LDFLAGS} ./apps/nb
-# 	                        go build -o bin/gatherer     -v ${LDFLAGS} ./apps/gatherer
-# 	                        go build -o bin/flow_cleaner -v ${LDFLAGS} ./apps/flow_cleaner
+	                        go build -o bin/demo           -v ${LDFLAGS} ./apps/demo
 
 bl:
-	GOOS=linux GOARCH=amd64 go build -o bin/nb           -v ${LDFLAGS} ./apps/nb
-# 	GOOS=linux GOARCH=amd64 go build -o services/gatherer     -v ${LDFLAGS} ./apps/gatherer
-# 	GOOS=linux GOARCH=amd64 go build -o services/flow_cleaner -v ${LDFLAGS} ./apps/flow_cleaner
+	GOOS=linux GOARCH=amd64 go build -o bin/demo           -v ${LDFLAGS} ./apps/demo
 
 

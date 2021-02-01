@@ -4,8 +4,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/pavlo67/workshop/common/identity"
-	"github.com/pavlo67/workshop/common/joiner"
+	"github.com/pavlo67/common/common"
+
+	"github.com/pavlo67/common/common/joiner"
 	"github.com/stretchr/testify/require"
 )
 
@@ -14,25 +15,25 @@ func TestHistoryCheckOn(t *testing.T) {
 
 	interfaceKey0 := joiner.InterfaceKey("0")
 
-	actorKey0 := identity.Key("0")
+	actorKey0 := common.Key("0")
 
-	actorKey1 := identity.Key("1")
+	actorKey1 := common.Key("1")
 
 	hOld := History{
 		{
-			ActorKey: nil,
+			ActorKey: "",
 			Key:      ActionKey("a0"),
 			DoneAt:   time.Now(),
 		},
 		{
-			ActorKey: &actorKey0,
+			ActorKey: actorKey0,
 			Key:      ActionKey("a1"),
 			DoneAt:   time.Now(),
 		},
 	}
 
 	hNew0 := append(hOld, Action{
-		ActorKey: &actorKey0,
+		ActorKey: actorKey0,
 		Key:      "an0",
 		DoneAt:   time0,
 		Related: &joiner.Link{
@@ -42,7 +43,7 @@ func TestHistoryCheckOn(t *testing.T) {
 	})
 
 	hNew1 := append(hOld, Action{
-		ActorKey: &actorKey0,
+		ActorKey: actorKey0,
 		Key:      "an0",
 		DoneAt:   time.Now(),
 		Related: &joiner.Link{
@@ -55,7 +56,7 @@ func TestHistoryCheckOn(t *testing.T) {
 	require.Error(t, err01) // times are different
 
 	hNew2 := append(hOld, Action{
-		ActorKey: &actorKey1,
+		ActorKey: actorKey1,
 		Key:      "an0",
 		DoneAt:   time0,
 		Related: &joiner.Link{
@@ -68,7 +69,7 @@ func TestHistoryCheckOn(t *testing.T) {
 	require.Error(t, err02) // actors are different
 
 	hNew0duplicate := append(hOld, Action{
-		ActorKey: &actorKey0,
+		ActorKey: actorKey0,
 		Key:      "an0",
 		DoneAt:   time0,
 		Related: &joiner.Link{
@@ -81,7 +82,7 @@ func TestHistoryCheckOn(t *testing.T) {
 	require.NoError(t, err00duplicate)
 
 	hNew0duplicate1 := append(hNew0duplicate, Action{
-		ActorKey: &actorKey0,
+		ActorKey: actorKey0,
 		Key:      "an0",
 		DoneAt:   time.Now(),
 		Related: &joiner.Link{

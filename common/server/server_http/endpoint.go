@@ -1,33 +1,33 @@
 package server_http
 
 import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"regexp"
 	"strings"
 
-	"io/ioutil"
-
-	"github.com/pavlo67/workshop/common/logger"
-	"github.com/pkg/errors"
+	"github.com/pavlo67/common/common/errata"
+	"github.com/pavlo67/common/common/logger"
 )
 
 const swaggerFile = "swagger.json"
 
-func InitEndpointsWithSwaggerV2(cfg Config, host string, srvOp Operator, swaggerPath, swaggerSubpath string, l logger.Operator) error {
+func InitEndpointsWithSwaggerV2(cfg Config, host string, noHTTPS bool, srvOp Operator, swaggerPath, swaggerSubpath string, l logger.Operator) error {
 	swaggerFilePath := swaggerPath + swaggerFile
 
-	swagger, err := cfg.SwaggerV2(host)
+	swagger, err := cfg.SwaggerV2(host, noHTTPS)
 	if err != nil {
-		return errors.Errorf("on .SwaggerV2(%#v): %s", cfg, err)
+		l.Errorf("%#v", cfg)
+		return fmt.Errorf("on .SwaggerV2(): %s", err) //
 	}
 
-	err = ioutil.WriteFile(swaggerFilePath, swagger, 0644)
-	if err != nil {
-		return errors.Errorf("on ioutil.WriteFile(%s, %s, 0755): %s", swaggerFilePath, swagger, err)
+	if err = ioutil.WriteFile(swaggerFilePath, swagger, 0644); err != nil {
+		return fmt.Errorf("on ioutil.WriteFile(%s, %s, 0755): %s", swaggerFilePath, swagger, err)
 	}
 	l.Infof("%d bytes are written into %s", len(swagger), swaggerFilePath)
 
-	err = InitEndpoints(cfg, srvOp, l)
-	if err != nil {
+	if err = InitEndpoints(cfg, srvOp, l); err != nil {
 		return err
 	}
 	return srvOp.HandleFiles("swagger", cfg.Prefix+"/"+swaggerSubpath+"/*filepath", StaticPath{LocalPath: swaggerPath})
@@ -35,17 +35,20 @@ func InitEndpointsWithSwaggerV2(cfg Config, host string, srvOp Operator, swagger
 
 func InitEndpoints(cfg Config, srvOp Operator, l logger.Operator) error {
 	if srvOp == nil {
-		return errors.New("on .InitEndpoints(): srvOp == nil")
+		return errata.New("on .InitEndpoints(): srvOp == nil")
 	}
 
 	for key, ep := range cfg.Endpoints {
+		//if ep.Skip {
+		//	continue
+		//}
 		if ep.Handler == nil {
-			return errors.Errorf("on InitEndpoints: no .Handler %#v", ep)
+			return fmt.Errorf("on InitEndpoints: no .Handler %#v", ep)
 		}
 
 		err := srvOp.HandleEndpoint(key, cfg.Prefix+ep.Path, *ep.Handler)
 		if err != nil {
-			return errors.Errorf("on srvOp.HandleEndpoint(%s, %s, %#v): %s", key, ep.Path, ep.Handler, err)
+			return fmt.Errorf("on srvOp.HandleEndpoint(%s, %s, %#v): %s", key, ep.Path, ep.Handler, err)
 		}
 	}
 
@@ -53,13 +56,14 @@ func InitEndpoints(cfg Config, srvOp Operator, l logger.Operator) error {
 }
 
 type Endpoint struct {
-	Method      string   `json:"method,omitempty"`
-	PathParams  []string `json:"path_params,omitempty"`
-	QueryParams []string `json:"query_params,omitempty"`
+	Method      string          `json:",omitempty"`
+	PathParams  []string        `json:",omitempty"`
+	QueryParams []string        `json:",omitempty"`
+	BodyParams  json.RawMessage `json:",omitempty"`
 
 	WorkerHTTP
 
-	// AllowedIDs []common.Key `json:"allowed_ids,omitempty"`
+	// AllowedIDs []common.PbxID `json:"allowed_ids,omitempty"`
 	// DataItem   interface{} `json:"data_item,omitempty"` // for Interface
 	// SwaggerDescription string
 }
@@ -91,7 +95,17 @@ func (ep Endpoint) PathTemplate(serverPath string) string {
 		return serverPath
 	}
 
-	return serverPath + "/:" + strings.Join(ep.PathParams, "/:")
+	var pathParams []string
+	for _, pp := range ep.PathParams {
+		if len(pp) > 0 && pp[0] == '*' {
+			pathParams = append(pathParams, pp)
+		} else {
+			pathParams = append(pathParams, ":"+pp)
+		}
+
+	}
+
+	return serverPath + "/" + strings.Join(pathParams, "/")
 }
 
 func (ep Endpoint) PathTemplateBraced(serverPath string) string {
@@ -101,6 +115,16 @@ func (ep Endpoint) PathTemplateBraced(serverPath string) string {
 
 	if len(ep.PathParams) < 1 {
 		return serverPath
+	}
+
+	var pathParams []string
+	for _, pp := range ep.PathParams {
+		if len(pp) > 0 && pp[0] == '*' {
+			pathParams = append(pathParams, pp[1:])
+		} else {
+			pathParams = append(pathParams, pp)
+		}
+
 	}
 
 	return serverPath + "/{" + strings.Join(ep.PathParams, "}/{") + "}"
