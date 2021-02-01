@@ -43,14 +43,22 @@ func New(cfg config.Access) (persons.Operator, crud.Cleaner, error) {
 	return &personsOp, &personsOp, nil
 }
 
-func hashCreds(creds auth.Creds) (auth.Creds, error) {
-	crypt := crypt.SHA256.New()
+func hashCreds(creds, oldCreds auth.Creds) (auth.Creds, error) {
+
+	if creds == nil {
+		creds = auth.Creds{}
+	}
 
 	password := strings.TrimSpace(creds.StringDefault(auth.CredsPassword, ""))
 	if password == "" {
-		return nil, errata.KeyableError(errata.NoCredsKey, common.Map{"creds": creds, "reason": "no '" + auth.CredsPassword + "' key"})
+		if oldCreds == nil {
+			return nil, errata.KeyableError(errata.NoCredsKey, common.Map{"creds": creds, "reason": "no '" + auth.CredsPassword + "' key"})
+		} else if creds != nil {
+			creds[auth.CredsPasshash] = oldCreds[auth.CredsPasshash]
+		}
 	}
 
+	crypt := crypt.SHA256.New()
 	// TODO: generate salt
 	var salt []byte
 	hash, err := crypt.Generate([]byte(password), salt)
@@ -82,7 +90,7 @@ func (pfs *personsFSStub) Add(identity auth.Identity, data common.Map, options *
 	}
 
 	var err error
-	if identity.Creds, err = hashCreds(identity.Creds); err != nil {
+	if identity.Creds, err = hashCreds(identity.Creds, nil); err != nil {
 		return "", errata.CommonError(err, onAdd)
 	}
 
@@ -108,46 +116,44 @@ func (pfs *personsFSStub) write(path string, item persons.Item) error {
 
 const onChange = "on personsFSStub.Change()"
 
-func (pfs *personsFSStub) Change(item persons.Item, options *crud.Options) error {
+func (pfs *personsFSStub) Change(item persons.Item, options *crud.Options) (*persons.Item, error) {
 	if options == nil || options.Identity == nil {
-		return errata.KeyableError(errata.NoRightsKey, common.Map{"on": onChange, "item": item})
+		return nil, errata.KeyableError(errata.NoRightsKey, common.Map{"on": onChange, "item": item})
 	}
+
+	// l.Info(1111111111, " ", item.ID)
 
 	itemOld, err := pfs.read(item.ID)
 	if err != nil || itemOld == nil {
 		errorStr := fmt.Sprintf("got %#v / %s", itemOld, err)
 		if options.HasRole(rbac.RoleAdmin) {
-			return errata.KeyableError(errata.WrongIDKey, common.Map{"on": onChange, "item": item, "reason": errorStr})
+			return nil, errata.KeyableError(errata.WrongIDKey, common.Map{"on": onChange, "item": item, "reason": errorStr})
 		} else {
 			l.Error(errorStr)
-			return errata.KeyableError(errata.NoRightsKey, common.Map{"on": onChange, "item": item, "requestedRole": rbac.RoleAdmin})
+			return nil, errata.KeyableError(errata.NoRightsKey, common.Map{"on": onChange, "item": item, "requestedRole": rbac.RoleAdmin})
 		}
 	}
+
+	// l.Infof("22222222 %s / %#v / %#v", options.Identity.ID, itemOld, itemOld.ID != options.Identity.ID)
 
 	if itemOld.ID != options.Identity.ID && !options.Identity.Roles.Has(rbac.RoleAdmin) {
-		return errata.KeyableError(errata.NoRightsKey, common.Map{"on": onChange, "item": item})
+		return nil, errata.KeyableError(errata.NoRightsKey, common.Map{"on": onChange, "item": item})
 	}
 
-	if newPassword := strings.TrimSpace(item.Creds.StringDefault(auth.CredsPassword, "")); newPassword != "" {
-		var err error
-		if item.Creds, err = hashCreds(item.Creds); err != nil {
-			return errata.CommonError(err, onChange)
-		}
-	} else if item.Creds != nil {
-		item.Creds[auth.CredsPasshash] = itemOld.Creds[auth.CredsPasshash]
-	} else {
-		item.Creds = common.Map{auth.CredsPasshash: itemOld.Creds[auth.CredsPasshash]}
+	if item.Creds, err = hashCreds(item.Creds, itemOld.Creds); err != nil {
+		return nil, errata.CommonError(err, onChange)
 	}
+
 	item.CreatedAt = itemOld.CreatedAt
 	now := time.Now()
 	item.UpdatedAt = &now
 
 	path := filepath.Join(pfs.path, string(item.ID))
 	if err := pfs.write(path, item); err != nil {
-		return errata.Wrap(err, onChange)
+		return nil, errata.Wrap(err, onChange)
 	}
 
-	return nil
+	return &item, nil
 }
 
 const onList = "on personsFSStub.List(): "
@@ -185,7 +191,7 @@ func (pfs *personsFSStub) List(options *crud.Options) ([]persons.Item, error) {
 const onRemove = "on personsFSStub.Remove()"
 
 func (pfs *personsFSStub) Remove(authID auth.ID, options *crud.Options) error {
-	if !options.HasRole(rbac.RoleAdmin) {
+	if authID != options.Identity.ID && !options.HasRole(rbac.RoleAdmin) {
 		return errata.KeyableError(errata.NoRightsKey, common.Map{"on": onRemove, "authID": authID, "requestedRole": rbac.RoleAdmin})
 	}
 
@@ -200,7 +206,7 @@ func (pfs *personsFSStub) Remove(authID auth.ID, options *crud.Options) error {
 const onRead = "on personsFSStub.Read()"
 
 func (pfs *personsFSStub) Read(authID auth.ID, options *crud.Options) (*persons.Item, error) {
-	if !options.HasRole(rbac.RoleAdmin) {
+	if authID != options.Identity.ID && !options.HasRole(rbac.RoleAdmin) {
 		return nil, errata.KeyableError(errata.NoRightsKey, common.Map{"on": onRead, "authID": authID, "requestedRole": rbac.RoleAdmin})
 	}
 
@@ -208,6 +214,8 @@ func (pfs *personsFSStub) Read(authID auth.ID, options *crud.Options) (*persons.
 }
 
 func (pfs *personsFSStub) read(authID auth.ID) (*persons.Item, error) {
+	// l.Info(10000000, " ", authID)
+
 	path := filepath.Join(pfs.path, string(authID)) //  pfs.path + string(authID)
 	jsonBytes, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -217,6 +225,10 @@ func (pfs *personsFSStub) read(authID auth.ID) (*persons.Item, error) {
 	if err := json.Unmarshal(jsonBytes, &item); err != nil {
 		return nil, errata.Wrap(err, onRead)
 	}
+
+	// l.Infof("readed: %#v", item)
+
+	item.ID = authID
 
 	return &item, nil
 }

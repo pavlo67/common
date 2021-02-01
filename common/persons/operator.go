@@ -17,7 +17,7 @@ type Item struct {
 
 type Operator interface {
 	Add(identity auth.Identity, data common.Map, options *crud.Options) (auth.ID, error)
-	Change(Item, *crud.Options) error
+	Change(Item, *crud.Options) (*Item, error)
 	Read(auth.ID, *crud.Options) (*Item, error)
 	Remove(auth.ID, *crud.Options) error
 	List(options *crud.Options) ([]Item, error)
