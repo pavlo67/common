@@ -14,10 +14,9 @@ var (
 )
 
 const serviceName = "demo"
-const appsSubpathDefault = "apps/"
 
 func main() {
-	versionOnly, envPath, cfgService, l := apps.Prepare(BuildDate, BuildTag, BuildCommit, serviceName, appsSubpathDefault)
+	versionOnly, envPath, cfgService, l := apps.Prepare(BuildDate, BuildTag, BuildCommit, serviceName, apps.AppsSubpathDefault)
 	if versionOnly {
 		return
 	}

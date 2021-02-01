@@ -5,7 +5,10 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/logger"
@@ -53,8 +56,33 @@ func Prepare(buildDate, buildTag, buildCommit, serviceName, appsSubpathDefault s
 	envPath = cwd + appsSubpath + "_environments/"
 	cfgServicePath := envPath + configEnv + ".yaml"
 	cfgService, err = config.Get(cfgServicePath, serviceName, serializer.MarshalerYAML)
-	if err != nil {
-		l.Fatal(err)
+	if err != nil || cfgService == nil {
+		l.Fatalf("on config.Get(%s, %s, serializer.MarshalerYAML)", cfgServicePath, serviceName, cfgService, err)
 	}
 	return versionOnly, envPath, cfgService, l
+}
+
+func PrepareTests(t *testing.T, serviceName, appsSubpath, configEnv string) (envPath string, cfgService *config.Config) {
+	os.Setenv("ENV", configEnv)
+
+	l, err := logger.Init(logger.Config{})
+	require.NoError(t, err)
+	require.NotNil(t, l)
+
+	cwd, err := os.Getwd()
+	require.NoError(t, err)
+
+	cwd += "/"
+	// t.Log("CWD: ", cwd)
+
+	// get config
+
+	envPath = cwd + appsSubpath + "_environments/"
+	cfgServicePath := envPath + configEnv + ".yaml"
+	cfgService, err = config.Get(cfgServicePath, serviceName, serializer.MarshalerYAML)
+	require.NoError(t, err)
+	require.NotNil(t, cfgService)
+
+	return envPath, cfgService
+
 }

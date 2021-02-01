@@ -3,6 +3,7 @@ package config
 import (
 	"io/ioutil"
 
+	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/errata"
 	"github.com/pavlo67/common/common/serializer"
 )
@@ -29,6 +30,7 @@ func (c *Config) Value(key string, target interface{}) error {
 	if c == nil {
 		return errNoConfig
 	}
+
 	if value, ok := c.data[key]; ok {
 		valueRaw, err := c.marshaler.Marshal(value)
 		if err != nil {
@@ -38,7 +40,7 @@ func (c *Config) Value(key string, target interface{}) error {
 		return c.marshaler.Unmarshal(valueRaw, target)
 	}
 
-	return nil
+	return errata.KeyableError(errata.NotFoundKey, common.Map{"reason": "no key in config", "key": key})
 }
 
 // -----------------------------------------------------------------------------

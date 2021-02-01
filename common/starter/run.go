@@ -29,7 +29,7 @@ func StartComponent(c Starter, cfg *config.Config, joinerOp joiner.Operator) err
 		log.Println(i)
 	}
 	if err != nil {
-		return fmt.Errorf("error calling .Init() for component (%s): %s", name, err)
+		return fmt.Errorf("error calling .Init() for component (%s): %#v", name, err)
 	}
 
 	if err = c.Run(joinerOp); err != nil {
