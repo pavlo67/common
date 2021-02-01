@@ -14,6 +14,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 
 	"github.com/pavlo67/common/common"
+	"github.com/pavlo67/common/common/errata"
 	"github.com/pavlo67/common/common/libraries/strlib"
 	"github.com/pavlo67/common/common/server"
 	"github.com/pavlo67/common/common/server/server_http"
@@ -97,7 +98,7 @@ func (s *serverHTTPJschmhr) ResponseRESTError(status int, err error, req *http.R
 	if status == 0 || status == http.StatusOK {
 		if key == errata.NoCredsKey || key == errata.InvalidCredsKey {
 			status = http.StatusUnauthorized
-		} else if key == errata.OverdueRightsErr || key == errata.NoUserKey || key == errata.NoRightsKey {
+		} else if key == errata.NoUserKey || key == errata.NoRightsKey {
 			status = http.StatusForbidden
 		} else if status == 0 || status == http.StatusOK {
 			status = http.StatusInternalServerError

@@ -2,16 +2,8 @@ package sqllib
 
 import (
 	"database/sql"
-	"encoding/json"
-	"fmt"
-	"strconv"
-	"strings"
 
-	"github.com/pavlo67/common/common/crud"
 	"github.com/pavlo67/common/common/errata"
-	"github.com/pavlo67/common/common/selectors"
-	"github.com/pavlo67/common/common/selectors/logic"
-	"github.com/pavlo67/common/common/selectors/selectors_sql"
 )
 
 const CantPrepare = "can't .Prepare(%s)"
@@ -28,95 +20,95 @@ var ErrNoTable = errata.New("table doesn't exist")
 
 type CorrectWildcards func(query string) string
 
-const onSQLList = "on sqllib.SQLList(): "
-
-func SQLList(table, fields string, options *crud.Options, correctWildcards CorrectWildcards) (string, []interface{}, error) {
-
-	var join, order, limit string
-	var values []interface{}
-
-	var term *selectors.Term
-
-	if options == nil {
-		term = selectors.In("viewer_key", "")
-
-	} else {
-		viewerKey := options.ActorKey
-		if options.Term == nil {
-			term = selectors.In("viewer_key", "")
-		} else {
-			term = logic.AND(term, selectors.In("viewer_key", viewerKey))
-		}
-
-		if strings.TrimSpace(options.JoinTo.Clause) != "" {
-			join = options.JoinTo.Clause
-			values = options.JoinTo.Values
-		} else if len(options.JoinTo.Values) > 0 {
-			return "", nil, fmt.Errorf(onSQLList+"wrong .JoinTo: %#v", options.JoinTo)
-		}
-
-		if len(options.OrderBy) > 0 {
-			order = " ORDER BY " + strings.Join(options.OrderBy, ", ")
-		}
-
-		if options.Offset+options.Limit > 0 {
-			if options.Limit > 0 {
-				limit += " LIMIT " + strconv.FormatUint(options.Limit, 10)
-			}
-
-			if options.Offset > 0 {
-				limit += " OFFSET " + strconv.FormatUint(options.Offset, 10)
-			}
-
-			// TODO: sqlite & mysql version
-		}
-	}
-
-	condition, valuesTerm, err := selectors_sql.Use(term)
-	if err != nil {
-		return "", nil, fmt.Errorf(onSQLList+"wrong selector (%#v): %s", term, err)
-	}
-
-	if strings.TrimSpace(condition) != "" {
-		condition = " WHERE " + condition
-	}
-
-	query := "SELECT " + fields + " FROM " + table + join + condition + order + limit
-	if correctWildcards != nil {
-		query = correctWildcards(query)
-	}
-
-	return query, append(values, valuesTerm...), nil
-}
-
-const onSQLCount = "on sqllib.SQLCount(): "
-
-func SQLCount(table string, options *crud.Options, correctWildcards CorrectWildcards) (string, []interface{}, error) {
-	var term *selectors.Term
-	if options == nil {
-		term = selectors.In("viewer_key", "")
-
-	} else if options.Term != nil {
-		term = logic.AND(options.Term, selectors.In("viewer_key", options.ActorKey))
-
-	} else {
-		term = selectors.In("viewer_key", options.ActorKey)
-
-	}
-
-	condition, values, err := selectors_sql.Use(term)
-	if err != nil {
-		termStr, _ := json.Marshal(term)
-		return "", nil, errata.Wrapf(err, onSQLCount+": can't selectors_sql.Use(%s)", termStr)
-	}
-
-	query := "SELECT COUNT(*) FROM " + table
-	if strings.TrimSpace(condition) != "" {
-		query += " WHERE " + condition
-	}
-
-	return query, values, nil
-}
+//const onSQLList = "on sqllib.SQLList(): "
+//
+//func SQLList(table, fields string, options *crud.Options, correctWildcards CorrectWildcards) (string, []interface{}, error) {
+//
+//	var join, order, limit string
+//	var values []interface{}
+//
+//	var term *selectors.Term
+//
+//	if options == nil {
+//		term = selectors.In("viewer_key", "")
+//
+//	} else {
+//		viewerKey := options.ActorKey
+//		if options.Term == nil {
+//			term = selectors.In("viewer_key", "")
+//		} else {
+//			term = logic.AND(term, selectors.In("viewer_key", viewerKey))
+//		}
+//
+//		if strings.TrimSpace(options.JoinTo.Clause) != "" {
+//			join = options.JoinTo.Clause
+//			values = options.JoinTo.Values
+//		} else if len(options.JoinTo.Values) > 0 {
+//			return "", nil, fmt.Errorf(onSQLList+"wrong .JoinTo: %#v", options.JoinTo)
+//		}
+//
+//		if len(options.OrderBy) > 0 {
+//			order = " ORDER BY " + strings.Join(options.OrderBy, ", ")
+//		}
+//
+//		if options.Offset+options.Limit > 0 {
+//			if options.Limit > 0 {
+//				limit += " LIMIT " + strconv.FormatUint(options.Limit, 10)
+//			}
+//
+//			if options.Offset > 0 {
+//				limit += " OFFSET " + strconv.FormatUint(options.Offset, 10)
+//			}
+//
+//			// TODO: sqlite & mysql version
+//		}
+//	}
+//
+//	condition, valuesTerm, err := selectors_sql.Use(term)
+//	if err != nil {
+//		return "", nil, fmt.Errorf(onSQLList+"wrong selector (%#v): %s", term, err)
+//	}
+//
+//	if strings.TrimSpace(condition) != "" {
+//		condition = " WHERE " + condition
+//	}
+//
+//	query := "SELECT " + fields + " FROM " + table + join + condition + order + limit
+//	if correctWildcards != nil {
+//		query = correctWildcards(query)
+//	}
+//
+//	return query, append(values, valuesTerm...), nil
+//}
+//
+//const onSQLCount = "on sqllib.SQLCount(): "
+//
+//func SQLCount(table string, options *crud.Options, correctWildcards CorrectWildcards) (string, []interface{}, error) {
+//	var term *selectors.Term
+//	if options == nil {
+//		term = selectors.In("viewer_key", "")
+//
+//	} else if options.Term != nil {
+//		term = logic.AND(options.Term, selectors.In("viewer_key", options.ActorKey))
+//
+//	} else {
+//		term = selectors.In("viewer_key", options.ActorKey)
+//
+//	}
+//
+//	condition, values, err := selectors_sql.Use(term)
+//	if err != nil {
+//		termStr, _ := json.Marshal(term)
+//		return "", nil, errata.Wrapf(err, onSQLCount+": can't selectors_sql.Use(%s)", termStr)
+//	}
+//
+//	query := "SELECT COUNT(*) FROM " + table
+//	if strings.TrimSpace(condition) != "" {
+//		query += " WHERE " + condition
+//	}
+//
+//	return query, values, nil
+//}
 
 type SqlStmt struct {
 	Stmt **sql.Stmt

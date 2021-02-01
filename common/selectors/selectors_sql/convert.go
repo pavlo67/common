@@ -2,7 +2,6 @@ package selectors_sql
 
 import (
 	"fmt"
-
 	"strings"
 
 	"github.com/pavlo67/common/common/errata"

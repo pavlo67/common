@@ -44,9 +44,6 @@ func (ss *server_http_jschmhrStarter) Init(cfg *config.Config, lCommon logger.Op
 }
 
 func (ss *server_http_jschmhrStarter) Run(joinerOp joiner.Operator) error {
-
-	l.Infof("!!! %#v", joinerOp.Interface(server_http.OnRequestInterfaceKey))
-
 	onRequest, _ := joinerOp.Interface(server_http.OnRequestInterfaceKey).(server_http.OnRequest)
 	if onRequest == nil {
 		return fmt.Errorf("no server_http.OnRequest with key %s", server_http.OnRequestInterfaceKey)

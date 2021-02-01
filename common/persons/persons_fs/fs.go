@@ -1,4 +1,4 @@
-package persons_fs_stub
+package persons_fs
 
 import (
 	"encoding/json"

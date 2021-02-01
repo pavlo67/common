@@ -22,6 +22,7 @@ node_modules
 vendor
 
 # Test files & executables
+demo
 bin/*
 build
 dist

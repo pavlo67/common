@@ -1,15 +1,14 @@
-package persons_fs_stub
+package persons_fs
 
 import (
 	"log"
 	"os"
 	"testing"
 
-	"github.com/pavlo67/common/common/logger"
-
 	"github.com/stretchr/testify/require"
 
 	"github.com/pavlo67/common/common/config"
+	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/persons/persons_scenarios"
 )
 
