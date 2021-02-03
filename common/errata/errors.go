@@ -3,6 +3,7 @@ package errata
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/pavlo67/common/common"
@@ -17,7 +18,6 @@ type Error interface {
 
 func CommonError(any ...interface{}) Error {
 	var err *commonError
-
 	for _, anything := range any {
 		err = err.append(anything)
 	}
@@ -27,7 +27,7 @@ func CommonError(any ...interface{}) Error {
 
 func KeyableError(key Key, data common.Map) Error {
 	return &commonError{
-		errs: Errors{New(string(key))},
+		errs: nil,
 		key:  key,
 		data: data,
 	}
@@ -47,7 +47,16 @@ func (ce *commonError) Error() string {
 	if ce == nil {
 		return ""
 	}
-	return ce.errs.String()
+	errStr := strings.TrimSpace(string(ce.key))
+	if errStr == "" {
+		errStr = "<no key>"
+	}
+
+	if len(ce.data) > 0 {
+		errStr += fmt.Sprintf(" (%v) ", ce.data)
+	}
+
+	return errStr + ce.errs.String()
 }
 
 func (ce *commonError) Key() Key {
@@ -74,9 +83,11 @@ func (ce *commonError) append(anything interface{}) *commonError {
 	if ce == nil {
 		switch v := anything.(type) {
 		case commonError:
-			return &v
+			v1 := v //  to prevent recursion in the case: ke1 := KeyableError(...); ke2 := CommonError(ke1, ke1)
+			return &v1
 		case *commonError:
-			return v
+			v1 := *v // to prevent recursion in the case: ke1 := KeyableError(...); ke2 := CommonError(ke1, ke1)
+			return &v1
 		case Error:
 			return &commonError{
 				errs: Errors{errors.New(v.Error())},

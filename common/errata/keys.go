@@ -1,5 +1,7 @@
 package errata
 
+import "errors"
+
 type Key string
 
 const CantPerformKey Key = "cant_perform"
@@ -26,4 +28,4 @@ const NullItemKey Key = "null_item"
 
 const NotImplementedKey Key = "not_implemented"
 
-var NotImplemented = New(string(NotImplementedKey))
+var NotImplemented = errors.New(string(NotImplementedKey))
