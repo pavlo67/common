@@ -13,6 +13,7 @@ import (
 
 	"github.com/GehirnInc/crypt"
 	_ "github.com/GehirnInc/crypt/sha256_crypt"
+	"github.com/pkg/errors"
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/auth"
@@ -63,7 +64,7 @@ func hashCreds(creds, oldCreds auth.Creds) (auth.Creds, error) {
 	var salt []byte
 	hash, err := crypt.Generate([]byte(password), salt)
 	if err != nil {
-		return nil, errata.Wrap(err, fmt.Sprintf("cant crypt.Generate(%s, %s)", password, salt))
+		return nil, errors.Wrap(err, fmt.Sprintf("cant crypt.Generate(%s, %s)", password, salt))
 	}
 
 	creds[auth.CredsPasshash] = hash
@@ -99,7 +100,7 @@ func (pfs *personsFSStub) Add(identity auth.Identity, data common.Map, options *
 		Data:      data,
 		CreatedAt: time.Now(),
 	}); err != nil {
-		return "", errata.Wrap(err, onAdd)
+		return "", errors.Wrap(err, onAdd)
 	}
 
 	return auth.ID(authIDStr), nil
@@ -150,7 +151,7 @@ func (pfs *personsFSStub) Change(item persons.Item, options *crud.Options) (*per
 
 	path := filepath.Join(pfs.path, string(item.ID))
 	if err := pfs.write(path, item); err != nil {
-		return nil, errata.Wrap(err, onChange)
+		return nil, errors.Wrap(err, onChange)
 	}
 
 	return &item, nil
@@ -165,20 +166,20 @@ func (pfs *personsFSStub) List(options *crud.Options) ([]persons.Item, error) {
 
 	d, err := os.Open(pfs.path)
 	if err != nil {
-		return nil, errata.Wrap(err, onList)
+		return nil, errors.Wrap(err, onList)
 	}
 	defer d.Close()
 
 	names, err := d.Readdirnames(-1)
 	if err != nil {
-		return nil, errata.Wrap(err, onList)
+		return nil, errors.Wrap(err, onList)
 	}
 
 	var items []persons.Item
 	for _, name := range names {
 		item, err := pfs.read(auth.ID(name))
 		if err != nil || item == nil {
-			return nil, errata.Errorf(onList+": got %#v, %s", item, err)
+			return nil, fmt.Errorf(onList+": got %#v, %s", item, err)
 		}
 		delete(item.Creds, auth.CredsPasshash)
 
@@ -197,7 +198,7 @@ func (pfs *personsFSStub) Remove(authID auth.ID, options *crud.Options) error {
 
 	path := filepath.Join(pfs.path, string(authID)) //  pfs.path + string(authID)
 	if err := os.RemoveAll(path); err != nil {
-		return errata.Errorf(onRemove+": can't os.RemoveAll(%s), got  %s", path, err)
+		return fmt.Errorf(onRemove+": can't os.RemoveAll(%s), got  %s", path, err)
 	}
 
 	return nil
@@ -219,11 +220,11 @@ func (pfs *personsFSStub) read(authID auth.ID) (*persons.Item, error) {
 	path := filepath.Join(pfs.path, string(authID)) //  pfs.path + string(authID)
 	jsonBytes, err := ioutil.ReadFile(path)
 	if err != nil {
-		return nil, errata.Wrap(err, onRead)
+		return nil, errors.Wrap(err, onRead)
 	}
 	var item persons.Item
 	if err := json.Unmarshal(jsonBytes, &item); err != nil {
-		return nil, errata.Wrap(err, onRead)
+		return nil, errors.Wrap(err, onRead)
 	}
 
 	// l.Infof("readed: %#v", item)

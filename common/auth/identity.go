@@ -5,7 +5,7 @@ import (
 	"github.com/pavlo67/common/common/rbac"
 )
 
-type ID = common.IDStr
+type ID common.IDStr
 
 type Identity struct {
 	ID       ID         `json:",omitempty"`

@@ -7,7 +7,7 @@ import (
 	"sync"
 
 	"github.com/pavlo67/common/common"
-	"github.com/pavlo67/common/common/errata"
+	"github.com/pkg/errors"
 )
 
 type InterfaceKey string
@@ -26,11 +26,6 @@ type Operator interface {
 	CloseAll()
 }
 
-type Link struct {
-	InterfaceKey InterfaceKey `bson:",omitempty" json:",omitempty"`
-	ID           ID           `bson:",omitempty" json:",omitempty"`
-}
-
 var _ Operator = &joiner{}
 
 func New() Operator {
@@ -45,22 +40,22 @@ type joiner struct {
 	mutex      *sync.RWMutex
 }
 
-var ErrJoiningNil = errata.New("can't join nil interface")
-var ErrJoiningDuplicate = errata.New("can't join interface over joined before")
+var ErrJoiningNil = errors.New("can't join nil interface")
+var ErrJoiningDuplicate = errors.New("can't join interface over joined before")
 
 func (j *joiner) Join(intrfc interface{}, interfaceKey InterfaceKey) error {
 	if j == nil {
 		return fmt.Errorf("got nil on .Join(%s)", interfaceKey)
 	}
 	if intrfc == nil {
-		return errata.Wrapf(ErrJoiningNil, "on .Join(%s)", interfaceKey)
+		return errors.Wrapf(ErrJoiningNil, "on .Join(%s)", interfaceKey)
 	}
 
 	j.mutex.Lock()
 	defer j.mutex.Unlock()
 
 	if _, ok := j.components[interfaceKey]; ok {
-		return errata.Wrapf(ErrJoiningDuplicate, "on .Join(%s)", interfaceKey)
+		return errors.Wrapf(ErrJoiningDuplicate, "on .Join(%s)", interfaceKey)
 	}
 
 	j.components[interfaceKey] = intrfc

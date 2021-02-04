@@ -3,7 +3,7 @@ package sqllib
 import (
 	"database/sql"
 
-	"github.com/pavlo67/common/common/errata"
+	"github.com/pkg/errors"
 )
 
 const CantPrepare = "can't .Prepare(%s)"
@@ -16,7 +16,7 @@ const NoRowOnQuery = "no row on query('%s', %#v)"
 const CantScanQueryRow = "can't scan query row ('%s', %#v)"
 const RowsError = "error on .Rows ('%s', %#v)"
 
-var ErrNoTable = errata.New("table doesn't exist")
+var ErrNoTable = errors.New("table doesn't exist")
 
 type CorrectWildcards func(query string) string
 
@@ -99,7 +99,7 @@ type CorrectWildcards func(query string) string
 //	condition, values, err := selectors_sql.Use(term)
 //	if err != nil {
 //		termStr, _ := json.Marshal(term)
-//		return "", nil, errata.Wrapf(err, onSQLCount+": can't selectors_sql.Use(%s)", termStr)
+//		return "", nil, errors.Wrapf(err, onSQLCount+": can't selectors_sql.Use(%s)", termStr)
 //	}
 //
 //	query := "SELECT COUNT(*) FROM " + table
@@ -120,7 +120,7 @@ func Prepare(dbh *sql.DB, sqlQuery string, stmt **sql.Stmt) error {
 
 	*stmt, err = dbh.Prepare(sqlQuery)
 	if err != nil {
-		return errata.Wrapf(err, "can't dbh.Prepare(%s)", sqlQuery)
+		return errors.Wrapf(err, "can't dbh.Prepare(%s)", sqlQuery)
 	}
 
 	return nil
@@ -129,12 +129,12 @@ func Prepare(dbh *sql.DB, sqlQuery string, stmt **sql.Stmt) error {
 func Exec(dbh *sql.DB, sqlQuery string, values ...interface{}) (*sql.Result, error) {
 	stmt, err := dbh.Prepare(sqlQuery)
 	if err != nil {
-		return nil, errata.Wrapf(err, CantPrepare, sqlQuery)
+		return nil, errors.Wrapf(err, CantPrepare, sqlQuery)
 	}
 
 	res, err := stmt.Exec(values...)
 	if err != nil {
-		return nil, errata.Wrapf(err, CantExec, sqlQuery, values)
+		return nil, errors.Wrapf(err, CantExec, sqlQuery, values)
 	}
 
 	return &res, nil
@@ -143,12 +143,12 @@ func Exec(dbh *sql.DB, sqlQuery string, values ...interface{}) (*sql.Result, err
 func Query(dbh *sql.DB, sqlQuery string, values ...interface{}) (*sql.Rows, error) {
 	stmt, err := dbh.Prepare(sqlQuery)
 	if err != nil {
-		return nil, errata.Wrapf(err, CantPrepare, sqlQuery)
+		return nil, errors.Wrapf(err, CantPrepare, sqlQuery)
 	}
 
 	rows, err := stmt.Query(values...)
 	if err != nil {
-		return nil, errata.Wrapf(err, CantExec, sqlQuery, values)
+		return nil, errors.Wrapf(err, CantExec, sqlQuery, values)
 	}
 
 	return rows, nil

@@ -11,6 +11,7 @@ import (
 	"github.com/pavlo67/common/common/errata"
 	"github.com/pavlo67/common/common/server"
 	"github.com/pavlo67/common/common/server/server_http"
+	"github.com/pkg/errors"
 )
 
 var bodyParams = json.RawMessage(`{
@@ -36,12 +37,12 @@ var authEndpoint = server_http.Endpoint{
 
 		credsJSON, err := ioutil.ReadAll(req.Body)
 		if err != nil {
-			return serverOp.ResponseRESTError(http.StatusBadRequest, errata.KeyableError(errata.WrongBodyKey, common.Map{"error": errata.Wrap(err, "can't read body")}), req)
+			return serverOp.ResponseRESTError(http.StatusBadRequest, errata.KeyableError(errata.WrongBodyKey, common.Map{"error": errors.Wrap(err, "can't read body")}), req)
 		}
 
 		var toAuth auth.Creds
 		if err = json.Unmarshal(credsJSON, &toAuth); err != nil {
-			return serverOp.ResponseRESTError(http.StatusBadRequest, errata.KeyableError(errata.WrongJSONKey, common.Map{"error": errata.Wrapf(err, "can't unmarshal body: %s", credsJSON)}), req)
+			return serverOp.ResponseRESTError(http.StatusBadRequest, errata.KeyableError(errata.WrongJSONKey, common.Map{"error": errors.Wrapf(err, "can't unmarshal body: %s", credsJSON)}), req)
 		}
 
 		toAuth[auth.CredsIP] = req.RemoteAddr

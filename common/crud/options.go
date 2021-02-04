@@ -1,35 +1,57 @@
 package crud
 
 import (
-	"database/sql"
-
-	"github.com/pavlo67/common/common/rbac"
-
 	"github.com/pavlo67/common/common/auth"
-
+	"github.com/pavlo67/common/common/rbac"
 	"github.com/pavlo67/common/common/selectors"
+	"github.com/pavlo67/common/common/selectors/logic"
 )
-
-type JoinTo struct {
-	Clause string
-	Values []interface{}
-}
 
 type Options struct {
 	Identity *auth.Identity
+	Selector *selectors.Term
+	Ranges   *Ranges
+}
 
-	// ActorKey common.Key
-
-	Term    *selectors.Term
-	JoinTo  JoinTo
+type Ranges struct {
 	GroupBy []string
 	OrderBy []string
-	Offset  int64
+	JoinTo  string
+	Values  []interface{}
+	Offset  uint64
+	Limit   uint64
+}
 
-	Tx *sql.Tx // TODO!!! use some general (non-SQL-specific) interface
+func (options *Options) GetIdentity() *auth.Identity {
+	if options == nil {
+		return nil
+	}
+	return options.Identity
+}
 
-	Limit  int64
-	Delete bool
+func (options *Options) WithSelector(selector *selectors.Term) *Options {
+	if options == nil {
+		return &Options{Selector: selector}
+	}
+	optionsCopied := *options
+
+	if options.Selector == nil {
+		optionsCopied.Selector = selector
+	} else if selector != nil {
+		optionsCopied.Selector = logic.AND(selector, options.Selector)
+	}
+
+	return &optionsCopied
+}
+
+func (options *Options) WithRanges(Ranges *Ranges) *Options {
+	if options == nil {
+		return &Options{Ranges: Ranges}
+	}
+	optionsCopied := *options
+	options.Ranges = Ranges
+
+	return &optionsCopied
 }
 
 func (options *Options) HasRole(oneOfRoles ...rbac.Role) bool {
@@ -47,7 +69,3 @@ func OptionsWithRoles(roles ...rbac.Role) *Options {
 		},
 	}
 }
-
-//type Counter map[string]uint64
-//
-//type Index map[string][]ID

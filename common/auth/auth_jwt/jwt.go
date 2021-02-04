@@ -13,6 +13,7 @@ import (
 	"github.com/pavlo67/common/common/errata"
 	"github.com/pavlo67/common/common/libraries/encrlib"
 	"github.com/pavlo67/common/common/rbac"
+	"github.com/pkg/errors"
 )
 
 const Proto = "jwt"
@@ -34,14 +35,14 @@ const onNew = "on auth_jwt.New()"
 func New(pathToStore string) (auth.Operator, error) {
 	privKey, err := encrlib.NewRSAPrivateKey(pathToStore)
 	if err != nil {
-		return nil, errata.Wrap(err, onNew)
+		return nil, errors.Wrap(err, onNew)
 	}
 
 	signerOpts := (&jose.SignerOptions{}).WithType("Token") // signerOpts.WithType("Token")
 	signingKey := jose.SigningKey{Algorithm: jose.RS256, Key: privKey}
 	rsaSigner, err := jose.NewSigner(signingKey, signerOpts)
 	if err != nil {
-		return nil, errata.Wrapf(err, onNew+": can't jose.NewSigner(%#v, %#v)", signingKey, signerOpts)
+		return nil, errors.Wrapf(err, onNew+": can't jose.NewSigner(%#v, %#v)", signingKey, signerOpts)
 	}
 
 	return &authJWT{privKey: *privKey, builder: jwt.Signed(rsaSigner)}, nil
@@ -90,7 +91,7 @@ func (authOp *authJWT) SetCreds(userID auth.ID, creds auth.Creds) (*auth.Creds, 
 
 	rawJWT, err := builder.CompactSerialize()
 	if err != nil {
-		return nil, errata.Wrap(err, "on authJWT.SetCreds() with builder.CompactSerialize()")
+		return nil, errors.Wrap(err, "on authJWT.SetCreds() with builder.CompactSerialize()")
 	}
 
 	delete(creds, auth.CredsToSet)
@@ -110,17 +111,17 @@ func (authOp *authJWT) Authenticate(toAuth auth.Creds) (*auth.Identity, error) {
 
 	parsedJWT, err := jwt.ParseSigned(credsJWT)
 	if err != nil {
-		return nil, errata.Wrapf(err, "failed to parse Token: %s", credsJWT)
+		return nil, errors.Wrapf(err, "failed to parse Token: %s", credsJWT)
 	}
 
 	res := JWTCreds{}
 	err = parsedJWT.Claims(&authOp.privKey.PublicKey, &res)
 	if err != nil {
-		return nil, errata.Wrapf(err, "failed to get claims: %#v", parsedJWT)
+		return nil, errors.Wrapf(err, "failed to get claims: %#v", parsedJWT)
 	}
 
 	return &auth.Identity{
-		ID:       common.IDStr(res.ID),
+		ID:       auth.ID(res.ID),
 		Nickname: res.Nickname,
 		Roles:    res.Roles,
 	}, nil

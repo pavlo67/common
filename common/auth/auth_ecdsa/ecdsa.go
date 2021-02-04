@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/btcsuite/btcutil/base58"
+	"github.com/pkg/errors"
 
 	"github.com/pavlo67/common/common/auth"
-	"github.com/pavlo67/common/common/errata"
 	"github.com/pavlo67/common/common/libraries/encrlib"
 )
 
@@ -21,11 +21,11 @@ const Proto = "ecdsa"
 
 var _ auth.Operator = &authECDSA{}
 
-var errIPToCheckSignature = errata.New("wrong IP to check signature")
-var errWrongSignature = errata.New("wrong signature")
-var errWrongNumber = errata.New("wrong user's number")
-var errEmptyPublicKeyAddress = errata.New("empty public key address")
-var errEmptyPrivateKeyGenerated = errata.New("empty private key generated")
+var errIPToCheckSignature = errors.New("wrong IP to check signature")
+var errWrongSignature = errors.New("wrong signature")
+var errWrongNumber = errors.New("wrong user's number")
+var errEmptyPublicKeyAddress = errors.New("empty public key address")
+var errEmptyPrivateKeyGenerated = errors.New("empty private key generated")
 
 //var cnt uint32
 //type Session struct {
@@ -117,12 +117,12 @@ const onAuthorize = "on authECDSA.Authenticate(): "
 
 func (is *authECDSA) Authenticate(toAuth auth.Creds) (*auth.Identity, error) {
 	if toAuth[auth.CredsPublicKeyEncoding] != Proto {
-		return nil, errata.Wrap(auth.ErrEncryptionType, onAuthorize)
+		return nil, errors.Wrap(auth.ErrEncryptionType, onAuthorize)
 	}
 
 	keyToSignature := strings.TrimSpace(toAuth.StringDefault(auth.CredsIP, ""))
 	if keyToSignature == "" {
-		return nil, errata.Wrapf(errIPToCheckSignature, "toAuth: %#v", toAuth)
+		return nil, errors.Wrapf(errIPToCheckSignature, "toAuth: %#v", toAuth)
 	}
 
 	publKeyBase58 := toAuth.StringDefault(auth.CredsPublicKeyBase58, "")

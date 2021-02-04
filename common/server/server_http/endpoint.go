@@ -2,12 +2,12 @@ package server_http
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"regexp"
 	"strings"
 
-	"github.com/pavlo67/common/common/errata"
 	"github.com/pavlo67/common/common/logger"
 )
 
@@ -35,7 +35,7 @@ func InitEndpointsWithSwaggerV2(cfg Config, host string, noHTTPS bool, srvOp Ope
 
 func InitEndpoints(cfg Config, srvOp Operator, l logger.Operator) error {
 	if srvOp == nil {
-		return errata.New("on .InitEndpoints(): srvOp == nil")
+		return errors.New("on .InitEndpoints(): srvOp == nil")
 	}
 
 	for key, ep := range cfg.Endpoints {

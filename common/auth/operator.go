@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/pavlo67/common/common/errata"
@@ -16,7 +17,7 @@ type Operator interface {
 
 // to use with map[CredsType]identity.ActorKey  --------------------------------------------------------------------
 
-var ErrNoIdentityOp = errata.New("no identity.ActorKey")
+var ErrNoIdentityOp = errors.New("no identity.ActorKey")
 
 const onGetIdentity = "on GetIdentity()"
 

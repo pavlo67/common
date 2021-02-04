@@ -4,9 +4,9 @@ import (
 	"strings"
 
 	"github.com/pavlo67/common/common"
+	"github.com/pkg/errors"
 
 	"github.com/pavlo67/common/common/config"
-	"github.com/pavlo67/common/common/errata"
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/libraries/filelib"
 	"github.com/pavlo67/common/common/logger"
@@ -35,7 +35,7 @@ func (ss *identity_jwtStarter) Name() string {
 
 func (ss *identity_jwtStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) (info []common.Map, err error) {
 	if lCommon == nil {
-		return nil, errata.New("no logger")
+		return nil, errors.New("no logger")
 	}
 	l = lCommon
 
@@ -66,16 +66,16 @@ func (ss *identity_jwtStarter) Setup() error {
 func (ss *identity_jwtStarter) Run(joinerOp joiner.Operator) error {
 	identOp, err := New(ss.keyPath + "jwt.key")
 	if err != nil || identOp == nil {
-		return errata.Wrap(err, "can't init identity_jwt.ActorKey")
+		return errors.Wrap(err, "can't init identity_jwt.ActorKey")
 	}
 
 	if err = joinerOp.Join(identOp, ss.interfaceKey); err != nil {
-		return errata.Wrapf(err, "can't join auth_jwt as auth.Operator with key '%s'", ss.interfaceKey)
+		return errors.Wrapf(err, "can't join auth_jwt as auth.Operator with key '%s'", ss.interfaceKey)
 	}
 
 	if ss.interfaceKey != ss.interfaceSetCredsKey {
 		if err = joinerOp.Join(identOp, ss.interfaceSetCredsKey); err != nil {
-			return errata.Wrapf(err, "can't join auth_jwt as auth.Operator with key '%s'", ss.interfaceSetCredsKey)
+			return errors.Wrapf(err, "can't join auth_jwt as auth.Operator with key '%s'", ss.interfaceSetCredsKey)
 		}
 	}
 

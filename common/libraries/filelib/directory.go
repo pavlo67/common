@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/pavlo67/common/common/errata"
+	"github.com/pkg/errors"
 )
 
 func RelativePath(pathFull, pathBase, pathPrefix string) string {
@@ -43,11 +43,11 @@ func GetDir(path string) (string, error) {
 
 	fi, err := os.Stat(path)
 	if err != nil {
-		return "", errata.Wrapf(err, onGetDir+"can't os.Stat(%s)", path)
+		return "", errors.Wrapf(err, onGetDir+"can't os.Stat(%s)", path)
 	}
 
 	if !fi.IsDir() {
-		return "", errata.Wrapf(err, onGetDir+"path (%s) isn't a directory", path)
+		return "", errors.Wrapf(err, onGetDir+"path (%s) isn't a directory", path)
 	}
 
 	if path[len(path)-1] != '/' {
@@ -60,7 +60,7 @@ func GetDir(path string) (string, error) {
 func Dir(path string) (string, error) {
 	path = strings.TrimSpace(path)
 	if path == "" {
-		return "", errata.New("can't create dir for empty path")
+		return "", errors.New("can't create dir for empty path")
 	}
 
 	// converting Windows-backslashed pathes to the normal ones
@@ -73,11 +73,11 @@ func Dir(path string) (string, error) {
 		if os.IsNotExist(err) {
 			err = os.MkdirAll(path, os.ModePerm)
 			if err != nil {
-				return "", errata.Wrapf(err, "can't create dir '%s'", path)
+				return "", errors.Wrapf(err, "can't create dir '%s'", path)
 			}
 			return path, nil
 		}
-		return "", errata.Wrapf(err, "can't get stat for dir '%s'", path)
+		return "", errors.Wrapf(err, "can't get stat for dir '%s'", path)
 	}
 
 	return path, nil

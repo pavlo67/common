@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/pkg/errors"
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/errata"
@@ -41,7 +42,7 @@ func New(port int, tlsCertFile, tlsKeyFile string, onRequest server_http.OnReque
 	}
 
 	if onRequest == nil {
-		return nil, errata.New("on server_http_jschmhr.New(): no server_http.OnRequest")
+		return nil, errors.New("on server_http_jschmhr.New(): no server_http.OnRequest")
 	}
 
 	var secretENVsToLower []string
@@ -72,7 +73,7 @@ func New(port int, tlsCertFile, tlsKeyFile string, onRequest server_http.OnReque
 // start wraps and verbalizes http.Server.ListenAndServe method.
 func (s *serverHTTPJschmhr) Start() error {
 	if s == nil {
-		return errata.New("no serverOp to start")
+		return errors.New("no serverOp to start")
 	}
 
 	s.httpServer.Addr = ":" + strconv.Itoa(s.port)
@@ -137,7 +138,7 @@ func (s *serverHTTPJschmhr) ResponseRESTOk(status int, data interface{}) (server
 
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
-		return server.Response{Status: http.StatusInternalServerError}, errata.Wrapf(err, "can't marshal json (%#v)", data)
+		return server.Response{Status: http.StatusInternalServerError}, errors.Wrapf(err, "can't marshal json (%#v)", data)
 	}
 
 	return server.Response{Status: status, Data: jsonBytes}, nil
@@ -149,7 +150,7 @@ func (s *serverHTTPJschmhr) HandleEndpoint(key, serverPath string, endpoint serv
 	path := endpoint.PathTemplate(serverPath)
 
 	if endpoint.WorkerHTTP == nil {
-		return errata.New(method + ": " + path + "\t!!! NULL workerHTTP ISN'T DISPATCHED !!!")
+		return errors.New(method + ": " + path + "\t!!! NULL workerHTTP ISN'T DISPATCHED !!!")
 	}
 
 	s.HandleOptions(key, path)
