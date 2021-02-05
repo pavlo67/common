@@ -16,9 +16,9 @@ import (
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/errata"
-	"github.com/pavlo67/common/common/libraries/strlib"
 	"github.com/pavlo67/common/common/server"
 	"github.com/pavlo67/common/common/server/server_http"
+	"github.com/pavlo67/common/common/strlib"
 )
 
 var _ server_http.Operator = &serverHTTPJschmhr{}

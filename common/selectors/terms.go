@@ -14,7 +14,7 @@ type TermUnary struct {
 
 type OperationUnary rune
 
-const NopUn OperationUnary = 0
+const Nop1 OperationUnary = 0
 const Not OperationUnary = '!'
 const Inv OperationUnary = '-'
 
@@ -43,16 +43,16 @@ const Le Operation = 'l'
 const And Operation = 'A'
 const Or Operation = 'O'
 
-const Nop Operation = 0
+const Nop2 Operation = 0
 
 func Operand(value interface{}) interface{} {
 	switch v := value.(type) {
 	case *TermUnary:
-		if v != nil && v.OperationUnary == NopUn {
+		if v != nil && v.OperationUnary == Nop1 {
 			return v.ValueUnary
 		}
 	case TermUnary:
-		if v.OperationUnary == NopUn {
+		if v.OperationUnary == Nop1 {
 			return v.ValueUnary
 		}
 		return &v

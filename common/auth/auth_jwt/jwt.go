@@ -10,8 +10,8 @@ import (
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/auth"
+	"github.com/pavlo67/common/common/encrlib"
 	"github.com/pavlo67/common/common/errata"
-	"github.com/pavlo67/common/common/libraries/encrlib"
 	"github.com/pavlo67/common/common/rbac"
 	"github.com/pkg/errors"
 )

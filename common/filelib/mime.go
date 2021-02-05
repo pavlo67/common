@@ -5,7 +5,7 @@ import (
 	"os"
 	"regexp"
 
-	"github.com/pavlo67/common/common/libraries/strlib"
+	"github.com/pavlo67/common/common/strlib"
 )
 
 var reTXTFile = regexp.MustCompile(`(?i)\.txt$`)

@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/pavlo67/common/common/libraries/filelib"
+	"github.com/pavlo67/common/common/filelib"
 )
 
 func TestNewRSAPrivateKey(t *testing.T) {

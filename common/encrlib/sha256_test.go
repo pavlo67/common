@@ -7,7 +7,7 @@ import (
 	_ "github.com/GehirnInc/crypt/sha256_crypt"
 	"github.com/stretchr/testify/require"
 
-	"github.com/pavlo67/common/common/libraries/strlib"
+	"github.com/pavlo67/common/common/strlib"
 )
 
 var passwordMinLength = 6

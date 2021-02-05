@@ -20,7 +20,7 @@ import (
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/crud"
 	"github.com/pavlo67/common/common/errata"
-	"github.com/pavlo67/common/common/libraries/filelib"
+	"github.com/pavlo67/common/common/filelib"
 	"github.com/pavlo67/common/common/persons"
 	"github.com/pavlo67/common/common/rbac"
 )

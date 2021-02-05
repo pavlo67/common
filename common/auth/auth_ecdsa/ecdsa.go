@@ -12,7 +12,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/common/common/auth"
-	"github.com/pavlo67/common/common/libraries/encrlib"
+	"github.com/pavlo67/common/common/encrlib"
 )
 
 // const Cryptype encrlib.Cryptype = "ecdsa"

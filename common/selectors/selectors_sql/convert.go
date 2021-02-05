@@ -1,11 +1,11 @@
 package selectors_sql
 
 import (
-	"fmt"
 	"strings"
 
-	"github.com/pavlo67/common/common/selectors"
 	"github.com/pkg/errors"
+
+	"github.com/pavlo67/common/common/selectors"
 )
 
 func Use(term *selectors.Term) (sqlCondition string, values []interface{}, err error) {
@@ -56,12 +56,10 @@ func Use(term *selectors.Term) (sqlCondition string, values []interface{}, err e
 	case selectors.Or:
 		sqlCondition = sqlCondition + " OR " + sqlConditionRight
 	default:
-		return "", nil, fmt.Errorf("wrong .Operation on selectors_sql.use(%#v)", term.Right)
+		return "", nil, errors.Errorf("wrong .Operation on selectors_sql.use(%#v)", term.Right)
 	}
 
-	values = append(values, valuesNext...)
-
-	return "(" + sqlCondition + ")", values, nil
+	return "(" + sqlCondition + ")", append(values, valuesNext...), nil
 }
 
 func use(value interface{}) (sqlCondition string, values []interface{}, err error) {
@@ -84,6 +82,10 @@ func use(value interface{}) (sqlCondition string, values []interface{}, err erro
 		if len(v.Values) < 1 {
 			// TODO!!! is it correct?
 			return "", nil, nil
+		} else if v.Values[0] == nil {
+			// TODO: add the rest options
+
+			return v.Key + " IS NULL", nil, nil
 		}
 		return v.Key + " in (" + strings.Repeat(",?", len(v.Values))[1:] + ")", v.Values, nil
 	case *selectors.TermOneOf:
@@ -92,15 +94,11 @@ func use(value interface{}) (sqlCondition string, values []interface{}, err erro
 			return "", nil, nil
 		}
 		return v.Key + " in (" + strings.Repeat(",?", len(v.Values))[1:] + ")", v.Values, nil
-	case selectors.TermString:
-		return v.String, v.Values, nil
-	case *selectors.TermString:
-		return v.String, v.Values, nil
 	default:
-		return "", nil, fmt.Errorf("wrong value for selectors_sql.use(%#v)", value)
+		return "", nil, errors.Errorf("wrong value for selectors_sql.use(%#v)", value)
 	}
 
-	if termUnary.OperationUnary == selectors.NopUn {
+	if termUnary.OperationUnary == selectors.Nop1 {
 		return use(termUnary.ValueUnary)
 	}
 
@@ -118,5 +116,5 @@ func use(value interface{}) (sqlCondition string, values []interface{}, err erro
 		return "-" + sqlCondition, values, nil
 	}
 
-	return "", nil, fmt.Errorf("wrong .OperationUnary on selectors_sql.use(%#v)", termUnary)
+	return "", nil, errors.Errorf("wrong .OperationUnary on selectors_sql.use(%#v)", termUnary)
 }

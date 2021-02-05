@@ -22,11 +22,25 @@ type Ranges struct {
 	Limit   uint64
 }
 
+func (options *Options) GetRanges() *Ranges {
+	if options == nil {
+		return nil
+	}
+	return options.Ranges
+}
+
 func (options *Options) GetIdentity() *auth.Identity {
 	if options == nil {
 		return nil
 	}
 	return options.Identity
+}
+
+func (options *Options) GetSelector() *selectors.Term {
+	if options == nil {
+		return nil
+	}
+	return options.Selector
 }
 
 func (options *Options) WithSelector(selector *selectors.Term) *Options {

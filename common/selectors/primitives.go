@@ -6,7 +6,7 @@ type TermOneOf struct {
 }
 
 func In(key string, values ...interface{}) *Term {
-	return &Term{TermOneOf{key, values}, nil, Nop}
+	return &Term{TermOneOf{key, values}, nil, Nop2}
 }
 
 type TermString struct {
@@ -15,5 +15,5 @@ type TermString struct {
 }
 
 func String(str string, values ...interface{}) *Term {
-	return &Term{TermString{str, values}, nil, Nop}
+	return &Term{TermString{str, values}, nil, Nop2}
 }

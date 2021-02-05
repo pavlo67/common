@@ -20,11 +20,11 @@ const WrongJSONKey Key = "wrong_json"
 
 const NotFoundKey Key = "not_found"
 
-// var NotFound = errors.New(string(NotFoundKey))
+var NotFound = errors.New(string(NotFoundKey))
 
 const NullItemKey Key = "null_item"
 
-// var NullItem = errors.New(string(NullItemKey))
+var NullItem = errors.New(string(NullItemKey))
 
 const NotImplementedKey Key = "not_implemented"
 

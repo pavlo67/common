@@ -3,18 +3,15 @@ package sqllib_pg
 import (
 	"database/sql"
 	"fmt"
+	"regexp"
+	"strconv"
 	"strings"
 
-	"github.com/pavlo67/common/common/libraries/sqllib"
+	_ "github.com/lib/pq"
 	"github.com/pkg/errors"
 
-	_ "github.com/lib/pq"
-
-	"strconv"
-
-	"regexp"
-
 	"github.com/pavlo67/common/common/config"
+	"github.com/pavlo67/common/common/sqllib"
 )
 
 func AddressPostgres(e config.Access) (string, error) {

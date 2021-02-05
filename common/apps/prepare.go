@@ -65,7 +65,7 @@ func Prepare(buildDate, buildTag, buildCommit, serviceName, appsSubpathDefault s
 func PrepareTests(t *testing.T, serviceName, appsSubpath, configEnv string) (envPath string, cfgService *config.Config) {
 	os.Setenv("ENV", configEnv)
 
-	l, err := logger.Init(logger.Config{})
+	l, err := logger.Init(logger.Config{}) // TODO!!! don't comment it (is required for tested components)
 	require.NoError(t, err)
 	require.NotNil(t, l)
 
@@ -73,9 +73,6 @@ func PrepareTests(t *testing.T, serviceName, appsSubpath, configEnv string) (env
 	require.NoError(t, err)
 
 	cwd += "/"
-	// t.Log("CWD: ", cwd)
-
-	// get config
 
 	envPath = cwd + appsSubpath + "_environments/"
 	cfgServicePath := envPath + configEnv + ".yaml"

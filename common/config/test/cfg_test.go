@@ -6,7 +6,7 @@ package cfg
 //	"testing"
 //
 //	"github.com/pavlo67/common/common/config"
-//	"github.com/pavlo67/common/common/libraries/filelib"
+//	"github.com/pavlo67/common/common/filelib"
 //
 //	"github.com/stretchr/testify/require"
 //)

@@ -7,8 +7,8 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/common/common/config"
+	"github.com/pavlo67/common/common/filelib"
 	"github.com/pavlo67/common/common/joiner"
-	"github.com/pavlo67/common/common/libraries/filelib"
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/server"
 	"github.com/pavlo67/common/common/starter"

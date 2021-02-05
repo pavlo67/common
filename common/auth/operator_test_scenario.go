@@ -10,7 +10,7 @@ import (
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/stretchr/testify/require"
 
-	"github.com/pavlo67/common/common/libraries/encrlib"
+	"github.com/pavlo67/common/common/encrlib"
 	"github.com/pavlo67/common/common/logger"
 )
 
