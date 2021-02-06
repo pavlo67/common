@@ -136,12 +136,29 @@ func (s *serverHTTPJschmhr) ResponseRESTOk(status int, data interface{}) (server
 		return server.Response{Status: status}, nil
 	}
 
-	jsonBytes, err := json.Marshal(data)
-	if err != nil {
-		return server.Response{Status: http.StatusInternalServerError}, errors.Wrapf(err, "can't marshal json (%#v)", data)
+	var dataBytes []byte
+
+	switch v := data.(type) {
+	case []byte:
+		dataBytes = v
+	case *[]byte:
+		if v != nil {
+			dataBytes = *v
+		}
+	case string:
+		dataBytes = []byte(v)
+	case *string:
+		if v != nil {
+			dataBytes = []byte(*v)
+		}
+	default:
+		var err error
+		if dataBytes, err = json.Marshal(data); err != nil {
+			return server.Response{Status: http.StatusInternalServerError}, errors.Wrapf(err, "can't marshal json (%#v)", data)
+		}
 	}
 
-	return server.Response{Status: status, Data: jsonBytes}, nil
+	return server.Response{Status: status, Data: dataBytes}, nil
 }
 
 func (s *serverHTTPJschmhr) HandleEndpoint(key, serverPath string, endpoint server_http.Endpoint) error {
