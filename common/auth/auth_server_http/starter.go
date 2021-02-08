@@ -1,80 +1,56 @@
 package auth_server_http
 
 import (
+	"fmt"
+
+	"github.com/pkg/errors"
+
 	"github.com/pavlo67/common/common"
-	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/server/server_http"
 	"github.com/pavlo67/common/common/starter"
-	"github.com/pkg/errors"
 )
 
 const InterfaceKey joiner.InterfaceKey = "auth_http"
 
 func Starter() starter.Operator {
-	return &authHTTPStarter{}
+	return &authServerHTTPStarter{}
 }
 
-var _ starter.Operator = &authHTTPStarter{}
+var _ starter.Operator = &authServerHTTPStarter{}
+
+type authServerHTTPStarter struct {
+	interfaceKey joiner.InterfaceKey
+}
+
+// ------------------------------------------------------------------------------------------------
 
 var l logger.Operator
-var authOps []auth.Operator
-var authOpPersons auth.Operator
 
-//var authOpToSetToken auth.Operator
-
-// var authOpToRegister auth.Operator
-
-type authHTTPStarter struct {
-	interfaceKey joiner.InterfaceKey
-	// setTokenKey  joiner.InterfaceKey
-}
-
-func (ah *authHTTPStarter) Name() string {
+func (ah *authServerHTTPStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ah *authHTTPStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
-	if lCommon == nil {
-		return nil, errors.New("no logger")
-	}
-	l = lCommon
+func (ah *authServerHTTPStarter) Init(_ *config.Config, options common.Map) error {
 	ah.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
-	// ah.setTokenKey = joiner.InterfaceKey(options.StringDefault("set_token_key", string(auth.InterfaceJWTKey)))
 
-	return nil, nil
-}
-
-func (ah *authHTTPStarter) Setup() error {
 	return nil
 }
 
-func (ah *authHTTPStarter) Run(joinerOp joiner.Operator) error {
-	authOpNil := auth.Operator(nil)
-
-	authComps := joinerOp.InterfacesAll(&authOpNil)
-	for _, authComp := range authComps {
-		if authOp, _ := authComp.Interface.(auth.Operator); authOp != nil {
-			authOps = append(authOps, authOp)
-			if authComp.InterfaceKey == auth.InterfaceKey {
-				authOpPersons = authOp
-			}
-		}
-	}
-
-	//if authOpToSetToken, _ = joinerOp.Interface(ah.setTokenKey).(auth.Operator); authOpToSetToken == nil {
-	//	return errors.New("no authOpToSetToken")
-	//}
-
-	if err := joinerOp.Join(&onRequest{}, server_http.OnRequestInterfaceKey); err != nil {
-		return errors.Wrapf(err, "can't join RequestOptions as server_http.onRequest with key '%s'", server_http.OnRequestInterfaceKey)
-	}
-
-	if err := joinerOp.Join(&authEndpoint, auth.AuthHandlerKey); err != nil {
-		return errors.Wrapf(err, "can't join authEndpoint as server_http.Endpoint with key '%s'", auth.AuthHandlerKey)
-	}
-
+func (ah *authServerHTTPStarter) Setup() error {
 	return nil
+}
+
+func (ah *authServerHTTPStarter) Run(joinerOp joiner.Operator) error {
+	if l, _ = joinerOp.Interface(logger.InterfaceKey).(logger.Operator); l == nil {
+		return fmt.Errorf("no logger.Operator with key %s", logger.InterfaceKey)
+	}
+
+	if err := joinerOp.Join(&onRequestMiddleware{}, server_http.OnRequestInterfaceKey); err != nil {
+		return errors.Wrapf(err, "can't join RequestOptions as server_http.onRequestMiddleware with key '%s'", server_http.OnRequestInterfaceKey)
+	}
+
+	return server_http.JoinEndpoints(joinerOp, Endpoints)
 }

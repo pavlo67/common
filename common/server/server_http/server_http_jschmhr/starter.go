@@ -3,6 +3,8 @@ package server_http_jschmhr
 import (
 	"fmt"
 
+	"github.com/pkg/errors"
+
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/joiner"
@@ -10,7 +12,6 @@ import (
 	"github.com/pavlo67/common/common/server"
 	"github.com/pavlo67/common/common/server/server_http"
 	"github.com/pavlo67/common/common/starter"
-	"github.com/pkg/errors"
 )
 
 func Starter() starter.Operator {
@@ -30,23 +31,25 @@ func (ss *server_http_jschmhrStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *server_http_jschmhrStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
-	l = lCommon
-
+func (ss *server_http_jschmhrStarter) Init(cfg *config.Config, options common.Map) error {
 	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(server_http.InterfaceKey)))
 
 	configKey := options.StringDefault("config_key", "server_http")
 	if err := cfg.Value(configKey, &ss.config); err != nil {
-		return nil, err
+		return err
 	}
 
-	return nil, nil
+	return nil
 }
 
 func (ss *server_http_jschmhrStarter) Run(joinerOp joiner.Operator) error {
-	onRequest, _ := joinerOp.Interface(server_http.OnRequestInterfaceKey).(server_http.OnRequest)
+	if l, _ = joinerOp.Interface(logger.InterfaceKey).(logger.Operator); l == nil {
+		return fmt.Errorf("no logger.Operator with key %s", logger.InterfaceKey)
+	}
+
+	onRequest, _ := joinerOp.Interface(server_http.OnRequestInterfaceKey).(server_http.OnRequestMiddleware)
 	if onRequest == nil {
-		return fmt.Errorf("no server_http.OnRequest with key %s", server_http.OnRequestInterfaceKey)
+		return fmt.Errorf("no server_http.OnRequestMiddleware with key %s", server_http.OnRequestInterfaceKey)
 	}
 
 	// TODO!!! customize it
@@ -59,14 +62,6 @@ func (ss *server_http_jschmhrStarter) Run(joinerOp joiner.Operator) error {
 
 	if err = joinerOp.Join(srvOp, ss.interfaceKey); err != nil {
 		return errors.Wrapf(err, "can't join *serverHTTPJschmhr{} as server_http.Operator with key '%s'", ss.interfaceKey)
-	}
-
-	if err = joinerOp.Join(ss.config.TLSCertFile != "" && ss.config.TLSKeyFile != "", server_http.HTTPSInterfaceKey); err != nil {
-		return errors.Wrapf(err, "can't join HTTPS info with key '%s'", server_http.HTTPSInterfaceKey)
-	}
-
-	if err = joinerOp.Join(ss.config.Port, server_http.PortInterfaceKey); err != nil {
-		return errors.Wrapf(err, "can't join port with key '%s'", server_http.PortInterfaceKey)
 	}
 
 	return nil

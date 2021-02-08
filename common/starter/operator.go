@@ -4,7 +4,6 @@ import (
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/joiner"
-	"github.com/pavlo67/common/common/logger"
 )
 
 type Operator interface {
@@ -12,7 +11,7 @@ type Operator interface {
 	// Title returns started component name
 	Name() string
 
-	Init(cfg *config.Config, l logger.Operator, options common.Map) (info []common.Map, err error)
+	Init(cfg *config.Config, options common.Map) error
 
 	// Run inits the component to use in application
 	Run(joiner.Operator) error

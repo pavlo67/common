@@ -8,17 +8,17 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/pavlo67/common/common/crud"
+	"github.com/pkg/errors"
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/auth"
+	"github.com/pavlo67/common/common/crud"
 	"github.com/pavlo67/common/common/errata"
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/server"
-	"github.com/pkg/errors"
 )
 
-const OperatorJWTKey = "_operator"
+//const OperatorJWTKey = "_operator"
 const bodyLogLimit = 2048
 
 const onRequest = "on server_http.Request()"
@@ -31,12 +31,9 @@ type ResponseBinary struct {
 	Data     []byte
 }
 
-func Request(serverURL string, ep EndpointConfig, requestData, responseData interface{}, options *crud.Options, logfile string) error {
+func Request(serverURL string, ep EndpointSettled, requestData, responseData interface{}, options *crud.Options, logfile string) error {
 	client := &http.Client{}
-	if ep.Handler == nil {
-		return fmt.Errorf("no ep.Handler: %#v", ep)
-	}
-	method := ep.Handler.Method
+	method := ep.Endpoint.Method
 
 	var err error
 	//for _, doReAuth := range reAuthTries {
@@ -76,7 +73,7 @@ func Request(serverURL string, ep EndpointConfig, requestData, responseData inte
 		defer Close(req.Body, client, nil)
 	}
 
-	if identity != nil {
+	if identity := options.GetIdentity(); identity != nil {
 		if jwt := identity.Creds.StringDefault(auth.CredsJWT, ""); jwt != "" {
 			req.Header.Add("Authorization", jwt)
 		} else if token := identity.Creds.StringDefault(auth.CredsToken, ""); token != "" {

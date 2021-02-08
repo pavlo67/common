@@ -6,7 +6,7 @@
  "paths": {
   "/backend/auth": {
    "post": {
-    "operationId": "authenticate_with_creds",
+    "operationId": "authenticate_http",
     "parameters": [
      {
       "in": "body",
@@ -40,6 +40,7 @@
  },
  "port": ":3001",
  "schemes": [
+  "https",
   "http"
  ],
  "swagger": "2.0"

@@ -12,11 +12,11 @@ import (
 	"github.com/pavlo67/common/common/server/server_http"
 )
 
-var _ server_http.OnRequest = &onRequest{}
+var _ server_http.OnRequestMiddleware = &onRequestMiddleware{}
 
-type onRequest struct{}
+type onRequestMiddleware struct{}
 
-func (*onRequest) Options(r *http.Request) (*crud.Options, error) {
+func (*onRequestMiddleware) Options(r *http.Request) (*crud.Options, error) {
 	//if r == nil {
 	//	return nil, errors.New("no server_http.Request in RequestOptions(...)")
 	//}
@@ -29,7 +29,7 @@ func (*onRequest) Options(r *http.Request) (*crud.Options, error) {
 
 	if tokenJWT != "" {
 		tokenJWT = strings.Replace(tokenJWT, "Bearer ", "", 1)
-		identity, errorKey, errs = auth.GetIdentity(auth.Creds{auth.CredsJWT: tokenJWT}, authOps, false, errs)
+		identity, errorKey, errs = auth.GetIdentity(auth.Creds{auth.CredsJWT: tokenJWT}, nil, false, errs)
 
 	} else {
 		errorKey = errata.NoCredsKey
@@ -84,3 +84,19 @@ func (*onRequest) Options(r *http.Request) (*crud.Options, error) {
 //	// previous errs is added by auth.GetIdentity()
 //}
 //var errNoIdentityOpsMap = errors.New("no map[CredsType]identity.UserKey")
+
+//authOpNil := auth.Operator(nil)
+//
+//authComps := joinerOp.InterfacesAll(&authOpNil)
+//for _, authComp := range authComps {
+//	if authOp, _ := authComp.Interface.(auth.Operator); authOp != nil {
+//		authOps = append(authOps, authOp)
+//		if authComp.InterfaceKey == auth.InterfaceKey {
+//			authOpPersons = authOp
+//		}
+//	}
+//}
+
+//if authOpToSetToken, _ = joinerOp.Interface(ah.setTokenKey).(auth.Operator); authOpToSetToken == nil {
+//	return errors.New("no authOpToSetToken")
+//}

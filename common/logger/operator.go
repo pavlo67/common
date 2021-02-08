@@ -45,8 +45,7 @@ type Operator interface {
 }
 
 func Init(loggerCfg Config) (Operator, error) {
-	err := zapInit(loggerCfg)
-	if err != nil {
+	if err := zapInit(loggerCfg); err != nil {
 		return nil, err
 	}
 

@@ -11,6 +11,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pavlo67/common/common/joiner"
+
 	"github.com/julienschmidt/httprouter"
 	"github.com/pkg/errors"
 
@@ -31,18 +33,18 @@ type serverHTTPJschmhr struct {
 	tlsCertFile string
 	tlsKeyFile  string
 
-	onRequest server_http.OnRequest
+	onRequest server_http.OnRequestMiddleware
 
 	secretENVsToLower []string
 }
 
-func New(port int, tlsCertFile, tlsKeyFile string, onRequest server_http.OnRequest, secretENVs []string) (server_http.Operator, error) {
+func New(port int, tlsCertFile, tlsKeyFile string, onRequest server_http.OnRequestMiddleware, secretENVs []string) (server_http.Operator, error) {
 	if port <= 0 {
 		return nil, fmt.Errorf("on server_http_jschmhr.New(): wrong port = %d", port)
 	}
 
 	if onRequest == nil {
-		return nil, errors.New("on server_http_jschmhr.New(): no server_http.OnRequest")
+		return nil, errors.New("on server_http_jschmhr.New(): no server_http.OnRequestMiddleware")
 	}
 
 	var secretENVsToLower []string
@@ -84,6 +86,10 @@ func (s *serverHTTPJschmhr) Start() error {
 	}
 
 	return s.httpServer.ListenAndServe()
+}
+
+func (s *serverHTTPJschmhr) Addr() (port int, https bool) {
+	return s.port, s.tlsCertFile != "" && s.tlsKeyFile != ""
 }
 
 //func (s *serverHTTPJschmhr) ServerHTTP() *http.Server {
@@ -161,7 +167,7 @@ func (s *serverHTTPJschmhr) ResponseRESTOk(status int, data interface{}) (server
 	return server.Response{Status: status, Data: dataBytes}, nil
 }
 
-func (s *serverHTTPJschmhr) HandleEndpoint(key, serverPath string, endpoint server_http.Endpoint) error {
+func (s *serverHTTPJschmhr) HandleEndpoint(key joiner.InterfaceKey, serverPath string, endpoint server_http.Endpoint) error {
 
 	method := strings.ToUpper(endpoint.Method)
 	path := endpoint.PathTemplate(serverPath)
@@ -232,7 +238,7 @@ func (s *serverHTTPJschmhr) HandleEndpoint(key, serverPath string, endpoint serv
 	return nil
 }
 
-func (s *serverHTTPJschmhr) HandleOptions(key, serverPath string) {
+func (s *serverHTTPJschmhr) HandleOptions(key joiner.InterfaceKey, serverPath string) {
 	//if strlib.In(s.handledOptions, serverPath) {
 	//	//l.Infof("- %#v", s.handledOptions)
 	//	return
@@ -251,7 +257,7 @@ func (s *serverHTTPJschmhr) HandleOptions(key, serverPath string) {
 
 var reHTMLExt = regexp.MustCompile(`\.html?$`)
 
-func (s *serverHTTPJschmhr) HandleFiles(key, serverPath string, staticPath server_http.StaticPath) error {
+func (s *serverHTTPJschmhr) HandleFiles(key joiner.InterfaceKey, serverPath string, staticPath server_http.StaticPath) error {
 	l.Infof("%-10s: FILES %s <-- %s", key, serverPath, staticPath.LocalPath)
 
 	// TODO: check localPath

@@ -41,7 +41,7 @@ package cfg
 //
 //	//ExpectedIndex := map[string]serverhttp_jschmhr.ComponentsIndex{
 //	//	"main": {
-//	//		Endpoints: map[string]serverhttp_jschmhr.Endpoint{
+//	//		EndpointsConfig: map[string]serverhttp_jschmhr.Endpoint{
 //	//			"ep1": {Method: "GET", LocalPath: "/"},
 //	//		},
 //	//		Listeners: map[string]serverhttp_jschmhr.Listener{

@@ -9,15 +9,12 @@ import (
 )
 
 const OnRequestInterfaceKey joiner.InterfaceKey = "server_http_on_request"
-
 const InterfaceKey joiner.InterfaceKey = "server_http"
-const PortInterfaceKey joiner.InterfaceKey = "server_http_port"
-const HTTPSInterfaceKey joiner.InterfaceKey = "server_http_https"
 
 type Params map[string]string
 type WorkerHTTP func(Operator, *http.Request, Params, *crud.Options) (server.Response, error)
 
-type OnRequest interface {
+type OnRequestMiddleware interface {
 	Options(r *http.Request) (*crud.Options, error)
 }
 
@@ -29,9 +26,9 @@ type StaticPath struct {
 type Operator interface {
 	ResponseRESTOk(status int, data interface{}) (server.Response, error)
 	ResponseRESTError(status int, err error, req *http.Request) (server.Response, error)
-	HandleEndpoint(key, serverPath string, endpoint Endpoint) error
-	HandleFiles(key, serverPath string, staticPath StaticPath) error
+	HandleEndpoint(key joiner.InterfaceKey, serverPath string, endpoint Endpoint) error
+	HandleFiles(key joiner.InterfaceKey, serverPath string, staticPath StaticPath) error
 
-	// ServerHTTP() *http.Server
 	Start() error
+	Addr() (port int, https bool)
 }
