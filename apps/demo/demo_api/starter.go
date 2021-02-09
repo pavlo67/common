@@ -31,7 +31,7 @@ func (ds *demoStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ds *demoStarter) Init(cfg *config.Config, options common.Map) error {
+func (ds *demoStarter) Prepare(cfg *config.Config, options common.Map) error {
 	ds.prefix = options.StringDefault("prefix", "")
 
 	return nil

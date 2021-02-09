@@ -23,8 +23,8 @@ import (
 //
 //	startOptions := c.CorrectedOptions(nil)
 //
-//	if err := c.Init(cfg, startOptions); err != nil {
-//		return fmt.Errorf("error calling .Init() for component (%s): %#v", name, err)
+//	if err := c.Prepare(cfg, startOptions); err != nil {
+//		return fmt.Errorf("error calling .Prepare() for component (%s): %#v", name, err)
 //	}
 //
 //	if err := c.Run(joinerOp); err != nil {
@@ -35,23 +35,16 @@ import (
 //}
 
 func Run(starters []Starter, cfg *config.Config, label string, l logger.Operator) (joiner.Operator, error) {
-
-	//for _, c := range starters {
-	//	if err := StartComponent(c, cfg, joinerOp, l); err != nil {
-	//		return joinerOp, err
-	//	}
-	//}
-
 	for _, c := range starters {
 		name := c.Name()
 		if key, ok := c.Options.String("interface_key"); ok {
 			name += " / " + key
 		}
 
-		l.Info("checking component: ", name)
+		l.Info("preparing component: ", name)
 		startOptions := c.CorrectedOptions(nil)
-		if err := c.Init(cfg, startOptions); err != nil {
-			return nil, fmt.Errorf("error calling .Init() for component (%s): %#v", name, err)
+		if err := c.Prepare(cfg, startOptions); err != nil {
+			return nil, fmt.Errorf("error calling .Prepare() for component (%s): %#v", name, err)
 		}
 	}
 

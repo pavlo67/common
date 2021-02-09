@@ -31,7 +31,7 @@ func (ss *server_http_jschmhrStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *server_http_jschmhrStarter) Init(cfg *config.Config, options common.Map) error {
+func (ss *server_http_jschmhrStarter) Prepare(cfg *config.Config, options common.Map) error {
 	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(server_http.InterfaceKey)))
 
 	configKey := options.StringDefault("config_key", "server_http")

@@ -1,19 +1,21 @@
-package logger
+package logger_test
 
 import (
 	"log"
 	"testing"
+
+	"github.com/pavlo67/common/common/logger"
 )
 
-func Stub(t *testing.T) Operator {
+func Init(t *testing.T) logger.Operator {
 	return &stubLogger{t}
 }
 
-func CommentsStub(t *testing.T) OperatorComments {
+func InitComments(t *testing.T) logger.OperatorComments {
 	return &stubLogger{t}
 }
 
-var _ Operator = &stubLogger{}
+var _ logger.Operator = &stubLogger{}
 
 type stubLogger struct {
 	t *testing.T

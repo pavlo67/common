@@ -8,6 +8,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/pavlo67/common/common/logger/logger_zap"
+
 	"github.com/stretchr/testify/require"
 
 	"github.com/pavlo67/common/common/config"
@@ -32,7 +34,7 @@ func Prepare(buildDate, buildTag, buildCommit, serviceName, appsSubpathDefault s
 
 	// logger
 
-	l, err := logger.Init(logger.Config{})
+	l, err := logger_zap.Init(logger.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -65,7 +67,7 @@ func Prepare(buildDate, buildTag, buildCommit, serviceName, appsSubpathDefault s
 func PrepareTests(t *testing.T, serviceName, appsSubpath, configEnv string) (envPath string, cfgService *config.Config) {
 	os.Setenv("ENV", configEnv)
 
-	l, err := logger.Init(logger.Config{}) // TODO!!! don't comment it (is required for tested components)
+	l, err := logger_zap.Init(logger.Config{}) // TODO!!! don't comment it (is required for tested components)
 	require.NoError(t, err)
 	require.NotNil(t, l)
 

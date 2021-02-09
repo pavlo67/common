@@ -1,24 +1,26 @@
-package logger
+package logger_zap
 
 import (
-	"sync"
+	"fmt"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	"github.com/pavlo67/common/common/logger"
 )
 
-var mutexZap = &sync.Mutex{}
-var loggerZap *zap.SugaredLogger
+var _ logger.Operator = &zap.SugaredLogger{}
 
-var _ Operator = &zap.SugaredLogger{}
-
-func zapInit(cfg Config) error {
+func Init(cfg logger.Config) (logger.Operator, error) {
 	c := zap.NewProductionConfig()
 	c.DisableStacktrace = true
 	c.Level.SetLevel(zapLevel(cfg.LogLevel))
-	c.OutputPaths = cfg.OutputPaths
-	if len(c.OutputPaths) < 1 {
+
+	if c.OutputPaths = cfg.OutputPaths; len(c.OutputPaths) < 1 {
 		c.OutputPaths = []string{"stdout"}
+	}
+	if c.ErrorOutputPaths = cfg.ErrorOutputPaths; len(c.ErrorOutputPaths) < 1 {
+		c.ErrorOutputPaths = []string{"stderr"}
 	}
 
 	c.Encoding = cfg.Encoding
@@ -30,45 +32,29 @@ func zapInit(cfg Config) error {
 
 	l, err := c.Build()
 	if err != nil {
-		return err
+		return nil, fmt.Errorf("can't create logger (%#v --> %#v), got %s", cfg, c, err)
 	}
 
-	mutexZap.Lock()
-	loggerZap = l.Sugar()
-	mutexZap.Unlock()
-
-	return nil
+	return l.Sugar(), nil
 }
 
-func zapLevel(level Level) zapcore.Level {
+func zapLevel(level logger.Level) zapcore.Level {
 	switch level {
-	case TraceLevel:
+	case logger.TraceLevel:
 		return zapcore.DebugLevel
-	case DebugLevel:
+	case logger.DebugLevel:
 		return zapcore.DebugLevel
-	case InfoLevel:
+	case logger.InfoLevel:
 		return zapcore.InfoLevel
-	case WarnLevel:
+	case logger.WarnLevel:
 		return zapcore.WarnLevel
-	case ErrorLevel:
+	case logger.ErrorLevel:
 		return zapcore.ErrorLevel
 	//case PanicLevel:
 	//	return zapcore.PanicLevel
-	case FatalLevel:
+	case logger.FatalLevel:
 		return zapcore.FatalLevel
 	default:
 		return zapcore.InfoLevel
 	}
-}
-
-func zapGet() *zap.SugaredLogger {
-	mutexZap.Lock()
-	l := loggerZap
-	mutexZap.Unlock()
-
-	if l == nil {
-		panic("no loggerZap (zap.SugaredLogger) to use found!!!")
-	}
-
-	return l
 }

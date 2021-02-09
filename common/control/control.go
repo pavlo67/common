@@ -27,7 +27,7 @@ func (ws *controlStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ws *controlStarter) Init(_ *config.Config, options common.Map) error {
+func (ws *controlStarter) Prepare(_ *config.Config, options common.Map) error {
 	return nil
 }
 

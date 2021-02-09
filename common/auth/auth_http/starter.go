@@ -31,7 +31,7 @@ func (ahs *authHTTPStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ahs *authHTTPStarter) Init(cfg *config.Config, options common.Map) error {
+func (ahs *authHTTPStarter) Prepare(cfg *config.Config, options common.Map) error {
 
 	var access config.Access
 	if err := cfg.Value("auth_http", &access); err != nil {

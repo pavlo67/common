@@ -33,7 +33,7 @@ func (ah *authServerHTTPStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ah *authServerHTTPStarter) Init(_ *config.Config, options common.Map) error {
+func (ah *authServerHTTPStarter) Prepare(_ *config.Config, options common.Map) error {
 	ah.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
 
 	return nil

@@ -31,7 +31,7 @@ type ResponseBinary struct {
 	Data     []byte
 }
 
-func Request(serverURL string, ep EndpointSettled, requestData, responseData interface{}, options *crud.Options, logfile string) error {
+func Request(serverURL string, ep EndpointSettled, requestData, responseData interface{}, options *crud.Options, l logger.Operator) error {
 	client := &http.Client{}
 	method := ep.Endpoint.Method
 
@@ -67,7 +67,7 @@ func Request(serverURL string, ep EndpointSettled, requestData, responseData int
 
 	req, err := http.NewRequest(method, serverURL, requestBodyReader)
 	if err != nil || req == nil {
-		logger.LogRequest(logfile, nil, method, serverURL, nil, requestBody, nil, nil, err, 0)
+		logger.LogRequest(l, method, serverURL, nil, requestBody, nil, nil, err, 0)
 		return fmt.Errorf("can't create request %s %s, got %#v, %s", method, serverURL, req, err)
 	} else if req.Body != nil {
 		defer Close(req.Body, client, nil)
@@ -97,12 +97,12 @@ func Request(serverURL string, ep EndpointSettled, requestData, responseData int
 			responseBody, _ = ioutil.ReadAll(resp.Body)
 		}
 
-		logger.LogRequest(logfile, nil, method, serverURL, req.Header, requestBody, responseHeaders, responseBody, err, statusCode)
+		logger.LogRequest(l, method, serverURL, req.Header, requestBody, responseHeaders, responseBody, err, statusCode)
 		return errors.Wrapf(err, "can't %s %s", method, serverURL)
 	}
 
 	responseBody, err = ioutil.ReadAll(resp.Body)
-	logger.LogRequest(logfile, nil, method, serverURL, req.Header, requestBody, resp.Header, responseBody, err, resp.StatusCode)
+	logger.LogRequest(l, method, serverURL, req.Header, requestBody, resp.Header, responseBody, err, resp.StatusCode)
 	if err != nil {
 		return errors.Wrapf(err, "can't read body from %s %s", method, serverURL)
 	}

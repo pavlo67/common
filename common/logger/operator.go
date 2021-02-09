@@ -1,15 +1,18 @@
 package logger
 
 import (
-	"errors"
+	"github.com/pavlo67/common/common/joiner"
 )
 
-type Level int32
+const InterfaceKey joiner.InterfaceKey = "logger"
+
+type Level int
 
 type Config struct {
-	LogLevel    Level
-	OutputPaths []string
-	Encoding    string
+	LogLevel         Level
+	OutputPaths      []string
+	ErrorOutputPaths []string
+	Encoding         string
 }
 
 const TraceLevel Level = -2
@@ -42,23 +45,6 @@ type Operator interface {
 
 	Fatal(args ...interface{})
 	Fatalf(template string, args ...interface{})
-}
-
-func Init(loggerCfg Config) (Operator, error) {
-	if err := zapInit(loggerCfg); err != nil {
-		return nil, err
-	}
-
-	l := Operator(zapGet())
-	if l == nil {
-		return nil, errors.New("no logger ???")
-	}
-
-	return l, nil
-}
-
-func Get() Operator {
-	return Operator(zapGet())
 }
 
 type OperatorComments interface {

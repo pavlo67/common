@@ -11,7 +11,7 @@ type Operator interface {
 	// Title returns started component name
 	Name() string
 
-	Init(cfg *config.Config, options common.Map) error
+	Prepare(cfg *config.Config, options common.Map) error
 
 	// Run inits the component to use in application
 	Run(joiner.Operator) error

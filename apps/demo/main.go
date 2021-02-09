@@ -3,6 +3,8 @@ package main
 import (
 	"log"
 
+	"github.com/pavlo67/common/common/logger/logger_zap"
+
 	"github.com/pavlo67/common/common/apps"
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/starter"
@@ -24,7 +26,7 @@ func main() {
 		return
 	}
 
-	l, err := logger.Init(logger.Config{})
+	l, err := logger_zap.Init(logger.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -32,7 +34,7 @@ func main() {
 	// running starters
 
 	label := "DEMO/PG/REST BUILD"
-	joinerOp, err := starter.Run(demo_api.Components(envPath, true, false), cfgService, label, logger.Get())
+	joinerOp, err := starter.Run(demo_api.Components(envPath, true, false), cfgService, label, l)
 	if err != nil {
 		l.Fatal(err)
 	}

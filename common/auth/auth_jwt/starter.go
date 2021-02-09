@@ -34,7 +34,7 @@ func (ss *identity_jwtStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *identity_jwtStarter) Init(cfg *config.Config, options common.Map) error {
+func (ss *identity_jwtStarter) Prepare(cfg *config.Config, options common.Map) error {
 
 	var cfgServerHTTP server.Config
 	if err := cfg.Value("server_http", &cfgServerHTTP); err != nil {
