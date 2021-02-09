@@ -52,6 +52,8 @@ func OperatorTestScenarioPassword(t *testing.T, operator Operator) {
 	}
 
 	for i, tc := range testCreds {
+		password := tc.StringDefault(CredsPassword, "")
+
 		t.Log(i)
 
 		// .SetCreds() ------------------------------------------
@@ -69,7 +71,7 @@ func OperatorTestScenarioPassword(t *testing.T, operator Operator) {
 		userCreds = &Creds{
 			CredsIP:       testIP,
 			CredsNickname: tc[CredsNickname],
-			CredsPassword: tc[CredsPassword],
+			CredsPassword: password,
 		}
 
 		user, err := operator.Authenticate(*userCreds)
@@ -84,7 +86,7 @@ func OperatorTestScenarioPassword(t *testing.T, operator Operator) {
 		userCreds = &Creds{
 			CredsIP:       testIP,
 			CredsLogin:    tc[CredsNickname],
-			CredsPassword: tc.StringDefault(CredsPassword, "") + "1",
+			CredsPassword: password + "1",
 		}
 
 		user, err = operator.Authenticate(*userCreds)

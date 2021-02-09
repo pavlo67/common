@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GehirnInc/crypt"
 	_ "github.com/GehirnInc/crypt/sha256_crypt"
 	"github.com/pkg/errors"
 
@@ -44,35 +43,6 @@ func New(cfg config.Access) (persons.Operator, crud.Cleaner, error) {
 	return &personsOp, &personsOp, nil
 }
 
-func hashCreds(creds, oldCreds auth.Creds) (auth.Creds, error) {
-
-	if creds == nil {
-		creds = auth.Creds{}
-	}
-
-	password := strings.TrimSpace(creds.StringDefault(auth.CredsPassword, ""))
-	if password == "" {
-		if oldCreds == nil {
-			return nil, errata.KeyableError(errata.NoCredsKey, common.Map{"creds": creds, "reason": "no '" + auth.CredsPassword + "' key"})
-		} else if creds != nil {
-			creds[auth.CredsPasshash] = oldCreds[auth.CredsPasshash]
-		}
-	}
-
-	crypt := crypt.SHA256.New()
-	// TODO: generate salt
-	var salt []byte
-	hash, err := crypt.Generate([]byte(password), salt)
-	if err != nil {
-		return nil, errors.Wrap(err, fmt.Sprintf("cant crypt.Generate(%s, %s)", password, salt))
-	}
-
-	creds[auth.CredsPasshash] = hash
-	delete(creds, auth.CredsPassword)
-
-	return creds, nil
-}
-
 const onAdd = "on personsFSStub.Add()"
 
 func (pfs *personsFSStub) Add(identity auth.Identity, data common.Map, options *crud.Options) (auth.ID, error) {
@@ -88,11 +58,6 @@ func (pfs *personsFSStub) Add(identity auth.Identity, data common.Map, options *
 	path := filepath.Join(pfs.path, authIDStr) //  pfs.path + string(authID)
 	if _, err := os.Stat(path); err == nil {
 		return "", errata.KeyableError(errata.DuplicateUserKey, common.Map{"on": onAdd, "identity": identity, "data": data})
-	}
-
-	var err error
-	if identity.Creds, err = hashCreds(identity.Creds, nil); err != nil {
-		return "", errata.CommonError(err, onAdd)
 	}
 
 	if err := pfs.write(path, persons.Item{
@@ -141,10 +106,6 @@ func (pfs *personsFSStub) Change(item persons.Item, options *crud.Options) (*per
 		return nil, errata.KeyableError(errata.NoRightsKey, common.Map{"on": onChange, "item": item})
 	}
 
-	if item.Creds, err = hashCreds(item.Creds, itemOld.Creds); err != nil {
-		return nil, errata.CommonError(err, onChange)
-	}
-
 	item.CreatedAt = itemOld.CreatedAt
 	now := time.Now()
 	item.UpdatedAt = &now
@@ -181,7 +142,7 @@ func (pfs *personsFSStub) List(options *crud.Options) ([]persons.Item, error) {
 		if err != nil || item == nil {
 			return nil, fmt.Errorf(onList+": got %#v, %s", item, err)
 		}
-		delete(item.Creds, auth.CredsPasshash)
+		// delete(item.Creds, auth.CredsPasshash)
 
 		items = append(items, *item)
 	}

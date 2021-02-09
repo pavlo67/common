@@ -1,7 +1,11 @@
 package auth_persons
 
 import (
+	"fmt"
 	"regexp"
+	"strings"
+
+	"github.com/GehirnInc/crypt"
 
 	"github.com/pavlo67/common/common"
 
@@ -38,17 +42,48 @@ func New(personsOp persons.Operator, maxPersonsToAuthCheck int) (auth.Operator, 
 	}, nil
 }
 
+func hashCreds(creds, oldCreds auth.Creds) (auth.Creds, error) {
+
+	if creds == nil {
+		creds = auth.Creds{}
+	}
+
+	password := strings.TrimSpace(creds.StringDefault(auth.CredsPassword, ""))
+	if password == "" {
+		if oldCreds == nil {
+			return nil, errata.KeyableError(errata.NoCredsKey, common.Map{"creds": creds, "reason": "no '" + auth.CredsPassword + "' key"})
+		} else if creds != nil {
+			creds[auth.CredsPasshash] = oldCreds[auth.CredsPasshash]
+		}
+	}
+
+	crypt := crypt.SHA256.New()
+	var salt []byte // TODO: generate salt
+	hash, err := crypt.Generate([]byte(password), salt)
+	if err != nil {
+		return nil, errors.Wrap(err, fmt.Sprintf("can't crypt.Generate(%s, %s)", password, salt))
+	}
+
+	creds[auth.CredsPasshash] = hash
+	delete(creds, auth.CredsPassword)
+
+	return creds, nil
+}
+
 const onSetCreds = "on authPersons.SetCreds()"
 
 func (authOp *authPersons) SetCreds(authID auth.ID, toSet auth.Creds) (*auth.Creds, error) {
-	var err error
-
 	if authID == "" {
 		// TODO: set .Allowed = false and verify email
 
+		toSetHashed, err := hashCreds(toSet, nil)
+		if err != nil {
+			return nil, errata.CommonError(err, onSetCreds)
+		}
+
 		identity := auth.Identity{
 			Nickname: toSet.StringDefault(auth.CredsNickname, ""),
-			Creds:    toSet,
+			Creds:    toSetHashed,
 		}
 
 		// TODO!!! hash password
@@ -60,6 +95,10 @@ func (authOp *authPersons) SetCreds(authID auth.ID, toSet auth.Creds) (*auth.Cre
 
 		return &toSet, nil
 	}
+
+	//if item.Creds, err = hashCreds(item.Creds, itemOld.Creds); err != nil {
+	//	return nil, errata.CommonError(err, onChange)
+	//}
 
 	return nil, errata.NotImplemented
 
@@ -112,6 +151,8 @@ func (authOp *authPersons) Authenticate(toAuth auth.Creds) (*auth.Identity, erro
 		return nil, errata.KeyableError(errata.NoCredsKey, common.Map{"no nickname in creds": toAuth})
 	}
 
+	password := toAuth.StringDefault(auth.CredsPassword, "")
+
 	//if login := toAuth.StringDefault(auth.CredsLogin, ""); login != "" {
 	//	if reEmail.MatchString(login) {
 	//		selector = selectors.Binary(selectors.Eq, persons.EmailFieldName, selectors.Value{login})
@@ -133,18 +174,22 @@ func (authOp *authPersons) Authenticate(toAuth auth.Creds) (*auth.Identity, erro
 
 	items, err := authOp.personsOp.List(crud.OptionsWithRoles(rbac.RoleAdmin)) // crud.Options{}.WithSelector(selector)
 	if err != nil {
-		return nil, errors.Wrapf(err, onAuthenticate+"can't .personsOp.List(selector = %#v, nil)", selector)
+		return nil, errors.Wrapf(err, onAuthenticate+": can't .personsOp.List(selector = %#v, nil)", selector)
 	}
 
-	password := toAuth.StringDefault(auth.CredsPassword, "")
+	crypt := crypt.SHA256.New()
 
 	for _, item := range items {
-		if item.Nickname == nickname && item.Creds.StringDefault(auth.CredsPassword, "") == password {
-			return &item.Identity, nil
+		if item.Nickname == nickname {
+			if err = crypt.Verify(item.Creds.StringDefault(auth.CredsPasshash, ""), []byte(password)); err == nil {
+				return &item.Identity, nil
+			} else {
+				l.Infof("can't verify %s on %s", item.Creds.StringDefault(auth.CredsPasshash, ""), password)
+			}
 		}
 	}
 
-	return nil, errata.KeyableError(errata.NoCredsKey, common.Map{"wrong password in creds": toAuth})
+	return nil, errata.KeyableError(errata.NoCredsKey, common.Map{onAuthenticate + ": wrong passhash in creds": toAuth})
 
 	//maxPersonsToAuthCheck := authOp.maxPersonsToAuthCheck
 	//if len(items) < authOp.maxPersonsToAuthCheck {
