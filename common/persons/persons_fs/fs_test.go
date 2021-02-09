@@ -10,7 +10,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/pavlo67/common/common/apps"
-	"github.com/pavlo67/common/common/persons/persons_scenarios"
 )
 
 func TestOperator(t *testing.T) {
@@ -38,5 +37,5 @@ func TestOperator(t *testing.T) {
 	personsCleanerOp, _ := joinerOp.Interface(persons.InterfaceCleanerKey).(crud.Cleaner)
 	require.NotNil(t, personsCleanerOp)
 
-	persons_scenarios.OperatorTestScenario(t, personsOp, personsCleanerOp)
+	persons.OperatorTestScenario(t, personsOp, personsCleanerOp)
 }

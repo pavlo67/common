@@ -1,4 +1,4 @@
-package persons_scenarios
+package persons
 
 import (
 	"os"
@@ -9,11 +9,10 @@ import (
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/crud"
-	"github.com/pavlo67/common/common/persons"
 	"github.com/pavlo67/common/common/rbac"
 )
 
-func OperatorTestScenario(t *testing.T, personsOp persons.Operator, personsCleanerOp crud.Cleaner) {
+func OperatorTestScenario(t *testing.T, personsOp Operator, personsCleanerOp crud.Cleaner) {
 
 	// prepare... ----------------------------------------------
 
@@ -86,7 +85,6 @@ func OperatorTestScenario(t *testing.T, personsOp persons.Operator, personsClean
 
 	person1, err := personsOp.Read(personID1, adminOptions)
 	require.NoErrorf(t, err, "%#v", err)
-	delete(identityToTestWithID.Creds, auth.CredsPassword)
 	require.Equal(t, identityToTestWithID, person1.Identity)
 
 	person1Options := crud.Options{Identity: &person1.Identity}
@@ -122,7 +120,6 @@ func OperatorTestScenario(t *testing.T, personsOp persons.Operator, personsClean
 
 	person1Changed, err := personsOp.Change(person1ToChange, adminOptions)
 	require.NoErrorf(t, err, "%#v", err)
-	delete(person1ToChange.Creds, auth.CredsPassword)
 	require.Equal(t, person1ToChange.Identity, person1Changed.Identity)
 
 	person1ChangedReaded, err := personsOp.Read(person1Changed.ID, adminOptions)
@@ -135,7 +132,6 @@ func OperatorTestScenario(t *testing.T, personsOp persons.Operator, personsClean
 
 	person1Changed, err = personsOp.Change(person1ToChange, &person1Options)
 	require.NoErrorf(t, err, "%#v", err)
-	delete(person1ToChange.Creds, auth.CredsPassword)
 	require.Equal(t, person1ToChange.Identity, person1Changed.Identity)
 
 	person1ChangedReaded, err = personsOp.Read(person1Changed.ID, &person1Options)

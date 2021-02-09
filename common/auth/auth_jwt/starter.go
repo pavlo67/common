@@ -25,9 +25,9 @@ var l logger.Operator
 var _ starter.Operator = &identity_jwtStarter{}
 
 type identity_jwtStarter struct {
-	interfaceKey         joiner.InterfaceKey
-	interfaceSetCredsKey joiner.InterfaceKey
-	keyPath              string
+	interfaceKey joiner.InterfaceKey
+	// interfaceSetCredsKey  joiner.InterfaceKey
+	keyPath string
 }
 
 func (ss *identity_jwtStarter) Name() string {
@@ -49,8 +49,8 @@ func (ss *identity_jwtStarter) Prepare(cfg *config.Config, options common.Map) e
 		ss.keyPath += "/"
 	}
 
-	// ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(auth.InterfaceJWTKey)))
-	// ss.interfaceSetCredsKey = joiner.InterfaceKey(options.StringDefault("interface_set_creds_key", string(auth.InterfaceJWTKey)))
+	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
+	// ss.interfaceSetCredsKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
 
 	return nil
 }
@@ -69,11 +69,11 @@ func (ss *identity_jwtStarter) Run(joinerOp joiner.Operator) error {
 		return errors.Wrapf(err, "can't join auth_jwt as auth.Operator with key '%s'", ss.interfaceKey)
 	}
 
-	if ss.interfaceKey != ss.interfaceSetCredsKey {
-		if err = joinerOp.Join(identOp, ss.interfaceSetCredsKey); err != nil {
-			return errors.Wrapf(err, "can't join auth_jwt as auth.Operator with key '%s'", ss.interfaceSetCredsKey)
-		}
-	}
+	//if ss.interfaceKey != ss.interfaceSetCredsKey {
+	//	if err = joinerOp.Join(identOp, ss.interfaceSetCredsKey); err != nil {
+	//		return errors.Wrapf(err, "can't join auth_jwt as auth.Operator with key '%s'", ss.interfaceSetCredsKey)
+	//	}
+	//}
 
 	return nil
 }

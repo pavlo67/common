@@ -6,27 +6,13 @@
  "paths": {
   "/backend/auth": {
    "post": {
-    "operationId": "authenticate_http",
+    "operationId": "auth_authenticate",
     "parameters": [
      {
       "in": "body",
-      "name": "credentials",
-      "description": "user's email/login \u0026 password'",
-      "schema": {
-       "type": "object",
-       "required": "password",
-       "properties": {
-        "email": {
-         "type": "string"
-        },
-        "nickname": {
-         "type": "string"
-        },
-        "password": {
-         "type": "string"
-        }
-       }
-      }
+      "name": "body_item",
+      "required": true,
+      "type": "string"
      }
     ],
     "produces": [

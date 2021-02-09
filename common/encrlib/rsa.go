@@ -39,14 +39,15 @@ func NewRSAPrivateKey(pathToStore string) (*rsa.PrivateKey, error) {
 		return nil, errors.New(onNewRSAPrivateKey + ": nil key was generated")
 	}
 
-	keyJSON, err := json.Marshal(privateKey)
-	if err != nil {
-		return nil, errors.Wrapf(err, onNewRSAPrivateKey+": can't .json.Marshal key (%#v)", privateKey)
-	}
+	if pathToStore != "" {
+		keyJSON, err := json.Marshal(privateKey)
+		if err != nil {
+			return nil, errors.Wrapf(err, onNewRSAPrivateKey+": can't .json.Marshal key (%#v)", privateKey)
+		}
 
-	err = ioutil.WriteFile(pathToStore, keyJSON, 0644)
-	if err != nil {
-		return nil, errors.Wrapf(err, onNewRSAPrivateKey+": can't write file (%s)", pathToStore)
+		if err = ioutil.WriteFile(pathToStore, keyJSON, 0644); err != nil {
+			return nil, errors.Wrapf(err, onNewRSAPrivateKey+": can't write file (%s)", pathToStore)
+		}
 	}
 
 	return privateKey, nil

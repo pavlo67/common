@@ -6,14 +6,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/require"
-
 	"github.com/pavlo67/common/common/filelib"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewRSAPrivateKey(t *testing.T) {
-	pathToStore := filelib.CurrentPath() + "test_rsa_key_" + strconv.FormatInt(time.Now().UnixNano(), 10) + ".test"
 
+	pathToStore := filelib.CurrentPath() + "test_rsa_key_" + strconv.FormatInt(time.Now().UnixNano(), 10) + ".test"
 	privateKey, err := NewRSAPrivateKey(pathToStore)
 	require.NoError(t, err)
 	require.NotNil(t, privateKey)
