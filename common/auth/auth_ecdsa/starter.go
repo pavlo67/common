@@ -1,6 +1,8 @@
 package auth_ecdsa
 
 import (
+	"fmt"
+
 	"github.com/pavlo67/common/common"
 	"github.com/pkg/errors"
 
@@ -27,21 +29,17 @@ func (ss *auth_ecdsa) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *auth_ecdsa) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) (info []common.Map, err error) {
-	if l = lCommon; lCommon == nil {
-		return nil, errors.New("no logger")
-	}
-
+func (ss *auth_ecdsa) Prepare(cfg *config.Config, options common.Map) error {
 	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
 
-	return nil, nil
-}
-
-func (ss *auth_ecdsa) Setup() error {
 	return nil
 }
 
 func (ss *auth_ecdsa) Run(joinerOp joiner.Operator) error {
+	if l, _ = joinerOp.Interface(logger.InterfaceKey).(logger.Operator); l == nil {
+		return fmt.Errorf("no logger.Operator with key %s", logger.InterfaceKey)
+	}
+
 	identOp, err := New()
 	if err != nil {
 		return err

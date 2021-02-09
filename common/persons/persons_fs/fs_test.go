@@ -14,15 +14,19 @@ import (
 )
 
 func TestOperator(t *testing.T) {
-
-	_, cfgService := apps.PrepareTests(t, "test_service", "../../../"+apps.AppsSubpathDefault, "test")
+	_, cfgService, l := apps.PrepareTests(
+		t,
+		"test_service", "../../../"+apps.AppsSubpathDefault,
+		"test",
+		"", // "persons_test."+strconv.FormatInt(time.Now().Unix(), 10)+".log",
+	)
 
 	components := []starter.Starter{
 		{Starter(), nil},
 	}
 
 	label := "PERSONS_FS/TEST BUILD"
-	joinerOp, err := starter.Run(components, cfgService, label)
+	joinerOp, err := starter.Run(components, cfgService, label, l)
 	if err != nil {
 		l.Fatal(err)
 	}

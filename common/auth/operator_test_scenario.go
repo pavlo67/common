@@ -11,13 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/pavlo67/common/common/encrlib"
-	"github.com/pavlo67/common/common/logger"
 )
-
-type OperatorTestCase struct {
-	UserID ID
-	ToSet  Creds
-}
 
 const testIP = "1.2.3.4"
 
@@ -45,55 +39,62 @@ const testIP = "1.2.3.4"
 //	}
 //}
 //
-//func OperatorTestScenarioPassword(t *testing.T, testCases []OperatorTestCase, l logger.Operator) {
-//	if env, ok := os.LookupEnv("ENV"); !ok || env != "test" {
-//		t.Fatal("No test environment!!!")
-//	}
-//
-//	for i, tc := range testCases {
-//		l.Info(i)
-//
-//		// .SetCreds() ------------------------------------------
-//
-//		userCreds, err := operator.SetCreds("", tc)
-//		require.NoError(t, err)
-//		require.NotNil(t, userCreds)
-//
-//		log.Printf("           creds: %#v", *userCreds)
-//
-//		require.Equal(t, tc[CredsNickname], (*userCreds)[CredsNickname])
-//
-//		// .Authenticate() ok -----------------------------------------
-//
-//		userCreds = &Creds{
-//			CredsIP:       testIP,
-//			CredsLogin:    tc[CredsNickname],
-//			CredsPassword: tc[CredsPassword],
-//		}
-//
-//		user, err := operator.Authenticate(*userCreds)
-//
-//		require.NoError(t, err)
-//		require.NotNil(t, user)
-//		require.Equal(t, tc[CredsNickname], user.Creds[CredsNickname])
-//		require.NotEmpty(t, user.Key)
-//
-//		// .Authenticate() err ----------------------------------------
-//
-//		userCreds = &Creds{
-//			CredsIP:       testIP,
-//			CredsLogin:    tc[CredsNickname],
-//			CredsPassword: tc[CredsPassword] + "1",
-//		}
-//
-//		user, err = operator.Authenticate(*userCreds)
-//
-//		require.Error(t, err)
-//		require.Nil(t, user)
-//	}
-//}
-//
-func OperatorTestScenarioToken(t *testing.T, operator Operator, l logger.Operator) {
+func OperatorTestScenarioPassword(t *testing.T, operator Operator) {
+	if env, ok := os.LookupEnv("ENV"); !ok || env != "test" {
+		t.Fatal("No test environment!!!")
+	}
+
+	testCreds := []Creds{
+		{
+			CredsNickname: "nickname" + strconv.FormatInt(time.Now().Unix(), 10),
+			CredsPassword: "password" + strconv.FormatInt(time.Now().Unix(), 10),
+		},
+	}
+
+	for i, tc := range testCreds {
+		t.Log(i)
+
+		// .SetCreds() ------------------------------------------
+
+		userCreds, err := operator.SetCreds("", tc)
+		require.NoError(t, err)
+		require.NotNil(t, userCreds)
+
+		t.Logf("           creds: %#v", *userCreds)
+
+		require.Equal(t, tc[CredsNickname], (*userCreds)[CredsNickname])
+
+		// .Authenticate() ok -----------------------------------------
+
+		userCreds = &Creds{
+			CredsIP:       testIP,
+			CredsNickname: tc[CredsNickname],
+			CredsPassword: tc[CredsPassword],
+		}
+
+		user, err := operator.Authenticate(*userCreds)
+
+		require.NoError(t, err)
+		require.NotNil(t, user)
+		require.Equal(t, tc[CredsNickname], user.Creds[CredsNickname])
+		require.NotEmpty(t, user.ID)
+
+		// .Authenticate() err ----------------------------------------
+
+		userCreds = &Creds{
+			CredsIP:       testIP,
+			CredsLogin:    tc[CredsNickname],
+			CredsPassword: tc.StringDefault(CredsPassword, "") + "1",
+		}
+
+		user, err = operator.Authenticate(*userCreds)
+
+		require.Error(t, err)
+		require.Nil(t, user)
+	}
+}
+
+func OperatorTestScenarioToken(t *testing.T, operator Operator) {
 	if env, ok := os.LookupEnv("ENV"); !ok || env != "test" {
 		t.Fatal("No test environment!!!")
 	}
@@ -105,7 +106,7 @@ func OperatorTestScenarioToken(t *testing.T, operator Operator, l logger.Operato
 	}
 
 	for i, tc := range testCreds {
-		l.Info(i)
+		t.Log(i)
 
 		// .SetCreds() ------------------------------------------
 
@@ -120,15 +121,15 @@ func OperatorTestScenarioToken(t *testing.T, operator Operator, l logger.Operato
 
 		(*userCreds)[CredsIP] = testIP
 
-		user, err := operator.Authenticate(*userCreds)
+		identity, err := operator.Authenticate(*userCreds)
 
 		require.NoError(t, err)
-		require.NotNil(t, user)
-		require.Equal(t, tc[CredsNickname], user.Nickname)
+		require.NotNil(t, identity)
+		require.Equal(t, tc[CredsNickname], identity.Nickname)
 	}
 }
 
-func OperatorTestScenarioPublicKey(t *testing.T, operator Operator, l logger.Operator) {
+func OperatorTestScenarioPublicKey(t *testing.T, operator Operator) {
 	if env, ok := os.LookupEnv("ENV"); !ok || env != "test" {
 		t.Fatal("No test environment!!!")
 	}
@@ -138,7 +139,7 @@ func OperatorTestScenarioPublicKey(t *testing.T, operator Operator, l logger.Ope
 	}
 
 	for i, tc := range testCreds {
-		l.Info(i)
+		t.Log(i)
 
 		// .SetCreds() ------------------------------------------
 

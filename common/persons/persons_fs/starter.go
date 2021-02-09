@@ -1,6 +1,8 @@
 package persons_fs
 
 import (
+	"fmt"
+
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/joiner"
@@ -30,35 +32,35 @@ func (uks *personsFSStubStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (uks *personsFSStubStarter) Init(cfg *config.Config, lCommon logger.Operator, options common.Map) ([]common.Map, error) {
-	if lCommon == nil {
-		return nil, errors.New("no logger.Operator")
-	}
-	l = lCommon
-
+func (uks *personsFSStubStarter) Prepare(cfg *config.Config, options common.Map) error {
 	configKey := options.StringDefault("config_key", configKeyDefault)
 
 	if err := cfg.Value(configKey, &uks.cfg); err != nil {
-		return nil, err
+		return err
 	}
 
 	uks.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(persons.InterfaceKey)))
 	uks.interfaceCleanerKey = joiner.InterfaceKey(options.StringDefault("interface_cleaner_key", string(persons.InterfaceCleanerKey)))
 
-	return nil, nil
+	return nil
 }
 
-func (uks *personsFSStubStarter) Run(joiner joiner.Operator) error {
+func (uks *personsFSStubStarter) Run(joinerOp joiner.Operator) error {
+
+	if l, _ = joinerOp.Interface(logger.InterfaceKey).(logger.Operator); l == nil {
+		return fmt.Errorf("no logger.Operator with key %s", logger.InterfaceKey)
+	}
+
 	personsOp, personsCleanerOp, err := New(uks.cfg)
 	if err != nil {
 		return errors.Wrapf(err, "can't personsFSStub.New()")
 	}
 
-	if err = joiner.Join(personsOp, uks.interfaceKey); err != nil {
+	if err = joinerOp.Join(personsOp, uks.interfaceKey); err != nil {
 		return errors.Wrap(err, "can't join *personsFSStub{} as persons.Operator interface")
 	}
 
-	if err = joiner.Join(personsCleanerOp, uks.interfaceCleanerKey); err != nil {
+	if err = joinerOp.Join(personsCleanerOp, uks.interfaceCleanerKey); err != nil {
 		return errors.Wrap(err, "can't join *personsFSStub{} as crud.Cleaner interface")
 	}
 

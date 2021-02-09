@@ -1,54 +1,47 @@
 package auth
 
-import (
-	"errors"
-	"fmt"
-
-	"github.com/pavlo67/common/common/errata"
-)
-
 type Operator interface {
 	// SetCreds sets user's own or temporary (session-generated) creds
-	SetCreds(userID ID, toSet Creds) (*Creds, error)
+	SetCreds(authID ID, toSet Creds) (*Creds, error)
 
 	// Authenticate can require to do .SetCreds first and to usa some session-generated creds
 	Authenticate(toAuth Creds) (*Identity, error)
 }
 
-// to use with map[CredsType]identity.ActorKey  --------------------------------------------------------------------
-
-var ErrNoIdentityOp = errors.New("no identity.ActorKey")
-
-const onGetIdentity = "on GetIdentity()"
-
-func GetIdentity(creds Creds, ops []Operator, useOperatorAuth bool, errs errata.Errors) (*Identity, errata.Key, errata.Errors) {
-	if len(creds) < 1 {
-		return nil, errata.NoCredsKey, append(errs, ErrNoCreds)
-	}
-
-	for _, op := range ops {
-		identity, err := op.Authenticate(creds)
-		if err != nil {
-			errs = append(errs, fmt.Errorf(onGetIdentity+`: on identOp.Authenticate(%#v): %s`, creds, err))
-		}
-		if identity != nil {
-			return identity, "", errs
-		}
-
-		//realm := op.Realm()
-		//if (useOperatorAuth && realm == OperatorRealmKey) || (!useOperatorAuth && realm != OperatorRealmKey) {
-		//	identity, err := op.Authenticate(creds)
-		//	if err != nil {
-		//		errs = append(errs, fmt.Errorf(onGetIdentity+`: on identOp.Authenticate(%#v): %s`, creds, err))
-		//	}
-		//	if identity != nil {
-		//		return identity, "", errs
-		//	}
-		//}
-	}
-
-	return nil, errata.InvalidCredsKey, errs
-}
+//// to use with map[CredsType]identity.ActorKey  --------------------------------------------------------------------
+//
+//var ErrNoIdentityOp = errors.New("no identity.ActorKey")
+//
+//const onGetIdentity = "on GetIdentity()"
+//
+//func GetIdentity(creds Creds, ops []Operator, useOperatorAuth bool, errs errata.Errors) (*Identity, errata.Key, errata.Errors) {
+//	if len(creds) < 1 {
+//		return nil, errata.NoCredsKey, append(errs, ErrNoCreds)
+//	}
+//
+//	for _, op := range ops {
+//		identity, err := op.Authenticate(creds)
+//		if err != nil {
+//			errs = append(errs, fmt.Errorf(onGetIdentity+`: on identOp.Authenticate(%#v): %s`, creds, err))
+//		}
+//		if identity != nil {
+//			return identity, "", errs
+//		}
+//
+//		//realm := op.Realm()
+//		//if (useOperatorAuth && realm == OperatorRealmKey) || (!useOperatorAuth && realm != OperatorRealmKey) {
+//		//	identity, err := op.Authenticate(creds)
+//		//	if err != nil {
+//		//		errs = append(errs, fmt.Errorf(onGetIdentity+`: on identOp.Authenticate(%#v): %s`, creds, err))
+//		//	}
+//		//	if identity != nil {
+//		//		return identity, "", errs
+//		//	}
+//		//}
+//	}
+//
+//	return nil, errata.InvalidCredsKey, errs
+//}
 
 // callbacks can be used for partial implementations of identity.ActorKey (in their own interfaces)
 //

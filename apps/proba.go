@@ -10,8 +10,8 @@ import (
 func main() {
 
 	l, err := logger_zap.Init(logger.Config{
-		OutputPaths:      []string{"stdout", "aaa.log"},
-		ErrorOutputPaths: []string{"stderr", "aaa.log"},
+		//OutputPaths:      []string{"stdout", "aaa.log"},
+		//ErrorOutputPaths: []string{"stderr", "aaa.log"},
 	})
 	if err != nil {
 		log.Fatal(err)

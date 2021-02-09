@@ -14,7 +14,12 @@ import (
 
 func TestConnect(t *testing.T) {
 
-	_, cfgService := apps.PrepareTests(t, "test_service", "../../../"+apps.AppsSubpathDefault, "test")
+	_, cfgService, _ := apps.PrepareTests(
+		t,
+		"test_service", "../../../"+apps.AppsSubpathDefault,
+		"test",
+		"", // "connect_test."+strconv.FormatInt(time.Now().Unix(), 10)+".log",
+	)
 
 	var cfgSqlite config.Access
 	err := cfgService.Value("sqllib_sqlite", &cfgSqlite)

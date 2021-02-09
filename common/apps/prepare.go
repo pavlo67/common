@@ -5,6 +5,7 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -64,10 +65,21 @@ func Prepare(buildDate, buildTag, buildCommit, serviceName, appsSubpathDefault s
 	return versionOnly, envPath, cfgService, l
 }
 
-func PrepareTests(t *testing.T, serviceName, appsSubpath, configEnv string) (envPath string, cfgService *config.Config) {
+func PrepareTests(t *testing.T, serviceName, appsSubpath, configEnv, logfile string) (envPath string, cfgService *config.Config, l logger.Operator) {
+
 	os.Setenv("ENV", configEnv)
 
-	l, err := logger_zap.Init(logger.Config{}) // TODO!!! don't comment it (is required for tested components)
+	var logPath []string
+	if logfile = strings.TrimSpace(logfile); logfile != "" {
+		logPath = []string{logfile}
+	}
+
+	l, err := logger_zap.Init(logger.Config{
+		LogLevel:         logger.TraceLevel,
+		OutputPaths:      append(logPath, "stdout"),
+		ErrorOutputPaths: append(logPath, "stderr"),
+		Encoding:         "",
+	}) // TODO!!! don't comment it (is required for tested components)
 	require.NoError(t, err)
 	require.NotNil(t, l)
 
@@ -82,6 +94,6 @@ func PrepareTests(t *testing.T, serviceName, appsSubpath, configEnv string) (env
 	require.NoError(t, err)
 	require.NotNil(t, cfgService)
 
-	return envPath, cfgService
+	return envPath, cfgService, l
 
 }

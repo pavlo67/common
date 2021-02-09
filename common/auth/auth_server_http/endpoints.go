@@ -2,8 +2,12 @@ package auth_server_http
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 
+	"github.com/pkg/errors"
+
+	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/crud"
 	"github.com/pavlo67/common/common/errata"
@@ -12,80 +16,78 @@ import (
 )
 
 var Endpoints = server_http.Endpoints{
-	auth.IntefaceKeyAuthenticateHandler: authPassEndpoint,
+	auth.IntefaceKeyAuthenticate: authenticateEndpoint,
+	auth.IntefaceKeySetCreds:     setCredsEndpoint,
 }
 
-var bodyParams = json.RawMessage(`{
-   "in": "body",
-	"name": "credentials",
-	"description": "user's email/login & password'",
-	"schema": {
-		"type": "object",
-		"required":"password",
-		"properties": {
-			"email":    {"type": "string"},
-			"nickname": {"type": "string"},
-			"password": {"type": "string"}
-		}
-	}
+//var bodyParams = json.RawMessage(`{
+//   "in": "body",
+//	"name": "credentials",
+//	"description": "user's email/login & password'",
+//	"schema": {
+//		"type": "object",
+//		"required":"password",
+//		"properties": {
+//			"email":    {"type": "string"},
+//			"nickname": {"type": "string"},
+//			"password": {"type": "string"}
+//          ...
+//		}
+//	}
+//
+//}`)
 
-}`)
-
-var authPassEndpoint = server_http.Endpoint{
-	Method:     "POST",
-	BodyParams: bodyParams,
+var authenticateEndpoint = server_http.Endpoint{
+	Method: "POST",
+	//BodyParams: bodyParams,
 	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, _ server_http.Params, _ *crud.Options) (server.Response, error) {
 
-		//credsJSON, err := ioutil.ReadAll(req.Body)
-		//if err != nil {
-		//	return serverOp.ResponseRESTError(http.StatusBadRequest, errata.KeyableError(errata.WrongBodyKey, common.Map{"error": errors.Wrap(err, "can't read body")}), req)
-		//}
-		//
-		//var toAuth auth.Creds
-		//if err = json.Unmarshal(credsJSON, &toAuth); err != nil {
-		//	return serverOp.ResponseRESTError(http.StatusBadRequest, errata.KeyableError(errata.WrongJSONKey, common.Map{"error": errors.Wrapf(err, "can't unmarshal body: %s", credsJSON)}), req)
-		//}
-		//
-		//toAuth[auth.CredsIP] = req.RemoteAddr
-		//
-		//identity, errorKey, errs := auth.GetIdentity(toAuth, authOps, false, nil)
-		//if identity != nil {
-		//	result := common.Map{} // "user": persons.Item{Identity: *identity}
-		//	if errorKey != "" {
-		//		result[server.ErrorKey] = errorKey
-		//	}
-		//	if len(errs) > 0 {
-		//		result["errors"] = errs.Err()
-		//	}
-		//	return serverOp.ResponseRESTOk(http.StatusOK, result)
-		//}
-		//
-		//if errorKey == "" {
-		//	errorKey = errata.NoCredsKey
-		//}
-		//
-		//if len(errs) > 0 {
-		//	return serverOp.ResponseRESTError(0, errata.KeyableError(errorKey, common.Map{"error": errs.Err()}), req)
-		//}
-		//
-		//return serverOp.ResponseRESTError(0, errata.KeyableError(errorKey, common.Map{"error": "no identity authorized"}), req)
+		credsJSON, err := ioutil.ReadAll(req.Body)
+		if err != nil {
+			return serverOp.ResponseRESTError(http.StatusBadRequest, errata.KeyableError(errata.WrongBodyKey, common.Map{"error": errors.Wrap(err, "can't read body")}), req)
+		}
 
-		return serverOp.ResponseRESTError(0, errata.CommonError(errata.NotImplementedKey), req)
+		var toAuth auth.Creds
+		if err = json.Unmarshal(credsJSON, &toAuth); err != nil {
+			return serverOp.ResponseRESTError(http.StatusBadRequest, errata.KeyableError(errata.WrongJSONKey, common.Map{"error": errors.Wrapf(err, "can't unmarshal body: %s", credsJSON)}), req)
+		}
+		toAuth[auth.CredsIP] = req.RemoteAddr
+
+		identity, err := authOp.Authenticate(toAuth)
+		if err != nil {
+			return serverOp.ResponseRESTError(0, err, req)
+		}
+
+		return serverOp.ResponseRESTOk(http.StatusOK, identity)
 	},
 }
 
-//if identity.Token == "" && authOpToSetToken != nil {
-//	toAddModified, err := authOpToSetToken.SetCreds(
-//		identity.ID,
-//		auth.Creds{
-//			auth.CredsNickname: identity.Nickname,
-//			auth.CredsRoles:    identity.Roles,
-//			auth.CredsToSet:    auth.CredsJWT,
-//		},
-//	)
-//	if err != nil || toAddModified == nil {
-//		return serverOp.ResponseRESTError(identity, 0, fmt.Errorf("can't create Token. got %s / %#v", err, toAddModified), req)
-//	}
-//	identity.Token, _ = toAddModified.String(auth.CredsJWT)
-//	// TODO!!! add CompanyID, OperatorAccountID
-//}
+var setCredsEndpoint = server_http.Endpoint{
+	Method: "POST",
+	//BodyParams: bodyParams,
+	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, _ server_http.Params, options *crud.Options) (server.Response, error) {
+
+		credsJSON, err := ioutil.ReadAll(req.Body)
+		if err != nil {
+			return serverOp.ResponseRESTError(http.StatusBadRequest, errata.KeyableError(errata.WrongBodyKey, common.Map{"error": errors.Wrap(err, "can't read body")}), req)
+		}
+
+		var toSet auth.Creds
+		if err = json.Unmarshal(credsJSON, &toSet); err != nil {
+			return serverOp.ResponseRESTError(http.StatusBadRequest, errata.KeyableError(errata.WrongJSONKey, common.Map{"error": errors.Wrapf(err, "can't unmarshal body: %s", credsJSON)}), req)
+		}
+		toSet[auth.CredsIP] = req.RemoteAddr
+
+		var authID auth.ID
+		if options != nil && options.Identity != nil {
+			authID = options.Identity.ID
+		}
+
+		creds, err := authOp.SetCreds(authID, toSet)
+		if err != nil {
+			return serverOp.ResponseRESTError(0, err, req)
+		}
+
+		return serverOp.ResponseRESTOk(http.StatusOK, creds)
+	},
+}

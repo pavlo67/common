@@ -1,10 +1,9 @@
 package auth_server_http
 
 import (
+	"errors"
 	"net/http"
-	"strings"
-
-	"github.com/pavlo67/common/common"
+	"regexp"
 
 	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/crud"
@@ -14,61 +13,49 @@ import (
 
 var _ server_http.OnRequestMiddleware = &onRequestMiddleware{}
 
-type onRequestMiddleware struct{}
+func OnRequestMiddleware(authJWTOp auth.Operator) (server_http.OnRequestMiddleware, error) {
+	if authJWTOp == nil {
+		return nil, errors.New("no authJWTOp")
+	}
 
-func (*onRequestMiddleware) Options(r *http.Request) (*crud.Options, error) {
+	return &onRequestMiddleware{
+		authJWTOp: authJWTOp,
+	}, nil
+}
+
+type onRequestMiddleware struct {
+	authJWTOp auth.Operator
+}
+
+var reBearer = regexp.MustCompile(`^\s*Bearer(\s|%[fF]20)*`)
+
+const onOptions = "on onRequestMiddleware.Options()"
+
+func (orm *onRequestMiddleware) Options(r *http.Request) (*crud.Options, error) {
 	//if r == nil {
 	//	return nil, errors.New("no server_http.Request in RequestOptions(...)")
 	//}
 
-	var errorKey errata.Key
-	var errs errata.Errors
 	var identity *auth.Identity
-
-	tokenJWT := r.Header.Get("Authorization")
-
-	if tokenJWT != "" {
-		tokenJWT = strings.Replace(tokenJWT, "Bearer ", "", 1)
-		identity, errorKey, errs = auth.GetIdentity(auth.Creds{auth.CredsJWT: tokenJWT}, nil, false, errs)
-
-	} else {
-		errorKey = errata.NoCredsKey
-
+	if tokenJWT := r.Header.Get("Authorization"); tokenJWT != "" {
+		tokenJWT = reBearer.ReplaceAllString(tokenJWT, "")
+		var err error
+		if identity, err = orm.authJWTOp.Authenticate(auth.Creds{auth.CredsJWT: tokenJWT}); err != nil {
+			return nil, errata.CommonError(err, onOptions)
+		}
 	}
 
-	err := errata.KeyableError(errorKey, common.Map{"error": errs.Err()})
 	if identity == nil {
-		return nil, err
+		return nil, nil
 	}
 
-	return &crud.Options{Identity: identity}, err
+	return &crud.Options{Identity: identity}, nil
 }
-
-// TOKEN CHECK
-//token := r.Header.Get("Token")
-//if token != "" {
-//	user, errs = auth.GetIdentity(auth.Creds{auth.CredsToken: token}, authOps, errs)
-//	if user != nil {
-//		return user, errs.Error()
-//	}
-//	// previous errs is added with auth.GetIdentity()
-//}
-//
-
-//// COOKIE CHECK
-//c, _ := r.Cookie("Token") // ErrNoCookie only
-//if c != nil && c.Left != "" {
-//	user, errs = auth.GetIdentity([]auth.Creds{{TypeKey: auth.CredsToken, Left: c.Left}}, authOps, errs)
-//	if user != nil {
-//		return user, errs.Error()
-//	}
-//	// previous errs is added with auth.GetIdentity()
-//}
 
 //// SIGNATURE CHECK
 //signature := r.Header.Get("Signature")
 //if signature != "" && r.URL != nil {
-//	publicKeyAddress := r.Header.Get("Public-IDStr-Address")
+//	publicKeyAddress := r.Header.Get("Public-Key-Address")
 //	numberToSignature := r.Header.Get("Number-To-Signature")
 //
 //	credsSignature := auth.Creds{
@@ -84,19 +71,3 @@ func (*onRequestMiddleware) Options(r *http.Request) (*crud.Options, error) {
 //	// previous errs is added by auth.GetIdentity()
 //}
 //var errNoIdentityOpsMap = errors.New("no map[CredsType]identity.UserKey")
-
-//authOpNil := auth.Operator(nil)
-//
-//authComps := joinerOp.InterfacesAll(&authOpNil)
-//for _, authComp := range authComps {
-//	if authOp, _ := authComp.Interface.(auth.Operator); authOp != nil {
-//		authOps = append(authOps, authOp)
-//		if authComp.InterfaceKey == auth.InterfaceKey {
-//			authOpPersons = authOp
-//		}
-//	}
-//}
-
-//if authOpToSetToken, _ = joinerOp.Interface(ah.setTokenKey).(auth.Operator); authOpToSetToken == nil {
-//	return errors.New("no authOpToSetToken")
-//}

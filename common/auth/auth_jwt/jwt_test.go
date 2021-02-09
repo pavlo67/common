@@ -4,12 +4,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/pavlo67/common/common/logger/logger_zap"
-
 	"github.com/stretchr/testify/require"
 
 	"github.com/pavlo67/common/common/auth"
-	"github.com/pavlo67/common/common/logger"
 )
 
 func TestOperator(t *testing.T) {
@@ -17,13 +14,13 @@ func TestOperator(t *testing.T) {
 	err := os.Setenv("ENV", env)
 	require.NoError(t, err)
 
-	l, err = logger_zap.Init(logger.Config{})
-	require.NoError(t, err)
-	require.NotNil(t, l)
+	//l, err = logger_zap.Init(logger.Config{})
+	//require.NoError(t, err)
+	//require.NotNil(t, l)
 
 	authOp, err := New("key.test")
 	require.NoError(t, err)
 	require.NotNil(t, authOp)
 
-	auth.OperatorTestScenarioToken(t, authOp, l)
+	auth.OperatorTestScenarioToken(t, authOp)
 }
