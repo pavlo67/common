@@ -33,7 +33,7 @@ func OperatorTestScenario(t *testing.T, personsOp Operator, personsCleanerOp cru
 	require.NoError(t, err)
 	require.Equal(t, 0, len(personItems))
 
-	// prepare data --------------------------------------------
+	// add person with ID --------------------------------------
 
 	dataToTest := common.Map{}
 	passwordToTestWithID := "passwordToTestWithID"
@@ -42,64 +42,62 @@ func OperatorTestScenario(t *testing.T, personsOp Operator, personsCleanerOp cru
 		ID:       "test_id",
 		Nickname: "test_nickname1",
 		Roles:    rbac.Roles{rbac.RoleUser},
-		Creds:    auth.Creds{},
 	}
-
-	passwordToTestWithoutID := "passwordToTestWithoutID"
-
-	identityToTestWithoutID := auth.Identity{
-		Nickname: "test_nickname2",
-		Roles:    rbac.Roles{rbac.RoleUser},
-		Creds:    auth.Creds{},
-	}
-
-	// add person with ID --------------------------------------
 
 	personIDWrong, err := personsOp.Add(identityToTestWithID, dataToTest, nil)
 	require.Error(t, err)
 	require.Empty(t, personIDWrong)
 
-	identityToTestWithID.Creds[auth.CredsPassword] = passwordToTestWithID
+	identityToTestWithID.SetCreds(auth.CredsPassword, passwordToTestWithID)
 	personID1, err := personsOp.Add(identityToTestWithID, dataToTest, adminOptions)
 	require.NoErrorf(t, err, "%#v", err)
 	require.Equal(t, identityToTestWithID.ID, personID1)
 
-	identityToTestWithID.Creds[auth.CredsPassword] = passwordToTestWithID
+	person1, err := personsOp.Read(personID1, adminOptions)
+	require.NoErrorf(t, err, "%#v", err)
+	require.Equal(t, identityToTestWithID.Creds(auth.CredsPassword), person1.Identity.Creds(auth.CredsPassword))
+
+	identityToTestWithID.SetCreds(auth.CredsPassword, "")
+	person1.Identity.SetCreds(auth.CredsPassword, "")
+	require.Equal(t, identityToTestWithID, person1.Identity)
+
+	person1Options := crud.Options{Identity: &person1.Identity}
+
+	identityToTestWithID.SetCreds(auth.CredsPassword, passwordToTestWithID)
 	personIDWrong, err = personsOp.Add(identityToTestWithID, dataToTest, adminOptions)
 	require.Errorf(t, err, "%#v", err)
 	require.Empty(t, personIDWrong)
 
 	// add person without ID -----------------------------------
 
-	identityToTestWithoutID.Creds[auth.CredsPassword] = passwordToTestWithoutID
+	passwordToTestWithoutID := "passwordToTestWithoutID"
+
+	identityToTestWithoutID := auth.Identity{
+		Nickname: "test_nickname2",
+		Roles:    rbac.Roles{rbac.RoleUser},
+	}
+
+	identityToTestWithoutID.SetCreds(auth.CredsPassword, passwordToTestWithoutID)
 	personID2, err := personsOp.Add(identityToTestWithoutID, dataToTest, adminOptions)
 	require.NoErrorf(t, err, "%#v", err)
 	require.NotEmpty(t, personID2)
 
-	identityToTestWithoutID.Creds[auth.CredsPassword] = passwordToTestWithoutID
+	identityToTestWithoutID.SetCreds(auth.CredsPassword, passwordToTestWithoutID)
 	personID3, err := personsOp.Add(identityToTestWithoutID, dataToTest, adminOptions)
 	require.NoErrorf(t, err, "%#v", err)
 	require.NotEmpty(t, personID3)
 
-	// read person ---------------------------------------------
-
-	person1, err := personsOp.Read(personID1, adminOptions)
-	require.NoErrorf(t, err, "%#v", err)
-	require.Equal(t, identityToTestWithID, person1.Identity)
-
-	person1Options := crud.Options{Identity: &person1.Identity}
-
 	person2, err := personsOp.Read(personID2, adminOptions)
 	require.NoErrorf(t, err, "%#v", err)
-	require.Equal(t, identityToTestWithoutID.Nickname, person2.Nickname)
-	require.Equal(t, personID2, person2.ID)
+	require.Equal(t, identityToTestWithoutID.Nickname, person2.Identity.Nickname)
+	require.Equal(t, personID2, person2.Identity.ID)
 
 	person2Options := crud.Options{Identity: &person2.Identity}
 
 	person3, err := personsOp.Read(personID3, adminOptions)
 	require.NoErrorf(t, err, "%#v", err)
-	require.Equal(t, identityToTestWithoutID.Nickname, person3.Nickname)
-	require.Equal(t, personID3, person3.ID)
+	require.Equal(t, identityToTestWithoutID.Nickname, person3.Identity.Nickname)
+	require.Equal(t, personID3, person3.Identity.ID)
 
 	// list persons by admin: ok -------------------------------
 
@@ -116,32 +114,32 @@ func OperatorTestScenario(t *testing.T, personsOp Operator, personsCleanerOp cru
 	// change person by admin: ok ------------------------------
 
 	person1ToChange := *person1
-	person1ToChange.Nickname += "_changed"
+	person1ToChange.Identity.Nickname += "_changed"
 
 	person1Changed, err := personsOp.Change(person1ToChange, adminOptions)
 	require.NoErrorf(t, err, "%#v", err)
 	require.Equal(t, person1ToChange.Identity, person1Changed.Identity)
 
-	person1ChangedReaded, err := personsOp.Read(person1Changed.ID, adminOptions)
+	person1ChangedReaded, err := personsOp.Read(person1Changed.Identity.ID, adminOptions)
 	require.NoErrorf(t, err, "%#v", err)
 	require.Equal(t, person1ToChange.Identity, person1ChangedReaded.Identity)
 
 	// change person by itself: ok -----------------------------
 
-	person1ToChange.Nickname += "_again"
+	person1ToChange.Identity.Nickname += "_again"
 
 	person1Changed, err = personsOp.Change(person1ToChange, &person1Options)
 	require.NoErrorf(t, err, "%#v", err)
 	require.Equal(t, person1ToChange.Identity, person1Changed.Identity)
 
-	person1ChangedReaded, err = personsOp.Read(person1Changed.ID, &person1Options)
+	person1ChangedReaded, err = personsOp.Read(person1Changed.Identity.ID, &person1Options)
 	require.NoErrorf(t, err, "%#v", err)
 	require.Equal(t, person1ToChange.Identity, person1ChangedReaded.Identity)
 
 	// change/read person by another person: error -------------
 
 	person1ToChangeAgain := *person1ChangedReaded
-	person1ToChangeAgain.Nickname += "_again2"
+	person1ToChangeAgain.Identity.Nickname += "_again2"
 
 	person1ChangedWrong, err := personsOp.Change(person1ToChangeAgain, &person2Options)
 	require.Errorf(t, err, "%#v", err)

@@ -78,7 +78,7 @@ func OperatorTestScenarioPassword(t *testing.T, operator Operator) {
 
 		require.NoError(t, err)
 		require.NotNil(t, user)
-		require.Equal(t, tc[CredsNickname], user.Creds[CredsNickname])
+		require.Equal(t, tc[CredsNickname], user.Creds(CredsNickname))
 		require.NotEmpty(t, user.ID)
 
 		// .Authenticate() err ----------------------------------------

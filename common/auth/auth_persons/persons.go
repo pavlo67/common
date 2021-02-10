@@ -83,7 +83,10 @@ func (authOp *authPersons) SetCreds(authID auth.ID, toSet auth.Creds) (*auth.Cre
 
 		identity := auth.Identity{
 			Nickname: toSet.StringDefault(auth.CredsNickname, ""),
-			Creds:    toSetHashed,
+		}
+
+		for k, v := range toSetHashed {
+			identity.SetCreds(k, v)
 		}
 
 		// TODO!!! hash password
@@ -181,10 +184,10 @@ func (authOp *authPersons) Authenticate(toAuth auth.Creds) (*auth.Identity, erro
 
 	for _, item := range items {
 		if item.Nickname == nickname {
-			if err = crypt.Verify(item.Creds.StringDefault(auth.CredsPasshash, ""), []byte(password)); err == nil {
+			if err = crypt.Verify(item.Creds(auth.CredsPasshash), []byte(password)); err == nil {
 				return &item.Identity, nil
 			} else {
-				l.Infof("can't verify %s on %s", item.Creds.StringDefault(auth.CredsPasshash, ""), password)
+				l.Infof("can't verify %s on %s", item.Creds(auth.CredsPasshash), password)
 			}
 		}
 	}

@@ -11,7 +11,7 @@ import (
 
 var _ logger.Operator = &zap.SugaredLogger{}
 
-func Init(cfg logger.Config) (logger.Operator, error) {
+func New(cfg logger.Config) (logger.Operator, error) {
 	c := zap.NewProductionConfig()
 	c.DisableStacktrace = true
 	c.Level.SetLevel(zapLevel(cfg.LogLevel))

@@ -77,6 +77,8 @@ func (pfs *personsFSStub) write(path string, item persons.Item) error {
 		return err
 	}
 
+	l.Infof("%s --> %s", item.Identity.Creds(auth.CredsPassword), jsonBytes)
+
 	return ioutil.WriteFile(path, jsonBytes, 0644)
 }
 
@@ -89,7 +91,7 @@ func (pfs *personsFSStub) Change(item persons.Item, options *crud.Options) (*per
 
 	// l.Info(1111111111, " ", item.ID)
 
-	itemOld, err := pfs.read(item.ID)
+	itemOld, err := pfs.read(item.Identity.ID)
 	if err != nil || itemOld == nil {
 		errorStr := fmt.Sprintf("got %#v / %s", itemOld, err)
 		if options.HasRole(rbac.RoleAdmin) {
@@ -102,7 +104,7 @@ func (pfs *personsFSStub) Change(item persons.Item, options *crud.Options) (*per
 
 	// l.Infof("22222222 %s / %#v / %#v", options.Identity.ID, itemOld, itemOld.ID != options.Identity.ID)
 
-	if itemOld.ID != options.Identity.ID && !options.Identity.Roles.Has(rbac.RoleAdmin) {
+	if itemOld.Identity.ID != options.Identity.ID && !options.Identity.Roles.Has(rbac.RoleAdmin) {
 		return nil, errata.KeyableError(errata.NoRightsKey, common.Map{"on": onChange, "item": item})
 	}
 
@@ -110,7 +112,7 @@ func (pfs *personsFSStub) Change(item persons.Item, options *crud.Options) (*per
 	now := time.Now()
 	item.UpdatedAt = &now
 
-	path := filepath.Join(pfs.path, string(item.ID))
+	path := filepath.Join(pfs.path, string(item.Identity.ID))
 	if err := pfs.write(path, item); err != nil {
 		return nil, errors.Wrap(err, onChange)
 	}
@@ -188,9 +190,14 @@ func (pfs *personsFSStub) read(authID auth.ID) (*persons.Item, error) {
 		return nil, errors.Wrap(err, onRead)
 	}
 
-	// l.Infof("readed: %#v", item)
+	//var identity *auth.Identity
+	//if err := json.Unmarshal(jsonBytes, &identity); err != nil {
+	//	return nil, errors.Wrap(err, onRead)
+	//}
 
-	item.ID = authID
+	l.Infof("readed: %s --> %s", jsonBytes, item.Creds(auth.CredsPassword))
+
+	item.Identity.ID = authID
 
 	return &item, nil
 }

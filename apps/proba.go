@@ -9,7 +9,7 @@ import (
 
 func main() {
 
-	l, err := logger_zap.Init(logger.Config{
+	l, err := logger_zap.New(logger.Config{
 		//OutputPaths:      []string{"stdout", "aaa.log"},
 		//ErrorOutputPaths: []string{"stderr", "aaa.log"},
 	})

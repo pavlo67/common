@@ -35,7 +35,7 @@ func Prepare(buildDate, buildTag, buildCommit, serviceName, appsSubpathDefault s
 
 	// logger
 
-	l, err := logger_zap.Init(logger.Config{})
+	l, err := logger_zap.New(logger.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -74,7 +74,7 @@ func PrepareTests(t *testing.T, serviceName, appsSubpath, configEnv, logfile str
 		logPath = []string{logfile}
 	}
 
-	l, err := logger_zap.Init(logger.Config{
+	l, err := logger_zap.New(logger.Config{
 		LogLevel:         logger.TraceLevel,
 		OutputPaths:      append(logPath, "stdout"),
 		ErrorOutputPaths: append(logPath, "stderr"),

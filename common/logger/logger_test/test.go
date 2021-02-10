@@ -7,13 +7,13 @@ import (
 	"github.com/pavlo67/common/common/logger"
 )
 
-func Init(t *testing.T) logger.Operator {
+func New(t *testing.T) logger.Operator {
 	return &stubLogger{t}
 }
 
-func InitComments(t *testing.T) logger.OperatorComments {
-	return &stubLogger{t}
-}
+//func InitComments(t *testing.T) logger.OperatorComments {
+//	return &stubLogger{t}
+//}
 
 var _ logger.Operator = &stubLogger{}
 
@@ -21,9 +21,9 @@ type stubLogger struct {
 	t *testing.T
 }
 
-func (sl *stubLogger) Comment(text string) {
-	sl.Info(text)
-}
+//func (sl *stubLogger) Comment(text string) {
+//	sl.Info(text)
+//}
 
 func (sl *stubLogger) Debug(args ...interface{}) {
 	if sl != nil && sl.t != nil {
