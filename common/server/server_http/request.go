@@ -74,9 +74,9 @@ func Request(serverURL string, ep EndpointSettled, requestData, responseData int
 	}
 
 	if identity := options.GetIdentity(); identity != nil {
-		if jwt := identity.Creds(auth.CredsJWT); jwt != "" {
+		if jwt := identity.GetCredsStr(auth.CredsJWT); jwt != "" {
 			req.Header.Add("Authorization", jwt)
-		} else if token := identity.Creds(auth.CredsToken); token != "" {
+		} else if token := identity.GetCredsStr(auth.CredsToken); token != "" {
 			req.Header.Add("Authorization", token)
 		}
 

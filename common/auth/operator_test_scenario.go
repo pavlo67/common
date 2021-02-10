@@ -74,12 +74,12 @@ func OperatorTestScenarioPassword(t *testing.T, operator Operator) {
 			CredsPassword: password,
 		}
 
-		user, err := operator.Authenticate(*userCreds)
+		identity, err := operator.Authenticate(*userCreds)
 
 		require.NoError(t, err)
-		require.NotNil(t, user)
-		require.Equal(t, tc[CredsNickname], user.Creds(CredsNickname))
-		require.NotEmpty(t, user.ID)
+		require.NotNil(t, identity)
+		require.Equal(t, tc[CredsNickname], identity.Nickname)
+		require.NotEmpty(t, identity.ID)
 
 		// .Authenticate() err ----------------------------------------
 
@@ -89,10 +89,10 @@ func OperatorTestScenarioPassword(t *testing.T, operator Operator) {
 			CredsPassword: password + "1",
 		}
 
-		user, err = operator.Authenticate(*userCreds)
+		identity, err = operator.Authenticate(*userCreds)
 
 		require.Error(t, err)
-		require.Nil(t, user)
+		require.Nil(t, identity)
 	}
 }
 

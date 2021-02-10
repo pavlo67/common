@@ -71,17 +71,6 @@ func (pfs *personsFSStub) Add(identity auth.Identity, data common.Map, options *
 	return auth.ID(authIDStr), nil
 }
 
-func (pfs *personsFSStub) write(path string, item persons.Item) error {
-	jsonBytes, err := json.Marshal(item)
-	if err != nil {
-		return err
-	}
-
-	l.Infof("%s --> %s", item.Identity.Creds(auth.CredsPassword), jsonBytes)
-
-	return ioutil.WriteFile(path, jsonBytes, 0644)
-}
-
 const onChange = "on personsFSStub.Change()"
 
 func (pfs *personsFSStub) Change(item persons.Item, options *crud.Options) (*persons.Item, error) {
@@ -177,27 +166,43 @@ func (pfs *personsFSStub) Read(authID auth.ID, options *crud.Options) (*persons.
 	return pfs.read(authID)
 }
 
-func (pfs *personsFSStub) read(authID auth.ID) (*persons.Item, error) {
-	// l.Info(10000000, " ", authID)
+// read/write file ----------------------------------------------
 
+type PersonWithCreds struct {
+	persons.Item
+	auth.Creds
+}
+
+func (pfs *personsFSStub) write(path string, item persons.Item) error {
+	personWithCreds := PersonWithCreds{
+		item,
+		item.GetCredsAll(),
+	}
+
+	jsonBytes, err := json.Marshal(personWithCreds)
+	if err != nil {
+		return err
+	}
+
+	return ioutil.WriteFile(path, jsonBytes, 0644)
+}
+
+func (pfs *personsFSStub) read(authID auth.ID) (*persons.Item, error) {
 	path := filepath.Join(pfs.path, string(authID)) //  pfs.path + string(authID)
 	jsonBytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, errors.Wrap(err, onRead)
 	}
-	var item persons.Item
-	if err := json.Unmarshal(jsonBytes, &item); err != nil {
+
+	var personWithCreds PersonWithCreds
+	if err := json.Unmarshal(jsonBytes, &personWithCreds); err != nil {
 		return nil, errors.Wrap(err, onRead)
 	}
 
-	//var identity *auth.Identity
-	//if err := json.Unmarshal(jsonBytes, &identity); err != nil {
-	//	return nil, errors.Wrap(err, onRead)
-	//}
+	personWithCreds.Identity.ID = authID
+	for k, v := range personWithCreds.Creds {
+		personWithCreds.SetCreds(k, v)
+	}
 
-	l.Infof("readed: %s --> %s", jsonBytes, item.Creds(auth.CredsPassword))
-
-	item.Identity.ID = authID
-
-	return &item, nil
+	return &personWithCreds.Item, nil
 }

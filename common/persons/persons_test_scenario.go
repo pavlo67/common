@@ -55,10 +55,10 @@ func OperatorTestScenario(t *testing.T, personsOp Operator, personsCleanerOp cru
 
 	person1, err := personsOp.Read(personID1, adminOptions)
 	require.NoErrorf(t, err, "%#v", err)
-	require.Equal(t, identityToTestWithID.Creds(auth.CredsPassword), person1.Identity.Creds(auth.CredsPassword))
+	require.True(t, identityToTestWithID.CheckCreds(auth.CredsPassword, passwordToTestWithID))
 
 	identityToTestWithID.SetCreds(auth.CredsPassword, "")
-	person1.Identity.SetCreds(auth.CredsPassword, "")
+	person1.SetCreds(auth.CredsPassword, "")
 	require.Equal(t, identityToTestWithID, person1.Identity)
 
 	person1Options := crud.Options{Identity: &person1.Identity}
@@ -89,15 +89,15 @@ func OperatorTestScenario(t *testing.T, personsOp Operator, personsCleanerOp cru
 
 	person2, err := personsOp.Read(personID2, adminOptions)
 	require.NoErrorf(t, err, "%#v", err)
-	require.Equal(t, identityToTestWithoutID.Nickname, person2.Identity.Nickname)
-	require.Equal(t, personID2, person2.Identity.ID)
+	require.Equal(t, identityToTestWithoutID.Nickname, person2.Nickname)
+	require.Equal(t, personID2, person2.ID)
 
 	person2Options := crud.Options{Identity: &person2.Identity}
 
 	person3, err := personsOp.Read(personID3, adminOptions)
 	require.NoErrorf(t, err, "%#v", err)
-	require.Equal(t, identityToTestWithoutID.Nickname, person3.Identity.Nickname)
-	require.Equal(t, personID3, person3.Identity.ID)
+	require.Equal(t, identityToTestWithoutID.Nickname, person3.Nickname)
+	require.Equal(t, personID3, person3.ID)
 
 	// list persons by admin: ok -------------------------------
 
@@ -114,32 +114,32 @@ func OperatorTestScenario(t *testing.T, personsOp Operator, personsCleanerOp cru
 	// change person by admin: ok ------------------------------
 
 	person1ToChange := *person1
-	person1ToChange.Identity.Nickname += "_changed"
+	person1ToChange.Nickname += "_changed"
 
 	person1Changed, err := personsOp.Change(person1ToChange, adminOptions)
 	require.NoErrorf(t, err, "%#v", err)
 	require.Equal(t, person1ToChange.Identity, person1Changed.Identity)
 
-	person1ChangedReaded, err := personsOp.Read(person1Changed.Identity.ID, adminOptions)
+	person1ChangedReaded, err := personsOp.Read(person1Changed.ID, adminOptions)
 	require.NoErrorf(t, err, "%#v", err)
 	require.Equal(t, person1ToChange.Identity, person1ChangedReaded.Identity)
 
 	// change person by itself: ok -----------------------------
 
-	person1ToChange.Identity.Nickname += "_again"
+	person1ToChange.Nickname += "_again"
 
 	person1Changed, err = personsOp.Change(person1ToChange, &person1Options)
 	require.NoErrorf(t, err, "%#v", err)
 	require.Equal(t, person1ToChange.Identity, person1Changed.Identity)
 
-	person1ChangedReaded, err = personsOp.Read(person1Changed.Identity.ID, &person1Options)
+	person1ChangedReaded, err = personsOp.Read(person1Changed.ID, &person1Options)
 	require.NoErrorf(t, err, "%#v", err)
 	require.Equal(t, person1ToChange.Identity, person1ChangedReaded.Identity)
 
 	// change/read person by another person: error -------------
 
 	person1ToChangeAgain := *person1ChangedReaded
-	person1ToChangeAgain.Identity.Nickname += "_again2"
+	person1ToChangeAgain.Nickname += "_again2"
 
 	person1ChangedWrong, err := personsOp.Change(person1ToChangeAgain, &person2Options)
 	require.Errorf(t, err, "%#v", err)
