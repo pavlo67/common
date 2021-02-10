@@ -6,44 +6,48 @@ import (
 	"reflect"
 	"sync"
 
+	"github.com/pavlo67/common/common/logger"
+
 	"github.com/pavlo67/common/common"
 	"github.com/pkg/errors"
 )
 
-type InterfaceKey string
-
 type Component struct {
-	InterfaceKey
+	common.InterfaceKey
 	Interface interface{}
 }
 
 type ID common.IDStr
 
 type Operator interface {
-	Join(interface{}, InterfaceKey) error
-	Interface(InterfaceKey) interface{}
+	Join(interface{}, common.InterfaceKey) error
+	Interface(common.InterfaceKey) interface{}
 	InterfacesAll(ptrToInterface interface{}) []Component
 	CloseAll()
 }
 
 var _ Operator = &joiner{}
 
-func New() Operator {
+func New(options common.Map, l logger.Operator) Operator {
 	return &joiner{
-		components: map[InterfaceKey]interface{}{},
+		l:          l,
+		options:    options,
+		components: map[common.InterfaceKey]interface{}{},
 		mutex:      &sync.RWMutex{},
 	}
 }
 
 type joiner struct {
-	components map[InterfaceKey]interface{}
+	l          logger.Operator
+	options    common.Map
+	components map[common.InterfaceKey]interface{}
 	mutex      *sync.RWMutex
 }
 
 var ErrJoiningNil = errors.New("can't join nil interface")
 var ErrJoiningDuplicate = errors.New("can't join interface over joined before")
 
-func (j *joiner) Join(intrfc interface{}, interfaceKey InterfaceKey) error {
+func (j *joiner) Join(intrfc interface{}, interfaceKey common.InterfaceKey) error {
 	if j == nil {
 		return fmt.Errorf("got nil on .Join(%s)", interfaceKey)
 	}
@@ -60,10 +64,14 @@ func (j *joiner) Join(intrfc interface{}, interfaceKey InterfaceKey) error {
 
 	j.components[interfaceKey] = intrfc
 
+	if j.l != nil && !j.options.IsTrue("silent") {
+		j.l.Infof("joined %s", interfaceKey)
+	}
+
 	return nil
 }
 
-func (j *joiner) Interface(interfaceKey InterfaceKey) interface{} {
+func (j *joiner) Interface(interfaceKey common.InterfaceKey) interface{} {
 	if j == nil {
 		log.Printf("on ActorKey.Component(%s): null ActorKey item", interfaceKey)
 	}

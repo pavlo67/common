@@ -24,7 +24,7 @@ var _ starter.Operator = &server_http_jschmhrStarter{}
 type server_http_jschmhrStarter struct {
 	config server.Config
 
-	interfaceKey joiner.InterfaceKey
+	interfaceKey common.InterfaceKey
 }
 
 func (ss *server_http_jschmhrStarter) Name() string {
@@ -32,7 +32,7 @@ func (ss *server_http_jschmhrStarter) Name() string {
 }
 
 func (ss *server_http_jschmhrStarter) Prepare(cfg *config.Config, options common.Map) error {
-	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(server_http.InterfaceKey)))
+	ss.interfaceKey = common.InterfaceKey(options.StringDefault("interface_key", string(server_http.InterfaceKey)))
 
 	configKey := options.StringDefault("config_key", "server_http")
 	if err := cfg.Value(configKey, &ss.config); err != nil {

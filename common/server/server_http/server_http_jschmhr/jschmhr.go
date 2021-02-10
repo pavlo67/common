@@ -11,8 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pavlo67/common/common/joiner"
-
 	"github.com/julienschmidt/httprouter"
 	"github.com/pkg/errors"
 
@@ -167,7 +165,7 @@ func (s *serverHTTPJschmhr) ResponseRESTOk(status int, data interface{}) (server
 	return server.Response{Status: status, Data: dataBytes}, nil
 }
 
-func (s *serverHTTPJschmhr) HandleEndpoint(key joiner.InterfaceKey, serverPath string, endpoint server_http.Endpoint) error {
+func (s *serverHTTPJschmhr) HandleEndpoint(key common.InterfaceKey, serverPath string, endpoint server_http.Endpoint) error {
 
 	method := strings.ToUpper(endpoint.Method)
 	path := endpoint.PathTemplate(serverPath)
@@ -238,7 +236,7 @@ func (s *serverHTTPJschmhr) HandleEndpoint(key joiner.InterfaceKey, serverPath s
 	return nil
 }
 
-func (s *serverHTTPJschmhr) HandleOptions(key joiner.InterfaceKey, serverPath string) {
+func (s *serverHTTPJschmhr) HandleOptions(key common.InterfaceKey, serverPath string) {
 	//if strlib.In(s.handledOptions, serverPath) {
 	//	//l.Infof("- %#v", s.handledOptions)
 	//	return
@@ -257,7 +255,7 @@ func (s *serverHTTPJschmhr) HandleOptions(key joiner.InterfaceKey, serverPath st
 
 var reHTMLExt = regexp.MustCompile(`\.html?$`)
 
-func (s *serverHTTPJschmhr) HandleFiles(key joiner.InterfaceKey, serverPath string, staticPath server_http.StaticPath) error {
+func (s *serverHTTPJschmhr) HandleFiles(key common.InterfaceKey, serverPath string, staticPath server_http.StaticPath) error {
 	l.Infof("%-10s: FILES %s <-- %s", key, serverPath, staticPath.LocalPath)
 
 	// TODO: check localPath

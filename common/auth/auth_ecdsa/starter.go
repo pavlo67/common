@@ -12,7 +12,7 @@ import (
 	"github.com/pavlo67/common/common/starter"
 )
 
-const InterfaceKey joiner.InterfaceKey = "auth_ecdsa"
+const InterfaceKey common.InterfaceKey = "auth_ecdsa"
 
 func Starter() starter.Operator {
 	return &auth_ecdsa{}
@@ -22,7 +22,7 @@ var l logger.Operator
 var _ starter.Operator = &auth_ecdsa{}
 
 type auth_ecdsa struct {
-	interfaceKey joiner.InterfaceKey
+	interfaceKey common.InterfaceKey
 }
 
 func (ss *auth_ecdsa) Name() string {
@@ -30,7 +30,7 @@ func (ss *auth_ecdsa) Name() string {
 }
 
 func (ss *auth_ecdsa) Prepare(cfg *config.Config, options common.Map) error {
-	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
+	ss.interfaceKey = common.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
 
 	return nil
 }

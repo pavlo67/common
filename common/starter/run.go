@@ -48,7 +48,7 @@ func Run(starters []Starter, cfg *config.Config, label string, l logger.Operator
 		}
 	}
 
-	joinerOp := joiner.New()
+	joinerOp := joiner.New(nil, l)
 	if err := joinerOp.Join(l, logger.InterfaceKey); err != nil {
 		return nil, errors.Errorf("can't join logger with key %s: %s", logger.InterfaceKey, err)
 	}

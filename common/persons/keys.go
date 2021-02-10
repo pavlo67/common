@@ -1,6 +1,8 @@
 package persons
 
-import "github.com/pavlo67/common/common/joiner"
+import (
+	"github.com/pavlo67/common/common"
+)
 
-const InterfaceKey joiner.InterfaceKey = "persons"
-const InterfaceCleanerKey joiner.InterfaceKey = "persons_cleaner"
+const InterfaceKey common.InterfaceKey = "persons"
+const InterfaceCleanerKey common.InterfaceKey = "persons_cleaner"

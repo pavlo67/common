@@ -24,7 +24,7 @@ var _ starter.Operator = &authHTTPStarter{}
 
 type authHTTPStarter struct {
 	serverConfig server_http.Config
-	interfaceKey joiner.InterfaceKey
+	interfaceKey common.InterfaceKey
 }
 
 func (ahs *authHTTPStarter) Name() string {
@@ -48,7 +48,7 @@ func (ahs *authHTTPStarter) Prepare(cfg *config.Config, options common.Map) erro
 
 	ahs.serverConfig.CompleteDirectly(auth_server_http.Endpoints, access.Host, access.Port, prefix)
 
-	ahs.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(auth.InterfaceKey)))
+	ahs.interfaceKey = common.InterfaceKey(options.StringDefault("interface_key", string(auth.InterfaceKey)))
 
 	return nil
 }

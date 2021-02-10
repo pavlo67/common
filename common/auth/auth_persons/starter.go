@@ -15,16 +15,16 @@ import (
 	"github.com/pavlo67/common/common/starter"
 )
 
-const InterfaceKey joiner.InterfaceKey = "auth_persons"
+const InterfaceKey common.InterfaceKey = "auth_persons"
 
 var l logger.Operator
 
 var _ starter.Operator = &authPersonsStarter{}
 
 type authPersonsStarter struct {
-	personsKey joiner.InterfaceKey
+	personsKey common.InterfaceKey
 
-	interfaceKey joiner.InterfaceKey
+	interfaceKey common.InterfaceKey
 }
 
 func Starter() starter.Operator {
@@ -36,8 +36,8 @@ func (aps *authPersonsStarter) Name() string {
 }
 
 func (aps *authPersonsStarter) Prepare(cfg *config.Config, options common.Map) error {
-	aps.personsKey = joiner.InterfaceKey(options.StringDefault("persons_key", string(persons.InterfaceKey)))
-	aps.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(auth.InterfaceKey)))
+	aps.personsKey = common.InterfaceKey(options.StringDefault("persons_key", string(persons.InterfaceKey)))
+	aps.interfaceKey = common.InterfaceKey(options.StringDefault("interface_key", string(auth.InterfaceKey)))
 
 	return nil
 }

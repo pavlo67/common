@@ -4,16 +4,18 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/pavlo67/common/common"
+
 	"github.com/stretchr/testify/require"
 )
 
 func TestInterface(t *testing.T) {
-	joiner := New()
+	joiner := New(nil, nil)
 
-	const keyA1 InterfaceKey = "KeyA1"
+	const keyA1 common.InterfaceKey = "KeyA1"
 	structA1 := &StructA{}
 
-	const keyA2 InterfaceKey = "KeyA2"
+	const keyA2 common.InterfaceKey = "KeyA2"
 	structA2 := &StructA{}
 
 	joiner.Join(structA1, keyA1)
@@ -63,19 +65,19 @@ func TestInterface(t *testing.T) {
 //}
 
 func TestComponentsAllWithSignature(t *testing.T) {
-	joiner := New()
+	joiner := New(nil, nil)
 
 	const textA1 = "StructA.TypeKey()"
-	const keyA1 InterfaceKey = "KeyA1"
+	const keyA1 common.InterfaceKey = "KeyA1"
 	structA1 := &StructA{text: textA1}
 
-	const keyA2 InterfaceKey = "KeyA2"
+	const keyA2 common.InterfaceKey = "KeyA2"
 	structA2 := &StructA{text: textA1}
 
-	const keyA3 InterfaceKey = "KeyA3"
+	const keyA3 common.InterfaceKey = "KeyA3"
 	structA3 := &StructA{text: textA1}
 
-	const keyB1 InterfaceKey = "KeyB1"
+	const keyB1 common.InterfaceKey = "KeyB1"
 	structB1 := &StructB{}
 
 	joiner.Join(structA1, keyA1)
@@ -101,19 +103,19 @@ func TestComponentsAllWithSignature(t *testing.T) {
 }
 
 func TestCloseAll(t *testing.T) {
-	joiner := New()
+	joiner := New(nil, nil)
 
 	const textA1 = "StructA.TypeKey()"
-	const keyA1 InterfaceKey = "KeyA1"
+	const keyA1 common.InterfaceKey = "KeyA1"
 	structA1 := &StructA{text: textA1}
 
-	const keyA2 InterfaceKey = "KeyA2"
+	const keyA2 common.InterfaceKey = "KeyA2"
 	structA2 := &StructA{text: textA1}
 
-	const keyA3 InterfaceKey = "KeyA3"
+	const keyA3 common.InterfaceKey = "KeyA3"
 	structA3 := &StructA{text: textA1}
 
-	const keyB1 InterfaceKey = "KeyB1"
+	const keyB1 common.InterfaceKey = "KeyB1"
 	structB1 := &StructB{}
 
 	joiner.Join(structA1, keyA1)

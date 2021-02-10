@@ -16,7 +16,7 @@ import (
 	"github.com/pavlo67/common/common/starter"
 )
 
-const InterfaceKey joiner.InterfaceKey = "auth_http"
+const InterfaceKey common.InterfaceKey = "auth_http"
 
 func Starter() starter.Operator {
 	return &authServerHTTPStarter{}
@@ -25,10 +25,10 @@ func Starter() starter.Operator {
 var _ starter.Operator = &authServerHTTPStarter{}
 
 type authServerHTTPStarter struct {
-	authKey    joiner.InterfaceKey
-	authJWTKey joiner.InterfaceKey
+	authKey    common.InterfaceKey
+	authJWTKey common.InterfaceKey
 
-	interfaceKey joiner.InterfaceKey
+	interfaceKey common.InterfaceKey
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -42,9 +42,9 @@ func (ashs *authServerHTTPStarter) Name() string {
 
 func (ashs *authServerHTTPStarter) Prepare(_ *config.Config, options common.Map) error {
 
-	ashs.authKey = joiner.InterfaceKey(options.StringDefault("auth_key", string(auth.InterfaceKey)))
-	ashs.authJWTKey = joiner.InterfaceKey(options.StringDefault("auth_jwt_key", string(auth_jwt.InterfaceKey)))
-	ashs.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
+	ashs.authKey = common.InterfaceKey(options.StringDefault("auth_key", string(auth.InterfaceKey)))
+	ashs.authJWTKey = common.InterfaceKey(options.StringDefault("auth_jwt_key", string(auth_jwt.InterfaceKey)))
+	ashs.interfaceKey = common.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
 
 	return nil
 }

@@ -46,7 +46,7 @@ func (ds *demoStarter) Prepare(cfg *config.Config, options common.Map) error {
 var serverConfig = server_http.Config{
 	Title:   "Demo REST API",
 	Version: "0.0.1",
-	EndpointsSettled: map[joiner.InterfaceKey]server_http.EndpointSettled{
+	EndpointsSettled: map[common.InterfaceKey]server_http.EndpointSettled{
 		auth.IntefaceKeyAuthenticate: {Path: "/auth", Tags: []string{"unauthorized"}, EndpointInternalKey: auth.IntefaceKeyAuthenticate},
 	},
 }
