@@ -3,13 +3,13 @@ package auth
 import (
 	"errors"
 
-	"github.com/pavlo67/common/common"
+	"github.com/pavlo67/common/common/joiner"
 )
 
-const InterfaceKey common.InterfaceKey = "auth"
+const InterfaceKey joiner.InterfaceKey = "auth"
 
-const IntefaceKeyAuthenticate common.InterfaceKey = "auth_authenticate"
-const IntefaceKeySetCreds common.InterfaceKey = "auth_set_creds"
+const IntefaceKeyAuthenticate joiner.InterfaceKey = "auth_authenticate"
+const IntefaceKeySetCreds joiner.InterfaceKey = "auth_set_creds"
 
 var ErrAuthRequired = errors.New("authorization required")
 var ErrPassword = errors.New("wrong password")

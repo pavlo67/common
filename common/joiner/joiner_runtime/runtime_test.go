@@ -1,27 +1,27 @@
-package joiner
+package joiner_runtime
 
 import (
 	"fmt"
 	"testing"
 
-	"github.com/pavlo67/common/common"
-
 	"github.com/stretchr/testify/require"
+
+	"github.com/pavlo67/common/common/joiner"
 )
 
 func TestInterface(t *testing.T) {
-	joiner := New(nil, nil)
+	joinerOp := New(nil, nil)
 
-	const keyA1 common.InterfaceKey = "KeyA1"
+	const keyA1 joiner.InterfaceKey = "KeyA1"
 	structA1 := &StructA{}
 
-	const keyA2 common.InterfaceKey = "KeyA2"
+	const keyA2 joiner.InterfaceKey = "KeyA2"
 	structA2 := &StructA{}
 
-	joiner.Join(structA1, keyA1)
-	joiner.Join(structA2, keyA2)
+	joinerOp.Join(structA1, keyA1)
+	joinerOp.Join(structA2, keyA2)
 
-	structA1Joined, ok := joiner.Interface(keyA1).(InterfaceA)
+	structA1Joined, ok := joinerOp.Interface(keyA1).(InterfaceA)
 	require.True(t, ok)
 	require.Equal(t, structA1, structA1Joined)
 }
@@ -65,27 +65,27 @@ func TestInterface(t *testing.T) {
 //}
 
 func TestComponentsAllWithSignature(t *testing.T) {
-	joiner := New(nil, nil)
+	joinerOp := New(nil, nil)
 
 	const textA1 = "StructA.TypeKey()"
-	const keyA1 common.InterfaceKey = "KeyA1"
+	const keyA1 joiner.InterfaceKey = "KeyA1"
 	structA1 := &StructA{text: textA1}
 
-	const keyA2 common.InterfaceKey = "KeyA2"
+	const keyA2 joiner.InterfaceKey = "KeyA2"
 	structA2 := &StructA{text: textA1}
 
-	const keyA3 common.InterfaceKey = "KeyA3"
+	const keyA3 joiner.InterfaceKey = "KeyA3"
 	structA3 := &StructA{text: textA1}
 
-	const keyB1 common.InterfaceKey = "KeyB1"
+	const keyB1 joiner.InterfaceKey = "KeyB1"
 	structB1 := &StructB{}
 
-	joiner.Join(structA1, keyA1)
-	joiner.Join(structA3, keyA3)
-	joiner.Join(structB1, keyB1)
-	joiner.Join(structA2, keyA2)
+	joinerOp.Join(structA1, keyA1)
+	joinerOp.Join(structA3, keyA3)
+	joinerOp.Join(structB1, keyB1)
+	joinerOp.Join(structA2, keyA2)
 
-	components := joiner.InterfacesAll((*InterfaceA)(nil))
+	components := joinerOp.InterfacesAll((*InterfaceA)(nil))
 	require.Equal(t, 3, len(components))
 
 	for _, component := range components {
@@ -103,27 +103,27 @@ func TestComponentsAllWithSignature(t *testing.T) {
 }
 
 func TestCloseAll(t *testing.T) {
-	joiner := New(nil, nil)
+	joinerOp := New(nil, nil)
 
 	const textA1 = "StructA.TypeKey()"
-	const keyA1 common.InterfaceKey = "KeyA1"
+	const keyA1 joiner.InterfaceKey = "KeyA1"
 	structA1 := &StructA{text: textA1}
 
-	const keyA2 common.InterfaceKey = "KeyA2"
+	const keyA2 joiner.InterfaceKey = "KeyA2"
 	structA2 := &StructA{text: textA1}
 
-	const keyA3 common.InterfaceKey = "KeyA3"
+	const keyA3 joiner.InterfaceKey = "KeyA3"
 	structA3 := &StructA{text: textA1}
 
-	const keyB1 common.InterfaceKey = "KeyB1"
+	const keyB1 joiner.InterfaceKey = "KeyB1"
 	structB1 := &StructB{}
 
-	joiner.Join(structA1, keyA1)
-	joiner.Join(structA3, keyA3)
-	joiner.Join(structB1, keyB1)
-	joiner.Join(structA2, keyA2)
+	joinerOp.Join(structA1, keyA1)
+	joinerOp.Join(structA3, keyA3)
+	joinerOp.Join(structB1, keyB1)
+	joinerOp.Join(structA2, keyA2)
 
-	joiner.CloseAll()
+	joinerOp.CloseAll()
 
 	require.Equal(t, 1, structA1.NumClose)
 	require.Equal(t, 1, structA2.NumClose)
@@ -143,7 +143,7 @@ type StructA struct {
 }
 
 var _ InterfaceA = &StructA{}
-var _ Closer = &StructA{}
+var _ joiner.Closer = &StructA{}
 
 func (s *StructA) ActionA() string {
 	s.NumActionA++
@@ -168,7 +168,7 @@ type StructB struct {
 }
 
 var _ InterfaceB = &StructB{}
-var _ Closer = &StructB{}
+var _ joiner.Closer = &StructB{}
 
 func (s *StructB) ActionB() string {
 	s.NumActionB++

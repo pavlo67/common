@@ -14,7 +14,7 @@ import (
 	"github.com/pavlo67/common/common/starter"
 )
 
-const InterfaceKey common.InterfaceKey = "auth_jwt"
+const InterfaceKey joiner.InterfaceKey = "auth_jwt"
 
 func Starter() starter.Operator {
 	return &identity_jwtStarter{}
@@ -24,7 +24,7 @@ var l logger.Operator
 var _ starter.Operator = &identity_jwtStarter{}
 
 type identity_jwtStarter struct {
-	interfaceKey common.InterfaceKey
+	interfaceKey joiner.InterfaceKey
 	// interfaceSetCredsKey  joiner.InterfaceKey
 	keyPath string
 }
@@ -48,7 +48,7 @@ func (ss *identity_jwtStarter) Prepare(cfg *config.Config, options common.Map) e
 		ss.keyPath += "/"
 	}
 
-	ss.interfaceKey = common.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
+	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
 	// ss.interfaceSetCredsKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
 
 	return nil

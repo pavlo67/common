@@ -30,7 +30,7 @@ type EndpointSettled struct {
 	Tags []string
 
 	Endpoint
-	EndpointInternalKey common.InterfaceKey
+	EndpointInternalKey joiner.InterfaceKey
 }
 
 type Config struct {
@@ -39,7 +39,7 @@ type Config struct {
 	Host             string
 	Port             string
 	Prefix           string
-	EndpointsSettled map[common.InterfaceKey]EndpointSettled
+	EndpointsSettled map[joiner.InterfaceKey]EndpointSettled
 }
 
 type Swagger map[string]interface{}
@@ -238,7 +238,7 @@ func (ep Endpoint) PathTemplateBraced(serverPath string) string {
 
 // joining endpoints -----------------------------------------------------
 
-type Endpoints map[common.InterfaceKey]Endpoint
+type Endpoints map[joiner.InterfaceKey]Endpoint
 
 func JoinEndpoints(joinerOp joiner.Operator, eps Endpoints) error {
 	for key, ep := range eps {

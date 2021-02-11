@@ -1,13 +1,14 @@
 package errata
 
 import (
-	"errors"
+	"fmt"
 	"log"
 	"testing"
 
-	"github.com/pavlo67/common/common"
-
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
+
+	"github.com/pavlo67/common/common"
 )
 
 func TestKeyableErrorKey(t *testing.T) {
@@ -44,4 +45,12 @@ func TestKeyableErrorString(t *testing.T) {
 	log.Printf("%s#v: %#v", "%", err2)
 
 	errors.New("222")
+}
+
+func TestWrapf(t *testing.T) {
+	err := errors.Wrapf(errors.New("eeeeee"), "22222 %s", "111")
+	log.Print(err)
+	err1 := CommonError(err, "can't init records.Operator")
+	log.Print(fmt.Errorf("error calling .Run() for component (%s): %#v", "name", err1))
+	log.Print(fmt.Errorf("error calling .Run() for component (%s): %s", "name", err1))
 }

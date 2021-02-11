@@ -24,7 +24,7 @@ var _ starter.Operator = &server_http_jschmhrStarter{}
 type server_http_jschmhrStarter struct {
 	config server.Config
 
-	interfaceKey common.InterfaceKey
+	interfaceKey joiner.InterfaceKey
 }
 
 func (ss *server_http_jschmhrStarter) Name() string {
@@ -32,7 +32,7 @@ func (ss *server_http_jschmhrStarter) Name() string {
 }
 
 func (ss *server_http_jschmhrStarter) Prepare(cfg *config.Config, options common.Map) error {
-	ss.interfaceKey = common.InterfaceKey(options.StringDefault("interface_key", string(server_http.InterfaceKey)))
+	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(server_http.InterfaceKey)))
 
 	configKey := options.StringDefault("config_key", "server_http")
 	if err := cfg.Value(configKey, &ss.config); err != nil {
@@ -47,9 +47,9 @@ func (ss *server_http_jschmhrStarter) Run(joinerOp joiner.Operator) error {
 		return fmt.Errorf("no logger.Operator with key %s", logger.InterfaceKey)
 	}
 
-	onRequest, _ := joinerOp.Interface(server_http.OnRequestInterfaceKey).(server_http.OnRequestMiddleware)
+	onRequest, _ := joinerOp.Interface(server_http.OnRequestMiddlewareInterfaceKey).(server_http.OnRequestMiddleware)
 	if onRequest == nil {
-		return fmt.Errorf("no server_http.OnRequestMiddleware with key %s", server_http.OnRequestInterfaceKey)
+		return fmt.Errorf("no server_http.OnRequestMiddleware with key %s", server_http.OnRequestMiddlewareInterfaceKey)
 	}
 
 	// TODO!!! customize it

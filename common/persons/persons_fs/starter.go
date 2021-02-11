@@ -19,8 +19,8 @@ func Starter() starter.Operator {
 const configKeyDefault = "persons_fs"
 
 type personsFSStubStarter struct {
-	interfaceKey        common.InterfaceKey
-	interfaceCleanerKey common.InterfaceKey
+	interfaceKey        joiner.InterfaceKey
+	interfaceCleanerKey joiner.InterfaceKey
 
 	cfg config.Access
 }
@@ -39,8 +39,8 @@ func (uks *personsFSStubStarter) Prepare(cfg *config.Config, options common.Map)
 		return err
 	}
 
-	uks.interfaceKey = common.InterfaceKey(options.StringDefault("interface_key", string(persons.InterfaceKey)))
-	uks.interfaceCleanerKey = common.InterfaceKey(options.StringDefault("interface_cleaner_key", string(persons.InterfaceCleanerKey)))
+	uks.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(persons.InterfaceKey)))
+	uks.interfaceCleanerKey = joiner.InterfaceKey(options.StringDefault("interface_cleaner_key", string(persons.InterfaceCleanerKey)))
 
 	return nil
 }

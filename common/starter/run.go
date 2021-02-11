@@ -5,6 +5,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/pavlo67/common/common/joiner/joiner_runtime"
+
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/common/common/config"
@@ -44,11 +46,11 @@ func Run(starters []Starter, cfg *config.Config, label string, l logger.Operator
 		l.Info("preparing component: ", name)
 		startOptions := c.CorrectedOptions(nil)
 		if err := c.Prepare(cfg, startOptions); err != nil {
-			return nil, fmt.Errorf("error calling .Prepare() for component (%s): %#v", name, err)
+			return nil, fmt.Errorf("error calling .Prepare() for component (%s): %s", name, err)
 		}
 	}
 
-	joinerOp := joiner.New(nil, l)
+	joinerOp := joiner_runtime.New(nil, l)
 	if err := joinerOp.Join(l, logger.InterfaceKey); err != nil {
 		return nil, errors.Errorf("can't join logger with key %s: %s", logger.InterfaceKey, err)
 	}
@@ -61,7 +63,7 @@ func Run(starters []Starter, cfg *config.Config, label string, l logger.Operator
 
 		l.Info("running component: ", name)
 		if err := c.Run(joinerOp); err != nil {
-			return nil, fmt.Errorf("error calling .Run() for component (%s): %#v", name, err)
+			return nil, fmt.Errorf("error calling .Run() for component (%s): %s", name, err)
 		}
 	}
 

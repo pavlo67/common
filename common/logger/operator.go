@@ -1,10 +1,10 @@
 package logger
 
 import (
-	"github.com/pavlo67/common/common"
+	"github.com/pavlo67/common/common/joiner"
 )
 
-const InterfaceKey common.InterfaceKey = "logger"
+const InterfaceKey joiner.InterfaceKey = "logger"
 
 type Level int
 
