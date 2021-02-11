@@ -40,7 +40,7 @@ func (ss *identity_jwtStarter) Prepare(cfg *config.Config, options common.Map) e
 		return err
 	}
 
-	// var errs basis.Errors
+	// var errs basis.multipleErrors
 	ss.keyPath = strings.TrimSpace(cfgAuthJWT.StringDefault("key_path", ""))
 	if ss.keyPath == "" {
 		ss.keyPath = "./"

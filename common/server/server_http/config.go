@@ -147,31 +147,49 @@ func (c Config) SwaggerV2(isHTTPS bool) ([]byte, error) {
 
 const swaggerFile = "swagger.json"
 
+const onInitEndpointsWithSwaggerV2 = "on server_http.InitEndpointsWithSwaggerV2()"
+
 func InitEndpointsWithSwaggerV2(srvOp Operator, cfg Config, isHTTPS bool, swaggerPath, swaggerSubpath string, l logger.Operator) error {
 	if srvOp == nil {
-		return errors.New("on .InitEndpointsWithSwaggerV2(): srvOp == nil")
+		return errors.New(onInitEndpointsWithSwaggerV2 + ": srvOp == nil")
 	}
 
 	swaggerFilePath := swaggerPath + swaggerFile
 
 	swagger, err := cfg.SwaggerV2(isHTTPS)
 	if err != nil {
-		l.Errorf("%#v", cfg)
-		return fmt.Errorf("on .SwaggerV2(): %s", err) //
+		return fmt.Errorf(onInitEndpointsWithSwaggerV2+": %s", err) //
 	}
 
 	if err = ioutil.WriteFile(swaggerFilePath, swagger, 0644); err != nil {
-		return fmt.Errorf("on ioutil.WriteFile(%s, %s, 0755): %s", swaggerFilePath, swagger, err)
+		return fmt.Errorf(onInitEndpointsWithSwaggerV2+": on ioutil.WriteFile(%s, %s, 0755): %s", swaggerFilePath, swagger, err)
 	}
-	l.Infof("%d bytes are written into %s", len(swagger), swaggerFilePath)
+	l.Infof(onInitEndpointsWithSwaggerV2+": %d bytes are written into %s", len(swagger), swaggerFilePath)
 
 	for key, ep := range cfg.EndpointsSettled {
 		if err := srvOp.HandleEndpoint(key, cfg.Prefix+ep.Path, ep.Endpoint); err != nil {
-			return fmt.Errorf("on srvOp.HandleEndpoint(%s, %s, %#v): %s", key, ep.Path, ep.Endpoint, err)
+			return fmt.Errorf(onInitEndpointsWithSwaggerV2+": handling endpoint(%s, %s, %#v) got %s", key, ep.Path, ep.Endpoint, err)
 		}
 	}
 
 	return srvOp.HandleFiles("swagger", cfg.Prefix+"/"+swaggerSubpath+"/*filepath", StaticPath{LocalPath: swaggerPath})
+}
+
+const onInitPages = "on server_http.InitPages()"
+
+func InitPages(srvOp Operator, pagesCfg Config, l logger.Operator) error {
+	if srvOp == nil {
+		return errors.New(onInitPages + ": srvOp == nil")
+	}
+
+	for key, ep := range pagesCfg.EndpointsSettled {
+		if err := srvOp.HandleEndpoint(key, pagesCfg.Prefix+ep.Path, ep.Endpoint); err != nil {
+			return fmt.Errorf(onInitPages+": handling %s, %s, %#v got %s", key, ep.Path, ep.Endpoint, err)
+		}
+	}
+
+	return nil
+	// return srvOp.HandleFiles("swagger", pagesCfg.Prefix+"/"+swaggerSubpath+"/*filepath", StaticPath{LocalPath: swaggerPath})
 }
 
 var rePathParam = regexp.MustCompile(":[^/]+")

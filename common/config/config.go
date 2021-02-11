@@ -67,7 +67,7 @@ func Get(cfgFile, serviceName string, marshaler serializer.Marshaler) (*Config, 
 }
 
 //// Key ...
-//func (c *Config) Key(key string, errs common.Errors) (string, common.Errors) {
+//func (c *Config) Key(key string, errs common.multipleErrors) (string, common.multipleErrors) {
 //	if c == nil {
 //		return "", append(errs, ErrNoConfig)
 //	}
@@ -78,7 +78,7 @@ func Get(cfgFile, serviceName string, marshaler serializer.Marshaler) (*Config, 
 //}
 //
 //// IsTrue ...
-//func (c *Config) IsTrue(key string, errs common.Errors) (bool, common.Errors) {
+//func (c *Config) IsTrue(key string, errs common.multipleErrors) (bool, common.multipleErrors) {
 //	if c == nil {
 //		return false, append(errs, ErrNoConfig)
 //	}

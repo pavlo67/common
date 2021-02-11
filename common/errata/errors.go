@@ -1,7 +1,6 @@
 package errata
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -33,12 +32,12 @@ func KeyableError(key Key, data common.Map) Error {
 	}
 }
 
-// Errors ---------------------------------------------------------------------------------------------------------------
+// commonError -------------------------------------------------------------------------------------------------------
 
 var _ Error = &commonError{}
 
 type commonError struct {
-	errs Errors
+	errs multipleErrors
 	key  Key
 	data common.Map
 }
@@ -90,14 +89,14 @@ func (ce *commonError) append(anything interface{}) *commonError {
 			return &v1
 		case Error:
 			return &commonError{
-				errs: Errors{errors.New(v.Error())},
+				errs: multipleErrors{errors.New(v.Error())},
 				key:  v.Key(),
 				data: v.Data(),
 			}
 		case error:
-			return &commonError{errs: Errors{v}}
+			return &commonError{errs: multipleErrors{v}}
 		case string:
-			return &commonError{errs: Errors{errors.New(v)}}
+			return &commonError{errs: multipleErrors{errors.New(v)}}
 		}
 		ce = &commonError{}
 	}
@@ -124,75 +123,4 @@ func (ce *commonError) append(anything interface{}) *commonError {
 func (ce *commonError) Append(anything interface{}) Error {
 	return ce.append(anything)
 
-}
-
-// Errors ------------------------------------------------------------------------------------------------
-
-// DEPRECATED
-type Errors []error
-
-// DEPRECATED
-func (errs Errors) String() string {
-	var errstrings []string
-	for _, err := range errs {
-		if err != nil {
-			errstring := err.Error()
-			if errstring == "" {
-				errstrings = append(errstrings, "???")
-			} else {
-				errstrings = append(errstrings, errstring)
-			}
-		}
-	}
-	return strings.Join(errstrings, " / ")
-}
-
-// DEPRECATED
-func (errs Errors) Append(err error) Errors {
-	if err != nil {
-		return append(errs, err)
-	}
-
-	return errs
-}
-
-// DEPRECATED
-func (errs Errors) AppendErrs(errsToAppend Errors) Errors {
-	if len(errs) == 0 {
-		return errsToAppend
-	}
-
-	for _, err := range errsToAppend {
-		if err != nil {
-			errs = append(errs, err)
-		}
-	}
-
-	return errs
-}
-
-// DEPRECATED
-func (errs Errors) Err() error {
-
-	// TODO!!! errs.Error() must keep Keyable interface
-
-	errstring := errs.String()
-	if errstring != "" {
-		return errors.New(errstring)
-	}
-
-	return nil
-}
-
-// DEPRECATED
-func (errs Errors) MarshalJSON() ([]byte, error) {
-	messages := []string{}
-
-	for _, err := range errs {
-		if err != nil {
-			messages = append(messages, err.Error())
-		}
-	}
-
-	return json.Marshal(messages)
 }

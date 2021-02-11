@@ -5,10 +5,9 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/auth/auth_jwt"
-
-	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
@@ -16,7 +15,7 @@ import (
 	"github.com/pavlo67/common/common/starter"
 )
 
-const InterfaceKey joiner.InterfaceKey = "auth_http"
+const InterfaceKey joiner.InterfaceKey = "auth_server_http"
 
 func Starter() starter.Operator {
 	return &authServerHTTPStarter{}

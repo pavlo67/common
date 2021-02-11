@@ -78,8 +78,6 @@ func (pfs *personsFSStub) Change(item persons.Item, options *crud.Options) (*per
 		return nil, errata.KeyableError(errata.NoRightsKey, common.Map{"on": onChange, "item": item})
 	}
 
-	// l.Info(1111111111, " ", item.ID)
-
 	itemOld, err := pfs.read(item.Identity.ID)
 	if err != nil || itemOld == nil {
 		errorStr := fmt.Sprintf("got %#v / %s", itemOld, err)

@@ -167,13 +167,15 @@ func (s *serverHTTPJschmhr) ResponseRESTOk(status int, data interface{}) (server
 	return server.Response{Status: status, Data: dataBytes}, nil
 }
 
+const onHandleEndpoint = "on serverHTTPJschmhr.HandleEndpoint()"
+
 func (s *serverHTTPJschmhr) HandleEndpoint(key joiner.InterfaceKey, serverPath string, endpoint server_http.Endpoint) error {
 
 	method := strings.ToUpper(endpoint.Method)
 	path := endpoint.PathTemplate(serverPath)
 
 	if endpoint.WorkerHTTP == nil {
-		return errors.New(method + ": " + path + "\t!!! NULL workerHTTP ISN'T DISPATCHED !!!")
+		return errors.New(onHandleEndpoint + ": " + method + ": " + path + "\t!!! NULL workerHTTP ISN'T DISPATCHED !!!")
 	}
 
 	s.HandleOptions(key, path)
@@ -221,7 +223,7 @@ func (s *serverHTTPJschmhr) HandleEndpoint(key joiner.InterfaceKey, serverPath s
 		}
 	}
 
-	l.Infof("%-10s: %s %s", key, method, path)
+	l.Infof(onHandleEndpoint+": %-10s: %s %s", key, method, path)
 	switch method {
 	case "GET":
 		s.httpServeMux.GET(path, handler)
@@ -232,7 +234,7 @@ func (s *serverHTTPJschmhr) HandleEndpoint(key joiner.InterfaceKey, serverPath s
 	case "DELETE":
 		s.httpServeMux.DELETE(path, handler)
 	default:
-		l.Error(method, " isn't supported!")
+		return fmt.Errorf(onHandleEndpoint+": method (%s) isn't supported", method)
 	}
 
 	return nil

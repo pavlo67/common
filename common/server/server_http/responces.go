@@ -2,8 +2,6 @@ package server_http
 
 import (
 	"net/http"
-
-	"github.com/pavlo67/common/common/errata"
 )
 
 const (
@@ -19,17 +17,6 @@ type RESTDataMessage struct {
 	Info     string `json:"info,omitempty"`
 	Redirect string `json:"redirect,omitempty"`
 }
-
-type RESTDataError struct {
-	Error errata.Errors `json:"error,omitempty"`
-}
-
-//func RESTError(err error) server.Response {
-//	return server.Response{
-//		History: http.StatusOK,
-//		StorageIndex:   RESTDataError{basis.Errors{err}},
-//	}
-//}
 
 // Redirect ----------------------------------------------------------------------------------
 
