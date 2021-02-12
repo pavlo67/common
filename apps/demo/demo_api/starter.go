@@ -47,7 +47,8 @@ var serverConfig = server_http.Config{
 	Title:   "Demo REST API",
 	Version: "0.0.1",
 	EndpointsSettled: map[joiner.InterfaceKey]server_http.EndpointSettled{
-		auth.IntefaceKeyAuthenticate: {Path: "/auth", Tags: []string{"unauthorized"}, EndpointInternalKey: auth.IntefaceKeyAuthenticate},
+		auth.IntefaceKeyAuthenticate: {Path: "/auth", Tags: []string{"unauthorized"}, Endpoint: server_http.Endpoint{InternalKey: auth.IntefaceKeyAuthenticate}},
+		auth.IntefaceKeySetCreds:     {Path: "/set_creds", Tags: []string{"unauthorized"}, Endpoint: server_http.Endpoint{InternalKey: auth.IntefaceKeySetCreds}},
 	},
 }
 

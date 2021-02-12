@@ -22,6 +22,25 @@
      "unauthorized"
     ]
    }
+  },
+  "/backend/set_creds": {
+   "post": {
+    "operationId": "auth_set_creds",
+    "parameters": [
+     {
+      "in": "body",
+      "name": "body_item",
+      "required": true,
+      "type": "string"
+     }
+    ],
+    "produces": [
+     "application/json"
+    ],
+    "tags": [
+     "unauthorized"
+    ]
+   }
   }
  },
  "port": ":3001",

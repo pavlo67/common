@@ -16,8 +16,8 @@ import (
 )
 
 var Endpoints = server_http.Endpoints{
-	auth.IntefaceKeyAuthenticate: authenticateEndpoint,
-	auth.IntefaceKeySetCreds:     setCredsEndpoint,
+	authenticateEndpoint,
+	setCredsEndpoint,
 }
 
 //var bodyParams = json.RawMessage(`{
@@ -38,7 +38,8 @@ var Endpoints = server_http.Endpoints{
 //}`)
 
 var authenticateEndpoint = server_http.Endpoint{
-	Method: "POST",
+	InternalKey: auth.IntefaceKeyAuthenticate,
+	Method:      "POST",
 	//BodyParams: bodyParams,
 	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, _ server_http.Params, _ *crud.Options) (server.Response, error) {
 
@@ -63,7 +64,8 @@ var authenticateEndpoint = server_http.Endpoint{
 }
 
 var setCredsEndpoint = server_http.Endpoint{
-	Method: "POST",
+	InternalKey: auth.IntefaceKeySetCreds,
+	Method:      "POST",
 	//BodyParams: bodyParams,
 	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, _ server_http.Params, options *crud.Options) (server.Response, error) {
 

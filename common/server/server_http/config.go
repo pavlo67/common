@@ -16,6 +16,7 @@ import (
 )
 
 type Endpoint struct {
+	InternalKey joiner.InterfaceKey
 	Method      string          `json:",omitempty"`
 	PathParams  []string        `json:",omitempty"`
 	QueryParams []string        `json:",omitempty"`
@@ -30,7 +31,6 @@ type EndpointSettled struct {
 	Tags []string
 
 	Endpoint
-	EndpointInternalKey joiner.InterfaceKey
 }
 
 type Config struct {
@@ -256,12 +256,12 @@ func (ep Endpoint) PathTemplateBraced(serverPath string) string {
 
 // joining endpoints -----------------------------------------------------
 
-type Endpoints map[joiner.InterfaceKey]Endpoint
+type Endpoints []Endpoint
 
 func JoinEndpoints(joinerOp joiner.Operator, eps Endpoints) error {
-	for key, ep := range eps {
-		if err := joinerOp.Join(&ep, key); err != nil {
-			return errata.CommonError(err, fmt.Sprintf("can't join %#v as server_http.Endpoint with key '%s'", ep, key))
+	for i, ep := range eps {
+		if err := joinerOp.Join(&eps[i], ep.InternalKey); err != nil {
+			return errata.CommonError(err, fmt.Sprintf("can't join %#v as server_http.Endpoint with key '%s'", ep, ep.InternalKey))
 		}
 	}
 
@@ -279,15 +279,15 @@ func (c *Config) CompleteWithJoiner(joinerOp joiner.Operator, host string, port 
 	}
 	c.Host, c.Port, c.Prefix = host, portStr, prefix
 
-	var ok bool
 	for key, ep := range c.EndpointsSettled {
-		if ep.Endpoint, ok = joinerOp.Interface(ep.EndpointInternalKey).(Endpoint); ok {
+		if endpoint, ok := joinerOp.Interface(ep.InternalKey).(Endpoint); ok {
+			ep.Endpoint = endpoint
 			c.EndpointsSettled[key] = ep
-		} else if handlerPtr, _ := joinerOp.Interface(ep.EndpointInternalKey).(*Endpoint); handlerPtr != nil {
-			ep.Endpoint = *handlerPtr
+		} else if endpointPtr, _ := joinerOp.Interface(ep.InternalKey).(*Endpoint); endpointPtr != nil {
+			ep.Endpoint = *endpointPtr
 			c.EndpointsSettled[key] = ep
 		} else {
-			return fmt.Errorf("no server_http.Endpoint with key %s", ep.EndpointInternalKey)
+			return fmt.Errorf("no server_http.Endpoint to complete %#v", ep)
 		}
 	}
 
@@ -305,13 +305,16 @@ func (c *Config) CompleteDirectly(endpoints Endpoints, host string, port int, pr
 	}
 	c.Host, c.Port, c.Prefix = host, portStr, prefix
 
-	var ok bool
-	for key, ep := range c.EndpointsSettled {
-		if ep.Endpoint, ok = endpoints[ep.EndpointInternalKey]; ok {
-			c.EndpointsSettled[key] = ep
-		} else {
-			return fmt.Errorf("no server_http.Endpoint with key %s", ep.EndpointInternalKey)
+EP_SETTLED:
+	for key, epSettled := range c.EndpointsSettled {
+		for _, ep := range endpoints {
+			if ep.InternalKey == epSettled.InternalKey {
+				epSettled.Endpoint = ep
+				c.EndpointsSettled[key] = epSettled
+				continue EP_SETTLED
+			}
 		}
+		return fmt.Errorf("no server_http.Endpoint with key %s", epSettled.InternalKey)
 	}
 
 	return nil
