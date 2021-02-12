@@ -8,6 +8,8 @@ import (
 	"github.com/pavlo67/common/common"
 )
 
+type Key = common.Key
+
 type Error interface {
 	error
 	Key() Key

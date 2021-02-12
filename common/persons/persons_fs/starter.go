@@ -3,11 +3,12 @@ package persons_fs
 import (
 	"fmt"
 
+	"github.com/pavlo67/common/common/persons"
+
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
-	"github.com/pavlo67/common/common/persons"
 	"github.com/pavlo67/common/common/starter"
 	"github.com/pkg/errors"
 )

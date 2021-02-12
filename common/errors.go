@@ -1,8 +1,8 @@
-package errata
+package common
 
-import "errors"
-
-type Key string
+import (
+	"errors"
+)
 
 const CantPerformKey Key = "cant_perform"
 
@@ -20,12 +20,12 @@ const WrongJSONKey Key = "wrong_json"
 
 const NotFoundKey Key = "not_found"
 
-var NotFound = errors.New(string(NotFoundKey))
+var ErrNotFound = errors.New(string(NotFoundKey))
 
 const NullItemKey Key = "null_item"
 
-var NullItem = errors.New(string(NullItemKey))
+var ErrNullItem = errors.New(string(NullItemKey))
 
 const NotImplementedKey Key = "not_implemented"
 
-var NotImplemented = errors.New(string(NotImplementedKey))
+var ErrNotImplemented = errors.New(string(NotImplementedKey))

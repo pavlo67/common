@@ -29,31 +29,30 @@ func SQLList(table, fields, condition string, options *crud.Options) string {
 		condition = " WHERE " + condition
 	}
 
-	var limit string
+	var limit, order string
 
-	order := "created_at DESC"
+	//ranges := options.GetRanges()
+	//
+	//if ranges != nil {
+	//	if len(ranges.OrderBy) > 0 {
+	//		order = strings.Join(ranges.OrderBy, ", ")
+	//	}
+	//
+	//	if ranges.Offset+ranges.Limit > 0 {
+	//		if ranges.Limit > 0 {
+	//			limit += " LIMIT " + strconv.FormatUint(ranges.Limit, 10)
+	//		}
+	//
+	//		if ranges.Offset > 0 {
+	//			limit += " OFFSET " + strconv.FormatUint(ranges.Offset, 10)
+	//		}
+	//
+	//		// TODO: sqlite & mysql version
+	//	}
+	// " ORDER BY " +
+	//}
 
-	ranges := options.GetRanges()
-
-	if ranges != nil {
-		if len(ranges.OrderBy) > 0 {
-			order = strings.Join(ranges.OrderBy, ", ")
-		}
-
-		if ranges.Offset+ranges.Limit > 0 {
-			if ranges.Limit > 0 {
-				limit += " LIMIT " + strconv.FormatUint(ranges.Limit, 10)
-			}
-
-			if ranges.Offset > 0 {
-				limit += " OFFSET " + strconv.FormatUint(ranges.Offset, 10)
-			}
-
-			// TODO: sqlite & mysql version
-		}
-	}
-
-	return "SELECT " + fields + " FROM " + table + condition + " ORDER BY " + order + limit
+	return "SELECT " + fields + " FROM " + table + condition + order + limit
 }
 
 func SQLCount(table, condition string, _ *crud.Options) string {

@@ -280,14 +280,14 @@ func (c *Config) CompleteWithJoiner(joinerOp joiner.Operator, host string, port 
 	c.Host, c.Port, c.Prefix = host, portStr, prefix
 
 	for key, ep := range c.EndpointsSettled {
-		if endpoint, ok := joinerOp.Interface(ep.InternalKey).(Endpoint); ok {
+		if endpoint, ok := joinerOp.Interface(key).(Endpoint); ok {
 			ep.Endpoint = endpoint
 			c.EndpointsSettled[key] = ep
-		} else if endpointPtr, _ := joinerOp.Interface(ep.InternalKey).(*Endpoint); endpointPtr != nil {
+		} else if endpointPtr, _ := joinerOp.Interface(key).(*Endpoint); endpointPtr != nil {
 			ep.Endpoint = *endpointPtr
 			c.EndpointsSettled[key] = ep
 		} else {
-			return fmt.Errorf("no server_http.Endpoint to complete %#v", ep)
+			return fmt.Errorf("no server_http.Endpoint joined with key %s", key)
 		}
 	}
 
@@ -307,14 +307,16 @@ func (c *Config) CompleteDirectly(endpoints Endpoints, host string, port int, pr
 
 EP_SETTLED:
 	for key, epSettled := range c.EndpointsSettled {
+		// TODO??? use epSettled.InternalKey to correct the main key value
+
 		for _, ep := range endpoints {
-			if ep.InternalKey == epSettled.InternalKey {
+			if ep.InternalKey == key {
 				epSettled.Endpoint = ep
 				c.EndpointsSettled[key] = epSettled
 				continue EP_SETTLED
 			}
 		}
-		return fmt.Errorf("no server_http.Endpoint with key %s", epSettled.InternalKey)
+		return fmt.Errorf("no server_http.Endpoint with key %s", key)
 	}
 
 	return nil

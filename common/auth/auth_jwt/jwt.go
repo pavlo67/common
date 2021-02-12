@@ -11,7 +11,6 @@ import (
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/encrlib"
-	"github.com/pavlo67/common/common/errata"
 	"github.com/pavlo67/common/common/rbac"
 	"github.com/pkg/errors"
 )
@@ -132,17 +131,17 @@ func (authOp *authJWT) Realm() string {
 }
 
 func (authOp *authJWT) AuthenticateSocial(idpID, idpToken string) (*auth.Identity, error) {
-	return nil, errata.NotImplemented
+	return nil, common.ErrNotImplemented
 }
 
 func (authOp *authJWT) ForgotPassword(toRemember auth.Creds) (bool, error) {
-	return false, errata.NotImplemented
+	return false, common.ErrNotImplemented
 }
 
 func (authOp *authJWT) ChangePassword(confirmationCode string, toSet auth.Creds) (bool, error) {
-	return false, errata.NotImplemented
+	return false, common.ErrNotImplemented
 }
 
 func (authOp *authJWT) DiscoverIDP(nickname string) (string, error) {
-	return "", errata.NotImplemented
+	return "", common.ErrNotImplemented
 }

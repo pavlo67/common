@@ -6,6 +6,7 @@ import (
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/crud"
+	"github.com/pavlo67/common/common/selectors"
 )
 
 type Item struct {
@@ -21,4 +22,7 @@ type Operator interface {
 	Read(auth.ID, *crud.Options) (*Item, error)
 	Remove(auth.ID, *crud.Options) error
 	List(options *crud.Options) ([]Item, error)
+
+	HasEmail(email string) (selectors.Term, error)
+	HasNickname(nickname string) (selectors.Term, error)
 }

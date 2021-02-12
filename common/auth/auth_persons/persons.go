@@ -1,7 +1,11 @@
 package auth_persons
 
 import (
+	"fmt"
 	"regexp"
+	"strings"
+
+	"github.com/pavlo67/common/common/selectors"
 
 	"github.com/pavlo67/common/common"
 
@@ -12,7 +16,6 @@ import (
 	"github.com/pavlo67/common/common/errata"
 	"github.com/pavlo67/common/common/persons"
 	"github.com/pavlo67/common/common/rbac"
-	"github.com/pavlo67/common/common/selectors"
 )
 
 var _ auth.Operator = &authPersons{}
@@ -69,7 +72,7 @@ func (authOp *authPersons) SetCreds(authID auth.ID, toSet auth.Creds) (*auth.Cre
 	//	return nil, errata.CommonError(err, onChange)
 	//}
 
-	return nil, errata.NotImplemented
+	return nil, common.ErrNotImplemented
 
 	//credsTypeToSet := auth.CredsType(toSet[auth.CredsToSet])
 	//delete(toSet, auth.CredsToSet)
@@ -111,16 +114,12 @@ const onAuthenticate = "on authPersons.Authenticate()"
 var reEmail = regexp.MustCompile("@")
 
 func (authOp *authPersons) Authenticate(toAuth auth.Creds) (*auth.Identity, error) {
-	var selector *selectors.Term
-
-	nickname := toAuth.StringDefault(auth.CredsNickname, "")
-	if nickname != "" {
-		// selector = selectors.Binary(selectors.Eq, persons.NicknameFieldName, selectors.Value{nickname})
-	} else {
-		return nil, errata.KeyableError(errata.NoCredsKey, common.Map{"no nickname in creds": toAuth})
+	nickname := strings.TrimSpace(toAuth.StringDefault(auth.CredsNickname, ""))
+	if nickname == "" {
+		return nil, errata.KeyableError(common.NoCredsKey, common.Map{"no nickname in creds": toAuth})
 	}
 
-	password := toAuth.StringDefault(auth.CredsPassword, "")
+	password := strings.TrimSpace(toAuth.StringDefault(auth.CredsPassword, ""))
 
 	//if login := toAuth.StringDefault(auth.CredsLogin, ""); login != "" {
 	//	if reEmail.MatchString(login) {
@@ -141,18 +140,31 @@ func (authOp *authPersons) Authenticate(toAuth auth.Creds) (*auth.Identity, erro
 	//	selectors.Binary(selectors.Gt, persons.VerifiedFieldName, selectors.Value{0}),
 	//)
 
-	items, err := authOp.personsOp.List(crud.OptionsWithRoles(rbac.RoleAdmin)) // crud.Options{}.WithSelector(selector)
+	var selector selectors.Item
+	//selector, err := authOp.personsOp.HasNickname(nickname)
+	//if err != nil {
+	//	return nil, errata.CommonError(err, onAuthenticate)
+	//}
+
+	items, err := authOp.personsOp.List(crud.OptionsWithRoles(rbac.RoleAdmin).WithSelector(selector))
 	if err != nil {
-		return nil, errors.Wrapf(err, onAuthenticate+": can't .personsOp.List(selector = %#v, nil)", selector)
+		return nil, errata.CommonError(err, fmt.Sprintf(onAuthenticate+": can't .personsOp.List(selector = %#v, nil)", selector))
 	}
 
 	for _, item := range items {
-		if item.Nickname == nickname && item.CheckCreds(auth.CredsPassword, password) {
+
+		// TODO!!! remove this check adding selector above
+		if item.Nickname != nickname {
+			continue
+		}
+
+		if item.CheckCreds(auth.CredsPassword, password) {
 			return &item.Identity, nil
 		}
+
 	}
 
-	return nil, errata.KeyableError(errata.NoCredsKey, common.Map{onAuthenticate + ": wrong creds": toAuth})
+	return nil, errata.KeyableError(common.NoCredsKey, common.Map{onAuthenticate + ": wrong creds": toAuth})
 
 	//maxPersonsToAuthCheck := authOp.maxPersonsToAuthCheck
 	//if len(items) < authOp.maxPersonsToAuthCheck {

@@ -56,7 +56,7 @@ func (j *joinerRuntime) Join(intrfc interface{}, interfaceKey joiner.InterfaceKe
 	j.components[interfaceKey] = intrfc
 
 	if j.l != nil && !j.options.IsTrue("silent") {
-		j.l.Infof("joined %s", interfaceKey)
+		j.l.Infof("joined (%T) as %s", intrfc, interfaceKey)
 	}
 
 	return nil

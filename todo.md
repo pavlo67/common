@@ -13,9 +13,5 @@
 * auth_ecdsa += email verification
 * public keygen: Web, CLI, bitcoin
 
-## selectors
-
-* authomatic key/id convertation
-
 
 

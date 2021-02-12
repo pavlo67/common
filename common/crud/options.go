@@ -4,29 +4,11 @@ import (
 	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/rbac"
 	"github.com/pavlo67/common/common/selectors"
-	"github.com/pavlo67/common/common/selectors/logic"
 )
 
 type Options struct {
 	Identity *auth.Identity
-	Selector *selectors.Term
-	Ranges   *Ranges
-}
-
-type Ranges struct {
-	GroupBy []string
-	OrderBy []string
-	JoinTo  string
-	Values  []interface{}
-	Offset  uint64
-	Limit   uint64
-}
-
-func (options *Options) GetRanges() *Ranges {
-	if options == nil {
-		return nil
-	}
-	return options.Ranges
+	Selector selectors.Item
 }
 
 func (options *Options) GetIdentity() *auth.Identity {
@@ -36,34 +18,12 @@ func (options *Options) GetIdentity() *auth.Identity {
 	return options.Identity
 }
 
-func (options *Options) GetSelector() *selectors.Term {
-	if options == nil {
-		return nil
-	}
-	return options.Selector
-}
-
-func (options *Options) WithSelector(selector *selectors.Term) *Options {
+func (options *Options) WithSelector(selector selectors.Item) *Options {
 	if options == nil {
 		return &Options{Selector: selector}
 	}
 	optionsCopied := *options
-
-	if options.Selector == nil {
-		optionsCopied.Selector = selector
-	} else if selector != nil {
-		optionsCopied.Selector = logic.AND(selector, options.Selector)
-	}
-
-	return &optionsCopied
-}
-
-func (options *Options) WithRanges(Ranges *Ranges) *Options {
-	if options == nil {
-		return &Options{Ranges: Ranges}
-	}
-	optionsCopied := *options
-	options.Ranges = Ranges
+	optionsCopied.Selector = selector
 
 	return &optionsCopied
 }

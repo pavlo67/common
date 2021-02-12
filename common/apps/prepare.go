@@ -15,7 +15,6 @@ import (
 
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/logger"
-	"github.com/pavlo67/common/common/serializer"
 )
 
 func Prepare(buildDate, buildTag, buildCommit, serviceName, appsSubpathDefault string) (versionOnly bool, envPath string, cfgService *config.Config, l logger.Operator) {
@@ -58,7 +57,7 @@ func Prepare(buildDate, buildTag, buildCommit, serviceName, appsSubpathDefault s
 
 	envPath = cwd + appsSubpath + "_environments/"
 	cfgServicePath := envPath + configEnv + ".yaml"
-	cfgService, err = config.Get(cfgServicePath, serviceName, serializer.MarshalerYAML)
+	cfgService, err = config.Get(cfgServicePath, serviceName, config.MarshalerYAML)
 	if err != nil || cfgService == nil {
 		l.Fatalf("on config.Get(%s, %s, serializer.MarshalerYAML)", cfgServicePath, serviceName, cfgService, err)
 	}
@@ -90,7 +89,7 @@ func PrepareTests(t *testing.T, serviceName, appsSubpath, configEnv, logfile str
 
 	envPath = cwd + appsSubpath + "_environments/"
 	cfgServicePath := envPath + configEnv + ".yaml"
-	cfgService, err = config.Get(cfgServicePath, serviceName, serializer.MarshalerYAML)
+	cfgService, err = config.Get(cfgServicePath, serviceName, config.MarshalerYAML)
 	require.NoError(t, err)
 	require.NotNil(t, cfgService)
 

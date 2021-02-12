@@ -5,7 +5,6 @@ import (
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/errata"
-	"github.com/pavlo67/common/common/serializer"
 	"github.com/pkg/errors"
 )
 
@@ -14,7 +13,7 @@ import (
 type Config struct {
 	serviceName string
 	data        map[string]interface{}
-	marshaler   serializer.Marshaler
+	marshaler   Marshaler
 }
 
 var errNoConfig = errors.New("no config")
@@ -41,12 +40,12 @@ func (c *Config) Value(key string, target interface{}) error {
 		return c.marshaler.Unmarshal(valueRaw, target)
 	}
 
-	return errata.KeyableError(errata.NotFoundKey, common.Map{"reason": "no key in config", "key": key})
+	return errata.KeyableError(common.NotFoundKey, common.Map{"reason": "no key in config", "key": key})
 }
 
 // -----------------------------------------------------------------------------
 
-func Get(cfgFile, serviceName string, marshaler serializer.Marshaler) (*Config, error) {
+func Get(cfgFile, serviceName string, marshaler Marshaler) (*Config, error) {
 
 	if len(cfgFile) < 1 {
 		return nil, errors.New("empty config path")
