@@ -8,9 +8,9 @@ import (
 )
 
 var (
-	BuildDate   = "unknown"
-	BuildTag    = "unknown"
-	BuildCommit = "unknown"
+	BuildDate   = ""
+	BuildTag    = ""
+	BuildCommit = ""
 )
 
 const serviceName = "demo"
@@ -20,8 +20,6 @@ func main() {
 	if versionOnly {
 		return
 	}
-
-	// running starters
 
 	label := "DEMO/REST BUILD"
 	joinerOp, err := starter.Run(demo_api.Components(envPath, true, false), cfgService, label, l)

@@ -9,6 +9,7 @@ import (
 type Options struct {
 	Identity *auth.Identity
 	Selector selectors.Item
+	Tx       interface{}
 }
 
 func (options *Options) GetIdentity() *auth.Identity {
@@ -16,6 +17,13 @@ func (options *Options) GetIdentity() *auth.Identity {
 		return nil
 	}
 	return options.Identity
+}
+
+func (options *Options) GetSelector() selectors.Item {
+	if options == nil {
+		return nil
+	}
+	return options.Selector
 }
 
 func (options *Options) WithSelector(selector selectors.Item) *Options {

@@ -5,12 +5,10 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/pkg/errors"
-
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/crud"
-	"github.com/pavlo67/common/common/errata"
+	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/server"
 	"github.com/pavlo67/common/common/server/server_http"
 )
@@ -45,12 +43,12 @@ var authenticateEndpoint = server_http.Endpoint{
 
 		credsJSON, err := ioutil.ReadAll(req.Body)
 		if err != nil {
-			return serverOp.ResponseRESTError(http.StatusBadRequest, errata.KeyableError(common.WrongBodyKey, common.Map{"error": errors.Wrap(err, "can't read body")}), req)
+			return serverOp.ResponseRESTError(http.StatusBadRequest, errors.KeyableError(common.WrongBodyKey, common.Map{"error": errors.Wrap(err, "can't read body")}), req)
 		}
 
 		var toAuth auth.Creds
 		if err = json.Unmarshal(credsJSON, &toAuth); err != nil {
-			return serverOp.ResponseRESTError(http.StatusBadRequest, errata.KeyableError(common.WrongJSONKey, common.Map{"error": errors.Wrapf(err, "can't unmarshal body: %s", credsJSON)}), req)
+			return serverOp.ResponseRESTError(http.StatusBadRequest, errors.KeyableError(common.WrongJSONKey, common.Map{"error": errors.Wrapf(err, "can't unmarshal body: %s", credsJSON)}), req)
 		}
 		toAuth[auth.CredsIP] = req.RemoteAddr
 
@@ -71,12 +69,12 @@ var setCredsEndpoint = server_http.Endpoint{
 
 		credsJSON, err := ioutil.ReadAll(req.Body)
 		if err != nil {
-			return serverOp.ResponseRESTError(http.StatusBadRequest, errata.KeyableError(common.WrongBodyKey, common.Map{"error": errors.Wrap(err, "can't read body")}), req)
+			return serverOp.ResponseRESTError(http.StatusBadRequest, errors.KeyableError(common.WrongBodyKey, common.Map{"error": errors.Wrap(err, "can't read body")}), req)
 		}
 
 		var toSet auth.Creds
 		if err = json.Unmarshal(credsJSON, &toSet); err != nil {
-			return serverOp.ResponseRESTError(http.StatusBadRequest, errata.KeyableError(common.WrongJSONKey, common.Map{"error": errors.Wrapf(err, "can't unmarshal body: %s", credsJSON)}), req)
+			return serverOp.ResponseRESTError(http.StatusBadRequest, errors.KeyableError(common.WrongJSONKey, common.Map{"error": errors.Wrapf(err, "can't unmarshal body: %s", credsJSON)}), req)
 		}
 		toSet[auth.CredsIP] = req.RemoteAddr
 

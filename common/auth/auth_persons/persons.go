@@ -5,17 +5,13 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/pavlo67/common/common/selectors"
-
 	"github.com/pavlo67/common/common"
-
-	"github.com/pkg/errors"
-
 	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/crud"
-	"github.com/pavlo67/common/common/errata"
+	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/persons"
 	"github.com/pavlo67/common/common/rbac"
+	"github.com/pavlo67/common/common/selectors"
 )
 
 var _ auth.Operator = &authPersons{}
@@ -116,7 +112,7 @@ var reEmail = regexp.MustCompile("@")
 func (authOp *authPersons) Authenticate(toAuth auth.Creds) (*auth.Identity, error) {
 	nickname := strings.TrimSpace(toAuth.StringDefault(auth.CredsNickname, ""))
 	if nickname == "" {
-		return nil, errata.KeyableError(common.NoCredsKey, common.Map{"no nickname in creds": toAuth})
+		return nil, errors.KeyableError(common.NoCredsKey, common.Map{"no nickname in creds": toAuth})
 	}
 
 	password := strings.TrimSpace(toAuth.StringDefault(auth.CredsPassword, ""))
@@ -148,7 +144,7 @@ func (authOp *authPersons) Authenticate(toAuth auth.Creds) (*auth.Identity, erro
 
 	items, err := authOp.personsOp.List(crud.OptionsWithRoles(rbac.RoleAdmin).WithSelector(selector))
 	if err != nil {
-		return nil, errata.CommonError(err, fmt.Sprintf(onAuthenticate+": can't .personsOp.List(selector = %#v, nil)", selector))
+		return nil, errors.CommonError(err, fmt.Sprintf(onAuthenticate+": can't .personsOp.List(selector = %#v, nil)", selector))
 	}
 
 	for _, item := range items {
@@ -164,7 +160,7 @@ func (authOp *authPersons) Authenticate(toAuth auth.Creds) (*auth.Identity, erro
 
 	}
 
-	return nil, errata.KeyableError(common.NoCredsKey, common.Map{onAuthenticate + ": wrong creds": toAuth})
+	return nil, errors.KeyableError(common.NoCredsKey, common.Map{onAuthenticate + ": wrong creds": toAuth})
 
 	//maxPersonsToAuthCheck := authOp.maxPersonsToAuthCheck
 	//if len(items) < authOp.maxPersonsToAuthCheck {

@@ -11,13 +11,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pavlo67/common/common/joiner"
-
 	"github.com/julienschmidt/httprouter"
-	"github.com/pkg/errors"
 
 	"github.com/pavlo67/common/common"
-	"github.com/pavlo67/common/common/errata"
+	"github.com/pavlo67/common/common/errors"
+	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/server"
 	"github.com/pavlo67/common/common/server/server_http"
 	"github.com/pavlo67/common/common/strlib"
@@ -97,7 +95,7 @@ func (s *serverHTTPJschmhr) Addr() (port int, https bool) {
 //}
 
 func (s *serverHTTPJschmhr) ResponseRESTError(status int, err error, req *http.Request) (server.Response, error) {
-	commonErr := errata.CommonError(err)
+	commonErr := errors.CommonError(err)
 
 	key := commonErr.Key()
 	data := common.Map{server.ErrorKey: key}

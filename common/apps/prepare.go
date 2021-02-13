@@ -21,10 +21,16 @@ func Prepare(buildDate, buildTag, buildCommit, serviceName, appsSubpathDefault s
 
 	rand.Seed(time.Now().UnixNano())
 
+	// show build/console params -----------------------------------------------------
+
 	var appsSubpath string
 	flag.BoolVar(&versionOnly, "v", false, "show build vars only")
 	flag.StringVar(&appsSubpath, "apps_subpath", appsSubpathDefault, "subpath to /apps directory")
 	flag.Parse()
+
+	if buildDate = strings.TrimSpace(buildDate); buildDate == "" {
+		buildDate = time.Now().Format(time.RFC3339)
+	}
 
 	log.Printf("builded: %s, tag: %s, commit: %s\n", buildDate, buildTag, buildCommit)
 
@@ -32,14 +38,14 @@ func Prepare(buildDate, buildTag, buildCommit, serviceName, appsSubpathDefault s
 		return versionOnly, "", nil, nil
 	}
 
-	// logger
+	// get logger --------------------------------------------------------------------
 
 	l, err := logger_zap.New(logger.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// getting config environments
+	// get config --------------------------------------------------------------------
 
 	configEnv, ok := os.LookupEnv("ENV")
 	if !ok {
@@ -51,9 +57,6 @@ func Prepare(buildDate, buildTag, buildCommit, serviceName, appsSubpathDefault s
 		l.Fatal("can't os.Getwd(): ", err)
 	}
 	cwd += "/"
-	l.Info("CWD: ", cwd)
-
-	// get config
 
 	envPath = cwd + appsSubpath + "_environments/"
 	cfgServicePath := envPath + configEnv + ".yaml"
@@ -61,6 +64,7 @@ func Prepare(buildDate, buildTag, buildCommit, serviceName, appsSubpathDefault s
 	if err != nil || cfgService == nil {
 		l.Fatalf("on config.Get(%s, %s, serializer.MarshalerYAML)", cfgServicePath, serviceName, cfgService, err)
 	}
+
 	return versionOnly, envPath, cfgService, l
 }
 

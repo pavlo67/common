@@ -4,11 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/pkg/errors"
-
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
-	"github.com/pavlo67/common/common/errata"
+	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/starter"
@@ -61,7 +59,7 @@ func (ss *identity_jwtStarter) Run(joinerOp joiner.Operator) error {
 
 	authOp, err := New(ss.keyPath + "jwt.key")
 	if err != nil || authOp == nil {
-		return errata.CommonError(err, fmt.Sprintf("got %#v", authOp))
+		return errors.CommonError(err, fmt.Sprintf("got %#v", authOp))
 	}
 
 	if err = joinerOp.Join(authOp, ss.interfaceKey); err != nil {

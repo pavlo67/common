@@ -1,13 +1,12 @@
 package auth_server_http
 
 import (
-	"errors"
 	"net/http"
 	"regexp"
 
 	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/crud"
-	"github.com/pavlo67/common/common/errata"
+	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/server/server_http"
 )
 
@@ -41,7 +40,7 @@ func (orm *onRequestMiddleware) Options(r *http.Request) (*crud.Options, error) 
 		tokenJWT = reBearer.ReplaceAllString(tokenJWT, "")
 		var err error
 		if identity, err = orm.authJWTOp.Authenticate(auth.Creds{auth.CredsJWT: tokenJWT}); err != nil {
-			return nil, errata.CommonError(err, onOptions)
+			return nil, errors.CommonError(err, onOptions)
 		}
 	}
 

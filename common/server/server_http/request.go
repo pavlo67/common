@@ -8,12 +8,10 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/pkg/errors"
-
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/crud"
-	"github.com/pavlo67/common/common/errata"
+	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/server"
 )
@@ -130,12 +128,12 @@ func Request(serverURL string, ep EndpointSettled, requestData, responseData int
 
 		errCommon := fmt.Sprintf("can't %s %s: status = %d, body = %s", method, serverURL, resp.StatusCode, responseBody)
 		if data["error"] != nil {
-			data["error"] = errata.CommonError(data["error"], errCommon)
+			data["error"] = errors.CommonError(data["error"], errCommon)
 		} else {
 			data["error"] = errCommon
 		}
-		errorKey := errata.Key(data.StringDefault(server.ErrorKey, ""))
-		return errata.KeyableError(errorKey, data)
+		errorKey := errors.Key(data.StringDefault(server.ErrorKey, ""))
+		return errors.KeyableError(errorKey, data)
 	}
 
 	if responseData != nil {

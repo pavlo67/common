@@ -16,6 +16,8 @@ _environments/*.yml
 .env.*.local
 *.key
 
+# Data
+*.sqlite
 
 # Dependencies
 node_modules

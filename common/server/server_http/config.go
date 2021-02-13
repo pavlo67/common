@@ -2,7 +2,6 @@ package server_http
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"regexp"
@@ -10,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/pavlo67/common/common"
-	"github.com/pavlo67/common/common/errata"
+	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
 )
@@ -261,7 +260,7 @@ type Endpoints []Endpoint
 func JoinEndpoints(joinerOp joiner.Operator, eps Endpoints) error {
 	for i, ep := range eps {
 		if err := joinerOp.Join(&eps[i], ep.InternalKey); err != nil {
-			return errata.CommonError(err, fmt.Sprintf("can't join %#v as server_http.Endpoint with key '%s'", ep, ep.InternalKey))
+			return errors.CommonError(err, fmt.Sprintf("can't join %#v as server_http.Endpoint with key '%s'", ep, ep.InternalKey))
 		}
 	}
 

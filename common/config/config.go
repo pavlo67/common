@@ -4,8 +4,7 @@ import (
 	"io/ioutil"
 
 	"github.com/pavlo67/common/common"
-	"github.com/pavlo67/common/common/errata"
-	"github.com/pkg/errors"
+	"github.com/pavlo67/common/common/errors"
 )
 
 // -----------------------------------------------------------------------------
@@ -40,7 +39,7 @@ func (c *Config) Value(key string, target interface{}) error {
 		return c.marshaler.Unmarshal(valueRaw, target)
 	}
 
-	return errata.KeyableError(common.NotFoundKey, common.Map{"reason": "no key in config", "key": key})
+	return errors.KeyableError(common.NotFoundKey, common.Map{"reason": "no key in config", "key": key})
 }
 
 // -----------------------------------------------------------------------------
