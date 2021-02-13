@@ -12,6 +12,7 @@ type Key = common.Key
 
 type Error interface {
 	error
+	Cause() error
 	Key() Key
 	Data() common.Map
 	Append(interface{}) Error
@@ -42,6 +43,14 @@ type commonError struct {
 	errs multipleErrors
 	key  Key
 	data common.Map
+}
+
+func (ce *commonError) Cause() error {
+	if ce != nil && len(ce.errs) > 0 {
+		return ce.errs[0]
+	}
+
+	return nil
 }
 
 func (ce *commonError) Error() string {
