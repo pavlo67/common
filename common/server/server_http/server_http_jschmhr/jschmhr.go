@@ -221,7 +221,7 @@ func (s *serverHTTPJschmhr) HandleEndpoint(key joiner.InterfaceKey, serverPath s
 		}
 	}
 
-	l.Infof(onHandleEndpoint+": %-10s: %s %s", key, method, path)
+	l.Infof("%-10s: %s %s", key, method, path)
 	switch method {
 	case "GET":
 		s.httpServeMux.GET(path, handler)

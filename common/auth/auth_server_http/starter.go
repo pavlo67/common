@@ -75,5 +75,5 @@ func (ashs *authServerHTTPStarter) Run(joinerOp joiner.Operator) error {
 		return fmt.Errorf("no auth.Operator with key %s", ashs.authKey)
 	}
 
-	return server_http.JoinEndpoints(joinerOp, Endpoints)
+	return Endpoints.Join(joinerOp)
 }

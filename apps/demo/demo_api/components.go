@@ -11,8 +11,6 @@ import (
 	"github.com/pavlo67/common/common/starter"
 )
 
-const prefix = "/backend"
-
 func Components(envPath string, startREST, logRequests bool) []starter.Starter {
 
 	starters := []starter.Starter{
@@ -37,7 +35,7 @@ func Components(envPath string, startREST, logRequests bool) []starter.Starter {
 		starter.Starter{server_http_jschmhr.Starter(), nil},
 
 		// actions starter (connecting specific actions to the corresponding action managers)
-		starter.Starter{Starter(), common.Map{"prefix": prefix}},
+		starter.Starter{Starter(), nil},
 	)
 
 	return starters

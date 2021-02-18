@@ -19,9 +19,7 @@ func Starter() starter.Operator {
 
 var _ starter.Operator = &demoStarter{}
 
-type demoStarter struct {
-	prefix string
-}
+type demoStarter struct{}
 
 // --------------------------------------------------------------------------
 
@@ -32,8 +30,6 @@ func (ds *demoStarter) Name() string {
 }
 
 func (ds *demoStarter) Prepare(cfg *config.Config, options common.Map) error {
-	ds.prefix = options.StringDefault("prefix", "")
-
 	return nil
 }
 
@@ -43,7 +39,7 @@ func (ds *demoStarter) Prepare(cfg *config.Config, options common.Map) error {
 
 // TODO!!! keep in mind that EndpointsConfig key and corresponding .HandlerKey not necessarily are the same, they can be defined different
 
-var serverConfig = server_http.Config{
+var restConfig = server_http.Config{
 	Title:   "Demo REST API",
 	Version: "0.0.1",
 	EndpointsSettled: map[joiner.InterfaceKey]server_http.EndpointSettled{
@@ -51,6 +47,8 @@ var serverConfig = server_http.Config{
 		auth.IntefaceKeySetCreds:     {Path: "/set_creds", Tags: []string{"unauthorized"}},
 	},
 }
+
+const restPrefix = "/backend"
 
 func (ds *demoStarter) Run(joinerOp joiner.Operator) error {
 	if l, _ = joinerOp.Interface(logger.InterfaceKey).(logger.Operator); l == nil {
@@ -63,16 +61,19 @@ func (ds *demoStarter) Run(joinerOp joiner.Operator) error {
 	}
 
 	srvPort, isHTTPS := srvOp.Addr()
+	restStaticPath := filelib.CurrentPath() + "./api-docs/"
 
-	if err := serverConfig.CompleteWithJoiner(joinerOp, "", srvPort, ds.prefix); err != nil {
+	if err := restConfig.CompleteWithJoiner(joinerOp, "", srvPort, restPrefix); err != nil {
+		return err
+	}
+	if err := restConfig.HandlePages(srvOp, l); err != nil {
 		return err
 	}
 
-	if err := server_http.InitEndpointsWithSwaggerV2(
-		srvOp, serverConfig, !isHTTPS,
-		filelib.CurrentPath()+"api-docs/", "api-docs",
-		l,
-	); err != nil {
+	if err := restConfig.InitSwagger(isHTTPS, restStaticPath+"swaggerJSON.json", l); err != nil {
+		return err
+	}
+	if err := srvOp.HandleFiles("rest_static", restPrefix+"/api-docs/*filepath", server_http.StaticPath{LocalPath: restStaticPath}); err != nil {
 		return err
 	}
 

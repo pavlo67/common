@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"regexp"
+	"net/url"
 	"strconv"
 	"strings"
 
@@ -13,24 +13,6 @@ import (
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
 )
-
-type Endpoint struct {
-	InternalKey joiner.InterfaceKey
-	Method      string          `json:",omitempty"`
-	PathParams  []string        `json:",omitempty"`
-	QueryParams []string        `json:",omitempty"`
-	BodyParams  json.RawMessage `json:",omitempty"`
-	Produces    []string        `json:",omitempty"`
-
-	WorkerHTTP
-}
-
-type EndpointSettled struct {
-	Path string
-	Tags []string
-
-	Endpoint
-}
 
 type Config struct {
 	Title            string
@@ -41,9 +23,36 @@ type Config struct {
 	EndpointsSettled map[joiner.InterfaceKey]EndpointSettled
 }
 
-type Swagger map[string]interface{}
+func (c Config) EP(endpointKey joiner.InterfaceKey, params []string, createFullURL bool) (string, string, error) {
+	ep, ok := c.EndpointsSettled[endpointKey]
+	if !ok {
+		return "", "", fmt.Errorf("no endpoint with key '%s'", endpointKey)
+	}
 
-// type SwaggerEndpoint struct {}
+	if len(ep.PathParams) != len(params) {
+		return "", "", fmt.Errorf("wrong params list (%#v) for endpoint (%s / %#v)", params, endpointKey, ep)
+	}
+
+	var urlStr string
+	if createFullURL {
+		urlStr = c.Host
+		if c.Port = strings.TrimSpace(c.Port); c.Port != "" {
+			urlStr += ":" + c.Port
+		}
+	}
+	urlStr += c.Prefix
+
+	for i, param := range params {
+		if param == "" {
+			return "", "", fmt.Errorf("empty param %d in list (%#v) for endpoint (%s / %#v)", i, params, endpointKey, ep)
+		}
+		urlStr += "/" + url.PathEscape(param)
+	}
+
+	return ep.Method, urlStr, nil
+}
+
+type Swagger map[string]interface{}
 
 func (c Config) SwaggerV2(isHTTPS bool) ([]byte, error) {
 	paths := map[string]common.Map{} // map[string]map[string]map[string]interface{}{}
@@ -144,128 +153,36 @@ func (c Config) SwaggerV2(isHTTPS bool) ([]byte, error) {
 	return json.MarshalIndent(swagger, "", " ")
 }
 
-const swaggerFile = "swagger.json"
-
-const onInitEndpointsWithSwaggerV2 = "on server_http.InitEndpointsWithSwaggerV2()"
-
-func InitEndpointsWithSwaggerV2(srvOp Operator, cfg Config, isHTTPS bool, swaggerPath, swaggerSubpath string, l logger.Operator) error {
-	if srvOp == nil {
-		return errors.New(onInitEndpointsWithSwaggerV2 + ": srvOp == nil")
-	}
-
-	swaggerFilePath := swaggerPath + swaggerFile
-
-	swagger, err := cfg.SwaggerV2(isHTTPS)
+func (c Config) InitSwagger(isHTTPS bool, swaggerStaticFilePath string, l logger.Operator) error {
+	swaggerJSON, err := c.SwaggerV2(isHTTPS)
 	if err != nil {
-		return fmt.Errorf(onInitEndpointsWithSwaggerV2+": %s", err) //
+		return err
 	}
-
-	if err = ioutil.WriteFile(swaggerFilePath, swagger, 0644); err != nil {
-		return fmt.Errorf(onInitEndpointsWithSwaggerV2+": on ioutil.WriteFile(%s, %s, 0755): %s", swaggerFilePath, swagger, err)
+	if err = ioutil.WriteFile(swaggerStaticFilePath, swaggerJSON, 0644); err != nil {
+		return fmt.Errorf("on ioutil.WriteFile(%s, %s, 0755): %s", swaggerStaticFilePath, swaggerJSON, err)
 	}
-	l.Infof(onInitEndpointsWithSwaggerV2+": %d bytes are written into %s", len(swagger), swaggerFilePath)
+	l.Infof("%d bytes are written into %s", len(swaggerJSON), swaggerStaticFilePath)
 
-	for key, ep := range cfg.EndpointsSettled {
-		if err := srvOp.HandleEndpoint(key, cfg.Prefix+ep.Path, ep.Endpoint); err != nil {
-			return fmt.Errorf(onInitEndpointsWithSwaggerV2+": handling endpoint(%s, %s, %#v) got %s", key, ep.Path, ep.Endpoint, err)
-		}
-	}
-
-	return srvOp.HandleFiles("swagger", cfg.Prefix+"/"+swaggerSubpath+"/*filepath", StaticPath{LocalPath: swaggerPath})
+	return nil
 }
 
-const onInitPages = "on server_http.InitPages()"
+const onInitPages = "on server_http.HandlePages()"
 
-func InitPages(srvOp Operator, pagesCfg Config, l logger.Operator) error {
+func (c Config) HandlePages(srvOp Operator, l logger.Operator) error {
 	if srvOp == nil {
 		return errors.New(onInitPages + ": srvOp == nil")
 	}
 
-	for key, ep := range pagesCfg.EndpointsSettled {
-		if err := srvOp.HandleEndpoint(key, pagesCfg.Prefix+ep.Path, ep.Endpoint); err != nil {
+	for key, ep := range c.EndpointsSettled {
+		if err := srvOp.HandleEndpoint(key, c.Prefix+ep.Path, ep.Endpoint); err != nil {
 			return fmt.Errorf(onInitPages+": handling %s, %s, %#v got %s", key, ep.Path, ep.Endpoint, err)
 		}
 	}
 
 	return nil
-	// return srvOp.HandleFiles("swagger", pagesCfg.Prefix+"/"+swaggerSubpath+"/*filepath", StaticPath{LocalPath: swaggerPath})
-}
-
-var rePathParam = regexp.MustCompile(":[^/]+")
-
-//func (ep Endpoint) PathWithParams(params ...string) string {
-//	matches := rePathParam.FindAllStringSubmatchIndex(ep.Path, -1)
-//
-//	numMatches := len(matches)
-//	if len(params) < numMatches {
-//		numMatches = len(params)
-//	}
-//
-//	path := ep.Path
-//	for nm := numMatches - 1; nm >= 0; nm-- {
-//		path = path[:matches[nm][0]] + url.PathEscape(strings.ReplaceTags(params[nm], "/", "%2F", -1)) + path[matches[nm][1]:]
-//	}
-//
-//	return path
-//}
-
-func (ep Endpoint) PathTemplate(serverPath string) string {
-	if len(serverPath) == 0 || serverPath[0] != '/' {
-		serverPath = "/" + serverPath
-	}
-
-	if len(ep.PathParams) < 1 {
-		return serverPath
-	}
-
-	var pathParams []string
-	for _, pp := range ep.PathParams {
-		if len(pp) > 0 && pp[0] == '*' {
-			pathParams = append(pathParams, pp)
-		} else {
-			pathParams = append(pathParams, ":"+pp)
-		}
-
-	}
-
-	return serverPath + "/" + strings.Join(pathParams, "/")
-}
-
-func (ep Endpoint) PathTemplateBraced(serverPath string) string {
-	if len(serverPath) == 0 || serverPath[0] != '/' {
-		serverPath = "/" + serverPath
-	}
-
-	if len(ep.PathParams) < 1 {
-		return serverPath
-	}
-
-	var pathParams []string
-	for _, pp := range ep.PathParams {
-		if len(pp) > 0 && pp[0] == '*' {
-			pathParams = append(pathParams, pp[1:])
-		} else {
-			pathParams = append(pathParams, pp)
-		}
-
-	}
-
-	return serverPath + "/{" + strings.Join(ep.PathParams, "}/{") + "}"
 }
 
 // joining endpoints -----------------------------------------------------
-
-type Endpoints []Endpoint
-
-func JoinEndpoints(joinerOp joiner.Operator, eps Endpoints) error {
-	for i, ep := range eps {
-		if err := joinerOp.Join(&eps[i], ep.InternalKey); err != nil {
-			return errors.CommonError(err, fmt.Sprintf("can't join %#v as server_http.Endpoint with key '%s'", ep, ep.InternalKey))
-		}
-	}
-
-	return nil
-}
 
 func (c *Config) CompleteWithJoiner(joinerOp joiner.Operator, host string, port int, prefix string) error {
 	if c == nil {
