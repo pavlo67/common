@@ -40,7 +40,7 @@ func (c Config) EP(endpointKey joiner.InterfaceKey, params []string, createFullU
 			urlStr += ":" + c.Port
 		}
 	}
-	urlStr += c.Prefix
+	urlStr += c.Prefix + ep.Path
 
 	for i, param := range params {
 		if param == "" {

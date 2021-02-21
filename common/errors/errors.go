@@ -8,7 +8,7 @@ import (
 	"github.com/pavlo67/common/common"
 )
 
-type Key = common.Key
+type Key = common.ErrorKey
 
 type Error interface {
 	error
@@ -33,6 +33,39 @@ func KeyableError(key Key, data common.Map) Error {
 		key:  key,
 		data: data,
 	}
+}
+
+func Keyed(err error) Key {
+	if err == nil {
+		return ""
+	}
+
+	if errs, _ := err.(Error); errs != nil {
+		return errs.Key()
+	}
+	return ""
+}
+
+func Cause(err error) error {
+	if err == nil {
+		return nil
+	}
+
+	if errs, _ := err.(Error); errs != nil {
+		return errs.Cause()
+	}
+	return nil
+}
+
+func Data(err error) common.Map {
+	if err == nil {
+		return nil
+	}
+
+	if errs, _ := err.(Error); errs != nil {
+		return errs.Data()
+	}
+	return nil
 }
 
 // commonError -------------------------------------------------------------------------------------------------------

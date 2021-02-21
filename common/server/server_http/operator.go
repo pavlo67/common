@@ -25,7 +25,7 @@ type StaticPath struct {
 }
 
 type Operator interface {
-	ResponseRESTOk(status int, data interface{}) (server.Response, error)
+	ResponseRESTOk(status int, data interface{}, req *http.Request) (server.Response, error)
 	ResponseRESTError(status int, err error, req *http.Request) (server.Response, error)
 	HandleEndpoint(key joiner.InterfaceKey, serverPath string, endpoint Endpoint) error
 	HandleFiles(key joiner.InterfaceKey, serverPath string, staticPath StaticPath) error

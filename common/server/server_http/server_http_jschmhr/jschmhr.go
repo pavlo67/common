@@ -117,21 +117,19 @@ func (s *serverHTTPJschmhr) ResponseRESTError(status int, err error, req *http.R
 		data["details"] = commonErr.Error()
 	}
 
-	if req != nil {
-		err = fmt.Errorf("ERROR on %s %s, got: %s", req.Method, req.URL, commonErr.Error())
-		// TODO: add body[:2048] for debugging
-	} else {
-		err = commonErr
-	}
-
 	jsonBytes, errJSON := json.Marshal(data)
 	if errJSON != nil {
-		l.Errorf("ERROR marshalling error data (%#v): %s", data, errJSON)
+		commonErr = commonErr.Append(fmt.Errorf("marshalling error data (%#v): %s", data, errJSON))
 	}
-	return server.Response{Status: status, Data: jsonBytes}, err
+
+	if req != nil {
+		commonErr = commonErr.Append(fmt.Errorf("on %s %s", req.Method, req.URL))
+	}
+
+	return server.Response{Status: status, Data: jsonBytes}, commonErr
 }
 
-func (s *serverHTTPJschmhr) ResponseRESTOk(status int, data interface{}) (server.Response, error) {
+func (s *serverHTTPJschmhr) ResponseRESTOk(status int, data interface{}, req *http.Request) (server.Response, error) {
 	if status == 0 {
 		status = http.StatusOK
 	}
@@ -158,7 +156,13 @@ func (s *serverHTTPJschmhr) ResponseRESTOk(status int, data interface{}) (server
 	default:
 		var err error
 		if dataBytes, err = json.Marshal(data); err != nil {
-			return server.Response{Status: http.StatusInternalServerError}, errors.Wrapf(err, "can't marshal json (%#v)", data)
+			if req != nil {
+				err = fmt.Errorf("on %s %s: can't marshal json (%#v), got %s", req.Method, req.URL, data, err)
+			} else {
+				err = fmt.Errorf("can't marshal json (%#v): %s", data, err)
+			}
+
+			return server.Response{Status: http.StatusInternalServerError}, err
 		}
 	}
 
@@ -199,6 +203,7 @@ func (s *serverHTTPJschmhr) HandleEndpoint(key joiner.InterfaceKey, serverPath s
 
 		responseData, err := endpoint.WorkerHTTP(s, r, params, options)
 		if err != nil {
+
 			l.Error(err)
 		}
 

@@ -4,28 +4,30 @@ import (
 	"errors"
 )
 
-const CantPerformKey Key = "cant_perform"
+type ErrorKey string
 
-const NoCredsKey Key = "no_creds"
-const InvalidCredsKey Key = "invalid_creds"
-const NoUserKey Key = "no_user"
-const DuplicateUserKey Key = "duplicate_user"
-const NoRightsKey Key = "no_rights"
+const CantPerformKey ErrorKey = "cant_perform"
 
-const NotUniqueEmailKey Key = "not_unique_email"
-const WrongPathKey Key = "wrong_path"
-const WrongBodyKey Key = "wrong_body"
-const WrongIDKey Key = "wrong_id"
-const WrongJSONKey Key = "wrong_json"
+const NoCredsKey ErrorKey = "no_creds"
+const InvalidCredsKey ErrorKey = "invalid_creds"
+const NoUserKey ErrorKey = "no_user"
+const DuplicateUserKey ErrorKey = "duplicate_user"
+const NoRightsKey ErrorKey = "no_rights"
 
-const NotFoundKey Key = "not_found"
+const NotUniqueEmailKey ErrorKey = "not_unique_email"
+const WrongPathKey ErrorKey = "wrong_path"
+const WrongBodyKey ErrorKey = "wrong_body"
+const WrongIDKey ErrorKey = "wrong_id"
+const WrongJSONKey ErrorKey = "wrong_json"
+
+const NotFoundKey ErrorKey = "not_found"
 
 var ErrNotFound = errors.New(string(NotFoundKey))
 
-const NullItemKey Key = "null_item"
+const NullItemKey ErrorKey = "null_item"
 
 var ErrNullItem = errors.New(string(NullItemKey))
 
-const NotImplementedKey Key = "not_implemented"
+const NotImplementedKey ErrorKey = "not_implemented"
 
 var ErrNotImplemented = errors.New(string(NotImplementedKey))

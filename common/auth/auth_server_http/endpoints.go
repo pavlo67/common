@@ -57,7 +57,7 @@ var authenticateEndpoint = server_http.Endpoint{
 			return serverOp.ResponseRESTError(0, err, req)
 		}
 
-		return serverOp.ResponseRESTOk(http.StatusOK, identity)
+		return serverOp.ResponseRESTOk(http.StatusOK, identity, req)
 	},
 }
 
@@ -88,6 +88,6 @@ var setCredsEndpoint = server_http.Endpoint{
 			return serverOp.ResponseRESTError(0, err, req)
 		}
 
-		return serverOp.ResponseRESTOk(http.StatusOK, creds)
+		return serverOp.ResponseRESTOk(http.StatusOK, creds, req)
 	},
 }
