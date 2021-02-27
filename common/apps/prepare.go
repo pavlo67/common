@@ -17,7 +17,7 @@ import (
 	"github.com/pavlo67/common/common/logger"
 )
 
-func Prepare(buildDate, buildTag, buildCommit, serviceName, appsSubpathDefault string) (versionOnly bool, envPath string, cfgService *config.Config, l logger.Operator) {
+func Prepare(buildDate, buildTag, buildCommit, appsSubpathDefault string) (versionOnly bool, envPath string, cfgService *config.Config, l logger.Operator) {
 
 	rand.Seed(time.Now().UnixNano())
 
@@ -60,15 +60,15 @@ func Prepare(buildDate, buildTag, buildCommit, serviceName, appsSubpathDefault s
 
 	envPath = cwd + appsSubpath + "_environments/"
 	cfgServicePath := envPath + configEnv + ".yaml"
-	cfgService, err = config.Get(cfgServicePath, serviceName, config.MarshalerYAML)
+	cfgService, err = config.Get(cfgServicePath, config.MarshalerYAML)
 	if err != nil || cfgService == nil {
-		l.Fatalf("on config.Get(%s, %s, serializer.MarshalerYAML)", cfgServicePath, serviceName, cfgService, err)
+		l.Fatalf("on config.Get(%s, serializer.MarshalerYAML)", cfgServicePath, cfgService, err)
 	}
 
 	return versionOnly, envPath, cfgService, l
 }
 
-func PrepareTests(t *testing.T, serviceName, appsSubpath, configEnv, logfile string) (envPath string, cfgService *config.Config, l logger.Operator) {
+func PrepareTests(t *testing.T, appsSubpath, configEnv, logfile string) (envPath string, cfgService *config.Config, l logger.Operator) {
 
 	os.Setenv("ENV", configEnv)
 
@@ -93,7 +93,7 @@ func PrepareTests(t *testing.T, serviceName, appsSubpath, configEnv, logfile str
 
 	envPath = cwd + appsSubpath + "_environments/"
 	cfgServicePath := envPath + configEnv + ".yaml"
-	cfgService, err = config.Get(cfgServicePath, serviceName, config.MarshalerYAML)
+	cfgService, err = config.Get(cfgServicePath, config.MarshalerYAML)
 	require.NoError(t, err)
 	require.NotNil(t, cfgService)
 

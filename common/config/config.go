@@ -44,7 +44,7 @@ func (c *Config) Value(key string, target interface{}) error {
 
 // -----------------------------------------------------------------------------
 
-func Get(cfgFile, serviceName string, marshaler Marshaler) (*Config, error) {
+func Get(cfgFile string, marshaler Marshaler) (*Config, error) {
 
 	if len(cfgFile) < 1 {
 		return nil, errors.New("empty config path")
@@ -55,7 +55,7 @@ func Get(cfgFile, serviceName string, marshaler Marshaler) (*Config, error) {
 		return nil, errors.Wrapf(err, "can't read config file from '%s'", cfgFile)
 	}
 
-	cfg := Config{serviceName: serviceName, marshaler: marshaler}
+	cfg := Config{marshaler: marshaler}
 	err = marshaler.Unmarshal(data, &cfg.data)
 	if err != nil {
 		return nil, errors.Wrapf(err, "can't .Unmarshal('%s') from config '%s'", data, cfgFile)

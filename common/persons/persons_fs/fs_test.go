@@ -3,19 +3,18 @@ package persons_fs
 import (
 	"testing"
 
-	"github.com/pavlo67/common/common/crud"
-	"github.com/pavlo67/common/common/persons"
-	"github.com/pavlo67/common/common/starter"
-
 	"github.com/stretchr/testify/require"
 
 	"github.com/pavlo67/common/common/apps"
+	"github.com/pavlo67/common/common/crud"
+	"github.com/pavlo67/common/common/persons"
+	"github.com/pavlo67/common/common/starter"
 )
 
 func TestOperator(t *testing.T) {
 	_, cfgService, l := apps.PrepareTests(
 		t,
-		"test_service", "../../../"+apps.AppsSubpathDefault,
+		"../../../"+apps.AppsSubpathDefault,
 		"test",
 		"", // "persons_test."+strconv.FormatInt(time.Now().Unix(), 10)+".log",
 	)

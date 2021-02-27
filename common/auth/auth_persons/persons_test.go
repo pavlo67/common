@@ -10,13 +10,11 @@ import (
 	"github.com/pavlo67/common/common/starter"
 )
 
-const serviceName = "notebook"
-
 func TestOperator(t *testing.T) {
 
 	_, cfgService, l := apps.PrepareTests(
 		t,
-		"test_service", "../../../"+apps.AppsSubpathDefault,
+		"../../../"+apps.AppsSubpathDefault,
 		"test",
 		"", // "connect_test."+strconv.FormatInt(time.Now().Unix(), 10)+".log",
 	)
