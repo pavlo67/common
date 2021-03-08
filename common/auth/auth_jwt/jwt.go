@@ -2,6 +2,8 @@ package auth_jwt
 
 import (
 	"crypto/rsa"
+	"encoding/json"
+	"fmt"
 	"strings"
 	"time"
 
@@ -70,27 +72,31 @@ func (authOp *authJWT) SetCreds(userID auth.ID, creds auth.Creds) (*auth.Creds, 
 			// Expiry:   jwt.NewNumericDate(time.Date(2017, 1, 1, 0, 8, 0, 0, time.UTC)),
 		},
 
-		Nickname: creds.StringDefault(auth.CredsNickname, ""),
+		Nickname: creds[auth.CredsNickname],
 	}
 
-	companyID := creds.StringDefault(auth.CredsCompanyID, "")
+	companyID := creds[auth.CredsCompanyID]
 	if companyID != "" {
 		jc.CompanyID = common.IDStr(companyID)
 	}
 
-	companyIDExternal := creds.StringDefault(auth.CredsCompanyIDExternal, "")
+	companyIDExternal := creds[auth.CredsCompanyIDExternal]
 	if companyIDExternal != "" {
 		jc.CompanyIDExternal = common.IDStr(companyIDExternal)
 	}
 
-	jc.Roles, _ = creds[auth.CredsRoles].(rbac.Roles)
+	if roles := creds[auth.CredsRoles]; roles != "" {
+		if err := json.Unmarshal([]byte(roles), &jc.Roles); err != nil {
+			return nil, fmt.Errorf("on authJWT.SetCreds() with json.Unmarshal(%s): %s", roles, err)
+		}
+	}
 
 	// add claims to the Builder
 	builder := authOp.builder.Claims(jc)
 
 	rawJWT, err := builder.CompactSerialize()
 	if err != nil {
-		return nil, errors.Wrap(err, "on authJWT.SetCreds() with builder.CompactSerialize()")
+		return nil, fmt.Errorf("on authJWT.SetCreds() with builder.CompactSerialize(): %s", err)
 	}
 
 	delete(creds, auth.CredsToSet)
@@ -101,7 +107,7 @@ func (authOp *authJWT) SetCreds(userID auth.ID, creds auth.Creds) (*auth.Creds, 
 }
 
 func (authOp *authJWT) Authenticate(toAuth auth.Creds) (*auth.Identity, error) {
-	credsJWT := toAuth.StringDefault(auth.CredsJWT, "")
+	credsJWT := toAuth[auth.CredsJWT]
 	if strings.TrimSpace(credsJWT) == "" {
 		return nil, nil
 	}

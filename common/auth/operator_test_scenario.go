@@ -52,11 +52,11 @@ func OperatorTestScenarioPassword(t *testing.T, operator Operator) {
 	}
 
 	for i, tc := range testCreds {
-		password := tc.StringDefault(CredsPassword, "")
+		password := tc[CredsPassword]
 
 		t.Log(i)
 
-		// .SetCreds() ------------------------------------------
+		// .SetCredsByKey() ------------------------------------------
 
 		userCreds, err := operator.SetCreds("", tc)
 		require.NoError(t, err)
@@ -110,7 +110,7 @@ func OperatorTestScenarioToken(t *testing.T, operator Operator) {
 	for i, tc := range testCreds {
 		t.Log(i)
 
-		// .SetCreds() ------------------------------------------
+		// .SetCredsByKey() ------------------------------------------
 
 		userCreds, err := operator.SetCreds("", tc)
 		require.NoError(t, err)
@@ -143,7 +143,7 @@ func OperatorTestScenarioPublicKey(t *testing.T, operator Operator) {
 	for i, tc := range testCreds {
 		t.Log(i)
 
-		// .SetCreds() ------------------------------------------
+		// .SetCredsByKey() ------------------------------------------
 
 		// tc[CredsToSet] = CredsPrivateKey
 
@@ -160,15 +160,15 @@ func OperatorTestScenarioPublicKey(t *testing.T, operator Operator) {
 
 		// .InitAuth() -----------------------------------
 
-		privKeySerialization := []byte(userCreds.StringDefault(CredsPrivateKey, ""))
+		privKeySerialization := []byte((*userCreds)[CredsPrivateKey])
 		privKey, err := encrlib.ECDSADeserialize(privKeySerialization)
 		require.NoError(t, err)
 		require.NotNil(t, privKey)
 
-		publicKeyBase58 := userCreds.StringDefault(CredsPublicKeyBase58, "")
+		publicKeyBase58 := (*userCreds)[CredsPublicKeyBase58]
 		log.Printf("public key base58: %s", publicKeyBase58)
 
-		credsToSet := Creds{CredsToSet: CredsKeyToSignature} // CredsIP: testIP,
+		credsToSet := Creds{CredsToSet: string(CredsKeyToSignature)} // CredsIP: testIP,
 		sessionCreds, err := operator.SetCreds("", credsToSet)
 		require.NoError(t, err)
 		require.NotNil(t, sessionCreds)

@@ -3,8 +3,6 @@ package auth_http
 import (
 	"encoding/json"
 
-	"github.com/pavlo67/common/common/crud"
-
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/common/common/auth"
@@ -37,14 +35,14 @@ func (authOp *authHTTP) SetCreds(authID auth.ID, toSet auth.Creds) (*auth.Creds,
 	}
 
 	var creds *auth.Creds
-	if err := server_http.Request(serverURL, ep, requestBody, creds, &crud.Options{Identity: &auth.Identity{ID: authID}}, l); err != nil {
+	if err := server_http.Request(serverURL, ep, requestBody, creds, nil, l); err != nil {
 		return nil, err
 	}
 
 	return creds, nil
 }
 
-// Authenticate can require to call .SetCreds() first and to use some session-generated creds
+// Authenticate can require to call .SetCredsByKey() first and to use some session-generated creds
 const onAuthenticate = "on authHTTP.Authenticate()"
 
 func (authOp *authHTTP) Authenticate(toAuth auth.Creds) (*auth.Identity, error) {

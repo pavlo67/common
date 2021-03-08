@@ -10,7 +10,6 @@ import (
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/auth"
-	"github.com/pavlo67/common/common/crud"
 	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/server"
@@ -29,7 +28,7 @@ type ResponseBinary struct {
 	Data     []byte
 }
 
-func Request(serverURL string, ep EndpointSettled, requestData, responseData interface{}, options *crud.Options, l logger.Operator) error {
+func Request(serverURL string, ep EndpointSettled, requestData, responseData interface{}, creds auth.Creds, l logger.Operator) error {
 	client := &http.Client{}
 	method := ep.Endpoint.Method
 
@@ -71,13 +70,10 @@ func Request(serverURL string, ep EndpointSettled, requestData, responseData int
 		defer Close(req.Body, client, nil)
 	}
 
-	if identity := options.GetIdentity(); identity != nil {
-		if jwt := identity.GetCredsStr(auth.CredsJWT); jwt != "" {
-			req.Header.Add("Authorization", jwt)
-		} else if token := identity.GetCredsStr(auth.CredsToken); token != "" {
-			req.Header.Add("Authorization", token)
-		}
-
+	if jwt := creds[auth.CredsJWT]; jwt != "" {
+		req.Header.Add("Authorization", jwt)
+	} else if token := creds[auth.CredsToken]; token != "" {
+		req.Header.Add("Authorization", token)
 	}
 	var responseBody []byte
 

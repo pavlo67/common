@@ -8,11 +8,13 @@ require (
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/lib/pq v1.9.0
 	github.com/mattn/go-sqlite3 v1.14.6
-	github.com/pkg/errors v0.8.1
+	github.com/pavlo67/data_exchange v0.0.1
+	github.com/pavlo67/tools v0.0.0-20210222112358-a1a9f3b18fe3
+	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.0
 	github.com/yosuke-furukawa/json5 v0.1.1
 	go.uber.org/zap v1.16.0
-	golang.org/x/text v0.3.0
+	golang.org/x/text v0.3.2
 	gopkg.in/square/go-jose.v2 v2.5.1
-	gopkg.in/yaml.v2 v2.2.7
+	gopkg.in/yaml.v2 v2.3.0
 )

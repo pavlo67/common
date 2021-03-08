@@ -4,20 +4,16 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/pavlo67/common/common"
 	"github.com/stretchr/testify/require"
 
 	"github.com/pavlo67/common/common/rbac"
 )
 
 func TestJSON(t *testing.T) {
-	testPassword := "ttt"
-
 	identity := Identity{
 		ID:       "1",
 		Nickname: "2",
 		Roles:    rbac.Roles{rbac.RoleUser},
-		creds:    common.Map{CredsPassword: testPassword},
 	}
 
 	bytes, err := json.Marshal(identity)

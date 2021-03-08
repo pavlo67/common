@@ -37,26 +37,19 @@ func New(personsOp persons.Operator, maxPersonsToAuthCheck int) (auth.Operator, 
 	}, nil
 }
 
-const onSetCreds = "on authPersons.SetCreds()"
+const onSetCreds = "on authPersons.SetCredsByKey()"
 
 func (authOp *authPersons) SetCreds(authID auth.ID, toSet auth.Creds) (*auth.Creds, error) {
 	if authID == "" {
 		// TODO: set .Allowed = false and verify email
 
 		identity := auth.Identity{
-			Nickname: toSet.StringDefault(auth.CredsNickname, ""),
-		}
-
-		for k, v := range toSet {
-			if k == auth.CredsNickname {
-				continue
-			}
-			identity.SetCreds(k, v)
+			Nickname: toSet[auth.CredsNickname],
 		}
 
 		// TODO!!! hash password
 
-		_, err := authOp.personsOp.Add(identity, nil, crud.OptionsWithRoles(rbac.RoleAdmin))
+		_, err := authOp.personsOp.Add(identity, toSet, nil, crud.OptionsWithRoles(rbac.RoleAdmin))
 		if err != nil {
 			return nil, errors.Wrapf(err, onSetCreds+"can't .personsOp.Save(%#v, nil)", identity)
 		}
@@ -110,12 +103,12 @@ const onAuthenticate = "on authPersons.Authenticate()"
 var reEmail = regexp.MustCompile("@")
 
 func (authOp *authPersons) Authenticate(toAuth auth.Creds) (*auth.Identity, error) {
-	nickname := strings.TrimSpace(toAuth.StringDefault(auth.CredsNickname, ""))
+	nickname := strings.TrimSpace(toAuth[auth.CredsNickname])
 	if nickname == "" {
 		return nil, errors.KeyableError(common.NoCredsKey, common.Map{"no nickname in creds": toAuth})
 	}
 
-	password := strings.TrimSpace(toAuth.StringDefault(auth.CredsPassword, ""))
+	password := strings.TrimSpace(toAuth[auth.CredsPassword])
 
 	//if login := toAuth.StringDefault(auth.CredsLogin, ""); login != "" {
 	//	if reEmail.MatchString(login) {

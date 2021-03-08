@@ -31,3 +31,7 @@ var ErrNullItem = errors.New(string(NullItemKey))
 const NotImplementedKey ErrorKey = "not_implemented"
 
 var ErrNotImplemented = errors.New(string(NotImplementedKey))
+
+const NotSupportedKey ErrorKey = "not_supported"
+
+var ErrNotSupported = errors.New(string(NotSupportedKey))

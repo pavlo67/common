@@ -1,132 +1,10 @@
 package auth
 
-import (
-	"fmt"
-	"strings"
+type Creds map[CredsType]string
 
-	"github.com/GehirnInc/crypt"
-	_ "github.com/GehirnInc/crypt/sha256_crypt"
-	"github.com/pkg/errors"
+type CredsType string
 
-	"github.com/pavlo67/common/common"
-	"github.com/pavlo67/common/common/rbac"
-)
-
-type Creds = common.Map
-
-var crypter = crypt.SHA256.New()
-
-func hash(value string) (string, error) {
-	if value := strings.TrimSpace(value); value == "" {
-		return "", errors.New("no value to hash")
-	}
-
-	var salt []byte // TODO: generate salt
-	hash, err := crypter.Generate([]byte(value), salt)
-	if err != nil {
-		return "", errors.Wrap(err, fmt.Sprintf("can't crypt.Generate(%s, %s)", value, salt))
-	}
-
-	return hash, nil
-}
-
-func (identity *Identity) CheckCreds(key, value string) bool {
-	if identity == nil {
-		return false
-	}
-
-	if key != CredsPassword {
-		return identity.creds.StringDefault(key, "") == value
-	}
-
-	return crypter.Verify(identity.creds.StringDefault(CredsPasshash, ""), []byte(value)) == nil
-}
-
-func (identity *Identity) GetCredsAll() Creds {
-	if identity == nil {
-		return nil
-	}
-
-	return identity.creds
-}
-
-func (identity *Identity) GetCreds(key string) interface{} {
-	if identity == nil {
-		return nil
-	}
-
-	return identity.creds[key]
-}
-
-func (identity *Identity) GetCredsStr(key string) string {
-	if identity == nil {
-		return ""
-	}
-
-	return identity.creds.StringDefault(key, "")
-}
-
-func (identity *Identity) SetCreds(key string, value interface{}) error {
-	if identity == nil {
-		return nil
-	}
-
-	if identity.creds == nil {
-		identity.creds = common.Map{}
-	}
-
-	if key != CredsPassword {
-		identity.creds[key] = value
-		return nil
-	}
-
-	var valueStr *string
-	switch v := value.(type) {
-	case string:
-		valueStr = &v
-	case *string:
-		valueStr = v
-	case []byte:
-		vStr := string(v)
-		valueStr = &vStr
-	case *[]byte:
-		if v != nil {
-			vStr := string(*v)
-			valueStr = &vStr
-		}
-	}
-
-	if valueStr != nil {
-		if passhash, err := hash(*valueStr); err != nil {
-			return err
-		} else {
-			identity.creds[CredsPasshash] = passhash
-		}
-	}
-
-	return nil
-}
-
-type IdentityForMarshallingCreds struct {
-	ID       ID         `json:",omitempty"`
-	Nickname string     `json:",omitempty"`
-	Roles    rbac.Roles `json:",omitempty"`
-	Creds    common.Map `json:",omitempty"`
-}
-
-//func (identity Identity) MarshalJSONCreds() ([]byte, error) {
-//	return json.Marshal(identity.creds)
-//}
-//
-//func (identity *Identity) UnmarshalJSONCreds(jsonBytes []byte) error {
-//	if len(jsonBytes) < 1 {
-//		return nil
-//	}
-//
-//	return json.Unmarshal(jsonBytes, &identity.creds)
-//}
-
-type CredsType = string
+const CredsEmail CredsType = "email"
 
 const CredsToSet CredsType = "to_set"
 const CredsRealm CredsType = "realm"
@@ -143,7 +21,6 @@ const CredsRoles CredsType = "roles"
 
 const CredsLogin CredsType = "login"
 const CredsNickname CredsType = "nickname"
-const CredsEmail CredsType = "email"
 const CredsPassword CredsType = "password"
 const CredsTemporaryKey CredsType = "temporary_key"
 

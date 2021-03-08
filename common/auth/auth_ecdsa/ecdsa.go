@@ -120,12 +120,12 @@ func (is *authECDSA) Authenticate(toAuth auth.Creds) (*auth.Identity, error) {
 		return nil, errors.Wrap(auth.ErrEncryptionType, onAuthorize)
 	}
 
-	keyToSignature := strings.TrimSpace(toAuth.StringDefault(auth.CredsIP, ""))
+	keyToSignature := strings.TrimSpace(toAuth[auth.CredsIP])
 	if keyToSignature == "" {
 		return nil, errors.Wrapf(errIPToCheckSignature, "toAuth: %#v", toAuth)
 	}
 
-	publKeyBase58 := toAuth.StringDefault(auth.CredsPublicKeyBase58, "")
+	publKeyBase58 := toAuth[auth.CredsPublicKeyBase58]
 	if len(publKeyBase58) < 1 {
 		return nil, errEmptyPublicKeyAddress
 	}
@@ -154,7 +154,7 @@ func (is *authECDSA) Authenticate(toAuth auth.Creds) (*auth.Identity, error) {
 	//	return nil, auth.ErrIP
 	//}
 
-	signature := []byte(toAuth.StringDefault(auth.CredsSignature, ""))
+	signature := []byte(toAuth[auth.CredsSignature])
 	if !encrlib.ECDSAVerify(keyToSignature, publKey, signature) {
 		return nil, errWrongSignature
 	}

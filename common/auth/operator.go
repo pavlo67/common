@@ -3,22 +3,24 @@ package auth
 import (
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/rbac"
+	"github.com/pavlo67/data_exchange/components/ns"
 )
 
 type ID common.IDStr
 
 type Identity struct {
-	ID       ID         `json:",omitempty"`
-	Nickname string     `json:",omitempty"`
-	Roles    rbac.Roles `json:",omitempty"`
-	creds    common.Map `json:",omitempty"`
+	ID       ID         `json:",omitempty" bson:"_id,omitempty"`
+	IssuedID ns.ID      `json:",omitempty" bson:",omitempty"`
+	Nickname string     `json:",omitempty" bson:",omitempty"`
+	Roles    rbac.Roles `json:",omitempty" bson:",omitempty"`
+	// TODO!!! be careful, Identity couldn't contain any creds (even non-public)
 }
 
 type Operator interface {
 	// SetCreds sets user's own or temporary (session-generated) creds
 	SetCreds(authID ID, toSet Creds) (*Creds, error)
 
-	// Authenticate can require to do .SetCreds first and to usa some session-generated creds
+	// Authenticate can require to do .SetCredsByKey first and to usa some session-generated creds
 	Authenticate(toAuth Creds) (*Identity, error)
 }
 

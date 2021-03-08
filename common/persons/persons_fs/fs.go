@@ -45,7 +45,7 @@ func New(cfg config.Access) (persons.Operator, crud.Cleaner, error) {
 
 const onAdd = "on personsFSStub.Add()"
 
-func (pfs *personsFSStub) Add(identity auth.Identity, data common.Map, options *crud.Options) (auth.ID, error) {
+func (pfs *personsFSStub) Add(identity auth.Identity, creds auth.Creds, data common.Map, options *crud.Options) (auth.ID, error) {
 	if !options.HasRole(rbac.RoleAdmin) {
 		return "", errors.KeyableError(common.NoRightsKey, common.Map{"on": onAdd, "identity": identity, "data": data, "requestedRole": rbac.RoleAdmin})
 	}
@@ -60,11 +60,14 @@ func (pfs *personsFSStub) Add(identity auth.Identity, data common.Map, options *
 		return "", errors.KeyableError(common.DuplicateUserKey, common.Map{"on": onAdd, "identity": identity, "data": data})
 	}
 
-	if err := pfs.write(path, persons.Item{
+	person := persons.Item{
 		Identity:  identity,
 		Data:      data,
 		CreatedAt: time.Now(),
-	}); err != nil {
+	}
+	person.SetCreds(creds)
+
+	if err := pfs.write(path, person); err != nil {
 		return "", errors.Wrap(err, onAdd)
 	}
 
@@ -190,7 +193,7 @@ type PersonWithCreds struct {
 func (pfs *personsFSStub) write(path string, item persons.Item) error {
 	personWithCreds := PersonWithCreds{
 		item,
-		item.GetCredsAll(),
+		item.Creds(),
 	}
 
 	jsonBytes, err := json.Marshal(personWithCreds)
@@ -213,10 +216,12 @@ func (pfs *personsFSStub) read(authID auth.ID) (*persons.Item, error) {
 		return nil, errors.Wrap(err, onRead)
 	}
 
-	personWithCreds.Identity.ID = authID
-	for k, v := range personWithCreds.Creds {
-		personWithCreds.SetCreds(k, v)
-	}
+	personWithCreds.Item.Identity.ID = authID
+	personWithCreds.Item.SetCreds(personWithCreds.Creds)
+
+	//for k, v := range personWithCreds.Creds {
+	//	personWithCreds.SetCredsByKey(k, v)
+	//}
 
 	return &personWithCreds.Item, nil
 }
