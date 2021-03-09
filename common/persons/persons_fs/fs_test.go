@@ -11,7 +11,7 @@ import (
 	"github.com/pavlo67/common/common/starter"
 )
 
-func TestOperator(t *testing.T) {
+func TestPersonsFSAsPersonsOperator(t *testing.T) {
 	_, cfgService, l := apps.PrepareTests(
 		t,
 		"../../../"+apps.AppsSubpathDefault,

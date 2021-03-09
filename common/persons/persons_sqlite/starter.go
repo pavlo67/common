@@ -10,9 +10,8 @@ import (
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/persons"
+	"github.com/pavlo67/common/common/sqllib/connect"
 	"github.com/pavlo67/common/common/starter"
-
-	"github.com/pavlo67/tools/components/connect"
 )
 
 func Starter() starter.Operator {

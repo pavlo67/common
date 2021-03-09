@@ -21,7 +21,6 @@ import (
 	"github.com/pavlo67/common/common/filelib"
 	"github.com/pavlo67/common/common/persons"
 	"github.com/pavlo67/common/common/rbac"
-	"github.com/pavlo67/common/common/selectors"
 )
 
 var _ persons.Operator = &personsFSStub{}
@@ -50,12 +49,12 @@ func (pfs *personsFSStub) Add(identity auth.Identity, creds auth.Creds, data com
 		return "", errors.KeyableError(common.NoRightsKey, common.Map{"on": onAdd, "identity": identity, "data": data, "requestedRole": rbac.RoleAdmin})
 	}
 
-	authIDStr := strings.TrimSpace(string(identity.ID))
-	if authIDStr == "" {
-		authIDStr = strconv.FormatInt(time.Now().UnixNano(), 10) + "-" + strconv.Itoa(rand.Int())
+	idStr := strings.TrimSpace(string(identity.ID))
+	if idStr == "" {
+		idStr = strconv.FormatInt(time.Now().UnixNano(), 10) + "-" + strconv.Itoa(rand.Int())
 	}
 
-	path := filepath.Join(pfs.path, authIDStr) //  pfs.path + string(authID)
+	path := filepath.Join(pfs.path, idStr) //  pfs.path + string(id)
 	if _, err := os.Stat(path); err == nil {
 		return "", errors.KeyableError(common.DuplicateUserKey, common.Map{"on": onAdd, "identity": identity, "data": data})
 	}
@@ -71,7 +70,7 @@ func (pfs *personsFSStub) Add(identity auth.Identity, creds auth.Creds, data com
 		return "", errors.Wrap(err, onAdd)
 	}
 
-	return auth.ID(authIDStr), nil
+	return auth.ID(idStr), nil
 }
 
 const onChange = "on personsFSStub.Change()"
@@ -110,6 +109,74 @@ func (pfs *personsFSStub) Change(item persons.Item, options *crud.Options) (*per
 	return &item, nil
 }
 
+const onRemove = "on personsFSStub.Remove()"
+
+func (pfs *personsFSStub) Remove(id auth.ID, options *crud.Options) error {
+	if id != options.Identity.ID && !options.HasRole(rbac.RoleAdmin) {
+		return errors.KeyableError(common.NoRightsKey, common.Map{"on": onRemove, "id": id, "requestedRole": rbac.RoleAdmin})
+	}
+
+	path := filepath.Join(pfs.path, string(id)) //  pfs.path + string(id)
+	if err := os.RemoveAll(path); err != nil {
+		return fmt.Errorf(onRemove+": can't os.RemoveAll(%s), got  %s", path, err)
+	}
+
+	return nil
+}
+
+const onRead = "on personsFSStub.Read()"
+
+func (pfs *personsFSStub) Read(id auth.ID, options *crud.Options) (*persons.Item, error) {
+	if id != options.Identity.ID && !options.HasRole(rbac.RoleAdmin) {
+		return nil, errors.KeyableError(common.NoRightsKey, common.Map{"on": onRead, "id": id, "requestedRole": rbac.RoleAdmin})
+	}
+
+	return pfs.read(id)
+}
+
+// read/write file ----------------------------------------------
+
+type PersonWithCreds struct {
+	persons.Item
+	auth.Creds
+}
+
+func (pfs *personsFSStub) write(path string, item persons.Item) error {
+	personWithCreds := PersonWithCreds{
+		item,
+		item.Creds(),
+	}
+
+	jsonBytes, err := json.Marshal(personWithCreds)
+	if err != nil {
+		return err
+	}
+
+	return ioutil.WriteFile(path, jsonBytes, 0644)
+}
+
+func (pfs *personsFSStub) read(id auth.ID) (*persons.Item, error) {
+	path := filepath.Join(pfs.path, string(id)) //  pfs.path + string(id)
+	jsonBytes, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, errors.Wrap(err, onRead)
+	}
+
+	var personWithCreds PersonWithCreds
+	if err := json.Unmarshal(jsonBytes, &personWithCreds); err != nil {
+		return nil, errors.Wrap(err, onRead)
+	}
+
+	personWithCreds.Item.Identity.ID = id
+	personWithCreds.Item.SetCreds(personWithCreds.Creds)
+
+	//for k, v := range personWithCreds.Creds {
+	//	personWithCreds.SetCredsByKey(k, v)
+	//}
+
+	return &personWithCreds.Item, nil
+}
+
 const onList = "on personsFSStub.List(): "
 
 func (pfs *personsFSStub) List(options *crud.Options) ([]persons.Item, error) {
@@ -140,88 +207,4 @@ func (pfs *personsFSStub) List(options *crud.Options) ([]persons.Item, error) {
 	}
 
 	return items, nil
-}
-
-const onRemove = "on personsFSStub.Remove()"
-
-func (pfs *personsFSStub) Remove(authID auth.ID, options *crud.Options) error {
-	if authID != options.Identity.ID && !options.HasRole(rbac.RoleAdmin) {
-		return errors.KeyableError(common.NoRightsKey, common.Map{"on": onRemove, "authID": authID, "requestedRole": rbac.RoleAdmin})
-	}
-
-	path := filepath.Join(pfs.path, string(authID)) //  pfs.path + string(authID)
-	if err := os.RemoveAll(path); err != nil {
-		return fmt.Errorf(onRemove+": can't os.RemoveAll(%s), got  %s", path, err)
-	}
-
-	return nil
-}
-
-const onRead = "on personsFSStub.Read()"
-
-func (pfs *personsFSStub) Read(authID auth.ID, options *crud.Options) (*persons.Item, error) {
-	if authID != options.Identity.ID && !options.HasRole(rbac.RoleAdmin) {
-		return nil, errors.KeyableError(common.NoRightsKey, common.Map{"on": onRead, "authID": authID, "requestedRole": rbac.RoleAdmin})
-	}
-
-	return pfs.read(authID)
-}
-
-// selectors ----------------------------------------------------
-
-func (pfs *personsFSStub) HasEmail(email string) (selectors.Term, error) {
-	return nil, common.ErrNotImplemented
-}
-
-func (pfs *personsFSStub) HasNickname(nickname string) (selectors.Term, error) {
-	nickname = strings.TrimSpace(nickname)
-
-	if nickname == "" {
-		return nil, errors.New("no nickname to search")
-	}
-
-	return nil, common.ErrNotImplemented
-}
-
-// read/write file ----------------------------------------------
-
-type PersonWithCreds struct {
-	persons.Item
-	auth.Creds
-}
-
-func (pfs *personsFSStub) write(path string, item persons.Item) error {
-	personWithCreds := PersonWithCreds{
-		item,
-		item.Creds(),
-	}
-
-	jsonBytes, err := json.Marshal(personWithCreds)
-	if err != nil {
-		return err
-	}
-
-	return ioutil.WriteFile(path, jsonBytes, 0644)
-}
-
-func (pfs *personsFSStub) read(authID auth.ID) (*persons.Item, error) {
-	path := filepath.Join(pfs.path, string(authID)) //  pfs.path + string(authID)
-	jsonBytes, err := ioutil.ReadFile(path)
-	if err != nil {
-		return nil, errors.Wrap(err, onRead)
-	}
-
-	var personWithCreds PersonWithCreds
-	if err := json.Unmarshal(jsonBytes, &personWithCreds); err != nil {
-		return nil, errors.Wrap(err, onRead)
-	}
-
-	personWithCreds.Item.Identity.ID = authID
-	personWithCreds.Item.SetCreds(personWithCreds.Creds)
-
-	//for k, v := range personWithCreds.Creds {
-	//	personWithCreds.SetCredsByKey(k, v)
-	//}
-
-	return &personWithCreds.Item, nil
 }

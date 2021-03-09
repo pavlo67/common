@@ -8,8 +8,8 @@ import (
 
 type Options struct {
 	Identity *auth.Identity
-	Selector selectors.Item
-	Tx       interface{}
+	Selector *selectors.Item
+	// Tx       interface{}
 }
 
 func (options *Options) GetIdentity() *auth.Identity {
@@ -19,7 +19,7 @@ func (options *Options) GetIdentity() *auth.Identity {
 	return options.Identity
 }
 
-func (options *Options) GetSelector() selectors.Item {
+func (options *Options) GetSelector() *selectors.Item {
 	if options == nil {
 		return nil
 	}
@@ -28,10 +28,10 @@ func (options *Options) GetSelector() selectors.Item {
 
 func (options *Options) WithSelector(selector selectors.Item) *Options {
 	if options == nil {
-		return &Options{Selector: selector}
+		return &Options{Selector: &selector}
 	}
 	optionsCopied := *options
-	optionsCopied.Selector = selector
+	optionsCopied.Selector = &selector
 
 	return &optionsCopied
 }

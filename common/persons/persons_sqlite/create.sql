@@ -18,3 +18,4 @@ CREATE INDEX idx_persons_issued_id    ON persons(issued_id);
 CREATE INDEX idx_persons_nickname     ON persons(nickname);
 CREATE INDEX idx_persons_email        ON persons(email);
 
+
