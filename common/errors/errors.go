@@ -27,13 +27,13 @@ func CommonError(any ...interface{}) Error {
 	return err
 }
 
-func KeyableError(key Key, data common.Map) Error {
-	return &commonError{
-		errs: nil,
-		key:  key,
-		data: data,
-	}
-}
+//func CommonError(key Key, data common.Map) Error {
+//	return &commonError{
+//		errs: nil,
+//		key:  key,
+//		data: data,
+//	}
+//}
 
 func Keyed(err error) Key {
 	if err == nil {
@@ -79,8 +79,13 @@ type commonError struct {
 }
 
 func (ce *commonError) Cause() error {
-	if ce != nil && len(ce.errs) > 0 {
-		return ce.errs[0]
+	if ce != nil {
+		if len(ce.errs) > 0 {
+			return ce.errs[0]
+		} else if ce.key != "" {
+			// ???
+			New(string(ce.key))
+		}
 	}
 
 	return nil
@@ -123,13 +128,36 @@ func (ce *commonError) append(anything interface{}) *commonError {
 		return ce
 	}
 
+	switch v := anything.(type) {
+	case Key:
+		if ce == nil {
+			return &commonError{key: v}
+		} else if ce.key == "" {
+			ce.key = v
+			return ce
+		} else {
+			anything = commonError{key: v}
+		}
+	case common.Map:
+		if ce == nil {
+			return &commonError{data: v}
+		} else if len(ce.data) < 1 {
+			ce.data = v
+			return ce
+		} else {
+			anything = commonError{data: v}
+		}
+	case string:
+		anything = errors.New(v)
+	}
+
 	if ce == nil {
 		switch v := anything.(type) {
 		case commonError:
-			v1 := v //  to prevent recursion in the case: ke1 := KeyableError(...); ke2 := CommonError(ke1, ke1)
+			v1 := v //  to prevent recursion in the case: ke1 := CommonError(...); ke2 := CommonError(ke1, ke1)
 			return &v1
 		case *commonError:
-			v1 := *v // to prevent recursion in the case: ke1 := KeyableError(...); ke2 := CommonError(ke1, ke1)
+			v1 := *v // to prevent recursion in the case: ke1 := CommonError(...); ke2 := CommonError(ke1, ke1)
 			return &v1
 		case Error:
 			return &commonError{

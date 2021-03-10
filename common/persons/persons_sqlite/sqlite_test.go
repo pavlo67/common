@@ -6,9 +6,9 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/pavlo67/common/common/apps"
+	"github.com/pavlo67/common/common/connect/connect_sqlite"
 	"github.com/pavlo67/common/common/crud"
 	"github.com/pavlo67/common/common/persons"
-	"github.com/pavlo67/common/common/sqllib/connect/connect_sqlite"
 	"github.com/pavlo67/common/common/starter"
 )
 

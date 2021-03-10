@@ -6,11 +6,11 @@ import (
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
+	"github.com/pavlo67/common/common/connect"
 	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/persons"
-	"github.com/pavlo67/common/common/sqllib/connect"
 	"github.com/pavlo67/common/common/starter"
 )
 

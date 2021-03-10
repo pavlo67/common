@@ -80,7 +80,7 @@ const onAdd = "on personsSQLite.Add(): "
 
 func (personsOp *personsSQLite) Add(identity auth.Identity, creds auth.Creds, data common.Map, options *crud.Options) (auth.ID, error) {
 	if !options.HasRole(rbac.RoleAdmin) {
-		return "", errors.KeyableError(common.NoRightsKey, common.Map{"on": onAdd, "identity": identity, "data": data, "requestedRole": rbac.RoleAdmin})
+		return "", errors.CommonError(common.NoRightsKey, common.Map{"on": onAdd, "identity": identity, "data": data, "requestedRole": rbac.RoleAdmin})
 	}
 
 	var err error
@@ -129,22 +129,22 @@ const onChange = "on personsSQLite.Change(): "
 
 func (personsOp *personsSQLite) Change(item persons.Item, options *crud.Options) (*persons.Item, error) {
 	if options == nil || options.Identity == nil {
-		return nil, errors.KeyableError(common.NoRightsKey, common.Map{"on": onChange, "item": item})
+		return nil, errors.CommonError(common.NoRightsKey, common.Map{"on": onChange, "item": item})
 	}
 
 	itemOld, err := personsOp.read(item.Identity.ID)
 	if err != nil || itemOld == nil {
 		errorStr := fmt.Sprintf("got %#v / %s", itemOld, err)
 		if options.HasRole(rbac.RoleAdmin) {
-			return nil, errors.KeyableError(common.WrongIDKey, common.Map{"on": onChange, "item": item, "reason": errorStr})
+			return nil, errors.CommonError(common.WrongIDKey, common.Map{"on": onChange, "item": item, "reason": errorStr})
 		} else {
 			l.Error(errorStr)
-			return nil, errors.KeyableError(common.NoRightsKey, common.Map{"on": onChange, "item": item, "requestedRole": rbac.RoleAdmin})
+			return nil, errors.CommonError(common.NoRightsKey, common.Map{"on": onChange, "item": item, "requestedRole": rbac.RoleAdmin})
 		}
 	}
 
 	if itemOld.Identity.ID != options.Identity.ID && !options.Identity.Roles.Has(rbac.RoleAdmin) {
-		return nil, errors.KeyableError(common.NoRightsKey, common.Map{"on": onChange, "item": item})
+		return nil, errors.CommonError(common.NoRightsKey, common.Map{"on": onChange, "item": item})
 	}
 
 	rolesBytes := []byte{} // to satisfy NOT NULL constraint
@@ -199,7 +199,7 @@ const onRemove = "on personsSQLite.Remove()"
 
 func (personsOp *personsSQLite) Remove(id auth.ID, options *crud.Options) error {
 	if id != options.Identity.ID && !options.HasRole(rbac.RoleAdmin) {
-		return errors.KeyableError(common.NoRightsKey, common.Map{"on": onRemove, "id": id, "requestedRole": rbac.RoleAdmin})
+		return errors.CommonError(common.NoRightsKey, common.Map{"on": onRemove, "id": id, "requestedRole": rbac.RoleAdmin})
 	}
 
 	idNum, err := strconv.ParseUint(string(id), 10, 64)
@@ -246,7 +246,7 @@ const onRead = "on personsSQLite.Read(): "
 
 func (personsOp *personsSQLite) Read(id auth.ID, options *crud.Options) (*persons.Item, error) {
 	if id != options.Identity.ID && !options.HasRole(rbac.RoleAdmin) {
-		return nil, errors.KeyableError(common.NoRightsKey, common.Map{"on": onRead, "id": id, "requestedRole": rbac.RoleAdmin})
+		return nil, errors.CommonError(common.NoRightsKey, common.Map{"on": onRead, "id": id, "requestedRole": rbac.RoleAdmin})
 	}
 
 	return personsOp.read(id)
@@ -256,7 +256,7 @@ const onList = "on personsSQLite.List()"
 
 func (personsOp *personsSQLite) List(options *crud.Options) ([]persons.Item, error) {
 	if !options.HasRole(rbac.RoleAdmin) {
-		return nil, errors.KeyableError(common.NoRightsKey, common.Map{"on": onList, "requestedRole": rbac.RoleAdmin})
+		return nil, errors.CommonError(common.NoRightsKey, common.Map{"on": onList, "requestedRole": rbac.RoleAdmin})
 	}
 
 	var condition string

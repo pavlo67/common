@@ -46,7 +46,7 @@ const onAdd = "on personsFSStub.Add()"
 
 func (pfs *personsFSStub) Add(identity auth.Identity, creds auth.Creds, data common.Map, options *crud.Options) (auth.ID, error) {
 	if !options.HasRole(rbac.RoleAdmin) {
-		return "", errors.KeyableError(common.NoRightsKey, common.Map{"on": onAdd, "identity": identity, "data": data, "requestedRole": rbac.RoleAdmin})
+		return "", errors.CommonError(common.NoRightsKey, common.Map{"on": onAdd, "identity": identity, "data": data, "requestedRole": rbac.RoleAdmin})
 	}
 
 	idStr := strings.TrimSpace(string(identity.ID))
@@ -56,7 +56,7 @@ func (pfs *personsFSStub) Add(identity auth.Identity, creds auth.Creds, data com
 
 	path := filepath.Join(pfs.path, idStr) //  pfs.path + string(id)
 	if _, err := os.Stat(path); err == nil {
-		return "", errors.KeyableError(common.DuplicateUserKey, common.Map{"on": onAdd, "identity": identity, "data": data})
+		return "", errors.CommonError(common.DuplicateUserKey, common.Map{"on": onAdd, "identity": identity, "data": data})
 	}
 
 	person := persons.Item{
@@ -77,24 +77,24 @@ const onChange = "on personsFSStub.Change()"
 
 func (pfs *personsFSStub) Change(item persons.Item, options *crud.Options) (*persons.Item, error) {
 	if options == nil || options.Identity == nil {
-		return nil, errors.KeyableError(common.NoRightsKey, common.Map{"on": onChange, "item": item})
+		return nil, errors.CommonError(common.NoRightsKey, common.Map{"on": onChange, "item": item})
 	}
 
 	itemOld, err := pfs.read(item.Identity.ID)
 	if err != nil || itemOld == nil {
 		errorStr := fmt.Sprintf("got %#v / %s", itemOld, err)
 		if options.HasRole(rbac.RoleAdmin) {
-			return nil, errors.KeyableError(common.WrongIDKey, common.Map{"on": onChange, "item": item, "reason": errorStr})
+			return nil, errors.CommonError(common.WrongIDKey, common.Map{"on": onChange, "item": item, "reason": errorStr})
 		} else {
 			l.Error(errorStr)
-			return nil, errors.KeyableError(common.NoRightsKey, common.Map{"on": onChange, "item": item, "requestedRole": rbac.RoleAdmin})
+			return nil, errors.CommonError(common.NoRightsKey, common.Map{"on": onChange, "item": item, "requestedRole": rbac.RoleAdmin})
 		}
 	}
 
 	// l.Infof("22222222 %s / %#v / %#v", options.Identity.ID, itemOld, itemOld.ID != options.Identity.ID)
 
 	if itemOld.Identity.ID != options.Identity.ID && !options.Identity.Roles.Has(rbac.RoleAdmin) {
-		return nil, errors.KeyableError(common.NoRightsKey, common.Map{"on": onChange, "item": item})
+		return nil, errors.CommonError(common.NoRightsKey, common.Map{"on": onChange, "item": item})
 	}
 
 	item.CreatedAt = itemOld.CreatedAt
@@ -113,7 +113,7 @@ const onRemove = "on personsFSStub.Remove()"
 
 func (pfs *personsFSStub) Remove(id auth.ID, options *crud.Options) error {
 	if id != options.Identity.ID && !options.HasRole(rbac.RoleAdmin) {
-		return errors.KeyableError(common.NoRightsKey, common.Map{"on": onRemove, "id": id, "requestedRole": rbac.RoleAdmin})
+		return errors.CommonError(common.NoRightsKey, common.Map{"on": onRemove, "id": id, "requestedRole": rbac.RoleAdmin})
 	}
 
 	path := filepath.Join(pfs.path, string(id)) //  pfs.path + string(id)
@@ -128,7 +128,7 @@ const onRead = "on personsFSStub.Read()"
 
 func (pfs *personsFSStub) Read(id auth.ID, options *crud.Options) (*persons.Item, error) {
 	if id != options.Identity.ID && !options.HasRole(rbac.RoleAdmin) {
-		return nil, errors.KeyableError(common.NoRightsKey, common.Map{"on": onRead, "id": id, "requestedRole": rbac.RoleAdmin})
+		return nil, errors.CommonError(common.NoRightsKey, common.Map{"on": onRead, "id": id, "requestedRole": rbac.RoleAdmin})
 	}
 
 	return pfs.read(id)
@@ -181,7 +181,7 @@ const onList = "on personsFSStub.List(): "
 
 func (pfs *personsFSStub) List(options *crud.Options) ([]persons.Item, error) {
 	if !options.HasRole(rbac.RoleAdmin) {
-		return nil, errors.KeyableError(common.NoRightsKey, common.Map{"on": onList, "requestedRole": rbac.RoleAdmin})
+		return nil, errors.CommonError(common.NoRightsKey, common.Map{"on": onList, "requestedRole": rbac.RoleAdmin})
 	}
 
 	d, err := os.Open(pfs.path)

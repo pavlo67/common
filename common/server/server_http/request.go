@@ -129,7 +129,7 @@ func Request(serverURL string, ep EndpointSettled, requestData, responseData int
 			data["error"] = errCommon
 		}
 		errorKey := errors.Key(data.StringDefault(server.ErrorKey, ""))
-		return errors.KeyableError(errorKey, data)
+		return errors.CommonError(errorKey, data)
 	}
 
 	if responseData != nil {

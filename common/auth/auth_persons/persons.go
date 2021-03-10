@@ -105,7 +105,7 @@ var reEmail = regexp.MustCompile("@")
 func (authOp *authPersons) Authenticate(toAuth auth.Creds) (*auth.Identity, error) {
 	nickname := strings.TrimSpace(toAuth[auth.CredsNickname])
 	if nickname == "" {
-		return nil, errors.KeyableError(common.NoCredsKey, common.Map{"no nickname in creds": toAuth})
+		return nil, errors.CommonError(common.NoCredsKey, common.Map{"no nickname in creds": toAuth})
 	}
 
 	password := strings.TrimSpace(toAuth[auth.CredsPassword])
@@ -153,7 +153,7 @@ func (authOp *authPersons) Authenticate(toAuth auth.Creds) (*auth.Identity, erro
 
 	}
 
-	return nil, errors.KeyableError(common.NoCredsKey, common.Map{onAuthenticate + ": wrong creds": toAuth})
+	return nil, errors.CommonError(common.NoCredsKey, common.Map{onAuthenticate + ": wrong creds": toAuth})
 
 	//maxPersonsToAuthCheck := authOp.maxPersonsToAuthCheck
 	//if len(items) < authOp.maxPersonsToAuthCheck {

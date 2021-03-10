@@ -39,7 +39,7 @@ func (c *Config) Value(key string, target interface{}) error {
 		return c.marshaler.Unmarshal(valueRaw, target)
 	}
 
-	return errors.KeyableError(common.NotFoundKey, common.Map{"reason": "no key in config", "key": key})
+	return errors.CommonError(common.NotFoundKey, common.Map{"reason": "no key in config", "key": key})
 }
 
 // -----------------------------------------------------------------------------

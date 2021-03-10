@@ -5,13 +5,12 @@ import (
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
+	"github.com/pavlo67/common/common/connect"
 	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/sqllib/sqllib_sqlite"
 	"github.com/pavlo67/common/common/starter"
-
-	"github.com/pavlo67/tools/components/connect"
 )
 
 func Starter() starter.Operator {
@@ -32,8 +31,7 @@ func (css *connectSQLiteStarter) Name() string {
 }
 
 func (css *connectSQLiteStarter) Prepare(cfg *config.Config, options common.Map) error {
-	dbKey := options.StringDefault("db_key", "sqlite")
-	if err := cfg.Value(dbKey, &css.cfgSQLite); err != nil {
+	if err := cfg.Value(options.StringDefault("db_key", "sqlite"), &css.cfgSQLite); err != nil {
 		return err
 	}
 
