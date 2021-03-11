@@ -18,7 +18,7 @@ import (
 	"github.com/pavlo67/common/common/strlib"
 )
 
-var fieldsToInsert = []string{"issued_id", "nickname", "email", "roles", "creds", "data", "history"}
+var fieldsToInsert = []string{"urn", "nickname", "email", "roles", "creds", "data", "history"}
 var fieldsToInsertStr = strings.Join(fieldsToInsert, ", ")
 
 var fieldsToUpdate = append(fieldsToInsert, "updated_at")
@@ -110,7 +110,7 @@ func (personsOp *personsSQLite) Add(identity auth.Identity, creds auth.Creds, da
 	// TODO!!! append to .History
 
 	// "issued_id", "nickname", "email", "roles", "creds", "data", "history"
-	values := []interface{}{identity.IssuedID, identity.Nickname, creds[auth.CredsEmail], rolesBytes, credsBytes, dataBytes, historyBytes}
+	values := []interface{}{identity.URN, identity.Nickname, creds[auth.CredsEmail], rolesBytes, credsBytes, dataBytes, historyBytes}
 
 	res, err := personsOp.stmInsert.Exec(values...)
 	if err != nil {
@@ -184,7 +184,7 @@ func (personsOp *personsSQLite) Change(item persons.Item, options *crud.Options)
 	}
 
 	// "issued_id", "nickname", "email", "roles", "creds", "data", "history", "updated_at"
-	values := []interface{}{item.Identity.IssuedID, item.Identity.Nickname, email, rolesBytes,
+	values := []interface{}{item.Identity.URN, item.Identity.Nickname, email, rolesBytes,
 		credsBytes, dataBytes, historyBytes, time.Now(), item.ID}
 
 	if _, err = personsOp.stmUpdate.Exec(values...); err != nil {
@@ -228,7 +228,7 @@ func (personsOp *personsSQLite) read(id auth.ID) (*persons.Item, error) {
 	// "issued_id", "nickname", "email", "roles", "creds", "data", "history", "updated_at", "created_at"
 
 	if err = personsOp.stmRead.QueryRow(idNum).Scan(
-		&item.Identity.IssuedID, &item.Identity.Nickname, &email, &rolesBytes, &credsBytes, &dataBytes,
+		&item.Identity.URN, &item.Identity.Nickname, &email, &rolesBytes, &credsBytes, &dataBytes,
 		&historyBytes, &item.UpdatedAt, &item.CreatedAt); err == sql.ErrNoRows {
 		return nil, errors.CommonError(common.ErrNotFound, onRead)
 	} else if err != nil {
@@ -317,7 +317,7 @@ func (personsOp *personsSQLite) List(options *crud.Options) ([]persons.Item, err
 		// "id"
 
 		if err := rows.Scan(
-			&item.Identity.IssuedID, &item.Identity.Nickname, &email, &rolesBytes, &credsBytes, &dataBytes,
+			&item.Identity.URN, &item.Identity.Nickname, &email, &rolesBytes, &credsBytes, &dataBytes,
 			&historyBytes, &item.UpdatedAt, &item.CreatedAt, &idNum); err != nil {
 			return nil, errors.Wrapf(err, onList+": "+sqllib.CantScanQueryRow, query, values)
 		}

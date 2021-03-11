@@ -17,15 +17,13 @@ import (
 	"github.com/pavlo67/common/common/logger"
 )
 
-func Prepare(buildDate, buildTag, buildCommit, appsSubpathDefault string) (versionOnly bool, envPath string, cfgService *config.Config, l logger.Operator) {
+func Prepare(buildDate, buildTag, buildCommit, envsSubpath string) (versionOnly bool, envPath string, cfgService *config.Config, l logger.Operator) {
 
 	rand.Seed(time.Now().UnixNano())
 
 	// show build/console params -----------------------------------------------------
 
-	var appsSubpath string
 	flag.BoolVar(&versionOnly, "v", false, "show build vars only")
-	flag.StringVar(&appsSubpath, "apps_subpath", appsSubpathDefault, "subpath to /apps directory")
 	flag.Parse()
 
 	if buildDate = strings.TrimSpace(buildDate); buildDate == "" {
@@ -58,7 +56,7 @@ func Prepare(buildDate, buildTag, buildCommit, appsSubpathDefault string) (versi
 	}
 	cwd += "/"
 
-	envPath = cwd + appsSubpath + "_environments/"
+	envPath = cwd + envsSubpath
 	cfgServicePath := envPath + configEnv + ".yaml"
 	cfgService, err = config.Get(cfgServicePath, config.MarshalerYAML)
 	if err != nil || cfgService == nil {
@@ -68,7 +66,7 @@ func Prepare(buildDate, buildTag, buildCommit, appsSubpathDefault string) (versi
 	return versionOnly, envPath, cfgService, l
 }
 
-func PrepareTests(t *testing.T, appsSubpath, configEnv, logfile string) (envPath string, cfgService *config.Config, l logger.Operator) {
+func PrepareTests(t *testing.T, envsSubpath, configEnv, logfile string) (envPath string, cfgService *config.Config, l logger.Operator) {
 
 	os.Setenv("ENV", configEnv)
 
@@ -91,7 +89,7 @@ func PrepareTests(t *testing.T, appsSubpath, configEnv, logfile string) (envPath
 
 	cwd += "/"
 
-	envPath = cwd + appsSubpath + "_environments/"
+	envPath = cwd + envsSubpath
 	cfgServicePath := envPath + configEnv + ".yaml"
 	cfgService, err = config.Get(cfgServicePath, config.MarshalerYAML)
 	require.NoError(t, err)

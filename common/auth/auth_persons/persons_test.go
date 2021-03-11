@@ -14,7 +14,7 @@ func TestOperator(t *testing.T) {
 
 	_, cfgService, l := apps.PrepareTests(
 		t,
-		"../../../"+apps.AppsSubpathDefault,
+		"../../../apps/_environments/",
 		"test",
 		"", // "connect_test."+strconv.FormatInt(time.Now().Unix(), 10)+".log",
 	)

@@ -44,6 +44,8 @@ github.com/pavlo67/data_exchange v0.0.9 h1:5ipebzE/RQLGf/QKHaCn9lCFVIgHu9V0WJ12Q
 github.com/pavlo67/data_exchange v0.0.9/go.mod h1:H7F7CHBZ2jRURmJKdqMVbE88KfFjcjhxn3SlXaU6zMI=
 github.com/pavlo67/data_exchange v0.0.10 h1:20KUw4FoCjRL3Wdwl1mFlKNc92XXMk+3h4L1UTlsLJ0=
 github.com/pavlo67/data_exchange v0.0.10/go.mod h1:m61JJNMkVDTfh7G9YEv1lN93BoOaVrOEq5AcMPzJhRg=
+github.com/pavlo67/data_exchange v0.0.11 h1:hnI+8OwOts0GU7scKSZFrJ8iluIl6VxVn6lyxKKZgOk=
+github.com/pavlo67/data_exchange v0.0.11/go.mod h1:BO1cyjbl8ewWv+LYjR98v6ycKv2WL0xcoYRDJmxOEXU=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=

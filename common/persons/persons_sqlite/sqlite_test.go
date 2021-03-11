@@ -15,7 +15,7 @@ import (
 func TestPersonsSQLiteAsPersonsOperator(t *testing.T) {
 	_, cfgService, l := apps.PrepareTests(
 		t,
-		"../../../"+apps.AppsSubpathDefault,
+		"../../../apps/_environments/",
 		"test",
 		"", // "persons_test."+strconv.FormatInt(time.Now().Unix(), 10)+".log",
 	)

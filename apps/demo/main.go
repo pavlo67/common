@@ -14,7 +14,7 @@ var (
 )
 
 func main() {
-	versionOnly, envPath, cfgService, l := apps.Prepare(BuildDate, BuildTag, BuildCommit, apps.AppsSubpathDefault)
+	versionOnly, envPath, cfgService, l := apps.Prepare(BuildDate, BuildTag, BuildCommit, "apps/")
 	if versionOnly {
 		return
 	}
