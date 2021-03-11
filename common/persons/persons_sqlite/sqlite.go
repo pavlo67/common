@@ -263,21 +263,28 @@ func (personsOp *personsSQLite) List(options *crud.Options) ([]persons.Item, err
 	var values []interface{}
 
 	if selector := options.GetSelector(); selector != nil {
+		valuesStr, ok := selector.Values.([]string)
+		if !ok {
+			return nil, fmt.Errorf(onList+": wrong selector: %#v", selector)
+		}
+
 		switch selector.Key {
 		case persons.HasEmail:
-			if len(selector.Values) != 1 {
-				return nil, fmt.Errorf(onList+": wrong values list in selector: %#v", selector)
+			if len(valuesStr) != 1 {
+				return nil, fmt.Errorf(onList+": wrong values list in selector: %#v / %#v", selector, valuesStr)
 			}
 			condition = `email = ?`
-			values = []interface{}{selector.Values[0]}
+			values = []interface{}{valuesStr[0]}
+
 		case persons.HasNickname:
-			if len(selector.Values) != 1 {
-				return nil, fmt.Errorf(onList+": wrong values list in selector: %#v", selector)
+			if len(valuesStr) != 1 {
+				return nil, fmt.Errorf(onList+": wrong values list in selector: %#v / %#v", selector, valuesStr)
 			}
 			condition = `nickname = ?`
-			values = []interface{}{selector.Values[0]}
+			values = []interface{}{valuesStr[0]}
+
 		default:
-			return nil, fmt.Errorf(onList+": wrong selector: %#v", selector)
+			return nil, fmt.Errorf(onList+": wrong selector.Key: %#v", selector)
 		}
 	}
 

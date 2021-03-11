@@ -10,7 +10,7 @@ type ID common.IDStr
 
 type Identity struct {
 	ID       ID         `json:",omitempty" bson:"_id,omitempty"`
-	IssuedID ns.ID      `json:",omitempty" bson:",omitempty"`
+	IssuedID ns.URN     `json:",omitempty" bson:",omitempty"`
 	Nickname string     `json:",omitempty" bson:",omitempty"`
 	Roles    rbac.Roles `json:",omitempty" bson:",omitempty"`
 	// TODO!!! be careful, Identity couldn't contain any creds (even non-public)
