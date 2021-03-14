@@ -1,17 +1,18 @@
-package connect_sqlite
+package db_sqlite
 
 import (
 	"fmt"
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
-	"github.com/pavlo67/common/common/connect"
 	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/sqllib/sqllib_sqlite"
 	"github.com/pavlo67/common/common/starter"
 )
+
+const InterfaceKey joiner.InterfaceKey = "db_sqlite"
 
 func Starter() starter.Operator {
 	return &connectSQLiteStarter{}
@@ -35,7 +36,7 @@ func (css *connectSQLiteStarter) Prepare(cfg *config.Config, options common.Map)
 		return err
 	}
 
-	css.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(connect.InterfaceSQLiteKey)))
+	css.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
 
 	return nil
 }

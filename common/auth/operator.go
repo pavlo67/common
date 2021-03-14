@@ -24,6 +24,20 @@ type Operator interface {
 	Authenticate(toAuth Creds) (*Identity, error)
 }
 
+func (identity *Identity) HasRole(role ...rbac.Role) bool {
+	if identity == nil {
+		return false
+	}
+
+	return identity.Roles.Has(role...)
+}
+
+func IdentityWithRoles(roles ...rbac.Role) *Identity {
+	return &Identity{
+		Roles: roles,
+	}
+}
+
 //// to use with map[CredsType]identity.ActorKey  --------------------------------------------------------------------
 //
 //var ErrNoIdentityOp = errors.New("no identity.ActorKey")

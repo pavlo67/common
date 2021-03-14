@@ -8,9 +8,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pavlo67/common/common/db"
+
+	"github.com/pavlo67/common/common/selectors"
+
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/auth"
-	"github.com/pavlo67/common/common/crud"
 	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/persons"
 	"github.com/pavlo67/common/common/rbac"
@@ -36,13 +39,13 @@ type personsSQLite struct {
 	db    *sql.DB
 	table string
 
-	sqlInsert, sqlUpdate, sqlRead, sqlRemove, sqlClean string
-	stmInsert, stmUpdate, stmRead, stmRemove, stmClean *sql.Stmt
+	sqlInsert, sqlUpdate, sqlRead, sqlRemove, sqlStat, sqlClean string
+	stmInsert, stmUpdate, stmRead, stmRemove, stmStat, stmClean *sql.Stmt
 }
 
 const onNew = "on personsSQLite.New(): "
 
-func New(db *sql.DB, table string) (persons.Operator, crud.Cleaner, error) {
+func New(db *sql.DB, table string) (persons.Operator, db.Cleaner, error) {
 	if table == "" {
 		table = persons.CollectionDefault
 	}
@@ -55,6 +58,7 @@ func New(db *sql.DB, table string) (persons.Operator, crud.Cleaner, error) {
 		sqlUpdate: "UPDATE " + table + " SET " + fieldsToUpdateStr + " WHERE id = ?",
 		sqlRemove: "DELETE FROM " + table + " where id = ?",
 		sqlRead:   "SELECT " + fieldsToReadStr + " FROM " + table + " WHERE id = ?",
+		sqlStat:   "SELECT COUNT(*) FROM " + table,
 
 		sqlClean: "DELETE FROM " + table,
 	}
@@ -64,6 +68,7 @@ func New(db *sql.DB, table string) (persons.Operator, crud.Cleaner, error) {
 		{&personsOp.stmUpdate, personsOp.sqlUpdate},
 		{&personsOp.stmRead, personsOp.sqlRead},
 		{&personsOp.stmRemove, personsOp.sqlRemove},
+		{&personsOp.stmStat, personsOp.sqlStat},
 		{&personsOp.stmClean, personsOp.sqlClean},
 	}
 
@@ -76,100 +81,36 @@ func New(db *sql.DB, table string) (persons.Operator, crud.Cleaner, error) {
 	return &personsOp, &personsOp, nil
 }
 
-const onAdd = "on personsSQLite.Add(): "
+const onSave = "on personsSQLite.Save(): "
 
-func (personsOp *personsSQLite) Add(identity auth.Identity, creds auth.Creds, data common.Map, options *crud.Options) (auth.ID, error) {
-	if !options.HasRole(rbac.RoleAdmin) {
-		return "", errors.CommonError(common.NoRightsKey, common.Map{"on": onAdd, "identity": identity, "data": data, "requestedRole": rbac.RoleAdmin})
+func (personsOp *personsSQLite) Save(item persons.Item, identity *auth.Identity) (auth.ID, error) {
+	if identity == nil || (item.ID != identity.ID && !identity.HasRole(rbac.RoleAdmin)) {
+		return "", errors.CommonError(common.NoRightsKey, common.Map{"on": onSave, "item": item})
 	}
 
 	var err error
-
-	rolesBytes := []byte{} // to satisfy NOT NULL constraint
-	if len(identity.Roles) > 0 {
-		if rolesBytes, err = json.Marshal(identity.Roles); err != nil {
-			return "", errors.Wrapf(err, onAdd+"can't marshal identity.Roles (%#v)", identity.Roles)
-		}
-	}
-
-	credsBytes := []byte{} // to satisfy NOT NULL constraint
-	if len(creds) > 0 {
-		if credsBytes, err = json.Marshal(creds); err != nil {
-			return "", errors.Wrapf(err, onAdd+"can't marshal creds (%#v)", creds)
-		}
-	}
-
-	dataBytes := []byte{} // to to satisfy NOT NULL constraint
-	if len(data) > 0 {
-		if dataBytes, err = json.Marshal(data); err != nil {
-			return "", errors.Wrapf(err, onAdd+"can't marshal data (%#v)", data)
-		}
-	}
-
-	historyBytes := []byte{} // to to satisfy NOT NULL constraint
-	// TODO!!! append to .History
-
-	// "issued_id", "nickname", "email", "roles", "creds", "data", "history"
-	values := []interface{}{identity.URN, identity.Nickname, creds[auth.CredsEmail], rolesBytes, credsBytes, dataBytes, historyBytes}
-
-	res, err := personsOp.stmInsert.Exec(values...)
-	if err != nil {
-		return "", errors.Wrapf(err, onAdd+sqllib.CantExec, personsOp.sqlInsert, strlib.Stringify(values))
-	}
-
-	idSQLite, err := res.LastInsertId()
-	if err != nil {
-		return "", errors.Wrapf(err, onAdd+sqllib.CantGetLastInsertId, personsOp.sqlInsert, strlib.Stringify(values))
-	}
-
-	return auth.ID(strconv.FormatInt(idSQLite, 10)), nil
-}
-
-const onChange = "on personsSQLite.Change(): "
-
-func (personsOp *personsSQLite) Change(item persons.Item, options *crud.Options) (*persons.Item, error) {
-	if options == nil || options.Identity == nil {
-		return nil, errors.CommonError(common.NoRightsKey, common.Map{"on": onChange, "item": item})
-	}
-
-	itemOld, err := personsOp.read(item.Identity.ID)
-	if err != nil || itemOld == nil {
-		errorStr := fmt.Sprintf("got %#v / %s", itemOld, err)
-		if options.HasRole(rbac.RoleAdmin) {
-			return nil, errors.CommonError(common.WrongIDKey, common.Map{"on": onChange, "item": item, "reason": errorStr})
-		} else {
-			l.Error(errorStr)
-			return nil, errors.CommonError(common.NoRightsKey, common.Map{"on": onChange, "item": item, "requestedRole": rbac.RoleAdmin})
-		}
-	}
-
-	if itemOld.Identity.ID != options.Identity.ID && !options.Identity.Roles.Has(rbac.RoleAdmin) {
-		return nil, errors.CommonError(common.NoRightsKey, common.Map{"on": onChange, "item": item})
-	}
-
 	rolesBytes := []byte{} // to satisfy NOT NULL constraint
 	if len(item.Identity.Roles) > 0 {
-		if rolesBytes, err = json.Marshal(item.Identity.Roles); err != nil {
-			return nil, errors.Wrapf(err, onChange+"can't marshal item.Identity.Roles (%#v)", item.Identity.Roles)
+		if rolesBytes, err = json.Marshal(item.Roles); err != nil {
+			return "", errors.Wrapf(err, onSave+"can't marshal item.Identity.Roles (%#v)", item.Roles)
 		}
 	}
 
 	creds := item.Creds()
-
 	email := creds[auth.CredsEmail]
 	delete(creds, auth.CredsEmail)
 
 	credsBytes := []byte{} // to satisfy NOT NULL constraint
 	if len(creds) > 0 {
 		if credsBytes, err = json.Marshal(creds); err != nil {
-			return nil, errors.Wrapf(err, onChange+"can't marshal creds (%#v)", creds)
+			return "", errors.Wrapf(err, onSave+"can't marshal creds (%#v)", creds)
 		}
 	}
 
 	dataBytes := []byte{} // to to satisfy NOT NULL constraint
 	if len(item.Data) > 0 {
 		if dataBytes, err = json.Marshal(item.Data); err != nil {
-			return nil, errors.Wrapf(err, onChange+"can't marshal data (%#v)", item.Data)
+			return "", errors.Wrapf(err, onSave+"can't marshal data (%#v)", item.Data)
 		}
 	}
 
@@ -179,26 +120,53 @@ func (personsOp *personsSQLite) Change(item persons.Item, options *crud.Options)
 	if len(item.History) > 0 {
 		historyBytes, err = json.Marshal(item.History)
 		if err != nil {
-			return nil, errors.Wrapf(err, onChange+"can't marshal .History(%#v)", item.History)
+			return "", errors.Wrapf(err, onSave+"can't marshal .History(%#v)", item.History)
 		}
 	}
 
-	// "issued_id", "nickname", "email", "roles", "creds", "data", "history", "updated_at"
-	values := []interface{}{item.Identity.URN, item.Identity.Nickname, email, rolesBytes,
-		credsBytes, dataBytes, historyBytes, time.Now(), item.ID}
+	if item.ID != "" {
+		itemOld, err := personsOp.read(item.Identity.ID)
+		if err != nil || itemOld == nil {
+			errorStr := fmt.Sprintf("got %#v / %s", itemOld, err)
+			if identity.HasRole(rbac.RoleAdmin) {
+				return "", errors.CommonError(common.WrongIDKey, common.Map{"on": onSave, "item": item, "reason": errorStr})
+			} else {
+				l.Error(errorStr)
+				return "", errors.CommonError(common.NoRightsKey, common.Map{"on": onSave, "item": item, "requestedRole": rbac.RoleAdmin})
+			}
+		}
+		// "issued_id", "nickname", "email", "roles", "creds", "data", "history", "updated_at"
+		values := []interface{}{item.Identity.URN, item.Identity.Nickname, email, rolesBytes,
+			credsBytes, dataBytes, historyBytes, time.Now(), item.ID}
 
-	if _, err = personsOp.stmUpdate.Exec(values...); err != nil {
-		return nil, errors.Wrapf(err, onChange+sqllib.CantExec, personsOp.sqlUpdate, strlib.Stringify(values))
+		if _, err = personsOp.stmUpdate.Exec(values...); err != nil {
+			return "", errors.Wrapf(err, onSave+sqllib.CantExec, personsOp.sqlUpdate, strlib.Stringify(values))
+		}
+
+	} else {
+		// "issued_id", "nickname", "email", "roles", "creds", "data", "history"
+		values := []interface{}{item.URN, item.Nickname, creds[auth.CredsEmail], rolesBytes, credsBytes, dataBytes, historyBytes}
+
+		res, err := personsOp.stmInsert.Exec(values...)
+		if err != nil {
+			return "", errors.Wrapf(err, onSave+sqllib.CantExec, personsOp.sqlInsert, strlib.Stringify(values))
+		}
+
+		idSQLite, err := res.LastInsertId()
+		if err != nil {
+			return "", errors.Wrapf(err, onSave+sqllib.CantGetLastInsertId, personsOp.sqlInsert, strlib.Stringify(values))
+		}
+
+		item.ID = auth.ID(strconv.FormatInt(idSQLite, 10))
 	}
 
-	// TODO??? re-read
-	return &item, nil
+	return item.ID, nil
 }
 
 const onRemove = "on personsSQLite.Remove()"
 
-func (personsOp *personsSQLite) Remove(id auth.ID, options *crud.Options) error {
-	if id != options.Identity.ID && !options.HasRole(rbac.RoleAdmin) {
+func (personsOp *personsSQLite) Remove(id auth.ID, identity *auth.Identity) error {
+	if identity == nil || (id != identity.ID && !identity.HasRole(rbac.RoleAdmin)) {
 		return errors.CommonError(common.NoRightsKey, common.Map{"on": onRemove, "id": id, "requestedRole": rbac.RoleAdmin})
 	}
 
@@ -244,8 +212,8 @@ func (personsOp *personsSQLite) read(id auth.ID) (*persons.Item, error) {
 
 const onRead = "on personsSQLite.Read(): "
 
-func (personsOp *personsSQLite) Read(id auth.ID, options *crud.Options) (*persons.Item, error) {
-	if id != options.Identity.ID && !options.HasRole(rbac.RoleAdmin) {
+func (personsOp *personsSQLite) Read(id auth.ID, identity *auth.Identity) (*persons.Item, error) {
+	if identity == nil || (id != identity.ID && !identity.HasRole(rbac.RoleAdmin)) {
 		return nil, errors.CommonError(common.NoRightsKey, common.Map{"on": onRead, "id": id, "requestedRole": rbac.RoleAdmin})
 	}
 
@@ -254,15 +222,15 @@ func (personsOp *personsSQLite) Read(id auth.ID, options *crud.Options) (*person
 
 const onList = "on personsSQLite.List()"
 
-func (personsOp *personsSQLite) List(options *crud.Options) ([]persons.Item, error) {
-	if !options.HasRole(rbac.RoleAdmin) {
+func (personsOp *personsSQLite) List(selector *selectors.Term, identity *auth.Identity) ([]persons.Item, error) {
+	if !identity.HasRole(rbac.RoleAdmin) {
 		return nil, errors.CommonError(common.NoRightsKey, common.Map{"on": onList, "requestedRole": rbac.RoleAdmin})
 	}
 
 	var condition string
 	var values []interface{}
 
-	if selector := options.GetSelector(); selector != nil {
+	if selector != nil {
 		valuesStr, ok := selector.Values.([]string)
 		if !ok {
 			return nil, fmt.Errorf(onList+": wrong selector: %#v", selector)
@@ -288,7 +256,7 @@ func (personsOp *personsSQLite) List(options *crud.Options) ([]persons.Item, err
 		}
 	}
 
-	query := sqllib.SQLList(personsOp.table, fieldsToListStr, condition, options)
+	query := sqllib.SQLList(personsOp.table, fieldsToListStr, condition, identity)
 	stm, err := personsOp.db.Prepare(query)
 	if err != nil {
 		return nil, errors.Wrapf(err, onList+": can't db.Prepare(%s)", query)
@@ -333,6 +301,19 @@ func (personsOp *personsSQLite) List(options *crud.Options) ([]persons.Item, err
 	}
 
 	return items, nil
+}
+
+const onStat = "on personsSQLite.Stat()"
+
+func (personsOp *personsSQLite) Stat(*selectors.Term, *auth.Identity) (db.StatMap, error) {
+	var num int
+	if err := personsOp.stmStat.QueryRow().Scan(&num); err == sql.ErrNoRows {
+		return nil, errors.CommonError(common.ErrNotFound, onStat)
+	} else if err != nil {
+		return nil, errors.Wrapf(err, onStat+sqllib.CantScanQueryRow, personsOp.sqlStat, nil)
+	}
+
+	return db.StatMap{"*": db.Stat{num}}, nil
 }
 
 func (personsOp *personsSQLite) Close() error {

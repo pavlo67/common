@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/pkg/errors"
+	"github.com/pavlo67/common/common/auth"
 
-	"github.com/pavlo67/common/common/crud"
+	"github.com/pkg/errors"
 )
 
 type CorrectWildcards func(query string) string
@@ -24,7 +24,7 @@ const RowsError = "error on .Rows ('%s', %#v)"
 
 var ErrNoTable = errors.New("table doesn't exist")
 
-func SQLList(table, fields, condition string, options *crud.Options) string {
+func SQLList(table, fields, condition string, identity *auth.Identity) string {
 	if strings.TrimSpace(condition) != "" {
 		condition = " WHERE " + condition
 	}
@@ -55,7 +55,7 @@ func SQLList(table, fields, condition string, options *crud.Options) string {
 	return "SELECT " + fields + " FROM " + table + condition + order + limit
 }
 
-func SQLCount(table, condition string, _ *crud.Options) string {
+func SQLCount(table, condition string, _ *auth.Identity) string {
 	query := "SELECT COUNT(*) FROM " + table
 
 	if strings.TrimSpace(condition) != "" {

@@ -7,7 +7,6 @@ import (
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/auth"
-	"github.com/pavlo67/common/common/crud"
 	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/server"
 	"github.com/pavlo67/common/common/server/server_http"
@@ -39,7 +38,7 @@ var authenticateEndpoint = server_http.Endpoint{
 	InternalKey: auth.IntefaceKeyAuthenticate,
 	Method:      "POST",
 	//BodyParams: bodyParams,
-	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, _ server_http.Params, _ *crud.Options) (server.Response, error) {
+	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, _ server_http.PathParams, _ *auth.Identity) (server.Response, error) {
 
 		credsJSON, err := ioutil.ReadAll(req.Body)
 		if err != nil {
@@ -65,7 +64,7 @@ var setCredsEndpoint = server_http.Endpoint{
 	InternalKey: auth.IntefaceKeySetCreds,
 	Method:      "POST",
 	//BodyParams: bodyParams,
-	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, _ server_http.Params, options *crud.Options) (server.Response, error) {
+	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, _ server_http.PathParams, identity *auth.Identity) (server.Response, error) {
 
 		credsJSON, err := ioutil.ReadAll(req.Body)
 		if err != nil {
@@ -79,8 +78,8 @@ var setCredsEndpoint = server_http.Endpoint{
 		toSet[auth.CredsIP] = req.RemoteAddr
 
 		var authID auth.ID
-		if options != nil && options.Identity != nil {
-			authID = options.Identity.ID
+		if identity != nil {
+			authID = identity.ID
 		}
 
 		creds, err := authOp.SetCreds(authID, toSet)

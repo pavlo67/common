@@ -17,7 +17,7 @@ import (
 //func StartComponent(c Starter, cfg *config.Config, joinerOp joiner.Operator, l logger.Operator) error {
 //	name := c.Name()
 //
-//	if key, ok := c.Options.String("interface_key"); ok {
+//	if key, ok := c.Identity.String("interface_key"); ok {
 //		name += " / " + key
 //	}
 //

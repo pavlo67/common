@@ -4,11 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"math/rand"
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
 	"time"
 
 	_ "github.com/GehirnInc/crypt/sha256_crypt"
@@ -16,107 +14,81 @@ import (
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/config"
-	"github.com/pavlo67/common/common/crud"
+	"github.com/pavlo67/common/common/db"
 	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/filelib"
 	"github.com/pavlo67/common/common/persons"
 	"github.com/pavlo67/common/common/rbac"
+	"github.com/pavlo67/common/common/selectors"
 )
 
 var _ persons.Operator = &personsFSStub{}
 
 type personsFSStub struct {
-	path string
+	randInt int
+	path    string
 }
 
 const onNew = "on personsFSStub.New() "
 
-func New(cfg config.Access) (persons.Operator, crud.Cleaner, error) {
+func New(cfg config.Access) (persons.Operator, db.Cleaner, error) {
 	path, err := filelib.Dir(cfg.Path)
 	if err != nil {
 		return nil, nil, errors.CommonError(err, onNew)
 	}
 
 	personsOp := personsFSStub{path: path}
-
 	return &personsOp, &personsOp, nil
 }
 
-const onAdd = "on personsFSStub.Add()"
+const onSave = "on personsFSStub.Save()"
 
-func (pfs *personsFSStub) Add(identity auth.Identity, creds auth.Creds, data common.Map, options *crud.Options) (auth.ID, error) {
-	if !options.HasRole(rbac.RoleAdmin) {
-		return "", errors.CommonError(common.NoRightsKey, common.Map{"on": onAdd, "identity": identity, "data": data, "requestedRole": rbac.RoleAdmin})
+func (personsOp *personsFSStub) Save(item persons.Item, identity *auth.Identity) (auth.ID, error) {
+	if identity == nil || (item.ID != identity.ID && !identity.HasRole(rbac.RoleAdmin)) {
+		return "", errors.CommonError(common.NoRightsKey, common.Map{"on": onSave, "item": item})
 	}
 
-	idStr := strings.TrimSpace(string(identity.ID))
-	if idStr == "" {
-		idStr = strconv.FormatInt(time.Now().UnixNano(), 10) + "-" + strconv.Itoa(rand.Int())
-	}
+	var path string
 
-	path := filepath.Join(pfs.path, idStr) //  pfs.path + string(id)
-	if _, err := os.Stat(path); err == nil {
-		return "", errors.CommonError(common.DuplicateUserKey, common.Map{"on": onAdd, "identity": identity, "data": data})
-	}
+	if item.ID != "" {
+		path = filepath.Join(personsOp.path, string(item.ID))
 
-	person := persons.Item{
-		Identity:  identity,
-		Data:      data,
-		CreatedAt: time.Now(),
-	}
-	person.SetCreds(creds)
-
-	if err := pfs.write(path, person); err != nil {
-		return "", errors.Wrap(err, onAdd)
-	}
-
-	return auth.ID(idStr), nil
-}
-
-const onChange = "on personsFSStub.Change()"
-
-func (pfs *personsFSStub) Change(item persons.Item, options *crud.Options) (*persons.Item, error) {
-	if options == nil || options.Identity == nil {
-		return nil, errors.CommonError(common.NoRightsKey, common.Map{"on": onChange, "item": item})
-	}
-
-	itemOld, err := pfs.read(item.Identity.ID)
-	if err != nil || itemOld == nil {
-		errorStr := fmt.Sprintf("got %#v / %s", itemOld, err)
-		if options.HasRole(rbac.RoleAdmin) {
-			return nil, errors.CommonError(common.WrongIDKey, common.Map{"on": onChange, "item": item, "reason": errorStr})
-		} else {
+		itemOld, err := personsOp.read(item.ID)
+		if err != nil || itemOld == nil {
+			errorStr := fmt.Sprintf("got %#v / %s", itemOld, err)
 			l.Error(errorStr)
-			return nil, errors.CommonError(common.NoRightsKey, common.Map{"on": onChange, "item": item, "requestedRole": rbac.RoleAdmin})
+			return "", errors.CommonError(common.NoRightsKey, common.Map{"on": onSave, "item": item, "requestedRole": rbac.RoleAdmin})
+		}
+
+		item.CreatedAt = itemOld.CreatedAt
+		now := time.Now()
+		item.UpdatedAt = &now
+
+	} else {
+		personsOp.randInt++
+		item.ID = auth.ID(strconv.FormatInt(time.Now().UnixNano(), 10) + "-" + strconv.Itoa(personsOp.randInt))
+
+		path = filepath.Join(personsOp.path, string(item.ID))
+		if _, err := os.Stat(path); err == nil {
+			return "", errors.CommonError(common.DuplicateUserKey, common.Map{"on": onSave, "item": item})
 		}
 	}
 
-	// l.Infof("22222222 %s / %#v / %#v", options.Identity.ID, itemOld, itemOld.ID != options.Identity.ID)
-
-	if itemOld.Identity.ID != options.Identity.ID && !options.Identity.Roles.Has(rbac.RoleAdmin) {
-		return nil, errors.CommonError(common.NoRightsKey, common.Map{"on": onChange, "item": item})
+	if err := personsOp.write(path, item); err != nil {
+		return "", errors.Wrap(err, onSave)
 	}
 
-	item.CreatedAt = itemOld.CreatedAt
-	now := time.Now()
-	item.UpdatedAt = &now
-
-	path := filepath.Join(pfs.path, string(item.Identity.ID))
-	if err := pfs.write(path, item); err != nil {
-		return nil, errors.Wrap(err, onChange)
-	}
-
-	return &item, nil
+	return item.ID, nil
 }
 
 const onRemove = "on personsFSStub.Remove()"
 
-func (pfs *personsFSStub) Remove(id auth.ID, options *crud.Options) error {
-	if id != options.Identity.ID && !options.HasRole(rbac.RoleAdmin) {
+func (personsOp *personsFSStub) Remove(id auth.ID, identity *auth.Identity) error {
+	if identity == nil || (id != identity.ID && !identity.HasRole(rbac.RoleAdmin)) {
 		return errors.CommonError(common.NoRightsKey, common.Map{"on": onRemove, "id": id, "requestedRole": rbac.RoleAdmin})
 	}
 
-	path := filepath.Join(pfs.path, string(id)) //  pfs.path + string(id)
+	path := filepath.Join(personsOp.path, string(id)) //  personsOp.path + string(id)
 	if err := os.RemoveAll(path); err != nil {
 		return fmt.Errorf(onRemove+": can't os.RemoveAll(%s), got  %s", path, err)
 	}
@@ -126,12 +98,12 @@ func (pfs *personsFSStub) Remove(id auth.ID, options *crud.Options) error {
 
 const onRead = "on personsFSStub.Read()"
 
-func (pfs *personsFSStub) Read(id auth.ID, options *crud.Options) (*persons.Item, error) {
-	if id != options.Identity.ID && !options.HasRole(rbac.RoleAdmin) {
+func (personsOp *personsFSStub) Read(id auth.ID, identity *auth.Identity) (*persons.Item, error) {
+	if identity == nil || (id != identity.ID && !identity.HasRole(rbac.RoleAdmin)) {
 		return nil, errors.CommonError(common.NoRightsKey, common.Map{"on": onRead, "id": id, "requestedRole": rbac.RoleAdmin})
 	}
 
-	return pfs.read(id)
+	return personsOp.read(id)
 }
 
 // read/write file ----------------------------------------------
@@ -141,7 +113,7 @@ type PersonWithCreds struct {
 	auth.Creds
 }
 
-func (pfs *personsFSStub) write(path string, item persons.Item) error {
+func (personsOp *personsFSStub) write(path string, item persons.Item) error {
 	personWithCreds := PersonWithCreds{
 		item,
 		item.Creds(),
@@ -155,8 +127,8 @@ func (pfs *personsFSStub) write(path string, item persons.Item) error {
 	return ioutil.WriteFile(path, jsonBytes, 0644)
 }
 
-func (pfs *personsFSStub) read(id auth.ID) (*persons.Item, error) {
-	path := filepath.Join(pfs.path, string(id)) //  pfs.path + string(id)
+func (personsOp *personsFSStub) read(id auth.ID) (*persons.Item, error) {
+	path := filepath.Join(personsOp.path, string(id)) //  personsOp.path + string(id)
 	jsonBytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, errors.Wrap(err, onRead)
@@ -167,7 +139,7 @@ func (pfs *personsFSStub) read(id auth.ID) (*persons.Item, error) {
 		return nil, errors.Wrap(err, onRead)
 	}
 
-	personWithCreds.Item.Identity.ID = id
+	personWithCreds.Item.ID = id
 	personWithCreds.Item.SetCreds(personWithCreds.Creds)
 
 	//for k, v := range personWithCreds.Creds {
@@ -179,12 +151,12 @@ func (pfs *personsFSStub) read(id auth.ID) (*persons.Item, error) {
 
 const onList = "on personsFSStub.List(): "
 
-func (pfs *personsFSStub) List(options *crud.Options) ([]persons.Item, error) {
-	if !options.HasRole(rbac.RoleAdmin) {
+func (personsOp *personsFSStub) List(Selector *selectors.Term, identity *auth.Identity) ([]persons.Item, error) {
+	if !identity.HasRole(rbac.RoleAdmin) {
 		return nil, errors.CommonError(common.NoRightsKey, common.Map{"on": onList, "requestedRole": rbac.RoleAdmin})
 	}
 
-	d, err := os.Open(pfs.path)
+	d, err := os.Open(personsOp.path)
 	if err != nil {
 		return nil, errors.Wrap(err, onList)
 	}
@@ -197,7 +169,7 @@ func (pfs *personsFSStub) List(options *crud.Options) ([]persons.Item, error) {
 
 	var items []persons.Item
 	for _, name := range names {
-		item, err := pfs.read(auth.ID(name))
+		item, err := personsOp.read(auth.ID(name))
 		if err != nil || item == nil {
 			return nil, fmt.Errorf(onList+": got %#v, %s", item, err)
 		}
@@ -207,4 +179,8 @@ func (pfs *personsFSStub) List(options *crud.Options) ([]persons.Item, error) {
 	}
 
 	return items, nil
+}
+
+func (personsOp *personsFSStub) Stat(*selectors.Term, *auth.Identity) (db.StatMap, error) {
+	return nil, common.ErrNotImplemented
 }

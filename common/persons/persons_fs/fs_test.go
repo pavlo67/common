@@ -3,15 +3,16 @@ package persons_fs
 import (
 	"testing"
 
+	"github.com/pavlo67/common/common/db"
+
 	"github.com/stretchr/testify/require"
 
 	"github.com/pavlo67/common/common/apps"
-	"github.com/pavlo67/common/common/crud"
 	"github.com/pavlo67/common/common/persons"
 	"github.com/pavlo67/common/common/starter"
 )
 
-func TestPersonsFSAsPersonsOperator(t *testing.T) {
+func TestPersonsFS(t *testing.T) {
 	_, cfgService, l := apps.PrepareTests(
 		t,
 		"../../../apps/_environments/",
@@ -33,7 +34,7 @@ func TestPersonsFSAsPersonsOperator(t *testing.T) {
 	personsOp, _ := joinerOp.Interface(persons.InterfaceKey).(persons.Operator)
 	require.NotNil(t, personsOp)
 
-	personsCleanerOp, _ := joinerOp.Interface(persons.InterfaceCleanerKey).(crud.Cleaner)
+	personsCleanerOp, _ := joinerOp.Interface(persons.InterfaceCleanerKey).(db.Cleaner)
 	require.NotNil(t, personsCleanerOp)
 
 	persons.OperatorTestScenario(t, personsOp, personsCleanerOp)

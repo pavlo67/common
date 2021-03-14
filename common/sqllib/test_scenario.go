@@ -5,8 +5,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-
-	"github.com/pavlo67/common/common/crud"
 )
 
 func TestDB(t *testing.T, db *sql.DB) {
@@ -29,7 +27,7 @@ func TestDB(t *testing.T, db *sql.DB) {
 	sqlUpdate := "UPDATE test SET a = ? WHERE a = ?"
 	sqlDelete := "DELETE FROM test WHERE a = ?"
 	sqlSelect := "SELECT a FROM test WHERE a = ?"
-	sqlList := SQLList("test", "a", "", &crud.Options{}) // Ranges: &crud.Ranges{OrderBy: []string{"a DESC"}}
+	sqlList := SQLList("test", "a", "", nil) // Ranges: &crud.Ranges{OrderBy: []string{"a DESC"}}
 
 	var stmInsert, stmUpdate, stmDelete, stmSelect, stmList *sql.Stmt
 

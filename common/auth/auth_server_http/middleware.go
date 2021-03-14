@@ -5,7 +5,6 @@ import (
 	"regexp"
 
 	"github.com/pavlo67/common/common/auth"
-	"github.com/pavlo67/common/common/crud"
 	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/server/server_http"
 )
@@ -28,9 +27,9 @@ type onRequestMiddleware struct {
 
 var reBearer = regexp.MustCompile(`^\s*Bearer(\s|%[fF]20)*`)
 
-const onOptions = "on onRequestMiddleware.Options()"
+const onOptions = "on onRequestMiddleware.Identity()"
 
-func (orm *onRequestMiddleware) Options(r *http.Request) (*crud.Options, error) {
+func (orm *onRequestMiddleware) Identity(r *http.Request) (*auth.Identity, error) {
 	//if r == nil {
 	//	return nil, errors.New("no server_http.Request in RequestOptions(...)")
 	//}
@@ -44,11 +43,7 @@ func (orm *onRequestMiddleware) Options(r *http.Request) (*crud.Options, error) 
 		}
 	}
 
-	if identity == nil {
-		return nil, nil
-	}
-
-	return &crud.Options{Identity: identity}, nil
+	return identity, nil
 }
 
 //// SIGNATURE CHECK

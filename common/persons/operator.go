@@ -6,10 +6,11 @@ import (
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/auth"
-	"github.com/pavlo67/common/common/crud"
+	"github.com/pavlo67/common/common/db"
 	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/selectors"
 
+	"github.com/pavlo67/data_exchange/components/structures"
 	"github.com/pavlo67/data_exchange/components/vcs"
 )
 
@@ -17,11 +18,11 @@ const HasEmail selectors.Key = "has_email"
 const HasNickname selectors.Key = "has_nickname"
 
 type Operator interface {
-	Add(identity auth.Identity, creds auth.Creds, data common.Map, options *crud.Options) (auth.ID, error)
-	Change(Item, *crud.Options) (*Item, error)
-	Read(auth.ID, *crud.Options) (*Item, error)
-	Remove(auth.ID, *crud.Options) error
-	List(options *crud.Options) ([]Item, error)
+	Save(Item, *auth.Identity) (auth.ID, error)
+	Read(auth.ID, *auth.Identity) (*Item, error)
+	Remove(auth.ID, *auth.Identity) error
+	List(*selectors.Term, *auth.Identity) ([]Item, error)
+	Stat(*selectors.Term, *auth.Identity) (db.StatMap, error)
 }
 
 type Item struct {
@@ -33,6 +34,11 @@ type Item struct {
 
 	// hidden values
 	creds auth.Creds `json:",omitempty" bson:",omitempty"`
+}
+
+type Pack struct {
+	structures.PackDescription
+	Data []Item
 }
 
 func (item *Item) CompletePersonFromJSON(id auth.ID, rolesBytes, credsBytes, dataBytes, historyBytes []byte, email string) error {
@@ -58,7 +64,7 @@ func (item *Item) CompletePersonFromJSON(id auth.ID, rolesBytes, credsBytes, dat
 	}
 
 	if len(dataBytes) > 0 {
-		if err := json.Unmarshal(historyBytes, &item.Data); err != nil {
+		if err := json.Unmarshal(dataBytes, &item.Data); err != nil {
 			return errors.Wrapf(err, "can't unmarshal .Data (%s)", dataBytes)
 		}
 	}

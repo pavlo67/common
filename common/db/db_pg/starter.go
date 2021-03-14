@@ -1,17 +1,18 @@
-package connect_pg
+package db_pg
 
 import (
 	"fmt"
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
-	"github.com/pavlo67/common/common/connect"
 	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/sqllib/sqllib_pg"
 	"github.com/pavlo67/common/common/starter"
 )
+
+const InterfaceKey joiner.InterfaceKey = "db_pg"
 
 func Starter() starter.Operator {
 	return &connectPgStarter{}
@@ -35,7 +36,7 @@ func (css *connectPgStarter) Prepare(cfg *config.Config, options common.Map) err
 		return err
 	}
 
-	css.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(connect.InterfaceSQLiteKey)))
+	css.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
 
 	return nil
 }

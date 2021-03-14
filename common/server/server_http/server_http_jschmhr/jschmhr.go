@@ -183,14 +183,14 @@ func (s *serverHTTPJschmhr) HandleEndpoint(key joiner.InterfaceKey, serverPath s
 	s.HandleOptions(key, path)
 
 	handler := func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
-		options, err := s.onRequest.Options(r)
+		options, err := s.onRequest.Identity(r)
 		if err != nil {
 			l.Error(err)
 		}
 
-		var params server_http.Params
+		var params server_http.PathParams
 		if len(paramsHR) > 0 {
-			params = server_http.Params{}
+			params = server_http.PathParams{}
 			for _, p := range paramsHR {
 				params[p.Key] = p.Value
 			}

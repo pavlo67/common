@@ -3,20 +3,21 @@ package server_http
 import (
 	"net/http"
 
+	"github.com/pavlo67/common/common/auth"
+
 	"github.com/pavlo67/common/common/joiner"
 
-	"github.com/pavlo67/common/common/crud"
 	"github.com/pavlo67/common/common/server"
 )
 
 const OnRequestMiddlewareInterfaceKey joiner.InterfaceKey = "server_http_on_request_middleware"
 const InterfaceKey joiner.InterfaceKey = "server_http"
 
-type Params map[string]string
-type WorkerHTTP func(Operator, *http.Request, Params, *crud.Options) (server.Response, error)
+type PathParams map[string]string
+type WorkerHTTP func(Operator, *http.Request, PathParams, *auth.Identity) (server.Response, error)
 
 type OnRequestMiddleware interface {
-	Options(r *http.Request) (*crud.Options, error)
+	Identity(r *http.Request) (*auth.Identity, error)
 }
 
 type StaticPath struct {

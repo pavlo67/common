@@ -7,7 +7,6 @@ import (
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/auth"
-	"github.com/pavlo67/common/common/crud"
 	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/persons"
 	"github.com/pavlo67/common/common/rbac"
@@ -49,8 +48,12 @@ func (authOp *authPersons) SetCreds(authID auth.ID, toSet auth.Creds) (*auth.Cre
 
 		// TODO!!! hash password
 
-		_, err := authOp.personsOp.Add(identity, toSet, nil, crud.OptionsWithRoles(rbac.RoleAdmin))
-		if err != nil {
+		person := persons.Item{Identity: identity}
+		if err := person.SetCreds(toSet); err != nil {
+			return nil, errors.Wrapf(err, onSetCreds+"can't .personsOp.SetCreds(%#v)", toSet)
+		}
+
+		if _, err := authOp.personsOp.Save(person, auth.IdentityWithRoles(rbac.RoleAdmin)); err != nil {
 			return nil, errors.Wrapf(err, onSetCreds+"can't .personsOp.Save(%#v, nil)", identity)
 		}
 
@@ -135,7 +138,7 @@ func (authOp *authPersons) Authenticate(toAuth auth.Creds) (*auth.Identity, erro
 	//	return nil, errata.CommonError(err, onAuthenticate)
 	//}
 
-	items, err := authOp.personsOp.List(crud.OptionsWithRoles(rbac.RoleAdmin).WithSelector(selector))
+	items, err := authOp.personsOp.List(&selector, auth.IdentityWithRoles(rbac.RoleAdmin))
 	if err != nil {
 		return nil, errors.CommonError(err, fmt.Sprintf(onAuthenticate+": can't .personsOp.List(selector = %#v, nil)", selector))
 	}

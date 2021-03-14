@@ -4,15 +4,19 @@ import (
 	"os"
 	"testing"
 
+	"github.com/pavlo67/common/common"
+
+	"github.com/pavlo67/common/common/db"
+
 	"github.com/stretchr/testify/require"
 
-	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/auth"
-	"github.com/pavlo67/common/common/crud"
 	"github.com/pavlo67/common/common/rbac"
 )
 
-func OperatorTestScenario(t *testing.T, personsOp Operator, personsCleanerOp crud.Cleaner) {
+func OperatorTestScenario(t *testing.T, personsOp Operator, personsCleanerOp db.Cleaner) {
+
+	var err error
 
 	// prepare... ----------------------------------------------
 
@@ -21,173 +25,180 @@ func OperatorTestScenario(t *testing.T, personsOp Operator, personsCleanerOp cru
 	require.NotNil(t, personsOp)
 	require.NotNil(t, personsCleanerOp)
 
-	adminOptions := crud.OptionsWithRoles(rbac.RoleAdmin)
-	require.NotNil(t, adminOptions)
+	adminIdentity := auth.IdentityWithRoles(rbac.RoleAdmin)
+	require.NotNil(t, adminIdentity)
 
 	// clean old data ------------------------------------------
 
-	err := personsCleanerOp.Clean(adminOptions)
+	err = personsCleanerOp.Clean(nil)
 	require.NoError(t, err)
 
-	personItems, err := personsOp.List(adminOptions)
+	personItems, err := personsOp.List(nil, adminIdentity)
 	require.NoError(t, err)
 	require.Equal(t, 0, len(personItems))
 
-	// add person with ID --------------------------------------
+	// add person ----------------------------------------------
 
-	dataToTest := common.Map{}
-	passwordToTestWithID := "passwordToTestWithID"
+	passwordToSave := "passwordToSave"
+	personToSave := Item{
+		Identity: auth.Identity{
+			Nickname: "test_nickname1",
+			Roles:    rbac.Roles{rbac.RoleUser},
+		},
+	}
+	err = personToSave.SetCreds(auth.Creds{auth.CredsPassword: passwordToSave})
+	require.NoError(t, err)
 
-	identityToTestWithID := auth.Identity{
-		ID:       "test_id",
-		Nickname: "test_nickname1",
-		Roles:    rbac.Roles{rbac.RoleUser},
+	personToSave.ID, err = personsOp.Save(personToSave, adminIdentity)
+	require.NoErrorf(t, err, "%#v", err)
+	require.NotEmpty(t, personToSave.ID)
+
+	// read person ---------------------------------------------
+
+	personReaded, err := personsOp.Read(personToSave.ID, adminIdentity)
+	require.NoErrorf(t, err, "%#v", err)
+	require.True(t, personReaded.CheckCreds(auth.CredsPassword, passwordToSave))
+
+	require.Equal(t, personToSave.Identity, personReaded.Identity)
+	require.Equal(t, personToSave.Data, personReaded.Data)
+
+	// change person -------------------------------------------
+
+	personToChange := personReaded
+	personToChange.Nickname += " (changed)"
+	personToChange.Nickname += " (changed)"
+	if personToChange.Data == nil {
+		personToChange.Data = common.Map{}
 	}
 
-	personIDWrong, err := personsOp.Add(identityToTestWithID, nil, dataToTest, nil)
-	require.Error(t, err)
-	require.Empty(t, personIDWrong)
+	personToChange.Data["change"] = "change"
+	passwordToChange := "passwordToChange"
+	err = personToChange.SetCreds(auth.Creds{auth.CredsPassword: passwordToChange})
+	require.NoError(t, err)
 
-	personID1, err := personsOp.Add(identityToTestWithID, auth.Creds{auth.CredsPassword: passwordToTestWithID}, dataToTest, adminOptions)
+	id, err := personsOp.Save(*personToChange, adminIdentity)
 	require.NoErrorf(t, err, "%#v", err)
-	// require.Equal(t, identityToTestWithID.ID, personID1)
-	require.NotEmpty(t, personID1)
-	identityToTestWithID.ID = personID1
+	require.Equal(t, personToChange.ID, id)
 
-	person1, err := personsOp.Read(personID1, adminOptions)
+	// read person ---------------------------------------------
 
+	personChangedReaded, err := personsOp.Read(personToSave.ID, adminIdentity)
 	require.NoErrorf(t, err, "%#v", err)
-	require.True(t, person1.CheckCreds(auth.CredsPassword, passwordToTestWithID))
+	require.Truef(t, personChangedReaded.CheckCreds(auth.CredsPassword, passwordToChange), ".Creds(): %#v", personChangedReaded.Creds())
 
-	person1.SetCreds(auth.Creds{auth.CredsPassword: ""})
-	require.Equal(t, identityToTestWithID, person1.Identity)
+	require.Equal(t, personToChange.Identity, personChangedReaded.Identity)
+	require.Equal(t, personToChange.Data, personChangedReaded.Data)
 
-	person1Options := crud.Options{Identity: &person1.Identity}
+	// add another person --------------------------------------
 
-	//personIDWrong, err = personsOp.Add(identityToTestWithID, auth.Creds{auth.CredsPassword: passwordToTestWithID}, dataToTest, adminOptions)
-	//require.Errorf(t, err, "%#v", err)
-	//require.Empty(t, personIDWrong)
-
-	// add person without ID -----------------------------------
-
-	passwordToTestWithoutID := "passwordToTestWithoutID"
-
-	identityToTestWithoutID := auth.Identity{
-		Nickname: "test_nickname2",
-		Roles:    rbac.Roles{rbac.RoleUser},
+	passwordToSaveAnother := "passwordToSaveAnother"
+	personToSaveAnother := Item{
+		Identity: auth.Identity{
+			Nickname: "test_nickname2",
+			Roles:    rbac.Roles{rbac.RoleUser},
+		},
 	}
+	err = personToSaveAnother.SetCreds(auth.Creds{auth.CredsPassword: passwordToSaveAnother})
+	require.NoError(t, err)
 
-	personID2, err := personsOp.Add(identityToTestWithoutID, auth.Creds{auth.CredsPassword: passwordToTestWithoutID}, dataToTest, adminOptions)
+	personToSaveAnother.ID, err = personsOp.Save(personToSaveAnother, adminIdentity)
 	require.NoErrorf(t, err, "%#v", err)
-	require.NotEmpty(t, personID2)
-
-	personID3, err := personsOp.Add(identityToTestWithoutID, auth.Creds{auth.CredsPassword: passwordToTestWithoutID}, dataToTest, adminOptions)
-	require.NoErrorf(t, err, "%#v", err)
-	require.NotEmpty(t, personID3)
-
-	person2, err := personsOp.Read(personID2, adminOptions)
-	require.NoErrorf(t, err, "%#v", err)
-	require.Equal(t, identityToTestWithoutID.Nickname, person2.Nickname)
-	require.Equal(t, personID2, person2.ID)
-
-	person2Options := crud.Options{Identity: &person2.Identity}
-
-	person3, err := personsOp.Read(personID3, adminOptions)
-	require.NoErrorf(t, err, "%#v", err)
-	require.Equal(t, identityToTestWithoutID.Nickname, person3.Nickname)
-	require.Equal(t, personID3, person3.ID)
+	require.NotEmpty(t, personToSaveAnother.ID)
 
 	// list persons by admin: ok -------------------------------
 
-	personItems, err = personsOp.List(adminOptions)
+	personItems, err = personsOp.List(nil, adminIdentity)
 	require.NoErrorf(t, err, "%#v", err)
-	require.Equal(t, 3, len(personItems))
+	require.Equal(t, 2, len(personItems))
 
-	// list persons by itself: error ---------------------------
+	//// add person ----------------------------------------------
+	//
+	//personItems, err = personsOp.List(adminIdentity)
+	//require.NoErrorf(t, err, "%#v", err)
+	//require.Equal(t, 3, len(personItems))
+	//
+	//// list persons by itself: error ---------------------------
+	//
+	//personItems, err = personsOp.List(&person1Options)
+	//require.Errorf(t, err, "%#v", err)
+	//require.Empty(t, personItems)
 
-	personItems, err = personsOp.List(&person1Options)
-	require.Errorf(t, err, "%#v", err)
-	require.Empty(t, personItems)
-
-	// change person by admin: ok ------------------------------
-
-	person1ToChange := *person1
-	person1ToChange.Nickname += "_changed"
-
-	person1Changed, err := personsOp.Change(person1ToChange, adminOptions)
-	require.NoErrorf(t, err, "%#v", err)
-	require.Equal(t, person1ToChange.Identity, person1Changed.Identity)
-
-	person1ChangedReaded, err := personsOp.Read(person1Changed.ID, adminOptions)
-	require.NoErrorf(t, err, "%#v", err)
-	require.Equal(t, person1ToChange.Identity, person1ChangedReaded.Identity)
-
-	// change person by itself: ok -----------------------------
-
-	person1ToChange.Nickname += "_again"
-
-	person1Changed, err = personsOp.Change(person1ToChange, &person1Options)
-	require.NoErrorf(t, err, "%#v", err)
-	require.Equal(t, person1ToChange.Identity, person1Changed.Identity)
-
-	person1ChangedReaded, err = personsOp.Read(person1Changed.ID, &person1Options)
-	require.NoErrorf(t, err, "%#v", err)
-	require.Equal(t, person1ToChange.Identity, person1ChangedReaded.Identity)
-
-	// change/read person by another person: error -------------
-
-	person1ToChangeAgain := *person1ChangedReaded
-	person1ToChangeAgain.Nickname += "_again2"
-
-	person1ChangedWrong, err := personsOp.Change(person1ToChangeAgain, &person2Options)
-	require.Errorf(t, err, "%#v", err)
-	require.Nil(t, person1ChangedWrong)
-
-	person1ReadedWrong, err := personsOp.Read(personID1, &person2Options)
-	require.Errorf(t, err, "%#v", err)
-	require.Nil(t, person1ReadedWrong)
-
-	person1Readed, err := personsOp.Read(personID1, &person1Options)
-	require.NoErrorf(t, err, "%#v", err)
-	require.NotNil(t, person1Readed)
-	require.Equal(t, person1Changed.Identity, person1Readed.Identity)
-
+	//// change person by admin: ok ------------------------------
+	//
+	//person1ToChange := *personReaded
+	//person1ToChange.Nickname += "_changed"
+	//
+	//person1Changed, err := personsOp.Change(person1ToChange, adminIdentity)
+	//require.NoErrorf(t, err, "%#v", err)
+	//require.Equal(t, person1ToChange.Identity, person1Changed.Identity)
+	//
+	//person1ChangedReaded, err := personsOp.Read(person1Changed.ID, adminIdentity)
+	//require.NoErrorf(t, err, "%#v", err)
+	//require.Equal(t, person1ToChange.Identity, person1ChangedReaded.Identity)
+	//
+	//// change person by itself: ok -----------------------------
+	//
+	//person1ToChange.Nickname += "_again"
+	//
+	//person1Changed, err = personsOp.Change(person1ToChange, &person1Options)
+	//require.NoErrorf(t, err, "%#v", err)
+	//require.Equal(t, person1ToChange.Identity, person1Changed.Identity)
+	//
+	//person1ChangedReaded, err = personsOp.Read(person1Changed.ID, &person1Options)
+	//require.NoErrorf(t, err, "%#v", err)
+	//require.Equal(t, person1ToChange.Identity, person1ChangedReaded.Identity)
+	//
+	//// change/read person by another person: error -------------
+	//
+	//person1ToChangeAgain := *person1ChangedReaded
+	//person1ToChangeAgain.Nickname += "_again2"
+	//
+	//person1ChangedWrong, err := personsOp.Change(person1ToChangeAgain, &person2Options)
+	//require.Errorf(t, err, "%#v", err)
+	//require.Nil(t, person1ChangedWrong)
+	//
+	//person1ReadedWrong, err := personsOp.Read(personID1, &person2Options)
+	//require.Errorf(t, err, "%#v", err)
+	//require.Nil(t, person1ReadedWrong)
+	//
+	//person1Readed, err := personsOp.Read(personID1, &person1Options)
+	//require.NoErrorf(t, err, "%#v", err)
+	//require.NotNil(t, person1Readed)
+	//require.Equal(t, person1Changed.Identity, person1Readed.Identity)
+	//
 	// remove person by admin: ok ------------------------------
 
-	err = personsOp.Remove(personID3, adminOptions)
+	err = personsOp.Remove(personToSaveAnother.ID, adminIdentity)
 	require.NoErrorf(t, err, "%#v", err)
 
-	person3Readed, err := personsOp.Read(personID3, adminOptions)
+	personAnotherReaded, err := personsOp.Read(personToSaveAnother.ID, adminIdentity)
 	require.Errorf(t, err, "%#v", err)
-	require.Nil(t, person3Readed)
+	require.Nil(t, personAnotherReaded)
 
-	// remove person by itself: ok -----------------------------
-
-	require.NotNil(t, person2Options.Identity)
-	err = personsOp.Remove(personID2, &person2Options)
-	require.NoErrorf(t, err, "%#v / %#v", person2Options.Identity, err)
-
-	person2Readed, err := personsOp.Read(personID2, &person2Options)
-	require.Errorf(t, err, "%#v", err)
-	require.Nil(t, person2Readed)
-
-	// remove person by another person: error ------------------
-
-	err = personsOp.Remove(personID1, &person2Options)
-	require.Errorf(t, err, "%#v", err)
-
-	person1Readed, err = personsOp.Read(personID1, adminOptions)
-	require.NoErrorf(t, err, "%#v", err)
-	require.NotNil(t, person1Readed)
-	require.Equal(t, person1ChangedReaded.Identity, person1Readed.Identity)
+	//// remove person by itself: ok -----------------------------
+	//
+	//require.NotNil(t, person2Options.Identity)
+	//err = personsOp.Remove(personID2, &person2Options)
+	//require.NoErrorf(t, err, "%#v / %#v", person2Options.Identity, err)
+	//
+	//person2Readed, err := personsOp.Read(personID2, &person2Options)
+	//require.Errorf(t, err, "%#v", err)
+	//require.Nil(t, person2Readed)
+	//
+	//// remove person by another person: error ------------------
+	//
+	//err = personsOp.Remove(personID1, &person2Options)
+	//require.Errorf(t, err, "%#v", err)
+	//
+	//person1Readed, err = personsOp.Read(personID1, adminIdentity)
+	//require.NoErrorf(t, err, "%#v", err)
+	//require.NotNil(t, person1Readed)
+	//require.Equal(t, person1ChangedReaded.Identity, person1Readed.Identity)
 
 	// list persons by admin: ok -------------------------------
 
-	personItems, err = personsOp.List(adminOptions)
+	personItems, err = personsOp.List(nil, adminIdentity)
 	require.NoErrorf(t, err, "%#v", err)
 	require.Equal(t, 1, len(personItems))
-
-	// clean old data ------------------------------------------
-	// TODO???
 
 }

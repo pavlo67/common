@@ -67,6 +67,8 @@ func (item *Item) SetCreds(creds auth.Creds) error {
 		}
 	}
 
+	// log.Printf("set creds: %#v --> %#v", creds, item.creds)
+
 	return nil
 }
 
@@ -78,6 +80,8 @@ func (item *Item) CheckCreds(key auth.CredsType, value string) bool {
 	if key != auth.CredsPassword {
 		return item.creds[key] == value
 	}
+
+	// log.Printf("check password (%s) on passhash (%s) --> %s", value, item.creds[auth.CredsPasshash], crypter.Verify(item.creds[auth.CredsPasshash], []byte(value)))
 
 	return crypter.Verify(item.creds[auth.CredsPasshash], []byte(value)) == nil
 }

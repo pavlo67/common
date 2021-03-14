@@ -6,7 +6,7 @@ import (
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
-	"github.com/pavlo67/common/common/connect"
+	"github.com/pavlo67/common/common/db/db_sqlite"
 	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
@@ -36,7 +36,7 @@ func (rss *personsSQLiteStarter) Name() string {
 func (rss *personsSQLiteStarter) Prepare(cfg *config.Config, options common.Map) error {
 
 	rss.table, _ = options.String("table")
-	rss.connectKey = joiner.InterfaceKey(options.StringDefault("connect_key", string(connect.InterfaceSQLiteKey)))
+	rss.connectKey = joiner.InterfaceKey(options.StringDefault("connect_key", string(db_sqlite.InterfaceKey)))
 	rss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(persons.InterfaceKey)))
 	rss.cleanerKey = joiner.InterfaceKey(options.StringDefault("cleaner_key", string(persons.InterfaceCleanerKey)))
 
