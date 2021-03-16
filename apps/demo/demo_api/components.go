@@ -3,10 +3,8 @@ package demo_api
 import (
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/auth/auth_jwt"
-	"github.com/pavlo67/common/common/auth/auth_persons"
 	"github.com/pavlo67/common/common/auth/auth_server_http"
 	"github.com/pavlo67/common/common/control"
-	"github.com/pavlo67/common/common/persons/persons_fs"
 	"github.com/pavlo67/common/common/server/server_http/server_http_jschmhr"
 	"github.com/pavlo67/common/common/starter"
 )
@@ -18,8 +16,6 @@ func Components(envPath string, startREST, logRequests bool) []starter.Starter {
 		{control.Starter(), nil},
 
 		// auth/persons components
-		{persons_fs.Starter(), nil},
-		{auth_persons.Starter(), nil},
 		{auth_jwt.Starter(), nil},
 		{auth_server_http.Starter(), common.Map{"auth_jwt_key": auth_jwt.InterfaceKey}},
 	}
