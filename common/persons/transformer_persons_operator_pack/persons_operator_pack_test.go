@@ -48,41 +48,47 @@ func TestTransformPersonsOperatorPack(t *testing.T) {
 
 	dataInitial := persons.Pack{
 		PackDescription: structures.PackDescription{
-			Title:  "title",
 			Fields: structures.Fields{},
-			// ErrorsMap: nil,
-			// History:   nil,
-			CreatedAt: time.Now(),
-			// UpdatedAt: nil,
-		},
-		Data: []persons.Item{
-			{
-				Identity: auth.Identity{
-					URN:      "urn1",
-					Nickname: "wqerwqer",
-					Roles:    nil,
-				},
-				Data: common.Map{"xxx": "yyy", "zzz": 777},
+			ItemDescription: structures.ItemDescription{
+				Label: "title",
+				// ErrorsMap: nil,
 				// History:   nil,
 				CreatedAt: time.Now(),
 				// UpdatedAt: nil,
 			},
+		},
+		Items: []persons.Item{
 			{
 				Identity: auth.Identity{
-					URN:      "urn2",
+					Nickname: "wqerwqer",
+					Roles:    nil,
+				},
+				ItemDescription: structures.ItemDescription{
+					Info: common.Map{"xxx": "yyy", "zzz": 777},
+					URN:  "urn1",
+					// History:   nil,
+					CreatedAt: time.Now(),
+					// UpdatedAt: nil,
+				},
+			},
+			{
+				Identity: auth.Identity{
 					Nickname: "wqerwqer2",
 					Roles:    rbac.Roles{rbac.RoleUser},
 				},
-				Data: common.Map{"xxx2": "yyy", "zzz2": 222},
-				// History:   nil,
-				CreatedAt: time.Now(),
-				// UpdatedAt: nil,
+				ItemDescription: structures.ItemDescription{
+					Info: common.Map{"xxx2": "yyy", "zzz2": 222},
+					URN:  "urn2",
+					// History:   nil,
+					CreatedAt: time.Now(),
+					// UpdatedAt: nil,
+				},
 			},
 		},
 	}
 
-	dataInitial.Data[0].SetCreds(auth.Creds{auth.CredsEmail: "aaa@bbb.ccc"})
-	dataInitial.Data[1].SetCreds(auth.Creds{auth.CredsEmail: "aaa2@bbb.ccc"})
+	dataInitial.Items[0].SetCreds(auth.Creds{auth.CredsEmail: "aaa@bbb.ccc"})
+	dataInitial.Items[1].SetCreds(auth.Creds{auth.CredsEmail: "aaa2@bbb.ccc"})
 
 	var params common.Map
 

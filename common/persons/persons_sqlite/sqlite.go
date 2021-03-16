@@ -2,7 +2,6 @@ package persons_sqlite
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -21,7 +20,7 @@ import (
 	"github.com/pavlo67/common/common/strlib"
 )
 
-var fieldsToInsert = []string{"urn", "nickname", "email", "roles", "creds", "data", "history"}
+var fieldsToInsert = []string{"nickname", "email", "roles", "creds", "label", "info", "tags", "urn", "pack_urn", "owner_nss", "viewer_nss", "history"}
 var fieldsToInsertStr = strings.Join(fieldsToInsert, ", ")
 
 var fieldsToUpdate = append(fieldsToInsert, "updated_at")
@@ -88,40 +87,17 @@ func (personsOp *personsSQLite) Save(item persons.Item, identity *auth.Identity)
 		return "", errors.CommonError(common.NoRightsKey, common.Map{"on": onSave, "item": item})
 	}
 
-	var err error
-	rolesBytes := []byte{} // to satisfy NOT NULL constraint
-	if len(item.Identity.Roles) > 0 {
-		if rolesBytes, err = json.Marshal(item.Roles); err != nil {
-			return "", errors.Wrapf(err, onSave+"can't marshal item.Identity.Roles (%#v)", item.Roles)
-		}
-	}
-
-	creds := item.Creds()
-	email := creds[auth.CredsEmail]
-	delete(creds, auth.CredsEmail)
-
-	credsBytes := []byte{} // to satisfy NOT NULL constraint
-	if len(creds) > 0 {
-		if credsBytes, err = json.Marshal(creds); err != nil {
-			return "", errors.Wrapf(err, onSave+"can't marshal creds (%#v)", creds)
-		}
-	}
-
-	dataBytes := []byte{} // to to satisfy NOT NULL constraint
-	if len(item.Data) > 0 {
-		if dataBytes, err = json.Marshal(item.Data); err != nil {
-			return "", errors.Wrapf(err, onSave+"can't marshal data (%#v)", item.Data)
-		}
-	}
-
 	// TODO!!! append to item.History
+	rolesBytes, credsBytes, emailBytes, infoBytes, tagsBytes, historyBytes, urnBytes, err := item.FoldIntoJSON()
+	if err != nil {
+		return "", errors.CommonError(err, onSave)
+	}
 
-	historyBytes := []byte{} // to to satisfy NOT NULL constraint
-	if len(item.History) > 0 {
-		historyBytes, err = json.Marshal(item.History)
-		if err != nil {
-			return "", errors.Wrapf(err, onSave+"can't marshal .History(%#v)", item.History)
-		}
+	// "nickname", "email", "roles", "creds",
+	// "label", "info", "tags", "urn", "pack_urn", "owner_nss", "viewer_nss", "history"
+	values := []interface{}{
+		item.Nickname, emailBytes, rolesBytes, credsBytes,
+		item.Label, infoBytes, tagsBytes, urnBytes, item.PackURN, item.OwnerNSS, item.ViewerNSS, historyBytes,
 	}
 
 	if item.ID != "" {
@@ -135,18 +111,14 @@ func (personsOp *personsSQLite) Save(item persons.Item, identity *auth.Identity)
 				return "", errors.CommonError(common.NoRightsKey, common.Map{"on": onSave, "item": item, "requestedRole": rbac.RoleAdmin})
 			}
 		}
-		// "issued_id", "nickname", "email", "roles", "creds", "data", "history", "updated_at"
-		values := []interface{}{item.Identity.URN, item.Identity.Nickname, email, rolesBytes,
-			credsBytes, dataBytes, historyBytes, time.Now(), item.ID}
+		// ... "updated_at", "id"
+		values = append(values, time.Now(), item.ID)
 
 		if _, err = personsOp.stmUpdate.Exec(values...); err != nil {
 			return "", errors.Wrapf(err, onSave+sqllib.CantExec, personsOp.sqlUpdate, strlib.Stringify(values))
 		}
 
 	} else {
-		// "issued_id", "nickname", "email", "roles", "creds", "data", "history"
-		values := []interface{}{item.URN, item.Nickname, creds[auth.CredsEmail], rolesBytes, credsBytes, dataBytes, historyBytes}
-
 		res, err := personsOp.stmInsert.Exec(values...)
 		if err != nil {
 			return "", errors.Wrapf(err, onSave+sqllib.CantExec, personsOp.sqlInsert, strlib.Stringify(values))
@@ -182,6 +154,8 @@ func (personsOp *personsSQLite) Remove(id auth.ID, identity *auth.Identity) erro
 	return nil
 }
 
+const onread = "on personsSQLite.read(): "
+
 func (personsOp *personsSQLite) read(id auth.ID) (*persons.Item, error) {
 
 	idNum, err := strconv.ParseUint(string(id), 10, 64)
@@ -190,21 +164,24 @@ func (personsOp *personsSQLite) read(id auth.ID) (*persons.Item, error) {
 	}
 
 	var item persons.Item
-	var email string
-	var rolesBytes, credsBytes, dataBytes, historyBytes []byte
+	var emailBytes, rolesBytes, credsBytes, infoBytes, tagsBytes, urnBytes, historyBytes []byte
 
-	// "issued_id", "nickname", "email", "roles", "creds", "data", "history", "updated_at", "created_at"
+	// "nickname", "email", "roles", "creds",
+	// "label", "info", "tags", "urn", "pack_urn", "owner_nss", "viewer_nss", "history"
+	// "updated_at", "created_at", "id"
 
 	if err = personsOp.stmRead.QueryRow(idNum).Scan(
-		&item.Identity.URN, &item.Identity.Nickname, &email, &rolesBytes, &credsBytes, &dataBytes,
-		&historyBytes, &item.UpdatedAt, &item.CreatedAt); err == sql.ErrNoRows {
-		return nil, errors.CommonError(common.ErrNotFound, onRead)
+		&item.Nickname, &emailBytes, &rolesBytes, &credsBytes,
+		&item.Label, &infoBytes, &tagsBytes, &urnBytes, &item.PackURN, &item.OwnerNSS, &item.ViewerNSS, &historyBytes,
+		&item.UpdatedAt, &item.CreatedAt,
+	); err == sql.ErrNoRows {
+		return nil, errors.CommonError(common.ErrNotFound, onread)
 	} else if err != nil {
-		return nil, errors.Wrapf(err, onRead+sqllib.CantScanQueryRow, personsOp.sqlRead, idNum)
+		return nil, errors.Wrapf(err, onread+sqllib.CantScanQueryRow, personsOp.sqlRead, idNum)
 	}
 
-	if err := item.CompletePersonFromJSON(id, rolesBytes, credsBytes, dataBytes, historyBytes, email); err != nil {
-		return nil, errors.CommonError(err, onRead)
+	if err := item.UnfoldFromJSON(id, rolesBytes, credsBytes, emailBytes, infoBytes, tagsBytes, urnBytes, historyBytes); err != nil {
+		return nil, errors.CommonError(err, onread)
 	}
 
 	return &item, nil
@@ -262,8 +239,6 @@ func (personsOp *personsSQLite) List(selector *selectors.Term, identity *auth.Id
 		return nil, errors.Wrapf(err, onList+": can't db.Prepare(%s)", query)
 	}
 
-	//l.Infof("%s / %#v\n%s", condition, values, query)
-
 	rows, err := stm.Query(values...)
 	if err == sql.ErrNoRows {
 		return nil, nil
@@ -278,19 +253,22 @@ func (personsOp *personsSQLite) List(selector *selectors.Term, identity *auth.Id
 		var idNum int64
 		var item persons.Item
 
-		var email string
-		var rolesBytes, credsBytes, dataBytes, historyBytes []byte
+		var emailBytes, rolesBytes, credsBytes, infoBytes, tagsBytes, urnBytes, historyBytes []byte
 
-		// "issued_id", "nickname", "email", "roles", "creds", "data", "history", "updated_at", "created_at"
-		// "id"
+		// "nickname", "email", "roles", "creds",
+		// "label", "info", "tags", "urn", "pack_urn", "owner_nss", "viewer_nss", "history"
+		// "updated_at", "created_at", "id"
 
 		if err := rows.Scan(
-			&item.Identity.URN, &item.Identity.Nickname, &email, &rolesBytes, &credsBytes, &dataBytes,
-			&historyBytes, &item.UpdatedAt, &item.CreatedAt, &idNum); err != nil {
+			&item.Nickname, &emailBytes, &rolesBytes, &credsBytes,
+			&item.Label, &infoBytes, &tagsBytes, &urnBytes, &item.PackURN, &item.OwnerNSS, &item.ViewerNSS, &historyBytes,
+			&item.UpdatedAt, &item.CreatedAt,
+			&idNum,
+		); err != nil {
 			return nil, errors.Wrapf(err, onList+": "+sqllib.CantScanQueryRow, query, values)
 		}
 
-		if err := item.CompletePersonFromJSON(auth.ID(strconv.FormatInt(idNum, 10)), rolesBytes, credsBytes, dataBytes, historyBytes, email); err != nil {
+		if err := item.UnfoldFromJSON(auth.ID(strconv.FormatInt(idNum, 10)), rolesBytes, credsBytes, emailBytes, infoBytes, tagsBytes, urnBytes, historyBytes); err != nil {
 			return nil, errors.CommonError(err, onList)
 		}
 		items = append(items, item)

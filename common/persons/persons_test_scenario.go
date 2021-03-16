@@ -60,18 +60,18 @@ func OperatorTestScenario(t *testing.T, personsOp Operator, personsCleanerOp db.
 	require.True(t, personReaded.CheckCreds(auth.CredsPassword, passwordToSave))
 
 	require.Equal(t, personToSave.Identity, personReaded.Identity)
-	require.Equal(t, personToSave.Data, personReaded.Data)
+	require.Equal(t, personToSave.Info, personReaded.Info)
 
 	// change person -------------------------------------------
 
 	personToChange := personReaded
 	personToChange.Nickname += " (changed)"
 	personToChange.Nickname += " (changed)"
-	if personToChange.Data == nil {
-		personToChange.Data = common.Map{}
+	if personToChange.Info == nil {
+		personToChange.Info = common.Map{}
 	}
 
-	personToChange.Data["change"] = "change"
+	personToChange.Info["change"] = "change"
 	passwordToChange := "passwordToChange"
 	err = personToChange.SetCreds(auth.Creds{auth.CredsPassword: passwordToChange})
 	require.NoError(t, err)
@@ -87,7 +87,7 @@ func OperatorTestScenario(t *testing.T, personsOp Operator, personsCleanerOp db.
 	require.Truef(t, personChangedReaded.CheckCreds(auth.CredsPassword, passwordToChange), ".Creds(): %#v", personChangedReaded.Creds())
 
 	require.Equal(t, personToChange.Identity, personChangedReaded.Identity)
-	require.Equal(t, personToChange.Data, personChangedReaded.Data)
+	require.Equal(t, personToChange.Info, personChangedReaded.Info)
 
 	// add another person --------------------------------------
 

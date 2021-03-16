@@ -38,33 +38,41 @@ func TestTransformTableCSV(t *testing.T) {
 
 	dataInitial := structures.Pack{
 		PackDescription: structures.PackDescription{
-			Title:  "title",
 			Fields: structures.Fields{},
 			// ErrorsMap: nil,
-			// History:   nil,
-			CreatedAt: time.Now(),
-			// UpdatedAt: nil,
-		},
-		Data: []types01.Person{
-			{
-				URN:      "urn1",
-				Nickname: "wqerwqer",
-				Roles:    nil,
-				Creds:    common.Map{string(auth.CredsEmail): "aaa@bbb.ccc"},
-				Data:     common.Map{"xxx": "yyy", "zzz": 777},
+			ItemDescription: structures.ItemDescription{
 				// History:   nil,
+				Label:     "title",
 				CreatedAt: time.Now(),
 				// UpdatedAt: nil,
 			},
+		},
+		Items: []types01.Person{
 			{
-				URN:      "urn2",
+				Nickname: "wqerwqer",
+				Roles:    nil,
+				Creds:    auth.Creds{auth.CredsEmail: "aaa@bbb.ccc"},
+
+				ItemDescription: structures.ItemDescription{
+					Info: common.Map{"xxx": "yyy", "zzz": 777},
+					URN:  "urn1",
+					// History:   nil,
+					CreatedAt: time.Now(),
+					// UpdatedAt: nil,
+				},
+			},
+			{
 				Nickname: "wqerwqer2",
 				Roles:    rbac.Roles{rbac.RoleUser},
-				Creds:    common.Map{string(auth.CredsEmail): "aaa2@bbb.ccc"},
-				Data:     common.Map{"xxx2": "yyy", "zzz2": 222},
-				// History:   nil,
-				CreatedAt: time.Now(),
-				// UpdatedAt: nil,
+				Creds:    auth.Creds{auth.CredsEmail: "aaa2@bbb.ccc"},
+
+				ItemDescription: structures.ItemDescription{
+					Info: common.Map{"xxx2": "yyy", "zzz2": 222},
+					URN:  "urn2",
+					// History:   nil,
+					CreatedAt: time.Now(),
+					// UpdatedAt: nil,
+				},
 			},
 		},
 	}

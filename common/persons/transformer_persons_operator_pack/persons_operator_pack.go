@@ -3,8 +3,6 @@ package transformer_persons_operator_pack
 import (
 	"fmt"
 
-	"github.com/pavlo67/common/common/db"
-
 	"github.com/pavlo67/data_exchange/components/structures"
 
 	"github.com/pavlo67/common/common"
@@ -19,16 +17,15 @@ import (
 var _ transformer.Operator = &transformerOperatorPackPersons{}
 
 type transformerOperatorPackPersons struct {
-	personsOp        persons.Operator
-	personsOpCleaner db.Cleaner
-	identity         *auth.Identity
+	personsOp persons.Operator
+	identity  *auth.Identity
 
 	packDescription *structures.PackDescription
 }
 
 const onNew = "on transformerOperatorPackPersons.New(): "
 
-func New(personsOp persons.Operator, personsOpCleaner db.Cleaner, identity *auth.Identity) (transformer.Operator, error) {
+func New(personsOp persons.Operator, identity *auth.Identity) (transformer.Operator, error) {
 	if personsOp == nil {
 		return nil, errors.New(onNew + ": no persons.Operator")
 	}
@@ -37,9 +34,8 @@ func New(personsOp persons.Operator, personsOpCleaner db.Cleaner, identity *auth
 	//}
 
 	return &transformerOperatorPackPersons{
-		personsOp:        personsOp,
-		personsOpCleaner: personsOpCleaner,
-		identity:         identity,
+		personsOp: personsOp,
+		identity:  identity,
 	}, nil
 }
 
@@ -47,13 +43,11 @@ func (transformOp *transformerOperatorPackPersons) Name() string {
 	return string(InterfaceKey)
 }
 
-func (transformOp *transformerOperatorPackPersons) Reset() error {
+func (transformOp *transformerOperatorPackPersons) reset() error {
 	transformOp.packDescription = nil
 
-	if transformOp.personsOpCleaner != nil {
-		// TODO!!! do it safely
-		transformOp.personsOpCleaner.Clean(nil)
-	}
+	// TODO!!! clean according to .PackURN
+
 	return nil
 }
 
@@ -65,8 +59,8 @@ func (transformOp *transformerOperatorPackPersons) Stat(selector *selectors.Term
 
 const onIn = "on transformerOperatorPackPersons.In(): "
 
-func (transformOp *transformerOperatorPackPersons) In(selector *selectors.Term, params common.Map, data interface{}) error {
-	if err := transformOp.Reset(); err != nil {
+func (transformOp *transformerOperatorPackPersons) In(params common.Map, data interface{}) error {
+	if err := transformOp.reset(); err != nil {
 		return errors.CommonError(err, onIn)
 	}
 
@@ -85,7 +79,7 @@ func (transformOp *transformerOperatorPackPersons) In(selector *selectors.Term, 
 		return fmt.Errorf(onIn+": nil data to import: %#v", data)
 	}
 
-	for i, personItem := range personsPack.Data {
+	for i, personItem := range personsPack.Items {
 		if _, err := transformOp.personsOp.Save(personItem, transformOp.identity); err != nil {
 			return fmt.Errorf(onIn+": can't save item (%d / %#v), got %s", i, personItem, err)
 		}
@@ -107,10 +101,12 @@ func (transformOp *transformerOperatorPackPersons) Out(selector *selectors.Term,
 		personsPack.PackDescription = *transformOp.packDescription
 	}
 
-	personsPack.Data, err = transformOp.personsOp.List(selector, transformOp.identity)
+	personsPack.Items, err = transformOp.personsOp.List(selector, transformOp.identity)
 	if err != nil {
 		return nil, fmt.Errorf(onOut+": can't list items (%#v), got %s", selector, err)
 	}
+
+	// TODO!!! set .URN for every item
 
 	return personsPack, nil
 }

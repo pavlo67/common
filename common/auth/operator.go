@@ -3,14 +3,12 @@ package auth
 import (
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/rbac"
-	"github.com/pavlo67/data_exchange/components/ns"
 )
 
 type ID common.IDStr
 
 type Identity struct {
 	ID       ID         `json:",omitempty" bson:"_id,omitempty"`
-	URN      ns.URN     `json:",omitempty" bson:",omitempty"`
 	Nickname string     `json:",omitempty" bson:",omitempty"`
 	Roles    rbac.Roles `json:",omitempty" bson:",omitempty"`
 	// TODO!!! be careful, Identity couldn't contain any creds (even non-public)

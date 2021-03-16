@@ -3,8 +3,6 @@ package transformer_persons_operator_pack
 import (
 	"fmt"
 
-	"github.com/pavlo67/common/common/db"
-
 	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/rbac"
 
@@ -29,9 +27,8 @@ var l logger.Operator
 var _ starter.Operator = &transformerPackPersonsOperatorStarter{}
 
 type transformerPackPersonsOperatorStarter struct {
-	personsKey        joiner.InterfaceKey
-	personsCleanerKey joiner.InterfaceKey
-	interfaceKey      joiner.InterfaceKey
+	personsKey   joiner.InterfaceKey
+	interfaceKey joiner.InterfaceKey
 }
 
 func (tppos *transformerPackPersonsOperatorStarter) Name() string {
@@ -40,7 +37,6 @@ func (tppos *transformerPackPersonsOperatorStarter) Name() string {
 
 func (tppos *transformerPackPersonsOperatorStarter) Prepare(cfg *config.Config, options common.Map) error {
 	tppos.personsKey = joiner.InterfaceKey(options.StringDefault("persons_key", string(persons.InterfaceKey)))
-	tppos.personsKey = joiner.InterfaceKey(options.StringDefault("persons_cleaner_key", ""))
 	tppos.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
 
 	return nil
@@ -56,15 +52,7 @@ func (tppos *transformerPackPersonsOperatorStarter) Run(joinerOp joiner.Operator
 		return fmt.Errorf("no persons.Operator with key %s", tppos.personsKey)
 	}
 
-	var personsOpCleaner db.Cleaner
-	if tppos.personsCleanerKey != "" {
-		personsOpCleaner, _ = joinerOp.Interface(tppos.personsCleanerKey).(db.Cleaner)
-		if personsOpCleaner == nil {
-			return fmt.Errorf("no db.Cleaner with key %s", tppos.personsCleanerKey)
-		}
-	}
-
-	transformOp, err := New(personsOp, personsOpCleaner, auth.IdentityWithRoles(rbac.RoleAdmin))
+	transformOp, err := New(personsOp, auth.IdentityWithRoles(rbac.RoleAdmin))
 	if err != nil {
 		return err
 	}

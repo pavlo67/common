@@ -30,7 +30,7 @@ func (transformOp *transformerPersonsPackTypes01) Name() string {
 	return string(InterfaceKey)
 }
 
-func (transformOp *transformerPersonsPackTypes01) Reset() error {
+func (transformOp *transformerPersonsPackTypes01) reset() error {
 	transformOp.packPersons = nil
 	return nil
 }
@@ -40,8 +40,8 @@ const onStat = "on transformerPersonsPackTypes01.Stat(): "
 func (transformOp *transformerPersonsPackTypes01) Stat(selector *selectors.Term, params common.Map) (interface{}, error) {
 	return &structures.PackStat{
 		ItemsStat: structures.ItemsStat{
-			Total:    len(transformOp.packPersons.Data),
-			NonEmpty: len(transformOp.packPersons.Data),
+			Total:    len(transformOp.packPersons.Items),
+			NonEmpty: len(transformOp.packPersons.Items),
 			Errored:  0, // TODO!!!
 		},
 		FieldsStat: transformOp.packPersons.Fields.Stat(),
@@ -51,8 +51,8 @@ func (transformOp *transformerPersonsPackTypes01) Stat(selector *selectors.Term,
 
 const onIn = "on transformerPersonsPackTypes01.In(): "
 
-func (transformOp *transformerPersonsPackTypes01) In(selector *selectors.Term, params common.Map, data interface{}) error {
-	if err := transformOp.Reset(); err != nil {
+func (transformOp *transformerPersonsPackTypes01) In(params common.Map, data interface{}) error {
+	if err := transformOp.reset(); err != nil {
 		return errors.CommonError(err, onIn)
 	}
 
@@ -75,48 +75,32 @@ func (transformOp *transformerPersonsPackTypes01) In(selector *selectors.Term, p
 
 	var persons01 []types01.Person
 
-	switch v := dataPack.Data.(type) {
+	switch v := dataPack.Items.(type) {
 	case []types01.Person:
 		persons01 = v
 	case *[]types01.Person:
 		if v == nil {
-			return fmt.Errorf("nil dataPack.Data to import: %#v", dataPack)
+			return fmt.Errorf("nil dataPack.Items to import: %#v", dataPack)
 		}
 		persons01 = *v
 	default:
-		return fmt.Errorf("wrong dataPack.Data to import: %#v", dataPack.Data)
+		return fmt.Errorf("wrong dataPack.Items to import: %#v", dataPack.Items)
 	}
 
 	transformOp.packPersons = &persons.Pack{
-		PackDescription: structures.PackDescription{
-			Title:     dataPack.Title,
-			Fields:    dataPack.Fields,
-			ErrorsMap: dataPack.ErrorsMap,
-			History:   dataPack.History,
-			CreatedAt: dataPack.CreatedAt,
-			UpdatedAt: dataPack.UpdatedAt,
-		},
-		Data: make([]persons.Item, len(persons01)),
+		PackDescription: dataPack.PackDescription,
+		Items:           make([]persons.Item, len(persons01)),
 	}
 
 	for i, person01 := range persons01 {
-		transformOp.packPersons.Data[i] = persons.Item{
+		transformOp.packPersons.Items[i] = persons.Item{
 			Identity: auth.Identity{
-				URN:      person01.URN,
 				Nickname: person01.Nickname,
 				Roles:    person01.Roles,
 			},
-			Data:      person01.Data,
-			History:   person01.History, // TODO??? modify here
-			CreatedAt: person01.CreatedAt,
-			UpdatedAt: person01.UpdatedAt,
+			ItemDescription: person01.ItemDescription,
 		}
-
-		creds := auth.Creds{}
-		for c := range person01.Creds {
-			creds[auth.CredsType(c)] = person01.Creds.StringDefault(c, "")
-		}
-		transformOp.packPersons.Data[i].SetCreds(creds)
+		transformOp.packPersons.Items[i].SetCreds(person01.Creds)
 	}
 
 	return nil
@@ -126,37 +110,21 @@ const onOut = "on transformerPersonsPackTypes01.Out(): "
 
 func (transformOp *transformerPersonsPackTypes01) Out(selector *selectors.Term, params common.Map) (data interface{}, err error) {
 	dataPack := structures.Pack{
-		PackDescription: structures.PackDescription{
-			Title:     transformOp.packPersons.Title,
-			Fields:    transformOp.packPersons.Fields,
-			ErrorsMap: transformOp.packPersons.ErrorsMap,
-			History:   transformOp.packPersons.History,
-			CreatedAt: transformOp.packPersons.CreatedAt,
-			UpdatedAt: transformOp.packPersons.UpdatedAt,
-		},
+		PackDescription: transformOp.packPersons.PackDescription,
 	}
 
-	persons01 := make([]types01.Person, len(transformOp.packPersons.Data))
+	persons01 := make([]types01.Person, len(transformOp.packPersons.Items))
 
-	for i, personsItem := range transformOp.packPersons.Data {
-		creds := common.Map{}
-
-		for c, v := range personsItem.Creds() {
-			creds[string(c)] = v
-		}
+	for i, personsItem := range transformOp.packPersons.Items {
 
 		persons01[i] = types01.Person{
-			URN:       personsItem.URN,
-			Nickname:  personsItem.Nickname,
-			Roles:     personsItem.Roles,
-			Creds:     creds,
-			Data:      personsItem.Data,
-			History:   personsItem.History,
-			CreatedAt: personsItem.CreatedAt,
-			UpdatedAt: personsItem.UpdatedAt,
+			Nickname:        personsItem.Nickname,
+			Roles:           personsItem.Roles,
+			Creds:           personsItem.Creds(),
+			ItemDescription: personsItem.ItemDescription,
 		}
 	}
-	dataPack.Data = persons01
+	dataPack.Items = persons01
 
 	return dataPack, nil
 }
