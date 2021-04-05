@@ -1,7 +1,6 @@
 package server_http_jschmhr
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -13,12 +12,8 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 
-	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/errors"
-	"github.com/pavlo67/common/common/joiner"
-	"github.com/pavlo67/common/common/server"
 	"github.com/pavlo67/common/common/server/server_http"
-	"github.com/pavlo67/common/common/strlib"
 )
 
 var _ server_http.Operator = &serverHTTPJschmhr{}
@@ -94,84 +89,9 @@ func (s *serverHTTPJschmhr) Addr() (port int, https bool) {
 //	return s.httpServer
 //}
 
-func (s *serverHTTPJschmhr) ResponseRESTError(status int, err error, req *http.Request) (server.Response, error) {
-	commonErr := errors.CommonError(err)
-
-	key := commonErr.Key()
-	data := common.Map{server.ErrorKey: key}
-
-	if status == 0 || status == http.StatusOK {
-		if key == common.NoCredsKey || key == common.InvalidCredsKey {
-			status = http.StatusUnauthorized
-		} else if key == common.NoUserKey || key == common.NoRightsKey {
-			status = http.StatusForbidden
-		} else if status == 0 || status == http.StatusOK {
-			status = http.StatusInternalServerError
-
-		} else {
-			status = http.StatusInternalServerError
-		}
-	}
-
-	if !strlib.In(s.secretENVsToLower, strings.ToLower(os.Getenv("ENV"))) {
-		data["details"] = commonErr.Error()
-	}
-
-	jsonBytes, errJSON := json.Marshal(data)
-	if errJSON != nil {
-		commonErr = commonErr.Append(fmt.Errorf("marshalling error data (%#v): %s", data, errJSON))
-	}
-
-	if req != nil {
-		commonErr = commonErr.Append(fmt.Errorf("on %s %s", req.Method, req.URL))
-	}
-
-	return server.Response{Status: status, Data: jsonBytes}, commonErr
-}
-
-func (s *serverHTTPJschmhr) ResponseRESTOk(status int, data interface{}, req *http.Request) (server.Response, error) {
-	if status == 0 {
-		status = http.StatusOK
-	}
-
-	if data == nil {
-		return server.Response{Status: status}, nil
-	}
-
-	var dataBytes []byte
-
-	switch v := data.(type) {
-	case []byte:
-		dataBytes = v
-	case *[]byte:
-		if v != nil {
-			dataBytes = *v
-		}
-	case string:
-		dataBytes = []byte(v)
-	case *string:
-		if v != nil {
-			dataBytes = []byte(*v)
-		}
-	default:
-		var err error
-		if dataBytes, err = json.Marshal(data); err != nil {
-			if req != nil {
-				err = fmt.Errorf("on %s %s: can't marshal json (%#v), got %s", req.Method, req.URL, data, err)
-			} else {
-				err = fmt.Errorf("can't marshal json (%#v): %s", data, err)
-			}
-
-			return server.Response{Status: http.StatusInternalServerError}, err
-		}
-	}
-
-	return server.Response{Status: status, Data: dataBytes}, nil
-}
-
 const onHandleEndpoint = "on serverHTTPJschmhr.HandleEndpoint()"
 
-func (s *serverHTTPJschmhr) HandleEndpoint(key joiner.InterfaceKey, serverPath string, endpoint server_http.Endpoint) error {
+func (s *serverHTTPJschmhr) HandleEndpoint(key server_http.EndpointKey, serverPath string, endpoint server_http.Endpoint) error {
 
 	method := strings.ToUpper(endpoint.Method)
 	path := endpoint.PathTemplate(serverPath)
@@ -203,7 +123,6 @@ func (s *serverHTTPJschmhr) HandleEndpoint(key joiner.InterfaceKey, serverPath s
 
 		responseData, err := endpoint.WorkerHTTP(s, r, params, options)
 		if err != nil {
-
 			l.Error(err)
 		}
 
@@ -243,7 +162,7 @@ func (s *serverHTTPJschmhr) HandleEndpoint(key joiner.InterfaceKey, serverPath s
 	return nil
 }
 
-func (s *serverHTTPJschmhr) HandleOptions(key joiner.InterfaceKey, serverPath string) {
+func (s *serverHTTPJschmhr) HandleOptions(key server_http.EndpointKey, serverPath string) {
 	//if strlib.In(s.handledOptions, serverPath) {
 	//	//l.Infof("- %#v", s.handledOptions)
 	//	return
@@ -262,7 +181,7 @@ func (s *serverHTTPJschmhr) HandleOptions(key joiner.InterfaceKey, serverPath st
 
 var reHTMLExt = regexp.MustCompile(`\.html?$`)
 
-func (s *serverHTTPJschmhr) HandleFiles(key joiner.InterfaceKey, serverPath string, staticPath server_http.StaticPath) error {
+func (s *serverHTTPJschmhr) HandleFiles(key server_http.EndpointKey, serverPath string, staticPath server_http.StaticPath) error {
 	l.Infof("%-10s: FILES %s <-- %s", key, serverPath, staticPath.LocalPath)
 
 	// TODO: check localPath

@@ -14,6 +14,7 @@ import (
 	"github.com/pavlo67/common/common/starter"
 )
 
+// DEPRECATED
 func Starter() starter.Operator {
 	return &controlStarter{}
 }

@@ -1,8 +1,6 @@
-## records
+## config
 
-* RBAC checks
-* "form" URL - get from serverConfig
-* нормально обробляти errs в хендлах
+* загальна структура реальности :-) /<environment>/<dataset>.<connector>
 
 ## sqlite
 
