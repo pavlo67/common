@@ -36,7 +36,8 @@ var Endpoints = server_http.Endpoints{
 
 var authenticateEndpoint = server_http.Endpoint{
 	EndpointDescription: server_http.EndpointDescription{
-		Method: "POST",
+		InternalKey: auth.IntefaceKeyAuthenticate,
+		Method:      "POST",
 	},
 
 	//BodyParams: bodyParams,
@@ -64,7 +65,8 @@ var authenticateEndpoint = server_http.Endpoint{
 
 var setCredsEndpoint = server_http.Endpoint{
 	EndpointDescription: server_http.EndpointDescription{
-		Method: "POST",
+		InternalKey: auth.IntefaceKeySetCreds,
+		Method:      "POST",
 	},
 
 	//BodyParams: bodyParams,

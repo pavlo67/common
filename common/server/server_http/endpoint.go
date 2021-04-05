@@ -2,16 +2,19 @@ package server_http
 
 import (
 	"encoding/json"
+
+	"github.com/pavlo67/common/common/joiner"
 )
 
 type EndpointDescription struct {
-	Method      string          `json:",omitempty"`
-	PathParams  []string        `json:",omitempty"`
-	QueryParams []string        `json:",omitempty"`
-	BodyParams  json.RawMessage `json:",omitempty"`
+	InternalKey joiner.InterfaceKey `json:",omitempty"`
+	Method      string              `json:",omitempty"`
+	PathParams  []string            `json:",omitempty"`
+	QueryParams []string            `json:",omitempty"`
+	BodyParams  json.RawMessage     `json:",omitempty"`
 }
 
-type EndpointKey = string
+type EndpointKey = joiner.InterfaceKey
 type EndpointsSettled map[EndpointKey]EndpointSettled
 
 type EndpointSettled struct {
