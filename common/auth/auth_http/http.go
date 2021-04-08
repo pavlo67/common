@@ -3,6 +3,8 @@ package auth_http
 import (
 	"encoding/json"
 
+	"github.com/pavlo67/common/common/httplib"
+
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/common/common/auth"
@@ -35,7 +37,7 @@ func (authOp *authHTTP) SetCreds(authID auth.ID, toSet auth.Creds) (*auth.Creds,
 	}
 
 	var creds *auth.Creds
-	if err := server_http.Request(serverURL, ep, requestBody, creds, nil, l); err != nil {
+	if err := httplib.Request(nil, serverURL, ep.Method, server_http.SetCreds(creds), requestBody, nil, l); err != nil {
 		return nil, err
 	}
 
@@ -55,7 +57,7 @@ func (authOp *authHTTP) Authenticate(toAuth auth.Creds) (*auth.Identity, error) 
 	}
 
 	var identity *auth.Identity
-	if err := server_http.Request(serverURL, ep, requestBody, &identity, nil, l); err != nil {
+	if err := httplib.Request(nil, serverURL, ep.Method, nil, requestBody, &identity, l); err != nil {
 		return nil, err
 	}
 

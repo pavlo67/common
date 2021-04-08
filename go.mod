@@ -1,6 +1,6 @@
 module github.com/pavlo67/common
 
-go 1.15
+go 1.16
 
 require (
 	github.com/GehirnInc/crypt v0.0.0-20200316065508-bb7000b8a962

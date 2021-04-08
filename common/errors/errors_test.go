@@ -44,6 +44,31 @@ func TestCommonErrorString(t *testing.T) {
 	errors.New("222")
 }
 
+func TestNil(t *testing.T) {
+	var err error
+
+	err = CommonError()
+	require.Truef(t, err == nil, "%#v", err)
+
+	err = CommonError(nil)
+	require.Truef(t, err == nil, "%#v", err)
+
+	err = CommonError(nil, nil)
+	require.Truef(t, err == nil, "%#v", err)
+
+	err = CommonError(nil, nil, nil)
+	require.Truef(t, err == nil, "%#v", err)
+
+}
+
+func TestWrapf(t *testing.T) {
+	err := errors.Wrapf(errors.New("eeeeee"), "22222 %s", "111")
+	log.Print(err)
+	err1 := CommonError(err, "can't init records.Operator")
+	log.Print(fmt.Errorf("error calling .Run() for component (%s): %#v", "name", err1))
+	log.Print(fmt.Errorf("error calling .Run() for component (%s): %s", "name", err1))
+}
+
 //func TestCommonErrorKey(t *testing.T) {
 //	testKey1 := Key("test_key1")
 //	ke1 := CommonError(testKey1, nil)
@@ -79,11 +104,3 @@ func TestCommonErrorString(t *testing.T) {
 //
 //	errors.New("222")
 //}
-
-func TestWrapf(t *testing.T) {
-	err := errors.Wrapf(errors.New("eeeeee"), "22222 %s", "111")
-	log.Print(err)
-	err1 := CommonError(err, "can't init records.Operator")
-	log.Print(fmt.Errorf("error calling .Run() for component (%s): %#v", "name", err1))
-	log.Print(fmt.Errorf("error calling .Run() for component (%s): %s", "name", err1))
-}

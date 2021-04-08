@@ -1,4 +1,4 @@
-package server_http
+package httplib
 
 import (
 	"io"

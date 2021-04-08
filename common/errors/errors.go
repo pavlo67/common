@@ -3,6 +3,7 @@ package errors
 import (
 	"errors"
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/pavlo67/common/common"
@@ -22,6 +23,10 @@ func CommonError(any ...interface{}) Error {
 	var err *commonError
 	for _, anything := range any {
 		err = err.append(anything)
+	}
+
+	if reflect.ValueOf(err).IsNil() {
+		return nil
 	}
 
 	return err
