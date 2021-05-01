@@ -1,7 +1,6 @@
 package apps
 
 import (
-	"flag"
 	"log"
 	"math/rand"
 	"os"
@@ -17,24 +16,9 @@ import (
 	"github.com/pavlo67/common/common/logger"
 )
 
-func Prepare(buildDate, buildTag, buildCommit, envsSubpath string) (versionOnly bool, envPath string, cfgService *config.Config, l logger.Operator) {
+func Prepare(envsSubpath string) (envPath string, cfgService *config.Config, l logger.Operator) {
 
 	rand.Seed(time.Now().UnixNano())
-
-	// show build/console params -----------------------------------------------------
-
-	flag.BoolVar(&versionOnly, "v", false, "show build vars only")
-	flag.Parse()
-
-	if buildDate = strings.TrimSpace(buildDate); buildDate == "" {
-		buildDate = time.Now().Format(time.RFC3339)
-	}
-
-	log.Printf("builded: %s, tag: %s, commit: %s\n", buildDate, buildTag, buildCommit)
-
-	if versionOnly {
-		return versionOnly, "", nil, nil
-	}
 
 	// get logger --------------------------------------------------------------------
 
@@ -63,7 +47,7 @@ func Prepare(buildDate, buildTag, buildCommit, envsSubpath string) (versionOnly 
 		l.Fatalf("on config.Get(%s, serializer.MarshalerYAML)", cfgServicePath, cfgService, err)
 	}
 
-	return versionOnly, envPath, cfgService, l
+	return envPath, cfgService, l
 }
 
 func PrepareTests(t *testing.T, envsSubpath, configEnv, logfile string) (envPath string, cfgService *config.Config, l logger.Operator) {

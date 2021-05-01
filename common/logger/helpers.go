@@ -20,7 +20,8 @@ func LogRequest(l Operator, method, path string, reqHeaders http.Header, reqBody
 		respBody = respBody[:MaxLoggedDataLength]
 	}
 
-	data := fmt.Sprintf("\n\n%s %s %s\nheaders: %#v\nbody: %s\nresponse: %d %s %#v", method, path, time.Now().Format(time.RFC3339), reqHeaders, reqBody, status, respBody, respHeaders)
+	data := fmt.Sprintf("\n\n%s %s %s\nheaders: %#v\nbody: %s\nresponse: %d %s\nheaders: %#v", method, path, time.Now().Format(time.RFC3339), reqHeaders, reqBody, status,
+		respBody, respHeaders)
 	if bodyErr != nil {
 		data = fmt.Sprintf("\nERROR: %s", bodyErr) + data
 		l.Error(data)
