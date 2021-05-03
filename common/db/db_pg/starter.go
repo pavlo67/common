@@ -2,6 +2,7 @@ package db_pg
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
@@ -27,34 +28,38 @@ type connectPgStarter struct {
 	interfaceKey joiner.InterfaceKey
 }
 
-func (css *connectPgStarter) Name() string {
+func (cps *connectPgStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (css *connectPgStarter) Prepare(cfg *config.Config, options common.Map) error {
-	if err := cfg.Value(options.StringDefault("db_key", "pg"), &css.cfgPg); err != nil {
+func (cps *connectPgStarter) Prepare(cfg *config.Config, options common.Map) error {
+	if err := cfg.Value(options.StringDefault("db_key", "pg"), &cps.cfgPg); err != nil {
 		return err
 	}
 
-	css.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
+	cps.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
 
 	return nil
 }
 
 const onRun = "on connectPgStarter.Run()"
 
-func (css *connectPgStarter) Run(joinerOp joiner.Operator) error {
+func (cps *connectPgStarter) Run(joinerOp joiner.Operator) error {
 	if l, _ = joinerOp.Interface(logger.InterfaceKey).(logger.Operator); l == nil {
 		return fmt.Errorf("no logger.Operator with key %s", logger.InterfaceKey)
 	}
 
-	db, err := sqllib_pg.Connect(css.cfgPg)
+	if os.Getenv("SHOW_CONNECTS") != "" {
+		l.Infof("CONNECTING TO PG: %#v", cps.cfgPg)
+	}
+
+	db, err := sqllib_pg.Connect(cps.cfgPg)
 	if err != nil || db == nil {
 		return errors.CommonError(err, fmt.Sprintf(onRun+": got %#v", db))
 	}
 
-	if err = joinerOp.Join(db, css.interfaceKey); err != nil {
-		return errors.CommonError(err, fmt.Sprintf("can't join *sql.DB with key '%s'", css.interfaceKey))
+	if err = joinerOp.Join(db, cps.interfaceKey); err != nil {
+		return errors.CommonError(err, fmt.Sprintf("can't join *sql.DB with key '%s'", cps.interfaceKey))
 	}
 
 	return nil

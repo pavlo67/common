@@ -3,7 +3,6 @@ package config
 import (
 	"encoding/json"
 
-	"github.com/yosuke-furukawa/json5/encoding/json5"
 	"gopkg.in/yaml.v2"
 )
 
@@ -15,7 +14,8 @@ type Marshaler interface {
 
 var MarshalerYAML = MarshalerStruct{yaml.Marshal, yaml.Unmarshal}
 var MarshalerJSON = MarshalerStruct{json.Marshal, json.Unmarshal}
-var MarshalerJSON5 = MarshalerStruct{json5.Marshal, json5.Unmarshal}
+
+// var MarshalerJSON5 = MarshalerStruct{json5.Marshal, json5.Unmarshal}
 
 //// var ConvertorXML = MarshalerStruct{xml.Marshal, xml.marshalIndent, xml.unmarshal}
 //

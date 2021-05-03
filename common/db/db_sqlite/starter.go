@@ -2,6 +2,7 @@ package db_sqlite
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
@@ -46,6 +47,10 @@ const onRun = "on connectSQLiteStarter.Run()"
 func (css *connectSQLiteStarter) Run(joinerOp joiner.Operator) error {
 	if l, _ = joinerOp.Interface(logger.InterfaceKey).(logger.Operator); l == nil {
 		return fmt.Errorf("no logger.Operator with key %s", logger.InterfaceKey)
+	}
+
+	if os.Getenv("SHOW_CONNECTS") != "" {
+		l.Infof("CONNECTING TO SQLITE: %#v", css.cfgSQLite)
 	}
 
 	db, err := sqllib_sqlite.Connect(css.cfgSQLite)
