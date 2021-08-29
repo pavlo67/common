@@ -45,7 +45,7 @@ func OperatorTestScenarioPassword(t *testing.T, authOp Operator) {
 		// .Authenticate() ok -----------------------------------------
 
 		userCreds = &Creds{
-			CredsIP:       testIP,
+			// CredsIP:       testIP,
 			CredsNickname: tc[CredsNickname],
 			CredsPassword: password,
 		}
@@ -60,7 +60,7 @@ func OperatorTestScenarioPassword(t *testing.T, authOp Operator) {
 		// .Authenticate() err ----------------------------------------
 
 		userCreds = &Creds{
-			CredsIP:       testIP,
+			// CredsIP:       testIP,
 			CredsLogin:    tc[CredsNickname],
 			CredsPassword: password + "1",
 		}
@@ -96,7 +96,7 @@ func OperatorTestScenarioToken(t *testing.T, operator Operator) {
 
 		// .Authenticate() -----------------------------------------
 
-		(*userCreds)[CredsIP] = testIP
+		// (*userCreds)[CredsIP] = testIP
 
 		identity, err := operator.Authenticate(*userCreds)
 
