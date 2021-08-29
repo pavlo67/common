@@ -13,7 +13,7 @@ import (
 )
 
 func TestFilesFS(t *testing.T) {
-	_, cfgService, l := config.PrepareTests(t, "../../../_environments/", "test", "files_fs.log")
+	cfgService, l := config.PrepareTests(t, "../../../_environments/", "test", "files_fs.log")
 	require.NotNil(t, cfgService)
 
 	var cfg config.Access
@@ -24,7 +24,7 @@ func TestFilesFS(t *testing.T) {
 		{Starter(), common.Map{"base_path": cfg.Path}},
 	}
 
-	joinerOp, err := starter.Run(components, cfgService, "CLI BUILD FOR TEST", l)
+	joinerOp, err := starter.Run(components, &cfgService, "CLI BUILD FOR TEST", l)
 	require.NoError(t, err)
 	require.NotNil(t, joinerOp)
 	defer joinerOp.CloseAll()

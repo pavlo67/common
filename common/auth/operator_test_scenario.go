@@ -15,7 +15,7 @@ import (
 
 const testIP = "1.2.3.4"
 
-func OperatorTestScenarioPassword(t *testing.T, operator Operator) {
+func OperatorTestScenarioPassword(t *testing.T, authOp Operator) {
 	if env, ok := os.LookupEnv("ENV"); !ok || env != "test" {
 		t.Fatal("No test environment!!!")
 	}
@@ -30,15 +30,15 @@ func OperatorTestScenarioPassword(t *testing.T, operator Operator) {
 	for i, tc := range testCreds {
 		password := tc[CredsPassword]
 
-		t.Log(i)
+		t.Log(i, "\n")
 
 		// .SetCredsByKey() ------------------------------------------
 
-		userCreds, err := operator.SetCreds("", tc)
+		userCreds, err := authOp.SetCreds("", tc)
 		require.NoError(t, err)
 		require.NotNil(t, userCreds)
 
-		t.Logf("           creds: %#v", *userCreds)
+		// t.Logf("           creds: %#v\n\n", *userCreds)
 
 		require.Equal(t, tc[CredsNickname], (*userCreds)[CredsNickname])
 
@@ -50,7 +50,7 @@ func OperatorTestScenarioPassword(t *testing.T, operator Operator) {
 			CredsPassword: password,
 		}
 
-		identity, err := operator.Authenticate(*userCreds)
+		identity, err := authOp.Authenticate(*userCreds)
 
 		require.NoError(t, err)
 		require.NotNil(t, identity)
@@ -65,8 +65,7 @@ func OperatorTestScenarioPassword(t *testing.T, operator Operator) {
 			CredsPassword: password + "1",
 		}
 
-		identity, err = operator.Authenticate(*userCreds)
-
+		identity, err = authOp.Authenticate(*userCreds)
 		require.Error(t, err)
 		require.Nil(t, identity)
 	}

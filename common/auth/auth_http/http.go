@@ -29,7 +29,7 @@ func New(serverConfig server_http.Config) (auth.Operator, error) {
 
 func (authOp *authHTTP) SetCreds(authID auth.ID, toSet auth.Creds) (*auth.Creds, error) {
 	ep := authOp.serverConfig.EndpointsSettled[auth.IntefaceKeySetCreds]
-	serverURL := authOp.serverConfig.Host + authOp.serverConfig.Port + ep.Path
+	serverURL := authOp.serverConfig.Host + authOp.serverConfig.Port + authOp.serverConfig.Prefix + ep.Path
 
 	requestBody, err := json.Marshal(toSet)
 	if err != nil {
@@ -37,7 +37,7 @@ func (authOp *authHTTP) SetCreds(authID auth.ID, toSet auth.Creds) (*auth.Creds,
 	}
 
 	var creds *auth.Creds
-	if err := httplib.Request(nil, serverURL, ep.Method, server_http.SetCreds(creds), requestBody, nil, l); err != nil {
+	if err := httplib.Request(nil, serverURL, ep.Method, server_http.SetCreds(creds), requestBody, &creds, l); err != nil {
 		return nil, err
 	}
 
@@ -49,7 +49,7 @@ const onAuthenticate = "on authHTTP.Authenticate()"
 
 func (authOp *authHTTP) Authenticate(toAuth auth.Creds) (*auth.Identity, error) {
 	ep := authOp.serverConfig.EndpointsSettled[auth.IntefaceKeyAuthenticate]
-	serverURL := authOp.serverConfig.Host + authOp.serverConfig.Port + ep.Path
+	serverURL := authOp.serverConfig.Host + authOp.serverConfig.Port + authOp.serverConfig.Prefix + ep.Path
 
 	requestBody, err := json.Marshal(toAuth)
 	if err != nil {
@@ -57,7 +57,7 @@ func (authOp *authHTTP) Authenticate(toAuth auth.Creds) (*auth.Identity, error) 
 	}
 
 	var identity *auth.Identity
-	if err := httplib.Request(nil, serverURL, ep.Method, nil, requestBody, &identity, l); err != nil {
+	if err = httplib.Request(nil, serverURL, ep.Method, nil, requestBody, &identity, l); err != nil {
 		return nil, err
 	}
 
