@@ -85,7 +85,7 @@ func (authOp *authJWT) SetCreds(userID auth.ID, creds auth.Creds) (*auth.Creds, 
 		jc.CompanyIDExternal = common.IDStr(companyIDExternal)
 	}
 
-	if roles := creds[auth.CredsRoles]; roles != "" {
+	if roles := creds[auth.CredsRole]; roles != "" {
 		if err := json.Unmarshal([]byte(roles), &jc.Roles); err != nil {
 			return nil, fmt.Errorf("on authJWT.SetCreds() with json.Unmarshal(%s): %s", roles, err)
 		}

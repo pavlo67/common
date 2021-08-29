@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// DEPRECATED!!! use url.URL instead
 type Access struct {
 	Proto   string
 	Host    string

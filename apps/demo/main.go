@@ -4,8 +4,9 @@ import (
 	"flag"
 	"log"
 
+	"github.com/pavlo67/common/common/config"
+
 	"github.com/pavlo67/common/apps/demo/demo_settings"
-	"github.com/pavlo67/common/common/apps"
 	"github.com/pavlo67/common/common/starter"
 )
 
@@ -21,9 +22,9 @@ func main() {
 		return
 	}
 
-	envPath, cfgService, l := apps.Prepare("_environments/")
+	cfgService, l := config.Prepare("_environments/")
 	label := "DEMO/REST BUILD"
-	joinerOp, err := starter.Run(demo_settings.Components(envPath, true, false), cfgService, label, l)
+	joinerOp, err := starter.Run(demo_settings.Components(true, false), &cfgService, label, l)
 	if err != nil {
 		l.Fatal(err)
 	}

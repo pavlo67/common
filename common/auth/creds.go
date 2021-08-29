@@ -17,7 +17,7 @@ const CredsJWTRefresh CredsType = "jwt_refresh"
 const CredsToken CredsType = "token"
 const CredsPartnerToken CredsType = "partner_token"
 
-const CredsRoles CredsType = "roles"
+const CredsRole CredsType = "roles"
 
 const CredsLogin CredsType = "login"
 const CredsNickname CredsType = "nickname"

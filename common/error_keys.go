@@ -21,17 +21,13 @@ const WrongIDKey ErrorKey = "wrong_id"
 const WrongJSONKey ErrorKey = "wrong_json"
 
 const NotFoundKey ErrorKey = "not_found"
-
-var ErrNotFound = errors.New(string(NotFoundKey))
-
 const NullItemKey ErrorKey = "null_item"
-
-var ErrNullItem = errors.New(string(NullItemKey))
-
 const NotImplementedKey ErrorKey = "not_implemented"
-
-var ErrNotImplemented = errors.New(string(NotImplementedKey))
-
 const NotSupportedKey ErrorKey = "not_supported"
 
+// default errors --------------------------------------------------
+
+var ErrNotImplemented = errors.New(string(NotImplementedKey))
+var ErrNotFound = errors.New(string(NotFoundKey))
+var ErrNullItem = errors.New(string(NullItemKey))
 var ErrNotSupported = errors.New(string(NotSupportedKey))

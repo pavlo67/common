@@ -5,14 +5,13 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/pavlo67/common/common/apps"
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/sqllib"
 )
 
 func TestConnect(t *testing.T) {
 
-	_, cfgService, _ := apps.PrepareTests(
+	_, cfgService, _ := config.PrepareTests(
 		t,
 		"../../../_environments/",
 		"test",

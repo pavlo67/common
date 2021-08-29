@@ -15,30 +15,6 @@ import (
 
 const testIP = "1.2.3.4"
 
-//var testCases = []OperatorTestCase{
-//	{
-//		ToSet: Creds{
-//			CredsPassword: "pass1",
-//			CredsNickname: testNick,
-//		},
-//	},
-//}
-
-//const testUserKey = Key("nick1@aaa")
-//
-//func TestCases(authOp Operator) []OperatorTestCase {
-//	return []OperatorTestCase{
-//		{
-//			Operator: authOp,
-//
-//			ToSet: Creds{
-//				CredsPassword: "pass1",
-//				CredsNickname: testNick,
-//			},
-//		},
-//	}
-//}
-//
 func OperatorTestScenarioPassword(t *testing.T, operator Operator) {
 	if env, ok := os.LookupEnv("ENV"); !ok || env != "test" {
 		t.Fatal("No test environment!!!")

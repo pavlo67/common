@@ -1,4 +1,4 @@
-package apps
+package config
 
 import (
 	"log"
@@ -12,11 +12,10 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/logger"
 )
 
-func Prepare(envsSubpath string) (envPath string, cfgService *config.Config, l logger.Operator) {
+func Prepare(envPath string) (Config, logger.Operator) {
 
 	rand.Seed(time.Now().UnixNano())
 
@@ -34,23 +33,23 @@ func Prepare(envsSubpath string) (envPath string, cfgService *config.Config, l l
 		configEnv = "local"
 	}
 
-	cwd, err := os.Getwd()
-	if err != nil {
-		l.Fatal("can't os.Getwd(): ", err)
-	}
-	cwd += "/"
+	//cwd, err := os.Getwd()
+	//if err != nil {
+	//	l.Fatal("can't os.Getwd(): ", err)
+	//}
+	//cwd += "/"
+	//envPath = cwd + envsSubpath
 
-	envPath = cwd + envsSubpath
 	cfgServicePath := envPath + configEnv + ".yaml"
-	cfgService, err = config.Get(cfgServicePath, config.MarshalerYAML)
-	if err != nil || cfgService == nil {
-		l.Fatalf("on config.Get(%s, serializer.MarshalerYAML)", cfgServicePath, cfgService, err)
+	cfgServicePtr, err := Get(cfgServicePath, MarshalerYAML)
+	if err != nil || cfgServicePtr == nil {
+		l.Fatalf("on config.Get(%s, serializer.MarshalerYAML) got %#v / %s", cfgServicePath, cfgServicePtr, err)
 	}
 
-	return envPath, cfgService, l
+	return *cfgServicePtr, l
 }
 
-func PrepareTests(t *testing.T, envsSubpath, configEnv, logfile string) (envPath string, cfgService *config.Config, l logger.Operator) {
+func PrepareTests(t *testing.T, envPath, configEnv, logfile string) (Config, logger.Operator) {
 
 	os.Setenv("ENV", configEnv)
 
@@ -63,22 +62,15 @@ func PrepareTests(t *testing.T, envsSubpath, configEnv, logfile string) (envPath
 		LogLevel:         logger.TraceLevel,
 		OutputPaths:      append(logPath, "stdout"),
 		ErrorOutputPaths: append(logPath, "stderr"),
-		Encoding:         "",
 	}) // TODO!!! don't comment it (is required for tested components)
 	require.NoError(t, err)
 	require.NotNil(t, l)
 
-	cwd, err := os.Getwd()
-	require.NoError(t, err)
-
-	cwd += "/"
-
-	envPath = cwd + envsSubpath
 	cfgServicePath := envPath + configEnv + ".yaml"
-	cfgService, err = config.Get(cfgServicePath, config.MarshalerYAML)
+	cfgServicePtr, err := Get(cfgServicePath, MarshalerYAML)
 	require.NoError(t, err)
-	require.NotNil(t, cfgService)
+	require.NotNil(t, cfgServicePtr)
 
-	return envPath, cfgService, l
+	return *cfgServicePtr, l
 
 }

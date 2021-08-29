@@ -6,7 +6,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/pavlo67/common/common"
-	"github.com/pavlo67/common/common/apps"
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/starter"
 
@@ -14,7 +13,7 @@ import (
 )
 
 func TestFilesFS(t *testing.T) {
-	_, cfgService, l := apps.PrepareTests(t, "../../../_environments/", "test", "files_fs.log")
+	_, cfgService, l := config.PrepareTests(t, "../../../_environments/", "test", "files_fs.log")
 	require.NotNil(t, cfgService)
 
 	var cfg config.Access

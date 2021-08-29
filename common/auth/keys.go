@@ -12,6 +12,8 @@ const IntefaceKeyAuthenticate joiner.InterfaceKey = "auth_authenticate"
 const IntefaceKeySetCreds joiner.InterfaceKey = "auth_set_creds"
 
 var ErrAuthRequired = errors.New("authorization required")
+var ErrNotAuthenticated = errors.New("not authenticated")
+
 var ErrPassword = errors.New("wrong password")
 var ErrSignaturedKey = errors.New("wrong signatured key")
 var ErrAuthSession = errors.New("wrong authorization session")

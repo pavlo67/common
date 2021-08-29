@@ -50,9 +50,14 @@ func (ed EndpointDescription) PathTemplate(serverPath string) string {
 	}
 
 	if len(ed.PathParams) < 1 {
+		if serverPath[len(serverPath)-1] != '/' {
+			serverPath += "/"
+		}
 		return serverPath
-	}
 
+	} else if serverPath[len(serverPath)-1] == '/' {
+		serverPath = serverPath[:len(serverPath)-1]
+	}
 	var pathParams []string
 	for _, pp := range ed.PathParams {
 		if len(pp) > 0 && pp[0] == '*' {
