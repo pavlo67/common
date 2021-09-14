@@ -11,7 +11,7 @@ import (
 
 func TestConnect(t *testing.T) {
 
-	_, cfgService, _ := config.PrepareTests(
+	cfgService, _ := config.PrepareTests(
 		t,
 		"../../../_environments/",
 		"test",

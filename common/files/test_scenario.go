@@ -26,7 +26,7 @@ func FilesTestScenario(t *testing.T, joinerOp joiner.Operator, interfaceKey, int
 
 	filesCleanerOp, _ := joinerOp.Interface(interfaceCleanerKey).(db.Cleaner)
 	require.NotNil(t, filesCleanerOp)
-	err := filesCleanerOp.Clean(nil)
+	err := filesCleanerOp.Clean()
 	require.NoError(t, err)
 
 	path1Saved := saveTest(t, filesOp, path1, fileData1)

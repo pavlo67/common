@@ -70,6 +70,8 @@ func (c *Config) CompleteWithJoiner(joinerOp joiner.Operator, host string, port 
 	return nil
 }
 
+// TODO: be careful, it's method for http-client only
+// TODO: be careful, it shouldn't be used on server side because it uses non-initiated (without starter.Operator.Run()) endpoints
 func (c *Config) CompleteDirectly(endpoints Endpoints, host string, port int, prefix string) error {
 	if c == nil {
 		return errors.New("no server_http.Config to be completed")
