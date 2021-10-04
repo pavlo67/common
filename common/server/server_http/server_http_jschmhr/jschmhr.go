@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pavlo67/common/common/auth"
+
 	"github.com/julienschmidt/httprouter"
 
 	"github.com/pavlo67/common/common/errors"
@@ -31,13 +33,9 @@ type serverHTTPJschmhr struct {
 	secretENVsToLower []string
 }
 
-func New(port int, tlsCertFile, tlsKeyFile string, onRequest server_http.OnRequestMiddleware, secretENVs []string) (server_http.Operator, error) {
+func New(port int, tlsCertFile, tlsKeyFile string, secretENVs []string) (server_http.Operator, error) {
 	if port <= 0 {
 		return nil, fmt.Errorf("on server_http_jschmhr.New(): wrong port = %d", port)
-	}
-
-	if onRequest == nil {
-		return nil, errors.New("on server_http_jschmhr.New(): no server_http.OnRequestMiddleware")
 	}
 
 	var secretENVsToLower []string
@@ -58,8 +56,6 @@ func New(port int, tlsCertFile, tlsKeyFile string, onRequest server_http.OnReque
 		port:         port,
 		tlsCertFile:  tlsCertFile,
 		tlsKeyFile:   tlsKeyFile,
-
-		onRequest: onRequest,
 
 		secretENVsToLower: secretENVsToLower,
 	}, nil
@@ -89,6 +85,17 @@ func (s *serverHTTPJschmhr) Addr() (port int, https bool) {
 //	return s.httpServer
 //}
 
+const onHandleMiddleware = "on serverHTTPJschmhr.HandleMiddleware()"
+
+func (s *serverHTTPJschmhr) HandleMiddleware(onRequest server_http.OnRequestMiddleware) error {
+	if s.onRequest != nil && onRequest != nil {
+		return fmt.Errorf(onHandleMiddleware + ": can't add middlware twice")
+	}
+
+	s.onRequest = onRequest
+	return nil
+}
+
 const onHandleEndpoint = "on serverHTTPJschmhr.HandleEndpoint()"
 
 func (s *serverHTTPJschmhr) HandleEndpoint(key server_http.EndpointKey, serverPath string, endpoint server_http.Endpoint) error {
@@ -103,9 +110,12 @@ func (s *serverHTTPJschmhr) HandleEndpoint(key server_http.EndpointKey, serverPa
 	s.HandleOptions(key, path)
 
 	handler := func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
-		options, err := s.onRequest.Identity(r)
-		if err != nil {
-			l.Error(err)
+		var identity *auth.Identity
+		if s.onRequest != nil {
+			var err error
+			if identity, err = s.onRequest.Identity(r); err != nil {
+				l.Error(err)
+			}
 		}
 
 		var params server_http.PathParams
@@ -121,7 +131,7 @@ func (s *serverHTTPJschmhr) HandleEndpoint(key server_http.EndpointKey, serverPa
 		w.Header().Set("Access-Control-Allow-Methods", server_http.CORSAllowMethods)
 		w.Header().Set("Access-Control-Allow-Credentials", server_http.CORSAllowCredentials)
 
-		responseData, err := endpoint.WorkerHTTP(s, r, params, options)
+		responseData, err := endpoint.WorkerHTTP(s, r, params, identity)
 		if err != nil {
 			l.Error(err)
 		}

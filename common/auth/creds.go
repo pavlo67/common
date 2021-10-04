@@ -17,8 +17,6 @@ const CredsJWTRefresh CredsType = "jwt_refresh"
 const CredsToken CredsType = "token"
 const CredsPartnerToken CredsType = "partner_token"
 
-const CredsRole CredsType = "roles"
-
 const CredsLogin CredsType = "login"
 const CredsNickname CredsType = "nickname"
 const CredsPassword CredsType = "password"
@@ -40,6 +38,8 @@ const CredsCompanyIDExternal CredsType = "company_id_external"
 
 const CredsPasshash CredsType = "passhash"
 const CredsPasshashCryptype CredsType = "passhash_cryptype"
+
+const CredsRole CredsType = "roles"
 
 //func CheckCode() {
 //	if toType == CredsSentCode {

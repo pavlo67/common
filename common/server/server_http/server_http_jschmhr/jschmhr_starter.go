@@ -47,15 +47,10 @@ func (ss *server_http_jschmhrStarter) Run(joinerOp joiner.Operator) error {
 		return fmt.Errorf("no logger.Operator with key %s", logger.InterfaceKey)
 	}
 
-	onRequest, _ := joinerOp.Interface(server_http.OnRequestMiddlewareInterfaceKey).(server_http.OnRequestMiddleware)
-	if onRequest == nil {
-		return fmt.Errorf("no server_http.OnRequestMiddleware with key %s", server_http.OnRequestMiddlewareInterfaceKey)
-	}
-
 	// TODO!!! customize it
 	var secretENVs []string
 
-	srvOp, err := New(ss.config.Port, ss.config.TLSCertFile, ss.config.TLSKeyFile, onRequest, secretENVs)
+	srvOp, err := New(ss.config.Port, ss.config.TLSCertFile, ss.config.TLSKeyFile, secretENVs)
 	if err != nil {
 		return errors.Wrap(err, "on server_http_jschmhr.New()")
 	}

@@ -27,6 +27,7 @@ type StaticPath struct {
 type WorkerHTTP func(Operator, *http.Request, PathParams, *auth.Identity) (server.Response, error)
 
 type Operator interface {
+	HandleMiddleware(onRequest OnRequestMiddleware) error
 	HandleEndpoint(key EndpointKey, serverPath string, endpoint Endpoint) error
 	HandleFiles(key EndpointKey, serverPath string, staticPath StaticPath) error
 
