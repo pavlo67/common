@@ -87,6 +87,8 @@ func (authOp *authstub) Authenticate(toAuth auth.Creds) (*auth.Identity, error) 
 	nickname := toAuth[auth.CredsNickname]
 	authID := auth.ID(nickname)
 
+	l.Infof("%#v", toAuth)
+
 	if user, ok := authOp.users[authID]; ok {
 		if err := authOp.crypter.Verify(user.passhash, []byte(toAuth[auth.CredsPassword])); err == nil {
 			return &auth.Identity{

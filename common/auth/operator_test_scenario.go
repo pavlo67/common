@@ -61,7 +61,7 @@ func OperatorTestScenarioPassword(t *testing.T, authOp Operator) {
 
 		userCreds = &Creds{
 			// CredsIP:       testIP,
-			CredsLogin:    tc[CredsNickname],
+			CredsNickname: tc[CredsNickname],
 			CredsPassword: password + "1",
 		}
 

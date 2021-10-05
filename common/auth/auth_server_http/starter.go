@@ -3,6 +3,7 @@ package auth_server_http
 import (
 	"fmt"
 
+	"github.com/pavlo67/common/common/server/server_http"
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/common/common"
@@ -11,7 +12,6 @@ import (
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
-	"github.com/pavlo67/common/common/server/server_http"
 	"github.com/pavlo67/common/common/starter"
 )
 
@@ -48,31 +48,38 @@ func (ashs *authServerHTTPStarter) Prepare(_ *config.Config, options common.Map)
 	return nil
 }
 
+const onRun = "on authServerHTTPStarter.Run()"
+
 func (ashs *authServerHTTPStarter) Run(joinerOp joiner.Operator) error {
 	if l, _ = joinerOp.Interface(logger.InterfaceKey).(logger.Operator); l == nil {
-		return fmt.Errorf("no logger.Operator with key %s", logger.InterfaceKey)
+		return fmt.Errorf(onRun+": no logger.Operator with key %s", logger.InterfaceKey)
 	}
 
 	// middleware -------------------------------------------------------
 
 	authJWTOp, _ := joinerOp.Interface(ashs.authJWTKey).(auth.Operator)
 	if authJWTOp == nil {
-		return fmt.Errorf("no auth.Operator with key %s", ashs.authJWTKey)
+		return fmt.Errorf(onRun+": no auth.Operator with key %s", ashs.authJWTKey)
 	}
 
 	middleware, err := OnRequestMiddleware(authJWTOp)
 	if err != nil || middleware == nil {
-		return fmt.Errorf("can't create server_http.OnRequestMiddleware(authJWTOp), got %#v, %s", middleware, err)
+		return fmt.Errorf(onRun+": can't create server_http.OnRequestMiddleware(authJWTOp), got %#v, %s", middleware, err)
 	}
 
-	if err := joinerOp.Join(middleware, server_http.OnRequestMiddlewareInterfaceKey); err != nil {
-		return errors.Wrapf(err, "can't join RequestOptions as server_http.onRequestMiddleware with key '%s'", server_http.OnRequestMiddlewareInterfaceKey)
+	srvOp, _ := joinerOp.Interface(server_http.InterfaceKey).(server_http.Operator)
+	if srvOp == nil {
+		return fmt.Errorf(onRun+": no server_http.Operator with key %s", server_http.InterfaceKey)
+	}
+
+	if err = srvOp.HandleMiddleware(middleware); err != nil {
+		return errors.Wrap(err, onRun)
 	}
 
 	// endpoints --------------------------------------------------------
 
 	if authOp, _ = joinerOp.Interface(ashs.authKey).(auth.Operator); authOp == nil {
-		return fmt.Errorf("no auth.Operator with key %s", ashs.authKey)
+		return fmt.Errorf(onRun+": no auth.Operator with key %s", ashs.authKey)
 	}
 
 	return Endpoints.Join(joinerOp)
