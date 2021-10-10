@@ -30,9 +30,6 @@
     cp _environments/env.yaml_example test.yaml
     go test -v github.com/pavlo67/common/common/auth/auth_http
 
-## Мінімальна версія
-
-Описане демо і тести з мінімальною версією бібліотеки лежать в гілці minimal_demo
 
 ## Swagger
 
