@@ -29,7 +29,7 @@ func TestConnect(t *testing.T) {
 	//cfgSqlite.Path += "test_connect.sqlite"
 
 	var cfgSqlite config.Access
-	err := cfgService.Value("sqlite", &cfgSqlite)
+	err := cfgService.Value("db_sqlite", &cfgSqlite)
 	require.NoError(t, err)
 
 	db, err := Connect(cfgSqlite)

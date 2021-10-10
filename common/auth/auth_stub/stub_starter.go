@@ -21,8 +21,8 @@ var l logger.Operator
 var _ starter.Operator = &authstubStarter{}
 
 type authstubStarter struct {
-	defaultUser  config.Access
-	interfaceKey joiner.InterfaceKey
+	defaultActors []auth.Actor
+	interfaceKey  joiner.InterfaceKey
 }
 
 func (ahs *authstubStarter) Name() string {
@@ -31,7 +31,7 @@ func (ahs *authstubStarter) Name() string {
 
 func (ahs *authstubStarter) Prepare(cfg *config.Config, options common.Map) error {
 
-	cfg.Value("auth_stub", &ahs.defaultUser)
+	cfg.Value("actors", &ahs.defaultActors)
 
 	ahs.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(auth.InterfaceKey)))
 
@@ -43,7 +43,7 @@ func (ahs *authstubStarter) Run(joinerOp joiner.Operator) error {
 		return fmt.Errorf("no logger.Operator with key %s", logger.InterfaceKey)
 	}
 
-	authOp, err := New(ahs.defaultUser)
+	authOp, err := New(ahs.defaultActors)
 	if err != nil {
 		return errors.Wrap(err, "can't init *authstub{} as auth.Operator")
 	}

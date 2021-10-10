@@ -17,6 +17,7 @@ const CredsJWTRefresh CredsType = "jwt_refresh"
 const CredsToken CredsType = "token"
 const CredsPartnerToken CredsType = "partner_token"
 
+const CredsID CredsType = "id"
 const CredsLogin CredsType = "login"
 const CredsNickname CredsType = "nickname"
 const CredsPassword CredsType = "password"
@@ -33,8 +34,7 @@ const CredsPublicKeyBase58 CredsType = "public_key_base58"
 const CredsPublicKeyEncoding CredsType = "public_key_encoding"
 const CredsPrivateKey CredsType = "private_key"
 
-const CredsCompanyID CredsType = "company_id"
-const CredsCompanyIDExternal CredsType = "company_id_external"
+const CredsGroupID CredsType = "group_id"
 
 const CredsPasshash CredsType = "passhash"
 const CredsPasshashCryptype CredsType = "passhash_cryptype"

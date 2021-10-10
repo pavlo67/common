@@ -27,7 +27,7 @@ func New(serverConfig server_http.Config) (auth.Operator, error) {
 	return &authOp, nil
 }
 
-func (authOp *authHTTP) SetCreds(authID auth.ID, toSet auth.Creds) (*auth.Creds, error) {
+func (authOp *authHTTP) SetCreds(actor auth.Actor, toSet auth.Creds) (*auth.Creds, error) {
 	ep := authOp.serverConfig.EndpointsSettled[auth.IntefaceKeySetCreds]
 	serverURL := authOp.serverConfig.Host + authOp.serverConfig.Port + authOp.serverConfig.Prefix + ep.Path
 
@@ -37,7 +37,7 @@ func (authOp *authHTTP) SetCreds(authID auth.ID, toSet auth.Creds) (*auth.Creds,
 	}
 
 	var creds *auth.Creds
-	if err := httplib.Request(nil, serverURL, ep.Method, server_http.SetCreds(creds), requestBody, &creds, l); err != nil {
+	if err := httplib.Request(nil, serverURL, ep.Method, server_http.SetCreds(&actor.Creds), requestBody, &creds, l); err != nil {
 		return nil, err
 	}
 
@@ -47,7 +47,7 @@ func (authOp *authHTTP) SetCreds(authID auth.ID, toSet auth.Creds) (*auth.Creds,
 // Authenticate can require to call .SetCredsByKey() first and to use some session-generated creds
 const onAuthenticate = "on authHTTP.Authenticate()"
 
-func (authOp *authHTTP) Authenticate(toAuth auth.Creds) (*auth.Identity, error) {
+func (authOp *authHTTP) Authenticate(toAuth auth.Creds) (*auth.Actor, error) {
 	ep := authOp.serverConfig.EndpointsSettled[auth.IntefaceKeyAuthenticate]
 	serverURL := authOp.serverConfig.Host + authOp.serverConfig.Port + authOp.serverConfig.Prefix + ep.Path
 
@@ -56,10 +56,10 @@ func (authOp *authHTTP) Authenticate(toAuth auth.Creds) (*auth.Identity, error) 
 		return nil, errors.Wrapf(err, onAuthenticate+": can't marshal toAuth(%#v)", toAuth)
 	}
 
-	var identity *auth.Identity
-	if err = httplib.Request(nil, serverURL, ep.Method, nil, requestBody, &identity, l); err != nil {
+	var actor *auth.Actor
+	if err = httplib.Request(nil, serverURL, ep.Method, nil, requestBody, &actor, l); err != nil {
 		return nil, err
 	}
 
-	return identity, nil
+	return actor, nil
 }

@@ -2,38 +2,42 @@ package auth_http
 
 import (
 	"testing"
+	"time"
 
-	"github.com/pavlo67/common/common/auth/auth_server_http"
-
-	"github.com/pavlo67/common/common/auth"
-
-	"github.com/pavlo67/common/apps/demo/demo_settings"
 	"github.com/stretchr/testify/require"
 
+	"github.com/pavlo67/common/common"
+	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/config"
+	"github.com/pavlo67/common/common/starter"
+
+	"github.com/pavlo67/common/apps/demo/demo_settings"
 )
 
 func TestAuthHTTP(t *testing.T) {
 
-	var cfgService config.Config
-	cfgService, l = config.PrepareTests(
-		t,
-		"../../../_environments/",
-		"test",
-		"", // "connect_test."+strconv.FormatInt(time.Now().Unix(), 10)+".log",
+	cfgService, l := config.PrepareTests(t, "../../../_environments/", "test", "")
+	require.NotNil(t, cfgService)
+
+	starters, err := demo_settings.Starters(cfgService, true)
+	require.NoError(t, err)
+
+	starters = append(
+		starters,
+		starter.Starter{Starter(), common.Map{
+			"prefix":        demo_settings.PrefixREST,
+			"server_config": demo_settings.ServerConfig,
+		}},
 	)
 
-	var cfgServerHTTP config.Access
-	err := cfgService.Value("server_http", &cfgServerHTTP)
+	joinerOp, err := starter.Run(starters, &cfgService, "CLI BUILD FOR TEST", l)
 	require.NoError(t, err)
+	require.NotNil(t, joinerOp)
+	defer joinerOp.CloseAll()
 
-	serverConfig := demo_settings.ServerConfig
+	time.Sleep(time.Second)
 
-	err = serverConfig.CompleteDirectly(auth_server_http.Endpoints, cfgServerHTTP.Host, cfgServerHTTP.Port, demo_settings.PrefixREST)
-	require.NoError(t, err)
-
-	authOp, err := New(serverConfig)
-	require.NoError(t, err)
+	authOp, _ := joinerOp.Interface(InterfaceKey).(auth.Operator)
 	require.NotNil(t, authOp)
 
 	auth.OperatorTestScenarioPassword(t, authOp)

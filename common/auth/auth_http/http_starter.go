@@ -7,7 +7,6 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/common/common"
-	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
@@ -18,6 +17,8 @@ import (
 func Starter() starter.Operator {
 	return &authHTTPStarter{}
 }
+
+const InterfaceKey joiner.InterfaceKey = "auth_http"
 
 var l logger.Operator
 var _ starter.Operator = &authHTTPStarter{}
@@ -48,7 +49,7 @@ func (ahs *authHTTPStarter) Prepare(cfg *config.Config, options common.Map) erro
 
 	ahs.serverConfig.CompleteDirectly(auth_server_http.Endpoints, access.Host, access.Port, prefix)
 
-	ahs.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(auth.InterfaceKey)))
+	ahs.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
 
 	return nil
 }

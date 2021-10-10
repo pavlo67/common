@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pkg/errors"
 	"gopkg.in/square/go-jose.v2"
 	"gopkg.in/square/go-jose.v2/jwt"
 
@@ -14,15 +15,9 @@ import (
 	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/encrlib"
 	"github.com/pavlo67/common/common/rbac"
-	"github.com/pkg/errors"
 )
 
-const Proto = "jwt"
-
 var _ auth.Operator = &authJWT{}
-
-//var errEmptyPublicKeyAddress = errors.New("empty public IDStr address")
-//var errEmptyPrivateKeyGenerated = errors.New("empty private key generated")
 
 type authJWT struct {
 	privKey rsa.PrivateKey
@@ -51,16 +46,26 @@ func New(pathToStore string) (auth.Operator, error) {
 
 type JWTCreds struct {
 	*jwt.Claims
-	Nickname          string       `json:",omitempty"`
-	CompanyID         common.IDStr `json:",omitempty"`
-	CompanyIDExternal common.IDStr `json:",omitempty"`
+	Nickname string       `json:",omitempty"`
+	GroupID  common.IDStr `json:",omitempty"`
 
 	// couldn't use rbac.Roles type because it has unappropriate .MarshalJSON() method
 	Roles rbac.Roles
 }
 
 // 	SetCreds ignores all input parameters, creates new "BTC identity" and returns it
-func (authOp *authJWT) SetCreds(userID auth.ID, creds auth.Creds) (*auth.Creds, error) {
+func (authOp *authJWT) SetCreds(actor auth.Actor, toSet auth.Creds) (*auth.Creds, error) {
+
+	var userID auth.ID
+	var roles rbac.Roles
+	if actor.Identity != nil {
+		userID = actor.Identity.ID
+	}
+
+	// TODO: allow for admins only
+	if userIDAnother := auth.ID(toSet[auth.CredsID]); userIDAnother != "" && roles.Has(rbac.RoleAdmin) {
+		userID = userIDAnother
+	}
 
 	jc := JWTCreds{
 		Claims: &jwt.Claims{
@@ -72,20 +77,11 @@ func (authOp *authJWT) SetCreds(userID auth.ID, creds auth.Creds) (*auth.Creds, 
 			// Expiry:   jwt.NewNumericDate(time.Date(2017, 1, 1, 0, 8, 0, 0, time.UTC)),
 		},
 
-		Nickname: creds[auth.CredsNickname],
+		Nickname: toSet[auth.CredsNickname],
+		GroupID:  common.IDStr(toSet[auth.CredsGroupID]),
 	}
 
-	companyID := creds[auth.CredsCompanyID]
-	if companyID != "" {
-		jc.CompanyID = common.IDStr(companyID)
-	}
-
-	companyIDExternal := creds[auth.CredsCompanyIDExternal]
-	if companyIDExternal != "" {
-		jc.CompanyIDExternal = common.IDStr(companyIDExternal)
-	}
-
-	if roles := creds[auth.CredsRole]; roles != "" {
+	if roles := toSet[auth.CredsRole]; roles != "" {
 		if err := json.Unmarshal([]byte(roles), &jc.Roles); err != nil {
 			return nil, fmt.Errorf("on authJWT.SetCreds() with json.Unmarshal(%s): %s", roles, err)
 		}
@@ -99,14 +95,14 @@ func (authOp *authJWT) SetCreds(userID auth.ID, creds auth.Creds) (*auth.Creds, 
 		return nil, fmt.Errorf("on authJWT.SetCreds() with builder.CompactSerialize(): %s", err)
 	}
 
-	delete(creds, auth.CredsToSet)
+	delete(toSet, auth.CredsToSet)
 
-	creds[auth.CredsJWT] = rawJWT
+	toSet[auth.CredsJWT] = rawJWT
 
-	return &creds, nil
+	return &toSet, nil
 }
 
-func (authOp *authJWT) Authenticate(toAuth auth.Creds) (*auth.Identity, error) {
+func (authOp *authJWT) Authenticate(toAuth auth.Creds) (*auth.Actor, error) {
 	credsJWT := toAuth[auth.CredsJWT]
 	if strings.TrimSpace(credsJWT) == "" {
 		return nil, nil
@@ -125,29 +121,11 @@ func (authOp *authJWT) Authenticate(toAuth auth.Creds) (*auth.Identity, error) {
 		return nil, errors.Wrapf(err, "failed to get claims: %#v", parsedJWT)
 	}
 
-	return &auth.Identity{
-		ID:       auth.ID(res.ID),
-		Nickname: res.Nickname,
-		Roles:    res.Roles,
+	return &auth.Actor{
+		Identity: &auth.Identity{
+			ID:       auth.ID(res.ID),
+			Nickname: res.Nickname,
+			Roles:    res.Roles,
+		},
 	}, nil
-}
-
-func (authOp *authJWT) Realm() string {
-	return "" // string(auth.InterfaceJWTInternalKey)
-}
-
-func (authOp *authJWT) AuthenticateSocial(idpID, idpToken string) (*auth.Identity, error) {
-	return nil, common.ErrNotImplemented
-}
-
-func (authOp *authJWT) ForgotPassword(toRemember auth.Creds) (bool, error) {
-	return false, common.ErrNotImplemented
-}
-
-func (authOp *authJWT) ChangePassword(confirmationCode string, toSet auth.Creds) (bool, error) {
-	return false, common.ErrNotImplemented
-}
-
-func (authOp *authJWT) DiscoverIDP(nickname string) (string, error) {
-	return "", common.ErrNotImplemented
 }

@@ -83,12 +83,7 @@ var setCredsEndpoint = server_http.Endpoint{
 		}
 		toSet[auth.CredsIP] = req.RemoteAddr
 
-		var authID auth.ID
-		if identity != nil {
-			authID = identity.ID
-		}
-
-		creds, err := authOp.SetCreds(authID, toSet)
+		creds, err := authOp.SetCreds(auth.Actor{Identity: identity}, toSet)
 		if err != nil {
 			return server_http.ResponseRESTError(0, err, req)
 		}

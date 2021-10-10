@@ -1,49 +1,44 @@
 package auth_stub
 
 import (
+	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/GehirnInc/crypt"
 	_ "github.com/GehirnInc/crypt/sha256_crypt"
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/common/common/auth"
-	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/rbac"
 )
 
 var _ auth.Operator = &authstub{}
 
-type User struct {
-
-	// TODO! ba careful: we set authID == nickname for this stub case
-
-	passhash string
-	roles    rbac.Roles
-}
-
 type authstub struct {
 	crypter crypt.Crypter
-	users   map[auth.ID]User
+	actors  []auth.Actor
 }
 
 const onNew = "on authstub.New()"
 
-func New(defaultUser config.Access) (auth.Operator, error) {
+func New(defaultActors []auth.Actor) (auth.Operator, error) {
 
-	crypter := crypt.SHA256.New()
+	authOp := authstub{crypter: crypt.SHA256.New()}
 
-	defaultUserPasshash, err := crypter.Generate([]byte(defaultUser.Pass), nil)
-	if err != nil {
-		return nil, errors.Wrap(err, onNew)
-	}
+	for _, actor := range defaultActors {
+		if actor.Creds == nil {
+			actor.Creds = auth.Creds{}
+		}
 
-	authOp := authstub{
-		crypter: crypter,
-		users: map[auth.ID]User{
-			auth.ID(defaultUser.User): {
-				passhash: defaultUserPasshash,
-				roles:    rbac.Roles{rbac.RoleAdmin},
-			},
-		},
+		var err error
+		actor.Creds[auth.CredsPasshash], err = authOp.crypter.Generate([]byte(actor.Creds[auth.CredsPassword]), nil)
+		if err != nil {
+			return nil, errors.Wrap(err, onNew)
+		}
+		delete(actor.Creds, auth.CredsPassword)
+
+		authOp.actors = append(authOp.actors, actor)
 	}
 
 	return &authOp, nil
@@ -51,51 +46,90 @@ func New(defaultUser config.Access) (auth.Operator, error) {
 
 const onSetCreds = "on authstub.SetCreds()"
 
-func (authOp *authstub) SetCreds(authID auth.ID, toSet auth.Creds) (*auth.Creds, error) {
-	nickname := toSet[auth.CredsNickname]
+func (authOp *authstub) SetCreds(actor auth.Actor, toSet auth.Creds) (*auth.Creds, error) {
+	if passwordToSet := strings.TrimSpace(toSet[auth.CredsPassword]); passwordToSet != "" {
+		var err error
+		toSet[auth.CredsPasshash], err = authOp.crypter.Generate([]byte(passwordToSet), nil)
+		if err != nil {
+			return nil, errors.Wrap(err, onSetCreds)
+		}
+		delete(actor.Creds, auth.CredsPassword)
 
-	if authID == "" {
-		authID = auth.ID(nickname)
+	}
+	delete(toSet, auth.CredsPassword)
+
+	var idToFind auth.ID
+
+	if actor.Identity != nil {
+		idToFind = actor.Identity.ID
+		if idToFindAnother := auth.ID(toSet[auth.CredsID]); idToFindAnother != "" {
+			if actor.Identity.Roles.Has(rbac.RoleAdmin) {
+				idToFind = idToFindAnother
+			} else {
+				return nil, fmt.Errorf(onSetCreds+": actor (H%#v) can't set alien creds non having admin role", actor.Identity)
+			}
+		}
 	}
 
-	passhash, err := authOp.crypter.Generate([]byte(toSet[auth.CredsPassword]), nil)
-	if err != nil {
-		return nil, errors.Wrapf(err, onSetCreds+": can't hash password: %s", err)
-	}
+	i := -1
 
-	var user *User
-	if userOld, ok := authOp.users[authID]; ok {
-		user = &userOld
+	if idToFind == "" {
+		i = len(authOp.actors)
+		actor := auth.Actor{Identity: &auth.Identity{ID: auth.ID(strconv.Itoa(i))}}
+		authOp.actors = append(authOp.actors, actor)
 	} else {
-		user = &User{}
+		for iToCheck, actorToSet := range authOp.actors {
+			if actorToSet.Identity != nil && actorToSet.Identity.ID == idToFind {
+				i = iToCheck
+			}
+		}
+		if i < 0 {
+			return nil, errors.Wrapf(auth.ErrNoUser, "no user with ID = %s", idToFind)
+		}
 	}
 
-	user.passhash = passhash
-	if role, ok := toSet[auth.CredsRole]; ok {
-		// multiple roles aren't supported here
-		user.roles = rbac.Roles{rbac.Role(role)}
+	actorToSet := authOp.actors[i]
+
+	if nicknameToSet := strings.TrimSpace(toSet[auth.CredsNickname]); nicknameToSet != "" {
+		actorToSet.Identity.Nickname = nicknameToSet
+		delete(toSet, auth.CredsNickname)
+	}
+	if roleStr, ok := toSet[auth.CredsRole]; ok {
+		role := rbac.Role(roleStr)
+		if role == rbac.RoleAdmin && !actor.Roles.Has(rbac.RoleAdmin) {
+			return nil, fmt.Errorf(onSetCreds+": actor (H%#v) can't set admin role non having own admin role", actor.Identity)
+		}
+
+		// TODO: multiple roles
+		actorToSet.Identity.Roles = rbac.Roles{rbac.Role(role)}
 	}
 
-	authOp.users[authID] = *user
+	if actorToSet.Creds == nil {
+		actorToSet.Creds = auth.Creds{}
+	}
+	for k, v := range toSet {
+		actorToSet.Creds[k] = v
+	}
 
-	return &auth.Creds{auth.CredsNickname: nickname}, nil
+	authOp.actors[i] = actorToSet
+
+	return &auth.Creds{auth.CredsNickname: actorToSet.Identity.Nickname}, nil // auth.CredsRole: actorToSet.Identity.Roles
 }
 
 const onAuthenticate = "on authstub.Authenticate()"
 
-func (authOp *authstub) Authenticate(toAuth auth.Creds) (*auth.Identity, error) {
+func (authOp *authstub) Authenticate(toAuth auth.Creds) (*auth.Actor, error) {
 	nickname := toAuth[auth.CredsNickname]
-	authID := auth.ID(nickname)
 
-	l.Infof("%#v", toAuth)
+	l.Infof("ACTORS: %#v", authOp.actors)
 
-	if user, ok := authOp.users[authID]; ok {
-		if err := authOp.crypter.Verify(user.passhash, []byte(toAuth[auth.CredsPassword])); err == nil {
-			return &auth.Identity{
-				ID:       authID,
-				Nickname: nickname,
-				Roles:    user.roles,
-			}, nil
+	l.Infof("TO AUTH: %s / %#v", nickname, toAuth)
+
+	for _, actor := range authOp.actors {
+		if actor.Identity != nil && actor.Identity.Nickname == nickname {
+			if err := authOp.crypter.Verify(actor.Creds[auth.CredsPasshash], []byte(toAuth[auth.CredsPassword])); err == nil {
+				return &actor, nil
+			}
 		}
 	}
 

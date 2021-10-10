@@ -28,46 +28,48 @@ func OperatorTestScenarioPassword(t *testing.T, authOp Operator) {
 	}
 
 	for i, tc := range testCreds {
+		nickname := tc[CredsNickname]
 		password := tc[CredsPassword]
 
 		t.Log(i, "\n")
 
 		// .SetCredsByKey() ------------------------------------------
 
-		userCreds, err := authOp.SetCreds("", tc)
+		userCreds, err := authOp.SetCreds(Actor{}, tc)
 		require.NoError(t, err)
 		require.NotNil(t, userCreds)
 
 		// t.Logf("           creds: %#v\n\n", *userCreds)
 
-		require.Equal(t, tc[CredsNickname], (*userCreds)[CredsNickname])
+		require.Equal(t, nickname, (*userCreds)[CredsNickname])
 
 		// .Authenticate() ok -----------------------------------------
 
 		userCreds = &Creds{
 			// CredsIP:       testIP,
-			CredsNickname: tc[CredsNickname],
+			CredsNickname: nickname,
 			CredsPassword: password,
 		}
 
-		identity, err := authOp.Authenticate(*userCreds)
+		actor, err := authOp.Authenticate(*userCreds)
 
 		require.NoError(t, err)
-		require.NotNil(t, identity)
-		require.Equal(t, tc[CredsNickname], identity.Nickname)
-		require.NotEmpty(t, identity.ID)
+		require.NotNil(t, actor)
+		require.NotNil(t, actor.Identity)
+		require.Equal(t, nickname, actor.Identity.Nickname)
+		require.NotEmpty(t, actor.Identity.ID)
 
 		// .Authenticate() err ----------------------------------------
 
 		userCreds = &Creds{
 			// CredsIP:       testIP,
-			CredsNickname: tc[CredsNickname],
+			CredsNickname: nickname,
 			CredsPassword: password + "1",
 		}
 
-		identity, err = authOp.Authenticate(*userCreds)
+		actor, err = authOp.Authenticate(*userCreds)
 		require.Error(t, err)
-		require.Nil(t, identity)
+		require.Nil(t, actor)
 	}
 }
 
@@ -87,7 +89,7 @@ func OperatorTestScenarioToken(t *testing.T, operator Operator) {
 
 		// .SetCredsByKey() ------------------------------------------
 
-		userCreds, err := operator.SetCreds("", tc)
+		userCreds, err := operator.SetCreds(Actor{}, tc)
 		require.NoError(t, err)
 		require.NotNil(t, userCreds)
 
@@ -98,11 +100,12 @@ func OperatorTestScenarioToken(t *testing.T, operator Operator) {
 
 		// (*userCreds)[CredsIP] = testIP
 
-		identity, err := operator.Authenticate(*userCreds)
+		actor, err := operator.Authenticate(*userCreds)
 
 		require.NoError(t, err)
-		require.NotNil(t, identity)
-		require.Equal(t, tc[CredsNickname], identity.Nickname)
+		require.NotNil(t, actor)
+		require.NotNil(t, actor.Identity)
+		require.Equal(t, tc[CredsNickname], actor.Identity.Nickname)
 	}
 }
 
@@ -111,18 +114,14 @@ func OperatorTestScenarioPublicKey(t *testing.T, operator Operator) {
 		t.Fatal("No test environment!!!")
 	}
 
-	testCreds := []Creds{
-		{},
-	}
+	testCreds := []Creds{{}}
 
 	for i, tc := range testCreds {
 		t.Log(i)
 
 		// .SetCredsByKey() ------------------------------------------
 
-		// tc[CredsToSet] = CredsPrivateKey
-
-		userCreds, err := operator.SetCreds("", tc)
+		userCreds, err := operator.SetCreds(Actor{}, tc)
 		require.NoError(t, err)
 		require.NotNil(t, userCreds)
 		require.NotEmpty(t, (*userCreds)[CredsPublicKeyBase58])
@@ -144,7 +143,7 @@ func OperatorTestScenarioPublicKey(t *testing.T, operator Operator) {
 		log.Printf("public key base58: %s", publicKeyBase58)
 
 		credsToSet := Creds{CredsToSet: string(CredsKeyToSignature)} // CredsIP: testIP,
-		sessionCreds, err := operator.SetCreds("", credsToSet)
+		sessionCreds, err := operator.SetCreds(Actor{}, credsToSet)
 		require.NoError(t, err)
 		require.NotNil(t, sessionCreds)
 
@@ -172,11 +171,12 @@ func OperatorTestScenarioPublicKey(t *testing.T, operator Operator) {
 		(*userCreds)[CredsKeyToSignature] = keyToSignature
 		(*userCreds)[CredsSignature] = string(signature)
 
-		user, err := operator.Authenticate(*userCreds)
+		actor, err := operator.Authenticate(*userCreds)
 
 		require.NoError(t, err)
-		require.NotNil(t, user)
-		// require.Equal(t, nickname, user.Creds[CredsNickname])
-		require.NotEmpty(t, user.ID)
+		require.NotNil(t, actor)
+		require.NotNil(t, actor.Identity)
+		// require.Equal(t, nickname, actor.Creds[CredsNickname])
+		require.NotEmpty(t, actor.Identity.ID)
 	}
 }

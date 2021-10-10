@@ -7,7 +7,6 @@ import (
 	"github.com/pavlo67/common/common/logger/logger_test"
 
 	"github.com/pavlo67/common/common/auth"
-	"github.com/pavlo67/common/common/config"
 	"github.com/stretchr/testify/require"
 )
 
@@ -17,7 +16,7 @@ func TestAuthStub(t *testing.T) {
 
 	l = logger_test.New(t)
 
-	authOp, err := New(config.Access{})
+	authOp, err := New(nil)
 	require.NoError(t, err)
 	require.NotNil(t, authOp)
 

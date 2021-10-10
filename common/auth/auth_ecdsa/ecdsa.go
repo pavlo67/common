@@ -54,7 +54,8 @@ func New() (auth.Operator, error) {
 }
 
 // 	SetCreds creates either session-generated key or new "BTC identity" and returns it
-func (is *authECDSA) SetCreds(userID auth.ID, toSet auth.Creds) (*auth.Creds, error) {
+func (is *authECDSA) SetCreds(actor auth.Actor, toSet auth.Creds) (*auth.Creds, error) {
+
 	//toSet := auth.CredsType(toSet[auth.CredsToSet])
 	//
 	//if toSet == auth.CredsKeyToSignature {
@@ -115,7 +116,7 @@ func (is *authECDSA) SetCreds(userID auth.ID, toSet auth.Creds) (*auth.Creds, er
 
 const onAuthorize = "on authECDSA.Authenticate(): "
 
-func (is *authECDSA) Authenticate(toAuth auth.Creds) (*auth.Identity, error) {
+func (is *authECDSA) Authenticate(toAuth auth.Creds) (*auth.Actor, error) {
 	if toAuth[auth.CredsPublicKeyEncoding] != Proto {
 		return nil, errors.Wrap(auth.ErrEncryptionType, onAuthorize)
 	}
@@ -164,8 +165,10 @@ func (is *authECDSA) Authenticate(toAuth auth.Creds) (*auth.Identity, error) {
 	//	nickname = nicknameReceived
 	//}
 
-	return &auth.Identity{
-		ID:       auth.ID(Proto + "://" + publKeyBase58),
-		Nickname: nickname,
+	return &auth.Actor{
+		Identity: &auth.Identity{
+			ID:       auth.ID(Proto + "://" + publKeyBase58),
+			Nickname: nickname,
+		},
 	}, nil
 }

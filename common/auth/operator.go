@@ -16,10 +16,10 @@ type Identity struct {
 
 type Operator interface {
 	// SetCreds sets user's own or temporary (session-generated) creds
-	SetCreds(authID ID, toSet Creds) (*Creds, error)
+	SetCreds(actor Actor, toSet Creds) (*Creds, error)
 
 	// Authenticate can require to do .SetCredsByKey first and to usa some session-generated creds
-	Authenticate(toAuth Creds) (*Identity, error)
+	Authenticate(toAuth Creds) (*Actor, error)
 }
 
 func (identity *Identity) HasRole(role ...rbac.Role) bool {

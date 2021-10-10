@@ -34,16 +34,18 @@ func (orm *onRequestMiddleware) Identity(r *http.Request) (*auth.Identity, error
 	//	return nil, errors.New("no server_http.Request in RequestOptions(...)")
 	//}
 
-	var identity *auth.Identity
 	if tokenJWT := r.Header.Get("Authorization"); tokenJWT != "" {
 		tokenJWT = reBearer.ReplaceAllString(tokenJWT, "")
-		var err error
-		if identity, err = orm.authJWTOp.Authenticate(auth.Creds{auth.CredsJWT: tokenJWT}); err != nil {
+		actor, err := orm.authJWTOp.Authenticate(auth.Creds{auth.CredsJWT: tokenJWT})
+		if err != nil {
 			return nil, errors.CommonError(err, onOptions)
+		}
+		if actor != nil {
+			return actor.Identity, nil
 		}
 	}
 
-	return identity, nil
+	return nil, nil
 }
 
 //// SIGNATURE CHECK

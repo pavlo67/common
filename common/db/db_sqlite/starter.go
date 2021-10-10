@@ -33,7 +33,7 @@ func (css *connectSQLiteStarter) Name() string {
 }
 
 func (css *connectSQLiteStarter) Prepare(cfg *config.Config, options common.Map) error {
-	if err := cfg.Value(options.StringDefault("db_key", "sqlite"), &css.cfgSQLite); err != nil {
+	if err := cfg.Value(options.StringDefault("db_key", "db_sqlite"), &css.cfgSQLite); err != nil {
 		return err
 	}
 

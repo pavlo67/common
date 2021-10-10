@@ -33,7 +33,7 @@ func (cps *connectPgStarter) Name() string {
 }
 
 func (cps *connectPgStarter) Prepare(cfg *config.Config, options common.Map) error {
-	if err := cfg.Value(options.StringDefault("db_key", "pg"), &cps.cfgPg); err != nil {
+	if err := cfg.Value(options.StringDefault("db_key", "db_pg"), &cps.cfgPg); err != nil {
 		return err
 	}
 
