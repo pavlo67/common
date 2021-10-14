@@ -4,6 +4,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/pavlo67/common/apps/demo/demo_server_http"
+
 	"github.com/stretchr/testify/require"
 
 	"github.com/pavlo67/common/common"
@@ -25,9 +27,9 @@ func TestAuthHTTP(t *testing.T) {
 	starters = append(
 		starters,
 		starter.Starter{Starter(), common.Map{
-			"prefix":        demo_settings.PrefixREST,
-			"server_config": demo_settings.ServerConfig,
-		}},
+			"prefix":        demo_server_http.PrefixREST,
+			"server_config": demo_server_http.ServerConfig,
+		}, nil},
 	)
 
 	joinerOp, err := starter.Run(starters, &cfgService, "CLI BUILD FOR TEST", l)

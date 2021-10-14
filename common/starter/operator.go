@@ -20,6 +20,7 @@ type Operator interface {
 type Starter struct {
 	Operator
 	Options common.Map
+	*config.Config
 }
 
 func (starter Starter) CorrectedOptions(options common.Map) common.Map {
