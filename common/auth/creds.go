@@ -40,6 +40,7 @@ const CredsPasshash CredsType = "passhash"
 const CredsPasshashCryptype CredsType = "passhash_cryptype"
 
 const CredsRole CredsType = "roles"
+const CredsRolesJSON CredsType = "roles_json"
 
 //func CheckCode() {
 //	if toType == CredsSentCode {

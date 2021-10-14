@@ -2,6 +2,7 @@ package auth_server_http
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -54,12 +55,33 @@ var authenticateEndpoint = server_http.Endpoint{
 		}
 		toAuth[auth.CredsIP] = req.RemoteAddr
 
-		identity, err := authOp.Authenticate(toAuth)
+		actor, err := authOp.Authenticate(toAuth)
 		if err != nil {
 			return server_http.ResponseRESTError(0, err, req)
+		} else if actor == nil || actor.Identity == nil {
+			return server_http.ResponseRESTError(0, auth.ErrNotAuthenticated, req)
 		}
 
-		return server_http.ResponseRESTOk(http.StatusOK, identity, req)
+		toSet := auth.Creds{
+			auth.CredsNickname: actor.Nickname,
+			auth.CredsID:       string(actor.ID),
+		}
+
+		if len(actor.Roles) > 0 {
+			rolesJSON, err := json.Marshal(actor.Roles)
+			if err != nil {
+				return server_http.ResponseRESTError(0, err, req)
+			}
+			toSet[auth.CredsRolesJSON] = string(rolesJSON)
+		}
+
+		jwtCreds, err := authJWTOp.SetCreds(auth.Actor{}, toSet)
+		if err != nil || jwtCreds == nil {
+			return server_http.ResponseRESTError(0, fmt.Errorf("got %#v / %s", jwtCreds, err), req)
+		}
+		actor.Creds = *jwtCreds
+
+		return server_http.ResponseRESTOk(http.StatusOK, actor, req)
 	},
 }
 
@@ -69,7 +91,6 @@ var setCredsEndpoint = server_http.Endpoint{
 		Method:      "POST",
 	},
 
-	//BodyParams: bodyParams,
 	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, _ server_http.PathParams, identity *auth.Identity) (server.Response, error) {
 
 		credsJSON, err := ioutil.ReadAll(req.Body)

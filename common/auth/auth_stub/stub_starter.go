@@ -31,7 +31,9 @@ func (ahs *authstubStarter) Name() string {
 
 func (ahs *authstubStarter) Prepare(cfg *config.Config, options common.Map) error {
 
-	cfg.Value("actors", &ahs.defaultActors)
+	if err := cfg.Value("actors", &ahs.defaultActors); err != nil {
+		return err
+	}
 
 	ahs.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(auth.InterfaceKey)))
 

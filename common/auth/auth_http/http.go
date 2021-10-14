@@ -37,7 +37,7 @@ func (authOp *authHTTP) SetCreds(actor auth.Actor, toSet auth.Creds) (*auth.Cred
 	}
 
 	var creds *auth.Creds
-	if err := httplib.Request(nil, serverURL, ep.Method, server_http.SetCreds(&actor.Creds), requestBody, &creds, l); err != nil {
+	if err := httplib.Request(nil, serverURL, ep.Method, server_http.SetCreds(actor.Creds), requestBody, &creds, l); err != nil {
 		return nil, err
 	}
 

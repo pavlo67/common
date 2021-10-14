@@ -55,6 +55,9 @@ func OperatorTestScenarioPassword(t *testing.T, authOp Operator) {
 
 		require.NoError(t, err)
 		require.NotNil(t, actor)
+
+		t.Logf("%#v", *actor)
+
 		require.NotNil(t, actor.Identity)
 		require.Equal(t, nickname, actor.Identity.Nickname)
 		require.NotEmpty(t, actor.Identity.ID)

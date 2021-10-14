@@ -33,7 +33,7 @@ type authServerHTTPStarter struct {
 // ------------------------------------------------------------------------------------------------
 
 var l logger.Operator
-var authOp auth.Operator
+var authOp, authJWTOp auth.Operator
 
 func (ashs *authServerHTTPStarter) Name() string {
 	return logger.GetCallInfo().PackageName
@@ -57,7 +57,7 @@ func (ashs *authServerHTTPStarter) Run(joinerOp joiner.Operator) error {
 
 	// middleware -------------------------------------------------------
 
-	authJWTOp, _ := joinerOp.Interface(ashs.authJWTKey).(auth.Operator)
+	authJWTOp, _ = joinerOp.Interface(ashs.authJWTKey).(auth.Operator)
 	if authJWTOp == nil {
 		return fmt.Errorf(onRun+": no auth.Operator with key %s", ashs.authJWTKey)
 	}

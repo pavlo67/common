@@ -57,14 +57,11 @@ type JWTCreds struct {
 func (authOp *authJWT) SetCreds(actor auth.Actor, toSet auth.Creds) (*auth.Creds, error) {
 
 	var userID auth.ID
-	var roles rbac.Roles
 	if actor.Identity != nil {
 		userID = actor.Identity.ID
-	}
-
-	// TODO: allow for admins only
-	if userIDAnother := auth.ID(toSet[auth.CredsID]); userIDAnother != "" && roles.Has(rbac.RoleAdmin) {
-		userID = userIDAnother
+		if userIDAnother := auth.ID(toSet[auth.CredsID]); userIDAnother != "" && actor.Identity.Roles.Has(rbac.RoleAdmin) {
+			userID = userIDAnother
+		}
 	}
 
 	jc := JWTCreds{
@@ -81,9 +78,9 @@ func (authOp *authJWT) SetCreds(actor auth.Actor, toSet auth.Creds) (*auth.Creds
 		GroupID:  common.IDStr(toSet[auth.CredsGroupID]),
 	}
 
-	if roles := toSet[auth.CredsRole]; roles != "" {
-		if err := json.Unmarshal([]byte(roles), &jc.Roles); err != nil {
-			return nil, fmt.Errorf("on authJWT.SetCreds() with json.Unmarshal(%s): %s", roles, err)
+	if rolesJSON := toSet[auth.CredsRolesJSON]; rolesJSON != "" {
+		if err := json.Unmarshal([]byte(rolesJSON), &jc.Roles); err != nil {
+			return nil, fmt.Errorf("on authJWT.SetCreds() with json.Unmarshal(%s): %s", rolesJSON, err)
 		}
 	}
 
