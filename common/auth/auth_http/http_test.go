@@ -26,7 +26,7 @@ func TestAuthHTTP(t *testing.T) {
 
 	starters = append(
 		starters,
-		starter.Starter{Starter(), common.Map{
+		starter.Component{Starter(), common.Map{
 			"prefix":        demo_server_http.PrefixREST,
 			"server_config": demo_server_http.ServerConfig,
 		}, nil},

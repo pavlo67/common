@@ -14,7 +14,7 @@ import (
 	"github.com/pavlo67/common/common/logger"
 )
 
-func Run(starters []Starter, serviceConfig *config.Config, label string, l logger.Operator) (joiner.Operator, error) {
+func Run(starters []Component, serviceConfig *config.Config, label string, l logger.Operator) (joiner.Operator, error) {
 	for _, c := range starters {
 		name := c.Name()
 		if key, ok := c.Options.String("interface_key"); ok {

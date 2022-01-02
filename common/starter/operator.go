@@ -7,23 +7,18 @@ import (
 )
 
 type Operator interface {
-
-	// Title returns started component name
 	Name() string
-
 	Prepare(cfg *config.Config, options common.Map) error
-
-	// Run inits the component to use in application
 	Run(joiner.Operator) error
 }
 
-type Starter struct {
+type Component struct {
 	Operator
 	Options common.Map
 	*config.Config
 }
 
-func (starter Starter) CorrectedOptions(options common.Map) common.Map {
+func (starter Component) CorrectedOptions(options common.Map) common.Map {
 	newOptions := common.Map{}
 
 	for k, v := range starter.Options {
