@@ -34,7 +34,10 @@ func (c *Config) HandleEndpoints(srvOp Operator, l logger.Operator) error {
 	}
 
 	for key, ep := range c.EndpointsSettled {
-		if err := srvOp.HandleEndpoint(key, c.Prefix+ep.Path, ep.Endpoint); err != nil {
+		if ep.Endpoint == nil {
+			return fmt.Errorf(onHandleEndpoints+": endpoint %s to handle is nil (%#v)", key, ep)
+		}
+		if err := srvOp.HandleEndpoint(key, c.Prefix+ep.Path, *ep.Endpoint); err != nil {
 			return fmt.Errorf(onHandleEndpoints+": handling %s, %s, %#v got %s", key, ep.Path, ep, err)
 		}
 	}
@@ -56,11 +59,15 @@ func (c *Config) CompleteWithJoiner(joinerOp joiner.Operator, host string, port 
 	c.Host, c.Port, c.Prefix = host, portStr, prefix
 
 	for key, ep := range c.EndpointsSettled {
+		if c.EndpointsSettled[key].Endpoint == nil {
+			continue
+		}
+
 		if endpoint, ok := joinerOp.Interface(key).(Endpoint); ok {
-			ep.Endpoint = endpoint
+			ep.Endpoint = &endpoint
 			c.EndpointsSettled[key] = ep
 		} else if endpointPtr, _ := joinerOp.Interface(key).(*Endpoint); endpointPtr != nil {
-			ep.Endpoint = *endpointPtr
+			ep.Endpoint = endpointPtr
 			c.EndpointsSettled[key] = ep
 		} else {
 			return fmt.Errorf("no server_http.Endpoint joined with key %s", key)
@@ -89,7 +96,7 @@ EP_SETTLED:
 
 		for _, ep := range endpoints {
 			if ep.InternalKey == key {
-				epSettled.Endpoint = ep
+				epSettled.Endpoint = &ep
 				c.EndpointsSettled[key] = epSettled
 				continue EP_SETTLED
 			}

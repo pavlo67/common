@@ -21,7 +21,7 @@ type EndpointSettled struct {
 	Path     string
 	Tags     []string `json:",omitempty"`
 	Produces []string `json:",omitempty"`
-	Endpoint
+	*Endpoint
 }
 
 type Endpoint struct {
