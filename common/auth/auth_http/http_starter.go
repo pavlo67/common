@@ -1,8 +1,6 @@
 package auth_http
 
 import (
-	"fmt"
-
 	"github.com/pavlo67/common/common/auth/auth_server_http"
 	"github.com/pkg/errors"
 
@@ -32,7 +30,11 @@ func (ahs *authHTTPStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ahs *authHTTPStarter) Prepare(cfg *config.Config, options common.Map) error {
+//} else if endpointsPtr, ok := options["endpoints"].(*server_http.Endpoints); ok {
+//	ihs.endpoints = *endpointsPtr
+
+func (ahs *authHTTPStarter) Run(cfg *config.Config, options common.Map, joinerOp joiner.Operator, l_ logger.Operator) error {
+	l = l_
 
 	var access config.Access
 	if err := cfg.Value("auth_http", &access); err != nil {
@@ -50,17 +52,6 @@ func (ahs *authHTTPStarter) Prepare(cfg *config.Config, options common.Map) erro
 	ahs.serverConfig.CompleteDirectly(auth_server_http.Endpoints, access.Host, access.Port, prefix)
 
 	ahs.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
-
-	return nil
-}
-
-//} else if endpointsPtr, ok := options["endpoints"].(*server_http.Endpoints); ok {
-//	ihs.endpoints = *endpointsPtr
-
-func (ahs *authHTTPStarter) Run(joinerOp joiner.Operator) error {
-	if l, _ = joinerOp.Interface(logger.InterfaceKey).(logger.Operator); l == nil {
-		return fmt.Errorf("no logger.Operator with key %s", logger.InterfaceKey)
-	}
 
 	authOp, err := New(ahs.serverConfig)
 	if err != nil {

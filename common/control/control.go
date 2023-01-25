@@ -1,7 +1,6 @@
 package control
 
 import (
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -28,16 +27,10 @@ func (ws *controlStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ws *controlStarter) Prepare(_ *config.Config, options common.Map) error {
-	return nil
-}
-
 var signalChan = make(chan os.Signal, 1000)
 
-func (ws *controlStarter) Run(joinerOp joiner.Operator) error {
-	if l, _ = joinerOp.Interface(logger.InterfaceKey).(logger.Operator); l == nil {
-		return fmt.Errorf("no logger.Operator with key %s", logger.InterfaceKey)
-	}
+func (ws *controlStarter) Run(_ *config.Config, _ common.Map, joinerOp joiner.Operator, l_ logger.Operator) error {
+	l = l_
 
 	// signal.Notify(signalChan, os.Interrupt)
 	// signal.Notify(signalChan, syscall.SIGTERM)

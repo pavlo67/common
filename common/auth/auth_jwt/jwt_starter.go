@@ -31,7 +31,8 @@ func (ss *identity_jwtStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *identity_jwtStarter) Prepare(cfg *config.Config, options common.Map) error {
+func (ss *identity_jwtStarter) Run(cfg *config.Config, options common.Map, joinerOp joiner.Operator, l_ logger.Operator) error {
+	l = l_
 
 	var cfgAuthJWT common.Map
 	if err := cfg.Value("auth_jwt", &cfgAuthJWT); err != nil {
@@ -48,14 +49,6 @@ func (ss *identity_jwtStarter) Prepare(cfg *config.Config, options common.Map) e
 
 	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
 	// ss.interfaceSetCredsKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
-
-	return nil
-}
-
-func (ss *identity_jwtStarter) Run(joinerOp joiner.Operator) error {
-	if l, _ = joinerOp.Interface(logger.InterfaceKey).(logger.Operator); l == nil {
-		return fmt.Errorf("no logger.Operator with key %s", logger.InterfaceKey)
-	}
 
 	authOp, err := New(ss.keyPath + "jwt.key")
 	if err != nil || authOp == nil {

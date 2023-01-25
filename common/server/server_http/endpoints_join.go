@@ -2,6 +2,7 @@ package server_http
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 
 	"github.com/pavlo67/common/common/errors"
@@ -59,9 +60,11 @@ func (c *Config) CompleteWithJoiner(joinerOp joiner.Operator, host string, port 
 	c.Host, c.Port, c.Prefix = host, portStr, prefix
 
 	for key, ep := range c.EndpointsSettled {
-		if c.EndpointsSettled[key].Endpoint == nil {
-			continue
-		}
+		//if c.EndpointsSettled[key].Endpoint != nil {
+		//	continue
+		//}
+
+		log.Print(key)
 
 		if endpoint, ok := joinerOp.Interface(key).(Endpoint); ok {
 			ep.Endpoint = &endpoint

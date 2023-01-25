@@ -1,8 +1,6 @@
 package auth_stub
 
 import (
-	"fmt"
-
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/common/common"
@@ -29,21 +27,14 @@ func (ahs *authstubStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ahs *authstubStarter) Prepare(cfg *config.Config, options common.Map) error {
+func (ahs *authstubStarter) Run(cfg *config.Config, options common.Map, joinerOp joiner.Operator, l_ logger.Operator) error {
+	l = l_
 
 	if err := cfg.Value("actors", &ahs.defaultActors); err != nil {
 		return err
 	}
 
 	ahs.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(auth.InterfaceKey)))
-
-	return nil
-}
-
-func (ahs *authstubStarter) Run(joinerOp joiner.Operator) error {
-	if l, _ = joinerOp.Interface(logger.InterfaceKey).(logger.Operator); l == nil {
-		return fmt.Errorf("no logger.Operator with key %s", logger.InterfaceKey)
-	}
 
 	authOp, err := New(ahs.defaultActors)
 	if err != nil {

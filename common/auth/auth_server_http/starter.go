@@ -3,12 +3,13 @@ package auth_server_http
 import (
 	"fmt"
 
+	"github.com/pavlo67/common/common/auth/auth_jwt"
+
 	"github.com/pavlo67/common/common/server/server_http"
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/auth"
-	"github.com/pavlo67/common/common/auth/auth_jwt"
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
@@ -39,21 +40,15 @@ func (ashs *authServerHTTPStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ashs *authServerHTTPStarter) Prepare(_ *config.Config, options common.Map) error {
+const onRun = "on authServerHTTPStarter.Run()"
+
+func (ashs *authServerHTTPStarter) Run(_ *config.Config, options common.Map, joinerOp joiner.Operator, l_ logger.Operator) error {
+
+	l = l_
 
 	ashs.authKey = joiner.InterfaceKey(options.StringDefault("auth_key", string(auth.InterfaceKey)))
 	ashs.authJWTKey = joiner.InterfaceKey(options.StringDefault("auth_jwt_key", string(auth_jwt.InterfaceKey)))
 	ashs.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
-
-	return nil
-}
-
-const onRun = "on authServerHTTPStarter.Run()"
-
-func (ashs *authServerHTTPStarter) Run(joinerOp joiner.Operator) error {
-	if l, _ = joinerOp.Interface(logger.InterfaceKey).(logger.Operator); l == nil {
-		return fmt.Errorf(onRun+": no logger.Operator with key %s", logger.InterfaceKey)
-	}
 
 	// middleware -------------------------------------------------------
 

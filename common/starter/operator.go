@@ -4,12 +4,12 @@ import (
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/joiner"
+	"github.com/pavlo67/common/common/logger"
 )
 
 type Operator interface {
 	Name() string
-	Prepare(cfg *config.Config, options common.Map) error
-	Run(joiner.Operator) error
+	Run(*config.Config, common.Map, joiner.Operator, logger.Operator) error
 }
 
 type Component struct {

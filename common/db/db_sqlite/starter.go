@@ -32,22 +32,16 @@ func (css *connectSQLiteStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (css *connectSQLiteStarter) Prepare(cfg *config.Config, options common.Map) error {
+const onRun = "on connectSQLiteStarter.Run()"
+
+func (css *connectSQLiteStarter) Run(cfg *config.Config, options common.Map, joinerOp joiner.Operator, l_ logger.Operator) error {
+	l = l_
+
 	if err := cfg.Value(options.StringDefault("db_key", "db_sqlite"), &css.cfgSQLite); err != nil {
 		return err
 	}
 
 	css.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
-
-	return nil
-}
-
-const onRun = "on connectSQLiteStarter.Run()"
-
-func (css *connectSQLiteStarter) Run(joinerOp joiner.Operator) error {
-	if l, _ = joinerOp.Interface(logger.InterfaceKey).(logger.Operator); l == nil {
-		return fmt.Errorf("no logger.Operator with key %s", logger.InterfaceKey)
-	}
 
 	if os.Getenv("SHOW_CONNECTS") != "" {
 		l.Infof("CONNECTING TO SQLITE: %#v", css.cfgSQLite)

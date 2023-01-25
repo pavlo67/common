@@ -1,8 +1,6 @@
 package server_http_jschmhr
 
 import (
-	"fmt"
-
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/common/common"
@@ -31,20 +29,14 @@ func (ss *server_http_jschmhrStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *server_http_jschmhrStarter) Prepare(cfg *config.Config, options common.Map) error {
+func (ss *server_http_jschmhrStarter) Run(cfg *config.Config, options common.Map, joinerOp joiner.Operator, l_ logger.Operator) error {
+	l = l_
+
 	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(server_http.InterfaceKey)))
 
 	configKey := options.StringDefault("config_key", "server_http")
 	if err := cfg.Value(configKey, &ss.config); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func (ss *server_http_jschmhrStarter) Run(joinerOp joiner.Operator) error {
-	if l, _ = joinerOp.Interface(logger.InterfaceKey).(logger.Operator); l == nil {
-		return fmt.Errorf("no logger.Operator with key %s", logger.InterfaceKey)
 	}
 
 	// TODO!!! customize it

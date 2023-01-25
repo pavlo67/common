@@ -32,22 +32,14 @@ func (cps *connectPgStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (cps *connectPgStarter) Prepare(cfg *config.Config, options common.Map) error {
+func (cps *connectPgStarter) Run(cfg *config.Config, options common.Map, joinerOp joiner.Operator, l_ logger.Operator) error {
+	l = l_
+
 	if err := cfg.Value(options.StringDefault("db_key", "db_pg"), &cps.cfgPg); err != nil {
 		return err
 	}
 
 	cps.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
-
-	return nil
-}
-
-const onRun = "on connectPgStarter.Run()"
-
-func (cps *connectPgStarter) Run(joinerOp joiner.Operator) error {
-	if l, _ = joinerOp.Interface(logger.InterfaceKey).(logger.Operator); l == nil {
-		return fmt.Errorf("no logger.Operator with key %s", logger.InterfaceKey)
-	}
 
 	if os.Getenv("SHOW_CONNECTS") != "" {
 		l.Infof("CONNECTING TO PG: %#v", cps.cfgPg)
@@ -55,7 +47,7 @@ func (cps *connectPgStarter) Run(joinerOp joiner.Operator) error {
 
 	db, err := sqllib_pg.Connect(cps.cfgPg)
 	if err != nil || db == nil {
-		return errors.CommonError(err, fmt.Sprintf(onRun+": got %#v", db))
+		return errors.CommonError(err, fmt.Sprintf("got %#v", db))
 	}
 
 	if err = joinerOp.Join(db, cps.interfaceKey); err != nil {
