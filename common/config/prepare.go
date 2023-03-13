@@ -1,9 +1,12 @@
 package config
 
 import (
+	"fmt"
 	"log"
 	"math/rand"
 	"os"
+	"regexp"
+	"runtime/debug"
 	"strings"
 	"testing"
 	"time"
@@ -13,6 +16,18 @@ import (
 
 	"github.com/stretchr/testify/require"
 )
+
+func ShowVCSInfo() {
+	if bi, ok := debug.ReadBuildInfo(); ok && bi != nil {
+		for _, s := range bi.Settings {
+			if ok, _ := regexp.MatchString(`^vcs\.`, s.Key); ok {
+				fmt.Printf("%s\t%s\n", s.Key, s.Value)
+			}
+		}
+		fmt.Print("\n")
+	}
+
+}
 
 func PrepareApp(envPath string) (Config, logger.Operator) {
 

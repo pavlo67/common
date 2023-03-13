@@ -10,12 +10,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pavlo67/common/common/auth"
-
 	"github.com/julienschmidt/httprouter"
 
+	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/errors"
-	"github.com/pavlo67/common/common/server/server_http"
+	"github.com/pavlo67/common/common/server_http"
 )
 
 var _ server_http.Operator = &serverHTTPJschmhr{}
@@ -110,6 +109,7 @@ func (s *serverHTTPJschmhr) HandleEndpoint(key server_http.EndpointKey, serverPa
 	s.HandleOptions(key, path)
 
 	handler := func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
+
 		var identity *auth.Identity
 		if s.onRequest != nil {
 			var err error

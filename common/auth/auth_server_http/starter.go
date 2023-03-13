@@ -5,7 +5,7 @@ import (
 
 	"github.com/pavlo67/common/common/auth/auth_jwt"
 
-	"github.com/pavlo67/common/common/server/server_http"
+	"github.com/pavlo67/common/common/server_http"
 	"github.com/pkg/errors"
 
 	"github.com/pavlo67/common/common"

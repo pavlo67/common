@@ -14,7 +14,7 @@ func TestAuthStub(t *testing.T) {
 
 	os.Setenv("ENV", "test")
 
-	l = logger_test.New(t)
+	l = logger_test.New(t, nil)
 
 	authOp, err := New(nil)
 	require.NoError(t, err)

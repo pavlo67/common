@@ -3,8 +3,6 @@ package server_http
 import (
 	"net/http"
 
-	"github.com/pavlo67/common/common/server"
-
 	"github.com/pavlo67/common/common/auth"
 
 	"github.com/pavlo67/common/common/joiner"
@@ -24,7 +22,7 @@ type StaticPath struct {
 	MIMEType  *string
 }
 
-type WorkerHTTP func(Operator, *http.Request, PathParams, *auth.Identity) (server.Response, error)
+type WorkerHTTP func(Operator, *http.Request, PathParams, *auth.Identity) (Response, error)
 
 type Operator interface {
 	HandleMiddleware(onRequest OnRequestMiddleware) error

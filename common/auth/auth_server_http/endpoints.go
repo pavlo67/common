@@ -9,8 +9,7 @@ import (
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/errors"
-	"github.com/pavlo67/common/common/server"
-	"github.com/pavlo67/common/common/server/server_http"
+	"github.com/pavlo67/common/common/server_http"
 )
 
 var Endpoints = server_http.Endpoints{
@@ -42,7 +41,7 @@ var authenticateEndpoint = server_http.Endpoint{
 	},
 
 	//BodyParams: bodyParams,
-	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, _ server_http.PathParams, _ *auth.Identity) (server.Response, error) {
+	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, _ server_http.PathParams, _ *auth.Identity) (server_http.Response, error) {
 
 		credsJSON, err := ioutil.ReadAll(req.Body)
 		if err != nil {
@@ -91,7 +90,7 @@ var setCredsEndpoint = server_http.Endpoint{
 		Method:      "POST",
 	},
 
-	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, _ server_http.PathParams, identity *auth.Identity) (server.Response, error) {
+	WorkerHTTP: func(serverOp server_http.Operator, req *http.Request, _ server_http.PathParams, identity *auth.Identity) (server_http.Response, error) {
 
 		credsJSON, err := ioutil.ReadAll(req.Body)
 		if err != nil {

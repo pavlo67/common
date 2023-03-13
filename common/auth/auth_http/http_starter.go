@@ -8,7 +8,7 @@ import (
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/joiner"
 	"github.com/pavlo67/common/common/logger"
-	"github.com/pavlo67/common/common/server/server_http"
+	"github.com/pavlo67/common/common/server_http"
 	"github.com/pavlo67/common/common/starter"
 )
 
@@ -41,15 +41,15 @@ func (ahs *authHTTPStarter) Run(cfg *config.Config, options common.Map, joinerOp
 		return err
 	}
 
-	// TODO!!! pass for each server separately
-	prefix := options.StringDefault("prefix", "")
-
 	var ok bool
 	if ahs.serverConfig, ok = options["server_config"].(server_http.Config); !ok {
 		return errors.New("no server config for authHTTPStarter")
 	}
+	ignoreAbsent, _ := options["ignore_absent"].(bool)
 
-	ahs.serverConfig.CompleteDirectly(auth_server_http.Endpoints, access.Host, access.Port, prefix)
+	if err := ahs.serverConfig.CompleteDirectly(auth_server_http.Endpoints, access.Host, access.Port, ignoreAbsent); err != nil {
+		return err
+	}
 
 	ahs.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
 

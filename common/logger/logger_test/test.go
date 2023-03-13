@@ -1,14 +1,16 @@
 package logger_test
 
 import (
+	"fmt"
 	"log"
+	"os"
 	"testing"
 
 	"github.com/pavlo67/common/common/logger"
 )
 
-func New(t *testing.T) logger.Operator {
-	return &stubLogger{t}
+func New(t *testing.T, commentPaths []string) logger.Operator {
+	return &stubLogger{t: t, commentPaths: commentPaths}
 }
 
 //func InitComments(t *testing.T) logger.OperatorComments {
@@ -18,7 +20,8 @@ func New(t *testing.T) logger.Operator {
 var _ logger.Operator = &stubLogger{}
 
 type stubLogger struct {
-	t *testing.T
+	t            *testing.T
+	commentPaths []string
 }
 
 //func (sl *stubLogger) Comment(text string) {
@@ -104,4 +107,25 @@ func (sl *stubLogger) Fatalf(template string, args ...interface{}) {
 		log.Fatalf(template, args...)
 	}
 
+}
+func (sl stubLogger) Comment(text string) {
+	outstring := "\n\t\t" + text + "\n\n"
+	for _, outPath := range sl.commentPaths {
+		switch outPath {
+		case "stdout":
+			fmt.Print(outstring)
+		case "stderr":
+			// to prevent duplicates in console
+			// fmt.Fprint(os.Stderr, outPath+" "+outstring)
+		default:
+			f, err := os.OpenFile(outPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+			if err != nil {
+				fmt.Fprint(os.Stderr, err)
+			}
+			defer f.Close()
+			if _, err := f.WriteString(outstring); err != nil {
+				fmt.Fprint(os.Stderr, err)
+			}
+		}
+	}
 }

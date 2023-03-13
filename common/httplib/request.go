@@ -11,7 +11,7 @@ import (
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/logger"
-	"github.com/pavlo67/common/common/server"
+	"github.com/pavlo67/common/common/server_http"
 )
 
 const bodyLogLimit = 2048
@@ -119,7 +119,7 @@ func Request(client *http.Client, serverURL, method string, header http.Header, 
 		} else {
 			data["error"] = errCommon
 		}
-		errorKey := errors.Key(data.StringDefault(server.ErrorKey, ""))
+		errorKey := errors.Key(data.StringDefault(server_http.ErrorKey, ""))
 		return errors.CommonError(errorKey, data)
 	}
 

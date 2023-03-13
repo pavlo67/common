@@ -7,7 +7,6 @@ import (
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/errors"
-	"github.com/pavlo67/common/common/server"
 )
 
 const (
@@ -35,11 +34,11 @@ func Redirect(w http.ResponseWriter, req *http.Request) {
 	http.Redirect(w, req, target, http.StatusTemporaryRedirect)
 }
 
-func ResponseRESTError(status int, err error, req *http.Request) (server.Response, error) {
+func ResponseRESTError(status int, err error, req *http.Request) (Response, error) {
 	commonErr := errors.CommonError(err)
 
 	key := commonErr.Key()
-	data := common.Map{server.ErrorKey: key}
+	data := common.Map{ErrorKey: key}
 
 	if status == 0 || status == http.StatusOK {
 		if key == common.NoCredsKey || key == common.InvalidCredsKey {
@@ -67,16 +66,16 @@ func ResponseRESTError(status int, err error, req *http.Request) (server.Respons
 		commonErr = commonErr.Append(fmt.Errorf("on %s %s", req.Method, req.URL))
 	}
 
-	return server.Response{Status: status, Data: jsonBytes}, commonErr
+	return Response{Status: status, Data: jsonBytes}, commonErr
 }
 
-func ResponseRESTOk(status int, data interface{}, req *http.Request) (server.Response, error) {
+func ResponseRESTOk(status int, data interface{}, req *http.Request) (Response, error) {
 	if status == 0 {
 		status = http.StatusOK
 	}
 
 	if data == nil {
-		return server.Response{Status: status}, nil
+		return Response{Status: status}, nil
 	}
 
 	var dataBytes []byte
@@ -103,9 +102,9 @@ func ResponseRESTOk(status int, data interface{}, req *http.Request) (server.Res
 				err = fmt.Errorf("can't marshal json (%#v): %s", data, err)
 			}
 
-			return server.Response{Status: http.StatusInternalServerError}, err
+			return Response{Status: http.StatusInternalServerError}, err
 		}
 	}
 
-	return server.Response{Status: status, Data: dataBytes}, nil
+	return Response{Status: status, Data: dataBytes}, nil
 }

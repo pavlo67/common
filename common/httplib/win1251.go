@@ -6,9 +6,10 @@ import (
 	"io/ioutil"
 	"regexp"
 
-	"github.com/pavlo67/common/common/strlib"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/transform"
+
+	"github.com/pavlo67/common/common/strlib"
 )
 
 func Win1251ToUTF8(data []byte) ([]byte, error) {

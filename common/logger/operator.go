@@ -1,8 +1,6 @@
 package logger
 
-import (
-	"github.com/pavlo67/common/common/joiner"
-)
+import "github.com/pavlo67/common/common/joiner"
 
 const InterfaceKey joiner.InterfaceKey = "logger"
 
@@ -45,8 +43,6 @@ type Operator interface {
 
 	Fatal(args ...interface{})
 	Fatalf(template string, args ...interface{})
-}
 
-type OperatorComments interface {
 	Comment(text string)
 }

@@ -14,7 +14,7 @@ func TestRequest(t *testing.T) {
 	url := "http://google.com/"
 	method := "GET"
 	var responseData []byte
-	l := logger_test.New(t)
+	l := logger_test.New(t, nil)
 
 	err := Request(nil, url, method, nil, nil, &responseData, l)
 	require.NoError(t, err)

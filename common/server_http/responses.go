@@ -1,4 +1,4 @@
-package server
+package server_http
 
 const ErrorKey = "error_key"
 
@@ -14,7 +14,7 @@ type Response struct {
 	FileName string
 }
 
-//func ResponseRESTError(identity,status int, key Key, err error) (Response, error) {
+//func ResponseRESTError(identity,status int, key DeviceKey, err error) (Response, error) {
 //	if err == nil {
 //		err = fmt.Errorf("unknown error with status %d", status)
 //	}

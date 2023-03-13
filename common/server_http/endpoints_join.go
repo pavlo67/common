@@ -2,7 +2,6 @@ package server_http
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 
 	"github.com/pavlo67/common/common/errors"
@@ -15,6 +14,7 @@ type Endpoints []Endpoint
 
 func (eps Endpoints) Join(joinerOp joiner.Operator) error {
 	for i, ep := range eps {
+
 		if err := joinerOp.Join(&eps[i], ep.InternalKey); err != nil {
 			return errors.CommonError(err, fmt.Sprintf("can't join %#v as Endpoint with key '%s'", ep, ep.InternalKey))
 		}
@@ -48,7 +48,7 @@ func (c *Config) HandleEndpoints(srvOp Operator, l logger.Operator) error {
 
 // joining endpoints -----------------------------------------------------
 
-func (c *Config) CompleteWithJoiner(joinerOp joiner.Operator, host string, port int, prefix string) error {
+func (c *Config) CompleteWithJoiner(joinerOp joiner.Operator, host string, port int) error {
 	if c == nil {
 		return errors.New("no server_http.Config to be completed")
 	}
@@ -57,14 +57,12 @@ func (c *Config) CompleteWithJoiner(joinerOp joiner.Operator, host string, port 
 	if port > 0 {
 		portStr = ":" + strconv.Itoa(port)
 	}
-	c.Host, c.Port, c.Prefix = host, portStr, prefix
+	c.Host, c.Port = host, portStr
 
 	for key, ep := range c.EndpointsSettled {
 		//if c.EndpointsSettled[key].Endpoint != nil {
 		//	continue
 		//}
-
-		log.Print(key)
 
 		if endpoint, ok := joinerOp.Interface(key).(Endpoint); ok {
 			ep.Endpoint = &endpoint
@@ -82,7 +80,7 @@ func (c *Config) CompleteWithJoiner(joinerOp joiner.Operator, host string, port 
 
 // TODO: be careful, it's method for http-client only
 // TODO: be careful, it shouldn't be used on server side because it uses non-initiated (without starter.Operator.Run()) endpoints
-func (c *Config) CompleteDirectly(endpoints Endpoints, host string, port int, prefix string) error {
+func (c *Config) CompleteDirectly(endpoints Endpoints, host string, port int, ignoreAbsent bool) error {
 	if c == nil {
 		return errors.New("no server_http.Config to be completed")
 	}
@@ -91,7 +89,7 @@ func (c *Config) CompleteDirectly(endpoints Endpoints, host string, port int, pr
 	if port > 0 {
 		portStr = ":" + strconv.Itoa(port)
 	}
-	c.Host, c.Port, c.Prefix = host, portStr, prefix
+	c.Host, c.Port = host, portStr
 
 EP_SETTLED:
 	for key, epSettled := range c.EndpointsSettled {
@@ -104,7 +102,10 @@ EP_SETTLED:
 				continue EP_SETTLED
 			}
 		}
-		return fmt.Errorf("no server_http.Endpoint with key %s", key)
+		if !ignoreAbsent {
+			return fmt.Errorf("no server_http.Endpoint with key %s", key)
+		}
+		fmt.Printf("no server_http.Endpoint with key %s\n", key)
 	}
 
 	return nil
