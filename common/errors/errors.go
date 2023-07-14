@@ -102,7 +102,7 @@ func (ce *commonError) Error() string {
 	}
 	errStr := strings.TrimSpace(string(ce.key))
 	if errStr == "" {
-		errStr = "<no key> "
+		// errStr = "<no key> "
 	}
 
 	if len(ce.data) > 0 {

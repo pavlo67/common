@@ -26,7 +26,6 @@ func ShowVCSInfo() {
 		}
 		fmt.Print("\n")
 	}
-
 }
 
 func PrepareApp(envPath string) (Config, logger.Operator) {
@@ -65,9 +64,9 @@ func PrepareTests(t *testing.T, envPath, configEnv, logfile string) (Config, log
 	}
 
 	l, err := logger_zap.New(logger.Config{
-		LogLevel:         logger.TraceLevel,
-		OutputPaths:      append(logPath, "stdout"),
-		ErrorOutputPaths: append(logPath, "stderr"),
+		LogLevel:    logger.TraceLevel,
+		OutputPaths: append(logPath, "stdout"),
+		ErrorPaths:  append(logPath, "stderr"),
 	}) // TODO!!! don't comment it (is required for tested components)
 	require.NoError(t, err)
 	require.NotNil(t, l)

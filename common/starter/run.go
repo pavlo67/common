@@ -13,9 +13,6 @@ import (
 
 func Run(starters []Component, serviceConfig *config.Config, label string, l logger.Operator) (joiner.Operator, error) {
 	joinerOp := joiner_runtime.New(nil, l)
-	//if err := joinerOp.Join(l, logger.InterfaceKey); err != nil {
-	//	return nil, errors.Errorf("can't join logger with key %s: %s", logger.InterfaceKey, err)
-	//}
 
 	for _, c := range starters {
 		name := c.Name()
@@ -24,18 +21,13 @@ func Run(starters []Component, serviceConfig *config.Config, label string, l log
 		}
 
 		l.Info("running component: ", name)
-		starterOptions := c.CorrectedOptions(nil)
 
 		starterConfig := c.Config
 		if starterConfig == nil {
 			starterConfig = serviceConfig
 		}
 
-		//if key, ok := c.Options.String("interface_key"); ok {
-		//	name += " / " + key
-		//}
-
-		if err := c.Run(starterConfig, starterOptions, joinerOp, l); err != nil {
+		if err := c.Run(starterConfig, c.Options, joinerOp, l); err != nil {
 			return nil, fmt.Errorf("error calling .Run() for component (%s): %s", name, err)
 		}
 	}

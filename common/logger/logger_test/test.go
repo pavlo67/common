@@ -6,6 +6,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/pavlo67/common/common/imagelib"
+
 	"github.com/pavlo67/common/common/logger"
 )
 
@@ -128,4 +130,16 @@ func (sl stubLogger) Comment(text string) {
 			}
 		}
 	}
+
+}
+
+func (sl stubLogger) File(path string, data []byte) {
+
+}
+
+func (sl stubLogger) Image(path string, getImage imagelib.GetImage) {
+
+}
+
+func (sl stubLogger) NoOps() {
 }

@@ -2,7 +2,6 @@ package sqllib
 
 import (
 	"database/sql"
-	"strconv"
 	"strings"
 
 	"github.com/pavlo67/common/common/auth"
@@ -65,49 +64,49 @@ func SQLCount(table, condition string, _ *auth.Identity) string {
 	return query
 }
 
-const defaultPageLengthStr = "200"
-
-func OrderAndLimit(sortBy []string, limits []uint64) string {
-	var sortStr, limitsStr string
-	if len(sortBy) > 0 {
-		for _, s := range sortBy {
-			if s == "" {
-				continue
-			}
-			desc := ""
-			if s[len(s)-1:] == "-" {
-				s = s[:len(s)-1]
-				desc = " DESC"
-			} else if s[len(s)-1:] == "+" {
-				s = s[:len(s)-1]
-			}
-			if sortStr != "" {
-				sortStr += ", "
-			}
-			sortStr += "`" + s + "`" + desc
-		}
-		if sortStr != "" {
-			sortStr = " ORDER BY " + sortStr
-		}
-	}
-	if len(limits) > 1 {
-		// limit[0] can be equal to 0
-		var pageLengthStr string
-		if limits[1] > 0 {
-			pageLengthStr = strconv.FormatUint(limits[1], 10)
-		} else {
-			pageLengthStr = defaultPageLengthStr
-		}
-		limitsStr = " LIMIT " + strconv.FormatUint(limits[0], 10) + ", " + pageLengthStr
-	} else if len(limits) > 0 {
-		if limits[0] > 0 {
-			limitsStr = " LIMIT " + strconv.FormatUint(limits[0], 10)
-		} else {
-			limitsStr = " LIMIT " + defaultPageLengthStr
-		}
-	}
-	return sortStr + limitsStr
-}
+//const defaultPageLengthStr = "200"
+//
+//func OrderAndLimit(sortBy []string, limits []uint64) string {
+//	var sortStr, limitsStr string
+//	if len(sortBy) > 0 {
+//		for _, s := range sortBy {
+//			if s == "" {
+//				continue
+//			}
+//			desc := ""
+//			if s[len(s)-1:] == "-" {
+//				s = s[:len(s)-1]
+//				desc = " DESC"
+//			} else if s[len(s)-1:] == "+" {
+//				s = s[:len(s)-1]
+//			}
+//			if sortStr != "" {
+//				sortStr += ", "
+//			}
+//			sortStr += "`" + s + "`" + desc
+//		}
+//		if sortStr != "" {
+//			sortStr = " ORDER BY " + sortStr
+//		}
+//	}
+//	if len(limits) > 1 {
+//		// limit[0] can be equal to 0
+//		var pageLengthStr string
+//		if limits[1] > 0 {
+//			pageLengthStr = strconv.FormatUint(limits[1], 10)
+//		} else {
+//			pageLengthStr = defaultPageLengthStr
+//		}
+//		limitsStr = " LIMIT " + strconv.FormatUint(limits[0], 10) + ", " + pageLengthStr
+//	} else if len(limits) > 0 {
+//		if limits[0] > 0 {
+//			limitsStr = " LIMIT " + strconv.FormatUint(limits[0], 10)
+//		} else {
+//			limitsStr = " LIMIT " + defaultPageLengthStr
+//		}
+//	}
+//	return sortStr + limitsStr
+//}
 
 type SqlStmt struct {
 	Stmt **sql.Stmt

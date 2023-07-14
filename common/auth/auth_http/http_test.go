@@ -4,8 +4,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/pavlo67/common/apps/demo/demo_server_http"
-
 	"github.com/stretchr/testify/require"
 
 	"github.com/pavlo67/common/common"
@@ -13,6 +11,7 @@ import (
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/starter"
 
+	"github.com/pavlo67/common/apps/demo/demo_server_http"
 	"github.com/pavlo67/common/apps/demo/demo_settings"
 )
 

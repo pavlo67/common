@@ -1,9 +1,12 @@
 package filelib
 
 import (
+	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"path"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
@@ -52,21 +55,96 @@ func BackupFile(fileName string) error {
 	return errors.Wrapf(err, "on copying '%s' to '%s'", fileName, backupName)
 }
 
+type Convert func(data []byte) ([]byte, error)
+
+func CopyFileConverted(src, dst string, perm fs.FileMode, convert Convert) error {
+	// TODO??? check if src and dst are the same
+
+	data, err := os.ReadFile(src)
+	if err != nil {
+		return err
+	}
+
+	if convert != nil {
+		data, err = convert(data)
+		if err != nil {
+			return err
+		}
+	}
+
+	return os.WriteFile(dst, data, perm)
+}
+
+//func CopyFile(src, dst string) error {
+//	// TODO??? check if src and dst are the same
+//
+//	in, err := os.Open(src)
+//	if err != nil {
+//		return err
+//	}
+//	defer func() {
+//		if err := in.Close(); err != nil {
+//			fmt.Fprintf(os.Stderr, "error closing %s: %s", src, err)
+//		}
+//	}()
+//
+//	out, err := os.Create(dst)
+//	if err != nil {
+//		return err
+//	}
+//	defer func() {
+//		if err := out.Close(); err != nil {
+//			fmt.Fprintf(os.Stderr, "error closing %s: %s", dst, err)
+//		}
+//	}()
+//
+//	if _, err = io.Copy(out, in); err != nil {
+//		return err
+//	}
+//
+//	return out.Sync()
+//}
+
+//type Convert func(data []byte) ([]byte, error)
+//
+//func CopyFileConverted(src, dst string, perm fs.FileMode, convert Convert) error {
+//	// TODO??? check if src and dst are the same
+//
+//	data, err := os.ReadFile(src)
+//	if err != nil {
+//		return err
+//	}
+//
+//	if convert != nil {
+//		data, err = convert(data)
+//		if err != nil {
+//			return err
+//		}
+//	}
+//
+//	return os.WriteFile(dst, data, perm)
+//}
+
 func CopyFile(src, dst string) error {
+	// TODO??? check if src and dst are the same
+
 	in, err := os.Open(src)
 	if err != nil {
 		return err
 	}
-	defer in.Close()
+	defer func() {
+		if err := in.Close(); err != nil {
+			fmt.Fprintf(os.Stderr, "error closing %s: %s", src, err)
+		}
+	}()
 
 	out, err := os.Create(dst)
 	if err != nil {
 		return err
 	}
 	defer func() {
-		cerr := out.Close()
-		if err == nil {
-			err = cerr
+		if err := out.Close(); err != nil {
+			fmt.Fprintf(os.Stderr, "error closing %s: %s", dst, err)
 		}
 	}()
 
@@ -77,52 +155,26 @@ func CopyFile(src, dst string) error {
 	return out.Sync()
 }
 
-//// ReadFileLines is a wrapper for filelib.Read() to read text filer.comp.
-//func ReadFileLines(path string) ([]string, error) {
-//	filelib, err := os.Open(path)
-//	if file != nil {
-//		defer filelib.Close()
-//	}
-//	if err != nil {
-//		return nil, nil.New("/ReadFileLines::os.Open (path, err): " + path + ", " + err.Err())
-//	}
-//
-//	lines := make([]string, 0, 16)
-//	scanner := bufio.NewScanner(filelib)
-//	scanner.Split(bufio.ScanLines)
-//	for scanner.Scan() {
-//		lines = append(lines, scanner.Text())
-//	}
-//	return lines, nil
-//}
+func RemoveContents(dir string) error {
+	//d, err := os.Open(dir)
+	//if err != nil {
+	//	return err
+	//}
+	//defer d.Close()
+	//names, err := d.Readdirnames(-1)
+	//if err != nil {
+	//	return err
+	//}
 
-//// ReadDir is a wrapper for dir.Readdirnames().
-//func ReadDir(path string) ([]string, error) {
-//	info, err := os.Stat(path)
-//	if err != nil {
-//		return nil, nil.Wrapf(err, "can't stat dir %v", path)
-//	}
-//
-//	if !info.IsDir() {
-//		return nil, nil.Errorf("can't read file as dir %v", path)
-//	}
-//
-//	dir, err := os.Open(path)
-//	if dir != nil {
-//		defer dir.Close()
-//	}
-//	if err != nil {
-//		return nil, nil.Wrapf(err, "can't open dir %v", path)
-//	}
-//
-//	filer.comp, err := dir.Readdirnames(0)
-//	if err != nil {
-//		return nil, nil.Wrapf(err, "can't read dir %v", path)
-//	}
-//
-//	for i := range filer.comp {
-//		filer.comp[i] = path + "/" + filer.comp[i]
-//	}
-//	return filer.comp, nil
-//
-//}
+	files, err := os.ReadDir(dir)
+	if err != nil {
+		return err
+	}
+
+	for _, file := range files {
+		if err = os.RemoveAll(filepath.Join(dir, file.Name())); err != nil {
+			return err
+		}
+	}
+	return nil
+}

@@ -1,16 +1,25 @@
 package logger
 
-import "github.com/pavlo67/common/common/joiner"
+import (
+	"path/filepath"
+	"regexp"
+	"strings"
+
+	"github.com/pavlo67/common/common/imagelib"
+	"github.com/pavlo67/common/common/joiner"
+)
 
 const InterfaceKey joiner.InterfaceKey = "logger"
 
 type Level int
 
 type Config struct {
-	LogLevel         Level
-	OutputPaths      []string
-	ErrorOutputPaths []string
-	Encoding         string
+	LogLevel    Level
+	BasePath    string
+	OutputPaths []string
+	ErrorPaths  []string
+	Encoding    string
+	SaveFiles   bool
 }
 
 const TraceLevel Level = -2
@@ -45,4 +54,30 @@ type Operator interface {
 	Fatalf(template string, args ...interface{})
 
 	Comment(text string)
+	File(path string, data []byte)
+	Image(path string, getImage imagelib.GetImage)
+
+	NoOps() // to init logger variable being unused (for possible next debug purposes)
+}
+
+// TODO!!! be careful in windows
+
+var reRootPath = regexp.MustCompile(`^/`)
+
+func ModifyPaths(paths []string, basePath string) []string {
+	if basePath = strings.TrimSpace(basePath); basePath == "" {
+		return paths
+	}
+
+	modifiedPaths := make([]string, len(paths))
+
+	for i, path := range paths {
+		if path == "stdin" || path == "stdout" || path == "stderr" || reRootPath.MatchString(path) {
+			modifiedPaths[i] = path
+		} else {
+			modifiedPaths[i] = filepath.Join(basePath, path)
+		}
+	}
+
+	return modifiedPaths
 }
