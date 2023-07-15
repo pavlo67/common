@@ -25,6 +25,19 @@ func (c *Config) ServiceName() string {
 	return c.serviceName
 }
 
+func (c *Config) Raw(key string) (interface{}, error) {
+	if c == nil {
+		return nil, errNoConfig
+	}
+
+	valueRaw, ok := c.data[key]
+	if !ok {
+		return nil, errors.CommonError(common.NotFoundKey, common.Map{"reason": "no key in config", "key": key})
+	}
+
+	return valueRaw, nil
+}
+
 func (c *Config) Value(key string, target interface{}) error {
 	if c == nil {
 		return errNoConfig
