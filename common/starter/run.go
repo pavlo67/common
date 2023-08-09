@@ -22,12 +22,7 @@ func Run(starters []Component, serviceConfig *config.Config, label string, l log
 
 		l.Info("running component: ", name)
 
-		starterConfig := c.Config
-		if starterConfig == nil {
-			starterConfig = serviceConfig
-		}
-
-		if err := c.Run(starterConfig, c.Options, joinerOp, l); err != nil {
+		if err := c.Run(serviceConfig, c.Options, joinerOp, l); err != nil {
 			return nil, fmt.Errorf("error calling .Run() for component (%s): %s", name, err)
 		}
 	}

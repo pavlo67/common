@@ -115,31 +115,55 @@ func cross(p1, p2 Point2) float64 {
 	return p1.X*p2.Y - p1.Y*p2.X
 }
 
-func DividedByLine(p0, p1 Point2, axis LineSegment) bool {
+func DividedByLine(p0, p1 Point2, axis LineSegment) *Point2 {
 	pIntersect := LinesIntersection(LineSegment{p0, p1}, axis)
 	if pIntersect == nil {
-		return false
+		return nil
 	}
 
 	if p1.X > p0.X {
 		if pIntersect.X > p0.X && pIntersect.X < p1.X {
-			return true
+			return pIntersect
 		}
 	} else if p1.X < p0.X {
 		if pIntersect.X > p1.X && pIntersect.X < p0.X {
-			return true
+			return pIntersect
 		}
 	} else if p1.Y > p0.Y {
 		if pIntersect.Y > p0.Y && pIntersect.Y < p1.Y {
-			return true
+			return pIntersect
 		}
 	} else {
 		if pIntersect.Y > p1.Y && pIntersect.Y < p0.Y {
-			return true
+			return pIntersect
 		}
 	}
 
 	// log.Print(p0, p1, pIntersect)
 
-	return false
+	return nil
+}
+
+func DistanceToLineSegment(p Point2, ls LineSegment) (distance, segmentLength float64) {
+	d0, d1, d := DistanceSquare(p, ls[0]), DistanceSquare(p, ls[1]), DistanceSquare(ls[0], ls[1])
+	var reversed bool
+	if d1 < d0 {
+		d0, d1, ls = d1, d0, LineSegment{ls[1], ls[0]}
+		reversed = true
+	}
+	if d0+d <= d1 {
+		if reversed {
+			return math.Sqrt(d0), math.Sqrt(d)
+		} else {
+			return math.Sqrt(d0), 0
+		}
+	}
+
+	c0 := (d0 + d - d1) / (2 * math.Sqrt(d))
+
+	if reversed {
+		return math.Sqrt(d0 - c0*c0), math.Sqrt(d) - c0
+	} else {
+		return math.Sqrt(d0 - c0*c0), c0
+	}
 }

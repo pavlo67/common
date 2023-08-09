@@ -15,5 +15,4 @@ type Operator interface {
 type Component struct {
 	Operator
 	Options common.Map
-	*config.Config
 }

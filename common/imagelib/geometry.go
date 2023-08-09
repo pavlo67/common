@@ -7,6 +7,39 @@ import (
 	"github.com/pavlo67/common/common/mathlib/geometry"
 )
 
+type Bounded interface {
+	Bounds() image.Rectangle
+}
+
+func RectangleAround(rect image.Rectangle, marginPix float64, pts ...geometry.Point2) image.Rectangle {
+	if len(pts) < 1 {
+		return image.Rectangle{}
+	}
+
+	if marginPix < 0 {
+		marginPix = 0
+	}
+
+	minX, minY, maxX, maxY := pts[0].X, pts[0].Y, pts[0].X, pts[0].Y
+
+	for _, p := range pts[1:] {
+		if p.X < minX {
+			minX = p.X
+		} else if p.X > maxX {
+			maxX = p.X
+		}
+		if p.Y < minY {
+			minY = p.Y
+		} else if p.Y > maxY {
+			maxY = p.Y
+		}
+	}
+
+	return rect.Intersect(image.Rectangle{
+		Min: geometry.Point2{minX - marginPix, minY - marginPix}.Point(),
+		Max: geometry.Point2{maxX + marginPix, maxY + marginPix}.Point()})
+}
+
 func PolyChain(points []image.Point) geometry.PolyChain {
 	polyChain := make(geometry.PolyChain, len(points))
 	for i, p := range points {

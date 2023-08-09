@@ -6,6 +6,19 @@ import (
 	"testing"
 )
 
+func ComparePolyChains(pCh0, pCh1 PolyChain) bool {
+	if len(pCh0) != len(pCh1) {
+		return false
+	}
+	for i, p := range pCh0 {
+		if p != pCh1[i] {
+			return false
+		}
+	}
+
+	return true
+}
+
 func TestCutPolyChain(t *testing.T) {
 	type args struct {
 		polyChain []Point2
@@ -62,7 +75,7 @@ func TestCutPolyChain(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := CutPolyChain(tt.args.polyChain, tt.args.endI, tt.args.axis); !reflect.DeepEqual(got, tt.want) {
+			if got := CutPolyChain(tt.args.polyChain, tt.args.endI, tt.args.axis); !ComparePolyChains(got, tt.want) {
 				t.Errorf("CutPolyChain() = %v, wantPolyChain %v", got, tt.want)
 			}
 		})

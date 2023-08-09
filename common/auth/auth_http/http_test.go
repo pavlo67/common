@@ -28,7 +28,7 @@ func TestAuthHTTP(t *testing.T) {
 		starter.Component{Starter(), common.Map{
 			// "prefix":        demo_server_http.PrefixREST,
 			"server_config": demo_server_http.ServerConfig,
-		}, nil},
+		}},
 	)
 
 	joinerOp, err := starter.Run(starters, &cfgService, "CLI BUILD FOR TEST", l)
