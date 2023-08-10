@@ -1,5 +1,11 @@
 package geometry
 
+import (
+	"sort"
+
+	"github.com/pavlo67/common/common/mathlib"
+)
+
 type PolyChain []Point2
 
 func (pCh PolyChain) Length() float64 {
@@ -18,9 +24,11 @@ func (pCh PolyChain) Reversed() PolyChain {
 	return polyChainReversed
 }
 
-func (pCh PolyChain) Direction(deviationMaxIn float64) LineSegment {
-	if len(pCh) < 2 {
-		return LineSegment{}
+func (pCh PolyChain) Direction(deviationMaxIn float64) *LineSegment {
+	if len(pCh) < 1 {
+		return nil
+	} else if len(pCh) < 2 {
+		return &LineSegment{pCh[0], pCh[0]}
 	}
 
 	pEnd := pCh[len(pCh)-1]
@@ -30,13 +38,13 @@ func (pCh PolyChain) Direction(deviationMaxIn float64) LineSegment {
 		directionLineNext := LineSegment{LineSegment{pCh[i], pCh[i+1]}.Middle(), pEnd}
 		for j := i + 1; j < len(pCh)-1; j++ {
 			if DistanceToLine(pCh[j], directionLineNext) > deviationMaxIn {
-				return directionLine
+				return &directionLine
 			}
 		}
 		directionLine = directionLineNext
 	}
 
-	return directionLine
+	return &directionLine
 }
 
 func ShortenPolyChain(pCh PolyChain, maxDistanceToBeJoined float64) PolyChain {
@@ -185,63 +193,91 @@ func CutPolyChain(pCh PolyChain, fromEndI int, axis LineSegment) PolyChain {
 	return cutted
 }
 
+type ProjectionPolyChainOnPolyChain struct {
+	N0 int
+	ProjectionOnPolyChain
+}
+
 func AveragePolyChains(pCh0, pCh1 PolyChain, distanceMaxIn float64) (ok bool, polyChain0Averaged PolyChain, polyChain1Rest []PolyChain) {
 
+	var projections []ProjectionPolyChainOnPolyChain
+
 	for i0, p0 := range pCh0 {
-		dist, projections := DistanceToPolyChain(pCh1, p0)
+		if dist, pr := DistanceToPolyChain(p0, pCh1); dist <= distanceMaxIn {
+			projections = append(projections, ProjectionPolyChainOnPolyChain{
+				N0:                    i0,
+				ProjectionOnPolyChain: pr,
+			})
+		}
+	}
 
-		// log.Print(i0, p0)
+	var pCh1Averaged []int
 
-		if dist <= distanceMaxIn {
+	if len(projections) > 0 {
+		sort.Slice(projections, func(i, j int) bool {
+			return projections[i].N > projections[j].N || (projections[i].N == projections[j].N && projections[i].Position > projections[j].Position)
+		})
 
-			// log.Print(i0, p0, dist, projections)
-
-			pr := projections[0]
-			pAvg := Point2{0.5 * (pr.X + p0.X), 0.5 * (pr.Y + p0.Y)}
-			pCh0[i0] = pAvg
+		ok = true
+		for _, pr := range projections {
+			pAvg := Point2{0.5 * (pr.X + pCh0[pr.N0].X), 0.5 * (pr.Y + pCh0[pr.N0].Y)}
 			if pr.Position == 0 {
+				// TODO!!! if duplicated???
 				pCh1[pr.N] = pAvg
+				pCh1Averaged = append(pCh1Averaged, pr.N)
 			} else {
 				pCh1 = append(pCh1[:pr.N+1], append(PolyChain{pAvg}, pCh1[pr.N+1:]...)...)
+				for i := range pCh1Averaged {
+					pCh1Averaged[i]++
+				}
+				pCh1Averaged = append(pCh1Averaged, pr.N+1)
 			}
-			ok = true
+			pCh0[pr.N0] = pAvg
 		}
+		projections = nil
 	}
 
 	// log.Fatalf("%v / %v", pCh0, pCh1)
-
 	// TODO!!! if pCh1 order is reversed and projections are multiple
 
-	var nextI1 int
 	for i1, p1 := range pCh1 {
-		dist, projections := DistanceToPolyChain(pCh0, p1)
-		if dist <= distanceMaxIn {
-			pr := projections[0]
-			pAvg := Point2{0.5 * (pr.X + p1.X), 0.5 * (pr.Y + p1.Y)}
-			pCh1[i1] = pAvg
-			if pr.Position == 0 {
-				pCh0[pr.N] = pAvg
-			} else {
-				pCh0 = append(pCh0[:pr.N+1], append(PolyChain{pAvg}, pCh0[pr.N+1:]...)...)
-			}
-			if i1 > nextI1 {
-				i1RestFrom := nextI1
-				if i1RestFrom > 0 {
-					i1RestFrom--
-				}
-				polyChain1Rest = append(polyChain1Rest, pCh1[i1RestFrom:i1+1])
-			}
-			ok = true
-			nextI1 = i1 + 1
+		if mathlib.InInt(pCh1Averaged, i1) {
+			continue
+		}
+
+		// TODO: be careful if pr.Position == 0 - this projection point on pCh0 must be averaged above
+		if dist, pr := DistanceToPolyChain(p1, pCh0); dist <= distanceMaxIn && pr.Position > 0 {
+			projections = append(projections, ProjectionPolyChainOnPolyChain{
+				N0:                    i1,
+				ProjectionOnPolyChain: pr,
+			})
 		}
 	}
-	if nextI1 < len(pCh1) {
-		i1RestFrom := nextI1
-		if i1RestFrom > 0 {
-			i1RestFrom--
+
+	if len(projections) > 0 {
+		ok = true
+		for _, pr := range projections {
+			pAvg := Point2{0.5 * (pr.X + pCh1[pr.N0].X), 0.5 * (pr.Y + pCh1[pr.N0].Y)}
+			pCh1[pr.N0] = pAvg
+			pCh0 = append(pCh0[:pr.N+1], append(PolyChain{pAvg}, pCh0[pr.N+1:]...)...)
+			pCh1Averaged = append(pCh1Averaged, pr.N0)
 		}
-		polyChain1Rest = append(polyChain1Rest, pCh1[i1RestFrom:])
 	}
+
+	sort.Slice(pCh1Averaged, func(i, j int) bool { return pCh1Averaged[i] < pCh1Averaged[j] })
+
+	var n1Prev, n1Next int
+	for _, n1 := range pCh1Averaged {
+		if n1 > n1Next {
+			polyChain1Rest = append(polyChain1Rest, pCh1[n1Prev:n1+1])
+		}
+		n1Prev, n1Next = n1, n1+1
+	}
+	if len(pCh1) > n1Next {
+		polyChain1Rest = append(polyChain1Rest, pCh1[n1Prev:])
+	}
+
+	// log.Print(pCh0, polyChain1Rest, pCh1Averaged)
 
 	return ok, pCh0, polyChain1Rest
 }

@@ -12,45 +12,51 @@ type ProjectionOnPolyChain struct {
 	Point2
 }
 
-func DistanceToPolyChain(pCh PolyChain, p Point2) (float64, []ProjectionOnPolyChain) {
+func DistanceToPolyChain(p Point2, pCh PolyChain) (float64, ProjectionOnPolyChain) {
+
 	if len(pCh) < 1 {
-		return 0, nil
+		return math.NaN(), ProjectionOnPolyChain{N: -1, Position: math.NaN(), Point2: Point2{math.NaN(), math.NaN()}}
+	} else if len(pCh) == 1 {
+		return Distance(p, pCh[0]), ProjectionOnPolyChain{Point2: pCh[0]}
 	}
 
-	minDist, projections := Distance(p, pCh[0]), []ProjectionOnPolyChain{{N: 0, Position: 0, Point2: pCh[0]}}
-	var p2 Point2
+	minDist := math.Inf(1)
+	var pr ProjectionOnPolyChain
 	var n int
+	var pPr Point2
 
-POINTS:
-	for i, p0 := range pCh[:len(pCh)-1] {
-		dist, position := DistanceToLineSegment(p, LineSegment{p0, pCh[i+1]})
-		if dist > minDist {
+	// POINTS:
+	for i, pI := range pCh[:len(pCh)-1] {
+		dist, position := DistanceToLineSegment(p, LineSegment{pI, pCh[i+1]})
+		if dist >= minDist {
 			continue
 		}
 
-		if segmentLength := Distance(p0, pCh[i+1]); segmentLength <= 0 {
-			p2, n = p0, i
+		if segmentLength := Distance(pI, pCh[i+1]); segmentLength <= 0 {
+			pPr, n, position = pI, i, 0
 		} else if position >= segmentLength {
-			p2, n, position = pCh[i+1], i+1, 0
+			pPr, n, position = pCh[i+1], i+1, 0
 		} else {
-			dx, dy := pCh[i+1].X-p0.X, pCh[i+1].Y-p0.Y
-			p2, n = Point2{p0.X + dx*position/segmentLength, p0.Y + dy*position/segmentLength}, i
+			dx, dy := pCh[i+1].X-pI.X, pCh[i+1].Y-pI.Y
+			pPr, n = Point2{pI.X + dx*position/segmentLength, pI.Y + dy*position/segmentLength}, i
 		}
 
-		if dist < minDist {
-			minDist, projections = dist, []ProjectionOnPolyChain{{n, position, p2}}
-		} else {
-			for _, pr := range projections {
-				if n == pr.N && position == pr.Position {
-					continue POINTS
-				}
-			}
+		minDist, pr = dist, ProjectionOnPolyChain{n, position, pPr}
 
-			projections = append(projections, ProjectionOnPolyChain{n, position, p2})
-		}
+		//if dist < minDist {
+		//	minDist, projections = dist, []ProjectionOnPolyChain{{n, position, pPr}}
+		//} else {
+		//	for _, pr := range projections {
+		//		if n == pr.N && position == pr.Position {
+		//			continue POINTS
+		//		}
+		//	}
+		//
+		//	projections = append(projections, ProjectionOnPolyChain{n, position, pPr})
+		//}
 	}
 
-	return minDist, projections
+	return minDist, pr
 }
 
 const onDivideByProjection = "on AddProjectionPoint()"

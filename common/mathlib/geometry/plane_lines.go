@@ -144,11 +144,11 @@ func DividedByLine(p0, p1 Point2, axis LineSegment) *Point2 {
 	return nil
 }
 
-func DistanceToLineSegment(p Point2, ls LineSegment) (distance, segmentLength float64) {
+func DistanceToLineSegment(p Point2, ls LineSegment) (distance, projectionPosition float64) {
 	d0, d1, d := DistanceSquare(p, ls[0]), DistanceSquare(p, ls[1]), DistanceSquare(ls[0], ls[1])
 	var reversed bool
 	if d1 < d0 {
-		d0, d1, ls = d1, d0, LineSegment{ls[1], ls[0]}
+		d0, d1 = d1, d0
 		reversed = true
 	}
 	if d0+d <= d1 {

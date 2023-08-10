@@ -1,16 +1,12 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
-
-	"github.com/pavlo67/common/common"
 )
 
 func main() {
-	data := `{"change":"change"}`
-	var m common.Map
+	data := []int{0, 1}
 
-	log.Print(json.Unmarshal([]byte(data), &m))
+	log.Print(data[1:])
 
 }

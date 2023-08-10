@@ -184,108 +184,106 @@ func TestAveragePolyChains(t *testing.T) {
 
 func TestDistanceToPolyChain(t *testing.T) {
 	tests := []struct {
-		name            string
-		polyChain       PolyChain
-		p               Point2
-		wantDistance    float64
-		wantProjections []ProjectionOnPolyChain
+		name           string
+		polyChain      PolyChain
+		p              Point2
+		wantDistance   float64
+		wantProjection ProjectionOnPolyChain
 	}{
 		{
-			name:            "",
-			polyChain:       PolyChain{{0.1, 3}, {0.1, 4}, {0.1, 6}},
-			p:               Point2{0, 4},
-			wantDistance:    0.1,
-			wantProjections: []ProjectionOnPolyChain{{N: 1, Position: 0, Point2: Point2{0.1, 4}}},
+			name:           "",
+			polyChain:      PolyChain{{0.1, 3}, {0.1, 4}, {0.1, 6}},
+			p:              Point2{0, 4},
+			wantDistance:   0.1,
+			wantProjection: ProjectionOnPolyChain{N: 1, Position: 0, Point2: Point2{0.1, 4}},
 		},
 		{
-			name:            "",
-			polyChain:       PolyChain{{0, 4}, {0, 6}},
-			p:               Point2{0, 0},
-			wantDistance:    4,
-			wantProjections: []ProjectionOnPolyChain{{N: 0, Position: 0, Point2: Point2{0, 4}}},
+			name:           "",
+			polyChain:      PolyChain{{0, 4}, {0, 6}},
+			p:              Point2{0, 0},
+			wantDistance:   4,
+			wantProjection: ProjectionOnPolyChain{N: 0, Position: 0, Point2: Point2{0, 4}},
 		},
 		{
-			name:            "",
-			polyChain:       PolyChain{{0, 4}, {0, 6}},
-			p:               Point2{0, 2},
-			wantDistance:    2,
-			wantProjections: []ProjectionOnPolyChain{{N: 0, Position: 0, Point2: Point2{0, 4}}},
+			name:           "",
+			polyChain:      PolyChain{{0, 4}, {0, 6}},
+			p:              Point2{0, 2},
+			wantDistance:   2,
+			wantProjection: ProjectionOnPolyChain{N: 0, Position: 0, Point2: Point2{0, 4}},
 		},
 		{
-			name:            "",
-			polyChain:       PolyChain{{0, 4}, {0, 6}},
-			p:               Point2{0, 4},
-			wantDistance:    0,
-			wantProjections: []ProjectionOnPolyChain{{N: 0, Position: 0, Point2: Point2{0, 4}}},
+			name:           "",
+			polyChain:      PolyChain{{0, 4}, {0, 6}},
+			p:              Point2{0, 4},
+			wantDistance:   0,
+			wantProjection: ProjectionOnPolyChain{N: 0, Position: 0, Point2: Point2{0, 4}},
 		},
 		{
-			name:            "",
-			polyChain:       PolyChain{{0, 0}, {0, 2}, {0, 4}},
-			p:               Point2{0, 4},
-			wantDistance:    0,
-			wantProjections: []ProjectionOnPolyChain{{N: 2, Position: 0, Point2: Point2{0, 4}}},
+			name:           "",
+			polyChain:      PolyChain{{0, 0}, {0, 2}, {0, 4}},
+			p:              Point2{0, 4},
+			wantDistance:   0,
+			wantProjection: ProjectionOnPolyChain{N: 2, Position: 0, Point2: Point2{0, 4}},
 		},
 		{
-			name:            "",
-			polyChain:       PolyChain{{0, 0}, {0, 2}, {0, 4}},
-			p:               Point2{0, 6},
-			wantDistance:    2,
-			wantProjections: []ProjectionOnPolyChain{{N: 2, Position: 0, Point2: Point2{0, 4}}},
+			name:           "",
+			polyChain:      PolyChain{{0, 0}, {0, 2}, {0, 4}},
+			p:              Point2{0, 6},
+			wantDistance:   2,
+			wantProjection: ProjectionOnPolyChain{N: 2, Position: 0, Point2: Point2{0, 4}},
 		},
 		{
-			name:            "",
-			polyChain:       PolyChain{{0, 0}, {0, 2}, {0, 4}},
-			p:               Point2{1, 3},
-			wantDistance:    1,
-			wantProjections: []ProjectionOnPolyChain{{N: 1, Position: 1, Point2: Point2{0, 3}}},
+			name:           "",
+			polyChain:      PolyChain{{0, 0}, {0, 2}, {0, 4}},
+			p:              Point2{1, 3},
+			wantDistance:   1,
+			wantProjection: ProjectionOnPolyChain{N: 1, Position: 1, Point2: Point2{0, 3}},
 		},
 		{
-			name:            "",
-			polyChain:       PolyChain{{0, 0}, {0, 2}, {0, 4}},
-			p:               Point2{1, 2},
-			wantDistance:    1,
-			wantProjections: []ProjectionOnPolyChain{{N: 1, Position: 0, Point2: Point2{0, 2}}},
+			name:           "",
+			polyChain:      PolyChain{{0, 0}, {0, 2}, {0, 4}},
+			p:              Point2{1, 2},
+			wantDistance:   1,
+			wantProjection: ProjectionOnPolyChain{N: 1, Position: 0, Point2: Point2{0, 2}},
 		},
 		{
-			name:         "",
-			polyChain:    PolyChain{{0, 0}, {0, 2}, {2, 2}},
-			p:            Point2{1, 1},
-			wantDistance: 1,
-			wantProjections: []ProjectionOnPolyChain{
-				{N: 0, Position: 1, Point2: Point2{0, 1}}, {N: 1, Position: 1, Point2: Point2{1, 2}}},
+			name:           "",
+			polyChain:      PolyChain{{0, 0}, {0, 2}, {2, 2}},
+			p:              Point2{1, 1},
+			wantDistance:   1,
+			wantProjection: ProjectionOnPolyChain{N: 0, Position: 1, Point2: Point2{0, 1}}, // , {N: 1, Position: 1, Point2: Point2{1, 2}}},
 		},
 		{
-			name:            "",
-			polyChain:       PolyChain{{0, 0}, {0, 2}, {2, 2}},
-			p:               Point2{1, 1.5},
-			wantDistance:    0.5,
-			wantProjections: []ProjectionOnPolyChain{{N: 1, Position: 1, Point2: Point2{1, 2}}},
+			name:           "",
+			polyChain:      PolyChain{{0, 0}, {0, 2}, {2, 2}},
+			p:              Point2{1, 1.5},
+			wantDistance:   0.5,
+			wantProjection: ProjectionOnPolyChain{N: 1, Position: 1, Point2: Point2{1, 2}},
 		},
 		{
-			name:            "",
-			polyChain:       PolyChain{{0, 0}, {0, 2}, {2, 2}},
-			p:               Point2{0.5, 1},
-			wantDistance:    0.5,
-			wantProjections: []ProjectionOnPolyChain{{N: 0, Position: 1, Point2: Point2{0, 1}}},
+			name:           "",
+			polyChain:      PolyChain{{0, 0}, {0, 2}, {2, 2}},
+			p:              Point2{0.5, 1},
+			wantDistance:   0.5,
+			wantProjection: ProjectionOnPolyChain{N: 0, Position: 1, Point2: Point2{0, 1}},
 		},
 		{
-			name:         "",
-			polyChain:    PolyChain{{0, 0}, {0, 2}, {2, 2}},
-			p:            Point2{2, 0},
-			wantDistance: 2,
-			wantProjections: []ProjectionOnPolyChain{
-				{N: 0, Position: 0, Point2: Point2{0, 0}}, {N: 2, Position: 0, Point2: Point2{2, 2}}},
+			name:           "",
+			polyChain:      PolyChain{{0, 0}, {0, 2}, {2, 2}},
+			p:              Point2{2, 0},
+			wantDistance:   2,
+			wantProjection: ProjectionOnPolyChain{N: 0, Position: 0, Point2: Point2{0, 0}}, // {N: 2, Position: 0, Point2: Point2{2, 2}}},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotDistance, gotProjections := DistanceToPolyChain(tt.polyChain, tt.p)
+			gotDistance, gotProjections := DistanceToPolyChain(tt.p, tt.polyChain)
 
 			if math.Abs(gotDistance-tt.wantDistance) > eps {
 				t.Errorf("TestDistanceToPolyChain() gotDistance = %f, wantDistance %f", gotDistance, tt.wantDistance)
 			}
-			if !reflect.DeepEqual(gotProjections, tt.wantProjections) {
-				t.Errorf("TestDistanceToPolyChain() gotProjections = %v, wantProjections %v", gotProjections, tt.wantProjections)
+			if !reflect.DeepEqual(gotProjections, tt.wantProjection) {
+				t.Errorf("TestDistanceToPolyChain() gotProjections = %v, wantProjection %v", gotProjections, tt.wantProjection)
 			}
 		})
 	}
