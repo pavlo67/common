@@ -38,8 +38,10 @@ func (op *loggerZap) Comment(text string) {
 
 func (op *loggerZap) File(path string, data []byte) {
 	if op.cfg.SaveFiles {
-		basedPaths := logger.ModifyPaths([]string{path}, op.cfg.BasePath)
-		if err := os.WriteFile(basedPaths[0], data, 0644); err != nil {
+		basedPaths, err := logger.ModifyPaths([]string{path}, op.cfg.BasePath)
+		if err != nil {
+			op.Error(err)
+		} else if err := os.WriteFile(basedPaths[0], data, 0644); err != nil {
 			op.Errorf("CAN'T WRITE TO FILE %s: %s", path, err)
 		}
 	}
@@ -52,8 +54,10 @@ func (op *loggerZap) Image(path string, getImage imagelib.GetImage) {
 			op.Info(info)
 		}
 		if img != nil {
-			basedPaths := logger.ModifyPaths([]string{path}, op.cfg.BasePath)
-			if err = imagelib.SavePNG(img, basedPaths[0]); err != nil {
+			basedPaths, err := logger.ModifyPaths([]string{path}, op.cfg.BasePath)
+			if err != nil {
+				op.Error(err)
+			} else if err = imagelib.SavePNG(img, basedPaths[0]); err != nil {
 				op.Error(err)
 			}
 		}
@@ -77,16 +81,25 @@ func New(cfg logger.Config) (logger.Operator, error) {
 	c.DisableStacktrace = true
 	c.Level.SetLevel(zapLevel(cfg.LogLevel))
 
+	var err error
+
 	if len(cfg.OutputPaths) < 1 {
 		c.OutputPaths = []string{"stdout"}
 	} else {
-		c.OutputPaths = logger.ModifyPaths(cfg.OutputPaths, cfg.BasePath)
+		c.OutputPaths, err = logger.ModifyPaths(cfg.OutputPaths, cfg.BasePath)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	if len(cfg.ErrorPaths) < 1 {
 		c.ErrorOutputPaths = []string{"stderr"}
 	} else {
-		c.ErrorOutputPaths = logger.ModifyPaths(cfg.ErrorPaths, cfg.BasePath)
+		c.ErrorOutputPaths, err = logger.ModifyPaths(cfg.ErrorPaths, cfg.BasePath)
+		if err != nil {
+			return nil, err
+		}
+
 	}
 
 	c.Encoding = cfg.Encoding

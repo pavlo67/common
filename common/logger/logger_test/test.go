@@ -137,8 +137,10 @@ func (op loggerTest) Comment(text string) {
 
 func (op loggerTest) File(path string, data []byte) {
 	if op.saveFiles {
-		basedPaths := logger.ModifyPaths([]string{path}, op.basePath)
-		if err := os.WriteFile(basedPaths[0], data, 0644); err != nil {
+		basedPaths, err := logger.ModifyPaths([]string{path}, op.basePath)
+		if err != nil {
+			op.Error(err)
+		} else if err := os.WriteFile(basedPaths[0], data, 0644); err != nil {
 			op.Errorf("CAN'T WRITE TO FILE %s: %s", path, err)
 		}
 	}
@@ -151,8 +153,10 @@ func (op loggerTest) Image(path string, getImage imagelib.GetImage) {
 			op.Info(info)
 		}
 		if img != nil {
-			basedPaths := logger.ModifyPaths([]string{path}, op.basePath)
-			if err = imagelib.SavePNG(img, basedPaths[0]); err != nil {
+			basedPaths, err := logger.ModifyPaths([]string{path}, op.basePath)
+			if err != nil {
+				op.Error(err)
+			} else if err = imagelib.SavePNG(img, basedPaths[0]); err != nil {
 				op.Error(err)
 			}
 		}

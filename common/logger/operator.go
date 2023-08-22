@@ -5,6 +5,9 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/pavlo67/common/common/errors"
+	"github.com/pavlo67/common/common/filelib"
+
 	"github.com/pavlo67/common/common/imagelib"
 	"github.com/pavlo67/common/common/joiner"
 )
@@ -66,9 +69,14 @@ type Operator interface {
 
 var reRootPath = regexp.MustCompile(`^/`)
 
-func ModifyPaths(paths []string, basePath string) []string {
-	if basePath = strings.TrimSpace(basePath); basePath == "" {
-		return paths
+func ModifyPaths(paths []string, basePath0 string) ([]string, error) {
+	if basePath0 = strings.TrimSpace(basePath0); basePath0 == "" {
+		return paths, nil
+	}
+
+	basePath, err := filelib.Dir(basePath0)
+	if err != nil {
+		return nil, errors.Wrapf(err, "on logger.ModifyPaths()")
 	}
 
 	modifiedPaths := make([]string, len(paths))
@@ -81,5 +89,5 @@ func ModifyPaths(paths []string, basePath string) []string {
 		}
 	}
 
-	return modifiedPaths
+	return modifiedPaths, nil
 }
