@@ -16,8 +16,8 @@ type loggerZap struct {
 	cfg logger.Config
 }
 
-func (loggerOp *loggerZap) Comment(text string) {
-	for _, commentPath := range append(loggerOp.cfg.OutputPaths, loggerOp.cfg.ErrorPaths...) {
+func (op *loggerZap) Comment(text string) {
+	for _, commentPath := range append(op.cfg.OutputPaths, op.cfg.ErrorPaths...) {
 		if commentPath == "stdout" {
 			fmt.Fprintf(os.Stdout, "\n%s\n", text)
 		} else if commentPath == "stderr" {
@@ -25,45 +25,49 @@ func (loggerOp *loggerZap) Comment(text string) {
 		} else {
 			f, err := os.OpenFile(commentPath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
 			if err != nil {
-				loggerOp.Errorf("CAN'T OPEN PATH (%s) TO COMMENT: %s", commentPath, err)
+				op.Errorf("CAN'T OPEN PATH (%s) TO COMMENT: %s", commentPath, err)
 				continue
 			}
 			defer f.Close()
 			if _, err = f.WriteString(text); err != nil {
-				loggerOp.Errorf("CAN'T WRITE COMMENT TO %s: %s", commentPath, err)
+				op.Errorf("CAN'T WRITE COMMENT TO %s: %s", commentPath, err)
 			}
 		}
 	}
 }
 
-func (loggerOp *loggerZap) File(path string, data []byte) {
-	if loggerOp.cfg.SaveFiles {
-		basedPaths := logger.ModifyPaths([]string{path}, loggerOp.cfg.BasePath)
+func (op *loggerZap) File(path string, data []byte) {
+	if op.cfg.SaveFiles {
+		basedPaths := logger.ModifyPaths([]string{path}, op.cfg.BasePath)
 		if err := os.WriteFile(basedPaths[0], data, 0644); err != nil {
-			loggerOp.Errorf("CAN'T WRITE TO FILE %s: %s", path, err)
+			op.Errorf("CAN'T WRITE TO FILE %s: %s", path, err)
 		}
 	}
 }
 
-func (loggerOp *loggerZap) Image(path string, getImage imagelib.GetImage) {
-	if loggerOp.cfg.SaveFiles {
+func (op *loggerZap) Image(path string, getImage imagelib.GetImage) {
+	if op.cfg.SaveFiles {
 		img, info, err := getImage.Image()
 		if info != "" {
-			loggerOp.Info(info)
+			op.Info(info)
 		}
 		if img != nil {
-			basedPaths := logger.ModifyPaths([]string{path}, loggerOp.cfg.BasePath)
+			basedPaths := logger.ModifyPaths([]string{path}, op.cfg.BasePath)
 			if err = imagelib.SavePNG(img, basedPaths[0]); err != nil {
-				loggerOp.Error(err)
+				op.Error(err)
 			}
 		}
 		if err != nil {
-			loggerOp.Error(err)
+			op.Error(err)
 		}
 	}
 }
 
-func (loggerOp *loggerZap) NoOps() {
+func (op *loggerZap) NoOps() {
+}
+
+func (op *loggerZap) Key() string {
+	return op.cfg.Key
 }
 
 var _ logger.Operator = &loggerZap{}

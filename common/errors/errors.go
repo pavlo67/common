@@ -32,6 +32,18 @@ func CommonError(any ...interface{}) Error {
 	return err
 }
 
+func AddErrors(err, errToAdd error) error {
+	if err == nil {
+		return errToAdd
+	} else if v := reflect.ValueOf(err); v.Kind() == reflect.Interface && v.IsNil() {
+		return errToAdd
+	} else if e, _ := err.(Error); e != nil {
+		return e.Append(errToAdd)
+	}
+
+	return CommonError(err, errToAdd)
+}
+
 //func CommonError(key Key, data common.Map) Error {
 //	return &commonError{
 //		errs: nil,

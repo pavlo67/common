@@ -32,13 +32,6 @@ func PrepareApp(envPath string) (Config, logger.Operator) {
 
 	rand.Seed(time.Now().UnixNano())
 
-	// get logger --------------------------------------------------------------------
-
-	l, err := logger_zap.New(logger.Config{})
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	// get config --------------------------------------------------------------------
 
 	configEnv, ok := os.LookupEnv("ENV")
@@ -48,7 +41,29 @@ func PrepareApp(envPath string) (Config, logger.Operator) {
 
 	cfgServicePtr, err := Get(envPath+configEnv+".yaml", MarshalerYAML)
 	if err != nil || cfgServicePtr == nil {
-		l.Fatalf("on config.PrepareApp(%s, %s) got %#v / %s", envPath, configEnv+".yaml", cfgServicePtr, err)
+		log.Fatalf("on config.PrepareApp(%s, %s) got %#v / %s", envPath, configEnv+".yaml", cfgServicePtr, err)
+	}
+
+	// get logger --------------------------------------------------------------------
+
+	// TODO!!! why it doesn't work??? it should be completed
+	// var loggerConfig logger.Config
+	// if err = cfgServicePtr.Value("logger", &loggerConfig); err != nil {
+	//	log.Fatalf("on config.PrepareApp(%s, %s) got %s reading logger config", envPath, configEnv+".yaml", err)
+	// }
+
+	var loggerSaveFiles bool
+	if err = cfgServicePtr.Value("logger_save_files", &loggerSaveFiles); err != nil {
+		log.Fatalf("on config.PrepareApp(%s, %s) got %s reading 'logger_save_files'", envPath, configEnv+".yaml", err)
+	}
+
+	loggerConfig := logger.Config{
+		SaveFiles: loggerSaveFiles,
+	}
+
+	l, err := logger_zap.New(loggerConfig)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	return *cfgServicePtr, l

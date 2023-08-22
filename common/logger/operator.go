@@ -14,6 +14,7 @@ const InterfaceKey joiner.InterfaceKey = "logger"
 type Level int
 
 type Config struct {
+	Key         string
 	LogLevel    Level
 	BasePath    string
 	OutputPaths []string
@@ -57,6 +58,7 @@ type Operator interface {
 	File(path string, data []byte)
 	Image(path string, getImage imagelib.GetImage)
 
+	Key() string
 	NoOps() // to init logger variable being unused (for possible next debug purposes)
 }
 

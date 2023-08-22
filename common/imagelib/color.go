@@ -21,11 +21,15 @@ type ColorNamed struct {
 }
 
 var RoundAbout = []ColorNamed{
+	{colornames.Black, "black"},
 	{colornames.Red, "red"},
-	{colornames.Orange, "orange"},
-	{colornames.Yellow, "yellow"},
+	{colornames.Aqua, "aqua"},
 	{colornames.Green, "green"},
 	{colornames.Blue, "blue"},
-	//{colornames.Pink, "pink"},
-	//{colornames.Violet, "violet"},
+
+	// {colornames.White, "white"},
+	// {colornames.Olive, "olive"},
+	// {colornames.Orange, "orange"},
+	// {colornames.Yellow, "yellow"},
+
 }

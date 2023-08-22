@@ -11,108 +11,110 @@ import (
 	"github.com/pavlo67/common/common/logger"
 )
 
-func New(t *testing.T, commentPaths []string) logger.Operator {
-	return &stubLogger{t: t, commentPaths: commentPaths}
+func New(t *testing.T, key, basePath string, saveFiles bool, commentPaths []string) logger.Operator {
+	return &loggerTest{t: t, key: key, basePath: basePath, saveFiles: saveFiles, commentPaths: commentPaths}
 }
 
 //func InitComments(t *testing.T) logger.OperatorComments {
-//	return &stubLogger{t}
+//	return &loggerTest{t}
 //}
 
-var _ logger.Operator = &stubLogger{}
+var _ logger.Operator = &loggerTest{}
 
-type stubLogger struct {
-	t            *testing.T
-	commentPaths []string
+type loggerTest struct {
+	t             *testing.T
+	key, basePath string
+	saveFiles     bool
+	commentPaths  []string
 }
 
-//func (sl *stubLogger) Comment(text string) {
+//func (sl *loggerTest) Comment(text string) {
 //	sl.Info(text)
 //}
 
-func (sl *stubLogger) Debug(args ...interface{}) {
-	if sl != nil && sl.t != nil {
-		sl.t.Log(append([]interface{}{"DEBUG: "}, args...)...)
+func (op *loggerTest) Debug(args ...interface{}) {
+	if op != nil && op.t != nil {
+		op.t.Log(append([]interface{}{"DEBUG: "}, args...)...)
 	} else {
 		log.Print(append([]interface{}{"DEBUG: "}, args...)...)
 	}
 }
 
-func (sl *stubLogger) Debugf(template string, args ...interface{}) {
-	if sl != nil && sl.t != nil {
-		sl.t.Logf("DEBUG: "+template, args...)
+func (op *loggerTest) Debugf(template string, args ...interface{}) {
+	if op != nil && op.t != nil {
+		op.t.Logf("DEBUG: "+template, args...)
 	} else {
 		log.Printf("DEBUG: "+template, args...)
 	}
 }
 
-func (sl *stubLogger) Info(args ...interface{}) {
-	if sl != nil && sl.t != nil {
-		sl.t.Log(append([]interface{}{"INFO: "}, args...)...)
+func (op *loggerTest) Info(args ...interface{}) {
+	if op != nil && op.t != nil {
+		op.t.Log(append([]interface{}{"INFO: "}, args...)...)
 	} else {
 		log.Print(append([]interface{}{"INFO: "}, args...)...)
 	}
 }
 
-func (sl *stubLogger) Infof(template string, args ...interface{}) {
-	if sl != nil && sl.t != nil {
-		sl.t.Logf("INFO: "+template, args...)
+func (op *loggerTest) Infof(template string, args ...interface{}) {
+	if op != nil && op.t != nil {
+		op.t.Logf("INFO: "+template, args...)
 	} else {
 		log.Printf("INFO: "+template, args...)
 	}
 }
 
-func (sl *stubLogger) Warn(args ...interface{}) {
-	if sl != nil && sl.t != nil {
-		sl.t.Log(append([]interface{}{"WARN: "}, args...)...)
+func (op *loggerTest) Warn(args ...interface{}) {
+	if op != nil && op.t != nil {
+		op.t.Log(append([]interface{}{"WARN: "}, args...)...)
 	} else {
 		log.Print(append([]interface{}{"WARN: "}, args...)...)
 	}
 }
 
-func (sl *stubLogger) Warnf(template string, args ...interface{}) {
-	if sl != nil && sl.t != nil {
-		sl.t.Logf("WARN: "+template, args...)
+func (op *loggerTest) Warnf(template string, args ...interface{}) {
+	if op != nil && op.t != nil {
+		op.t.Logf("WARN: "+template, args...)
 	} else {
 		log.Printf("WARN: "+template, args...)
 	}
 }
 
-func (sl *stubLogger) Error(args ...interface{}) {
-	if sl != nil && sl.t != nil {
-		sl.t.Error(args...)
+func (op *loggerTest) Error(args ...interface{}) {
+	if op != nil && op.t != nil {
+		op.t.Error(args...)
 	} else {
 		log.Print(append([]interface{}{"ERROR: "}, args...)...)
 	}
 }
 
-func (sl *stubLogger) Errorf(template string, args ...interface{}) {
-	if sl != nil && sl.t != nil {
-		sl.t.Errorf(template, args...)
+func (op *loggerTest) Errorf(template string, args ...interface{}) {
+	if op != nil && op.t != nil {
+		op.t.Errorf(template, args...)
 	} else {
 		log.Printf("ERROR: "+template, args...)
 	}
 }
 
-func (sl *stubLogger) Fatal(args ...interface{}) {
-	if sl != nil && sl.t != nil {
-		sl.t.Fatal(args...)
+func (op *loggerTest) Fatal(args ...interface{}) {
+	if op != nil && op.t != nil {
+		op.t.Fatal(args...)
 	} else {
 		log.Fatal(args...)
 	}
 }
 
-func (sl *stubLogger) Fatalf(template string, args ...interface{}) {
-	if sl != nil && sl.t != nil {
-		sl.t.Fatalf(template, args...)
+func (op *loggerTest) Fatalf(template string, args ...interface{}) {
+	if op != nil && op.t != nil {
+		op.t.Fatalf(template, args...)
 	} else {
 		log.Fatalf(template, args...)
 	}
 
 }
-func (sl stubLogger) Comment(text string) {
+func (op loggerTest) Comment(text string) {
 	outstring := "\n\t\t" + text + "\n\n"
-	for _, outPath := range sl.commentPaths {
+	for _, outPath := range op.commentPaths {
 		switch outPath {
 		case "stdout":
 			fmt.Print(outstring)
@@ -133,13 +135,36 @@ func (sl stubLogger) Comment(text string) {
 
 }
 
-func (sl stubLogger) File(path string, data []byte) {
-
+func (op loggerTest) File(path string, data []byte) {
+	if op.saveFiles {
+		basedPaths := logger.ModifyPaths([]string{path}, op.basePath)
+		if err := os.WriteFile(basedPaths[0], data, 0644); err != nil {
+			op.Errorf("CAN'T WRITE TO FILE %s: %s", path, err)
+		}
+	}
 }
 
-func (sl stubLogger) Image(path string, getImage imagelib.GetImage) {
-
+func (op loggerTest) Image(path string, getImage imagelib.GetImage) {
+	if op.saveFiles {
+		img, info, err := getImage.Image()
+		if info != "" {
+			op.Info(info)
+		}
+		if img != nil {
+			basedPaths := logger.ModifyPaths([]string{path}, op.basePath)
+			if err = imagelib.SavePNG(img, basedPaths[0]); err != nil {
+				op.Error(err)
+			}
+		}
+		if err != nil {
+			op.Error(err)
+		}
+	}
 }
 
-func (sl stubLogger) NoOps() {
+func (op loggerTest) NoOps() {
+}
+
+func (op *loggerTest) Key() string {
+	return op.key
 }

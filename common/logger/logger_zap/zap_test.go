@@ -10,7 +10,10 @@ import (
 
 func TestLoggerZapOutputPaths(t *testing.T) {
 
+	testKey := "testKey"
+
 	cfg := logger.Config{
+		Key:         testKey,
 		LogLevel:    logger.InfoLevel,
 		OutputPaths: []string{"test.log", "stdout"},
 		//ErrorOutputPaths: nil,
@@ -20,11 +23,13 @@ func TestLoggerZapOutputPaths(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, l)
 
+	require.Equal(t, testKey, l.Key())
+
 	l.Comment("INITIAL BLOCK")
 
-	l.Info("1!!!")
+	l.Info("IT'S TEST FOR LOGGING INFO. OK!")
 
 	l.Comment("NEXT BLOCK")
 
-	l.Error("2!!!")
+	l.Error("IT'S TEST FOR LOGGING ERROR. OK!")
 }
