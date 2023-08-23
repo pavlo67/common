@@ -13,6 +13,24 @@ func (p2 Point2) Point() image.Point {
 	return image.Point{int(math.Round(p2.X)), int(math.Round(p2.Y))}
 }
 
+func (p2 Point2) Angle() float64 {
+	if p2.X == 0 {
+		if p2.Y > 0 {
+			return math.Pi / 2
+		} else if p2.Y < 0 {
+			return -math.Pi / 2
+		} else {
+			return math.NaN()
+		}
+	} else if p2.X >= 0 {
+		return math.Atan(p2.Y / p2.X)
+	} else if p2.Y >= 0 {
+		return math.Atan(p2.Y/p2.X) + math.Pi
+	} else {
+		return math.Atan(p2.Y/p2.X) - math.Pi
+	}
+}
+
 // !!! is equal to Angle() but more complicate
 //func Angle1(p Point2) float64 {
 //	x, y := p.Position, p.Y

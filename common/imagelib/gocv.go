@@ -70,11 +70,11 @@ func ContourAreaPix(contour gocv.PointVector) (float64, float64) {
 
 const onResize = "on imagelib.Resize()"
 
-func Resize(rgb image.RGBA, ratio float64) (*image.RGBA, float64, error) {
-	if ratio == 1 || ratio == 0 {
+func Resize(rgb image.RGBA, scale float64) (*image.RGBA, float64, error) {
+	if scale == 1 || scale == 0 {
 		return &rgb, 1, nil
-	} else if ratio < 0 {
-		return nil, 0, fmt.Errorf("wrong resize ratio (%f) / "+onResize, ratio)
+	} else if scale < 0 {
+		return nil, 0, fmt.Errorf("wrong resize scale (%f) / "+onResize, scale)
 	}
 
 	mat, err := gocv.ImageToMatRGB(&rgb)
@@ -86,7 +86,7 @@ func Resize(rgb image.RGBA, ratio float64) (*image.RGBA, float64, error) {
 	matForResize := gocv.NewMat()
 	defer matForResize.Close()
 
-	gocv.Resize(mat, &matForResize, image.Point{}, ratio, ratio, gocv.InterpolationDefault)
+	gocv.Resize(mat, &matForResize, image.Point{}, scale, scale, gocv.InterpolationDefault)
 
 	imgResized, err := matForResize.ToImage()
 	if err != nil {
@@ -98,7 +98,7 @@ func Resize(rgb image.RGBA, ratio float64) (*image.RGBA, float64, error) {
 		return nil, 0, fmt.Errorf("resized image has wrong type: %T / "+onResize, rgbaResized)
 	}
 
-	return rgbaResized, ratio, nil
+	return rgbaResized, scale, nil
 }
 
 const onTranspose = "on imagelib.Transpose()"

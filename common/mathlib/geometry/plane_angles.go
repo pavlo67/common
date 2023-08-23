@@ -6,6 +6,7 @@ import (
 
 // TODO!!!! be careful: all single point angles are calculated in range -pi < angle <= pi
 
+// DEPRECATED!!! use p.Angle()
 func Angle(p Point2) float64 {
 	if p.X == 0 {
 		if p.Y > 0 {
