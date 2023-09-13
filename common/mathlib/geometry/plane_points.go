@@ -9,29 +9,33 @@ type Point2 struct {
 	X, Y float64
 }
 
-func (p2 Point2) Point() image.Point {
-	return image.Point{int(math.Round(p2.X)), int(math.Round(p2.Y))}
+func (p Point2) ImagePoint() image.Point {
+	return image.Point{int(math.Round(p.X)), int(math.Round(p.Y))}
 }
 
-func (p2 Point2) Angle() float64 {
-	if p2.X == 0 {
-		if p2.Y > 0 {
+func (p Point2) Sub(p1 Point2) Point2 {
+	return Point2{p.X - p1.X, p.Y - p1.Y}
+}
+
+func (p Point2) Rotation() Rotation {
+	if p.X == 0 {
+		if p.Y > 0 {
 			return math.Pi / 2
-		} else if p2.Y < 0 {
+		} else if p.Y < 0 {
 			return -math.Pi / 2
 		} else {
-			return math.NaN()
+			return Rotation(math.NaN())
 		}
-	} else if p2.X >= 0 {
-		return math.Atan(p2.Y / p2.X)
-	} else if p2.Y >= 0 {
-		return math.Atan(p2.Y/p2.X) + math.Pi
+	} else if p.X >= 0 {
+		return Rotation(math.Atan(p.Y / p.X))
+	} else if p.Y >= 0 {
+		return Rotation(math.Atan(p.Y/p.X) + math.Pi)
 	} else {
-		return math.Atan(p2.Y/p2.X) - math.Pi
+		return Rotation(math.Atan(p.Y/p.X) - math.Pi)
 	}
 }
 
-// !!! is equal to Angle() but more complicate
+// !!! is equal to Rotation() but more complicate
 //func Angle1(p Point2) float64 {
 //	x, y := p.Position, p.Y
 //	if x == 0 {
@@ -54,13 +58,13 @@ func (p2 Point2) Angle() float64 {
 //}
 
 func Angle2(v0, v1 Point2) float64 {
-	angle := Angle(v1) - Angle(v0)
+	angle := v1.Rotation() - v0.Rotation()
 	if angle > math.Pi {
-		return angle - 2*math.Pi
+		return float64(angle - 2*math.Pi)
 	} else if angle <= -math.Pi {
-		return angle + 2*math.Pi
+		return float64(angle + 2*math.Pi)
 	}
-	return angle
+	return float64(angle)
 }
 
 func Distance(p0, p1 Point2) float64 {
@@ -142,18 +146,18 @@ func TurnAroundAxisMultiple(axis LineSegment, p2s ...Point2) []Point2 {
 	return p2sTurned
 }
 
-func RotateByAngle(p Point2, addAngle float64) Point2 {
-	angle := Angle(p)
+func RotateByAngle(p Point2, addAngle Rotation) Point2 {
+	angle := p.Rotation()
 	r := math.Sqrt(p.X*p.X + p.Y*p.Y)
 
-	return Point2{r * math.Cos(angle+addAngle), r * math.Sin(angle+addAngle)}
+	return Point2{r * math.Cos(float64(angle+addAngle)), r * math.Sin(float64(angle+addAngle))}
 }
 
 func RotateWithRatio(p Point2, ratio float64) Point2 {
-	angle := Angle(p)
+	angle := p.Rotation()
 	r := math.Sqrt(p.X*p.X + p.Y*p.Y)
 
-	return Point2{r * math.Cos(angle*ratio), r * math.Sin(angle*ratio)}
+	return Point2{r * math.Cos(float64(angle)*ratio), r * math.Sin(float64(angle)*ratio)}
 }
 
 // TODO!!!! be careful: axis angles are calculated in range -pi/2 < angle <= pi/2

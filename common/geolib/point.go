@@ -1,0 +1,83 @@
+package geolib
+
+import (
+	"math"
+
+	geo "github.com/kellydunn/golang-geo"
+	// geo "github.com/billups/golang-geo"
+
+	"github.com/pavlo67/common/common/mathlib/geometry"
+)
+
+type Point struct {
+	Lat, Lon Degrees
+}
+
+type Direction struct {
+	Bearing
+	Distance float64
+}
+
+// https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
+
+func (p Point) Tile(zoom int) Tile {
+	// TODO!!! check zoom
+
+	tile := Tile{Zoom: zoom}
+
+	n := math.Exp2(float64(zoom))
+
+	tile.X = int(math.Floor(float64((p.Lon+180.0)/360.0) * n))
+	if float64(tile.X) >= n {
+		tile.X = int(n - 1)
+	}
+
+	latAngle := float64(p.Lat) * math.Pi / 180
+	tile.Y = int(math.Floor(n * (1 - math.Log(math.Tan(latAngle)+1/math.Cos(latAngle))/math.Pi) / 2))
+
+	// log.Print(p, zoom, tile)
+
+	return tile
+}
+
+func (p Point) Geo() geo.Point {
+	return *geo.NewPoint(float64(p.Lat), float64(p.Lon))
+}
+
+func (p Point) MovedAt(dx, dy float64) Point {
+	if dx == 0 && dy == 0 {
+		return p
+	}
+
+	dxKm, dyKm := dx*0.001, dy*0.001
+
+	bearing := BearingFromGeometry(geometry.Point2{dxKm, dyKm}.Rotation())
+
+	geoPoint := p.Geo()
+
+	// geoPoint.PointAtDistanceAndBearing() requires distance in kilometers
+	geoPointNew := geoPoint.PointAtDistanceAndBearing(math.Sqrt(dxKm*dxKm+dyKm*dyKm), float64(bearing))
+
+	return Point{Degrees(geoPointNew.Lat()), Degrees(geoPointNew.Lng())}
+}
+
+func (p Point) PointAtDirection(dir Direction) Point {
+	geoPoint := p.Geo()
+
+	// geoPoint.PointAtDistanceAndBearing() requires distance in kilometers
+	geoPointNew := geoPoint.PointAtDistanceAndBearing(dir.Distance*0.001, float64(dir.Bearing))
+
+	return Point{Degrees(geoPointNew.Lat()), Degrees(geoPointNew.Lng())}
+}
+
+func (p Point) BearingTo(p1 Point) Bearing {
+	geoPoint, geoPoint1 := p.Geo(), p1.Geo()
+	return Bearing(geoPoint.BearingTo(&geoPoint1))
+}
+
+func (p Point) DistanceTo(p1 Point) float64 {
+	geoPoint, geoPoint1 := p.Geo(), p1.Geo()
+
+	// geoPoint.GreatCircleDistance(&geoPoint1) returns distance in kilometers
+	return 1000 * geoPoint.GreatCircleDistance(&geoPoint1)
+}

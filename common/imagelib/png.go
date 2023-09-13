@@ -14,8 +14,8 @@ import (
 )
 
 // DEPRECATED
-//type GetImage interface {
-//	GetImage() (image.GetImage, error)
+//type Imager interface {
+//	Imager() (image.Imager, error)
 //}
 
 const onSavePNG = "on imagelib.SavePNG()"
@@ -48,7 +48,7 @@ type PointsImage struct {
 	image.Rectangle
 }
 
-var _ GetImage = &PointsImage{}
+var _ Imager = &PointsImage{}
 
 func (imageOp *PointsImage) Bounds() image.Rectangle {
 	if imageOp == nil {
@@ -66,7 +66,7 @@ func (imageOp *PointsImage) Image() (image.Image, string, error) {
 	return PointsToGrayscale(imageOp.Points, imageOp.Rectangle), "", nil
 }
 
-// PointsToGrayscale returns Gray_ structure instead of image.Gray because the structure implements GetImage interface required for show.Demo()
+// PointsToGrayscale returns Gray_ structure instead of image.Gray because the structure implements Imager interface required for show.Demo()
 func PointsToGrayscale(points []image.Point, rect image.Rectangle) image.Image {
 	xWidth := rect.Max.X - rect.Min.X
 	yHeight := rect.Max.Y - rect.Min.Y

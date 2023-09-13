@@ -51,10 +51,10 @@ func GrayFromPoints2(points2 []geometry.Point2, rect *image.Rectangle) image.Gra
 
 	var dX, dY int
 	if rect == nil {
-		p0 := points2[0].Point()
+		p0 := points2[0].ImagePoint()
 		rect = &image.Rectangle{Min: p0, Max: image.Point{p0.X + 1, p0.Y + 1}}
 		for _, p2 := range points2[1:] {
-			p := p2.Point()
+			p := p2.ImagePoint()
 			if p.X >= rect.Max.X {
 				rect.Max.X = p.X + 1
 			} else if p.X < rect.Min.X {

@@ -5,7 +5,7 @@ import (
 	"image"
 )
 
-type GetImage interface {
+type Imager interface {
 	Image() (image.Image, string, error)
 	Bounds() image.Rectangle
 }
@@ -14,57 +14,38 @@ type SubImage interface {
 	SubImage(image.Rectangle) image.Image
 }
 
-//// GetImage -----------------------------------------------------------------------------
-//
-//var _ GetImage = &GetImage{}
-//
-//type GetImage struct {
-//	Img  image.GetImage
-//	Rect image.Rectangle
-//}
-//
-//func (imageOp *GetImage) Bounds() image.Rectangle {
-//	if imageOp == nil || imageOp.Img == nil {
-//		return image.Rectangle{}
-//	}
-//
-//	return imageOp.Rect
-//}
-//
-//func (imageOp GetImage) GetImage() (image.GetImage, string, error) {
-//	return imageOp.Img, "", nil
-//}
+// Imager -------------------------------------------------------------------------
 
-// GetImageRGBA -------------------------------------------------------------------------
+var _ Imager = &GetImage{}
 
-var _ GetImage = &GetImageRGBA{}
-
-type GetImageRGBA struct {
-	RGBA        *image.RGBA
-	ResizeRatio float64
-	ImageMasks  []GetMask
+type GetImage struct {
+	Images     []image.Image
+	ImageMasks []GetMask
 }
 
-func (imageOp *GetImageRGBA) Bounds() image.Rectangle {
-	if imageOp == nil || imageOp.RGBA == nil {
+func (imageOp *GetImage) Bounds() image.Rectangle {
+	if imageOp == nil || len(imageOp.Images) < 1 {
 		return image.Rectangle{}
 	}
 
-	return imageOp.RGBA.Rect
+	return imageOp.Images[0].Bounds()
 }
 
-const onImage = "on GetImageRGBA.GetImage()"
+const onImage = "on Imager.Imager()"
 
-func (imageOp *GetImageRGBA) Image() (image.Image, string, error) {
-	if imageOp == nil || imageOp.RGBA == nil {
-		return nil, "", fmt.Errorf(onImage + ": imageOp == nil || imageOp.RGBA == nil")
+func (imageOp *GetImage) Image() (image.Image, string, error) {
+	if imageOp == nil || len(imageOp.Images) < 1 {
+		return nil, "", fmt.Errorf(onImage + ": imageOp == nil || len(imageOp.Images) == 0")
 	}
 
-	img, _, err := Resize(*imageOp.RGBA, imageOp.ResizeRatio)
-	if err != nil {
-		return nil, "", err
-	} else if img == nil {
-		return nil, "", fmt.Errorf("resized img == nil / " + onImage)
+	img := ImageToRGBACopied(imageOp.Images[0])
+	for _, imgToAdd := range imageOp.Images[1:] {
+		rect := imgToAdd.Bounds()
+		for x := rect.Min.X; x < rect.Max.X; x++ {
+			for y := rect.Min.Y; y < rect.Max.Y; y++ {
+				img.Set(x, y, imgToAdd.At(x, y))
+			}
+		}
 	}
 
 	var info string
@@ -83,22 +64,22 @@ func (imageOp *GetImageRGBA) Image() (image.Image, string, error) {
 	return img, info, nil
 }
 
-// GetImageGray -------------------------------------------------------------------------
-
-var _ GetImage = &GetImageGray{}
-
-type GetImageGray struct {
-	Gray *image.Gray
-}
-
-func (imageOp GetImageGray) Image() (image.Image, string, error) {
-	return imageOp.Gray, "", nil
-}
-
-func (imageOp *GetImageGray) Bounds() image.Rectangle {
-	if imageOp == nil || imageOp.Gray == nil {
-		return image.Rectangle{}
-	}
-
-	return imageOp.Gray.Rect
-}
+//// GetImageGray -------------------------------------------------------------------------
+//
+//var _ Imager = &GetImageGray{}
+//
+//type GetImageGray struct {
+//	Gray *image.Gray
+//}
+//
+//func (imageOp GetImageGray) Image() (image.Image, string, error) {
+//	return imageOp.Gray, "", nil
+//}
+//
+//func (imageOp *GetImageGray) Bounds() image.Rectangle {
+//	if imageOp == nil || imageOp.Gray == nil {
+//		return image.Rectangle{}
+//	}
+//
+//	return imageOp.Gray.Rect
+//}

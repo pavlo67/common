@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"regexp"
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/errors"
@@ -22,6 +23,8 @@ type ResponseBinary struct {
 	MIMEType string
 	Data     []byte
 }
+
+var reBinary = regexp.MustCompile(`^image/`)
 
 func Request(client *http.Client, serverURL, method string, header http.Header, requestData, responseData interface{}, l logger.Operator) error {
 	if client == nil {
@@ -87,7 +90,16 @@ func Request(client *http.Client, serverURL, method string, header http.Header, 
 	}
 
 	responseBody, err = ioutil.ReadAll(resp.Body)
-	logger.LogRequest(l, method, serverURL, req.Header, requestBody, resp.Header, responseBody, err, resp.StatusCode)
+	if err != nil {
+		l.Error("can't read response body: ", err)
+	}
+
+	var responseBodyToLog []byte
+
+	if !reBinary.MatchString(resp.Header.Get("Content-Type")) {
+		responseBodyToLog = responseBody
+	}
+	logger.LogRequest(l, method, serverURL, req.Header, requestBody, resp.Header, responseBodyToLog, err, resp.StatusCode)
 	if err != nil {
 		return fmt.Errorf(onRequest+": can't read body from %s %s, got %s", method, serverURL, err)
 	}

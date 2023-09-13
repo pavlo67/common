@@ -31,7 +31,7 @@ func (ss *identity_jwtStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *identity_jwtStarter) Run(cfg *config.Config, options common.Map, joinerOp joiner.Operator, l_ logger.Operator) error {
+func (ss *identity_jwtStarter) Run(cfg *config.Environment, options common.Map, joinerOp joiner.Operator, l_ logger.Operator) error {
 	l = l_
 
 	var cfgAuthJWT common.Map

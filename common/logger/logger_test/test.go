@@ -146,7 +146,7 @@ func (op loggerTest) File(path string, data []byte) {
 	}
 }
 
-func (op loggerTest) Image(path string, getImage imagelib.GetImage) {
+func (op loggerTest) Image(path string, getImage imagelib.Imager) {
 	if op.saveFiles {
 		img, info, err := getImage.Image()
 		if info != "" {

@@ -34,10 +34,10 @@ func (css *connectSQLiteStarter) Name() string {
 
 const onRun = "on connectSQLiteStarter.Run()"
 
-func (css *connectSQLiteStarter) Run(cfg *config.Config, options common.Map, joinerOp joiner.Operator, l_ logger.Operator) error {
+func (css *connectSQLiteStarter) Run(env *config.Environment, options common.Map, joinerOp joiner.Operator, l_ logger.Operator) error {
 	l = l_
 
-	if err := cfg.Value(options.StringDefault("db_key", "db_sqlite"), &css.cfgSQLite); err != nil {
+	if err := env.Value(options.StringDefault("db_key", "db_sqlite"), &css.cfgSQLite); err != nil {
 		return err
 	}
 

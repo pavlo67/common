@@ -9,11 +9,11 @@ import (
 	"github.com/pavlo67/common/common/rbac"
 )
 
-func Auth(cfgService config.Config, authOp Operator, role rbac.Role) (actor *Actor, err error) {
+func Auth(env config.Environment, authOp Operator, role rbac.Role) (actor *Actor, err error) {
 
 	var actors []Actor
 
-	if err := cfgService.Value("actors", &actors); err != nil {
+	if err := env.Value("actors", &actors); err != nil {
 		return nil, err
 	}
 

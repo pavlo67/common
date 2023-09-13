@@ -31,7 +31,7 @@ func ComposeImages(imgs [][]image.Image) (*image.RGBA, error) {
 			for y0 := rect.Min.Y; y0 < rect.Max.Y; y0++ {
 				for x0 := rect.Min.X; x0 < rect.Max.X; x0++ {
 					imgComposed.Set(
-						((y-rect.Min.X)*rect.Dx() + x0 - rect.Min.X), ((x-rect.Min.Y)*rect.Dy() + y0 - rect.Min.X),
+						((x-rect.Min.X)*rect.Dx() + x0 - rect.Min.X), ((y-rect.Min.Y)*rect.Dy() + y0 - rect.Min.Y),
 						imgXY.At(x0, y0))
 				}
 			}

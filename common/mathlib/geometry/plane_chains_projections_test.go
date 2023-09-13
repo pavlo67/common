@@ -36,6 +36,20 @@ func TestProjectionsOnPolyChain(t *testing.T) {
 					ProjectionOnPolyChain: ProjectionOnPolyChain{N: 2, Position: math.Sqrt(2) / 2, Point2: Point2{2.5, 1.5}}},
 			},
 		},
+		{
+			name:        "",
+			polyChain:   PolyChain{{X: 567.758571909734, Y: 327.33667901650387}, {X: 588, Y: 381}}, //
+			p:           Point2{X: 574, Y: 355},
+			distanceMax: 3,
+			expected:    []ProjectionOnPolyChainDirected{},
+		},
+		{
+			name:        "",
+			polyChain:   PolyChain{{X: 416.5, Y: 420}, {X: 422, Y: 413}, {X: 414.5, Y: 402}}, //
+			p:           Point2{X: 427, Y: 412},
+			distanceMax: 3,
+			expected:    []ProjectionOnPolyChainDirected{},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -45,8 +59,11 @@ func TestProjectionsOnPolyChain(t *testing.T) {
 	}
 }
 
+// geometry.PolyChain{geometry.Point2{X:556, Y:355}, geometry.Point2{X:559, Y:355}, geometry.Point2{X:562, Y:355}, geometry.Point2{X:565, Y:355}, geometry.Point2{X:568,
+//	Y:355}, geometry.Point2{X:571, Y:355}, geometry.Point2} / 3)
+
 func CheckProjections(t *testing.T, expected, got []ProjectionOnPolyChainDirected) {
-	require.Equalf(t, len(expected), len(got), "expected: %v, got: %v", expected, got)
+	require.Equalf(t, len(expected), len(got), "expected: %v, got: %#v", expected, got)
 	for i, e := range expected {
 		g := got[i]
 		require.Equalf(t, e.N, g.N, "#d: %v vs %v", i, e, g)

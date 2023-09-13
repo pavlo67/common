@@ -7,14 +7,16 @@ import (
 	"os"
 	"regexp"
 	"runtime/debug"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
+
+	"github.com/pavlo67/common/common/filelib"
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/logger/logger_zap"
-
-	"github.com/stretchr/testify/require"
 )
 
 func ShowVCSInfo() {
@@ -28,7 +30,7 @@ func ShowVCSInfo() {
 	}
 }
 
-func PrepareApp(envPath string) (Config, logger.Operator) {
+func PrepareApp(envPath string) (Environment, logger.Operator) {
 
 	rand.Seed(time.Now().UnixNano())
 
@@ -47,18 +49,29 @@ func PrepareApp(envPath string) (Config, logger.Operator) {
 	// get logger --------------------------------------------------------------------
 
 	// TODO!!! why it doesn't work??? it should be completed
-	// var loggerConfig logger.Config
+	// var loggerConfig logger.Environment
 	// if err = cfgServicePtr.Value("logger", &loggerConfig); err != nil {
 	//	log.Fatalf("on config.PrepareApp(%s, %s) got %s reading logger config", envPath, configEnv+".yaml", err)
 	// }
 
-	var loggerSaveFiles bool
-	if err = cfgServicePtr.Value("logger_save_files", &loggerSaveFiles); err != nil {
+	var saveFiles bool
+	if err = cfgServicePtr.Value("logger_save_files", &saveFiles); err != nil {
 		log.Fatalf("on config.PrepareApp(%s, %s) got %s reading 'logger_save_files'", envPath, configEnv+".yaml", err)
+	}
+	var basePath0 string
+	if err = cfgServicePtr.Value("logger_path", &basePath0); err != nil {
+		log.Fatalf("on config.PrepareApp(%s, %s) got %s reading 'logger_path'", envPath, configEnv+".yaml", err)
+	}
+
+	basePath, err := filelib.Dir(basePath0)
+	if err != nil {
+		log.Fatalf("on config.PrepareApp(%s, %s): can't create base path (%s): %s", envPath, configEnv+".yaml", basePath0, err)
 	}
 
 	loggerConfig := logger.Config{
-		SaveFiles: loggerSaveFiles,
+		Key:       strconv.FormatInt(time.Now().Unix(), 10),
+		BasePath:  basePath,
+		SaveFiles: saveFiles,
 	}
 
 	l, err := logger_zap.New(loggerConfig)
@@ -69,7 +82,7 @@ func PrepareApp(envPath string) (Config, logger.Operator) {
 	return *cfgServicePtr, l
 }
 
-func PrepareTests(t *testing.T, envPath, configEnv, logfile string) (Config, logger.Operator) {
+func PrepareTests(t *testing.T, envPath, configEnv, logfile string) (Environment, logger.Operator) {
 
 	os.Setenv("ENV", configEnv)
 

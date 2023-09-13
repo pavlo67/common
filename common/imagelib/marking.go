@@ -49,7 +49,7 @@ func (mask Mask) ShowOn(img image.Image) {
 }
 
 func Line(s geometry.LineSegment, width int) []image.Point {
-	begin, end := s[0].Point(), s[1].Point()
+	begin, end := s[0].ImagePoint(), s[1].ImagePoint()
 
 	var wMin int
 	if width <= 1 {

@@ -10,7 +10,7 @@ import (
 func TestRotateByAngle(t *testing.T) {
 	type args struct {
 		p        Point2
-		addAngle float64
+		addAngle Rotation
 	}
 	tests := []struct {
 		name string
@@ -219,9 +219,9 @@ func TestAngle(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want float64
+		want Rotation
 	}{
-		{args: args{p: Point2{X: 0, Y: 0}}, want: math.NaN()},
+		{args: args{p: Point2{X: 0, Y: 0}}, want: Rotation(math.NaN())},
 		{args: args{p: Point2{X: 1, Y: 0}}, want: 0},
 		{args: args{p: Point2{X: 1, Y: 1}}, want: math.Pi / 4},
 		{args: args{p: Point2{X: 0, Y: 1}}, want: math.Pi / 2},
@@ -233,8 +233,8 @@ func TestAngle(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Angle(tt.args.p); math.Abs(got-tt.want) > eps {
-				t.Errorf("Angle() = %v, wantDistance %v", got, tt.want)
+			if got := tt.args.p.Rotation(); math.Abs(float64(got-tt.want)) > eps {
+				t.Errorf("Rotation() = %v, wantDistance %v", got, tt.want)
 			}
 		})
 	}
@@ -262,7 +262,7 @@ func TestAngle(t *testing.T) {
 //	for _, tt := range tests {
 //		t.Run(tt.name, func(t *testing.T) {
 //			if got := Angle1(tt.args.p); math.Abs(got-tt.wantDistance) > eps {
-//				t.Errorf("Angle() = %v, wantDistance %v", got, tt.wantDistance)
+//				t.Errorf("Rotation() = %v, wantDistance %v", got, tt.wantDistance)
 //			}
 //		})
 //	}

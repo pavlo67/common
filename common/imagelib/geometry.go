@@ -36,8 +36,8 @@ func RectangleAround(rect image.Rectangle, marginPix float64, pts ...geometry.Po
 	}
 
 	return rect.Intersect(image.Rectangle{
-		Min: geometry.Point2{minX - marginPix, minY - marginPix}.Point(),
-		Max: geometry.Point2{maxX + marginPix, maxY + marginPix}.Point()})
+		Min: geometry.Point2{minX - marginPix, minY - marginPix}.ImagePoint(),
+		Max: geometry.Point2{maxX + marginPix, maxY + marginPix}.ImagePoint()})
 }
 
 func PolyChain(points []image.Point) geometry.PolyChain {
@@ -92,7 +92,7 @@ func Center(points ...image.Point) geometry.Point2 {
 	return geometry.Point2{X: x / n, Y: y / n}
 }
 
-//func AverageAlongOx(points2 []numlib.Point2) ([]image.Point, image.Rect) {
+//func AverageAlongOx(points2 []numlib.Point2) ([]image.ImagePoint, image.Rect) {
 //	if len(points2) < 1 {
 //		return nil, image.Rect{}
 //	}
@@ -117,7 +117,7 @@ func Center(points ...image.Point) geometry.Point2 {
 //		}
 //	}
 //
-//	points := make([]image.Point, len(points2))
+//	points := make([]image.ImagePoint, len(points2))
 //
 //	var yPlus, yMinus []float64
 //	for _, p := range points2 {
@@ -145,13 +145,13 @@ func Center(points ...image.Point) geometry.Point2 {
 //	toX := points[len(points)-1].Position + 1
 //
 //	for i := len(points) - 1; i >= 0; i-- {
-//		points = append(points, image.Point{Position: points[i].Position, Y: yBase - points[i].Y})
+//		points = append(points, image.ImagePoint{Position: points[i].Position, Y: yBase - points[i].Y})
 //	}
 //
-//	return points, image.Rect{Max: image.Point{toX, yBase * 2}}
+//	return points, image.Rect{Max: image.ImagePoint{toX, yBase * 2}}
 //}
 //
-//func AveragedPoint(x, yBase int, yPlus, yMinus []float64) image.Point {
+//func AveragedPoint(x, yBase int, yPlus, yMinus []float64) image.ImagePoint {
 //	var yPlusAvg, yMinusAvg float64
 //
 //	if len(yPlus) > 0 {
@@ -168,5 +168,5 @@ func Center(points ...image.Point) geometry.Point2 {
 //		yMinusAvg /= float64(len(yMinus))
 //	}
 //
-//	return image.Point{x, yBase + int(math.Round((yPlusAvg-yMinusAvg)/2))}
+//	return image.ImagePoint{x, yBase + int(math.Round((yPlusAvg-yMinusAvg)/2))}
 //}

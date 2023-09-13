@@ -59,7 +59,7 @@ type Operator interface {
 
 	Comment(text string)
 	File(path string, data []byte)
-	Image(path string, getImage imagelib.GetImage)
+	Image(path string, getImage imagelib.Imager)
 
 	Key() string
 	NoOps() // to init logger variable being unused (for possible next debug purposes)

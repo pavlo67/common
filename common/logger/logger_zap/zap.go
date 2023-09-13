@@ -47,7 +47,7 @@ func (op *loggerZap) File(path string, data []byte) {
 	}
 }
 
-func (op *loggerZap) Image(path string, getImage imagelib.GetImage) {
+func (op *loggerZap) Image(path string, getImage imagelib.Imager) {
 	if op.cfg.SaveFiles {
 		img, info, err := getImage.Image()
 		if info != "" {

@@ -7,9 +7,7 @@ import (
 	"github.com/pavlo67/common/common/errors"
 )
 
-// -----------------------------------------------------------------------------
-
-type Config struct {
+type Environment struct {
 	serviceName string
 	data        map[string]interface{}
 	marshaler   Marshaler
@@ -17,7 +15,7 @@ type Config struct {
 
 var errNoConfig = errors.New("no config")
 
-func (c *Config) ServiceName() string {
+func (c *Environment) ServiceName() string {
 	if c == nil {
 		return ""
 	}
@@ -25,7 +23,7 @@ func (c *Config) ServiceName() string {
 	return c.serviceName
 }
 
-func (c *Config) Raw(key string) (interface{}, error) {
+func (c *Environment) Raw(key string) (interface{}, error) {
 	if c == nil {
 		return nil, errNoConfig
 	}
@@ -38,7 +36,7 @@ func (c *Config) Raw(key string) (interface{}, error) {
 	return valueRaw, nil
 }
 
-func (c *Config) Value(key string, target interface{}) error {
+func (c *Environment) Value(key string, target interface{}) error {
 	if c == nil {
 		return errNoConfig
 	}
@@ -57,7 +55,7 @@ func (c *Config) Value(key string, target interface{}) error {
 
 // -----------------------------------------------------------------------------
 
-func Get(cfgFile string, marshaler Marshaler) (*Config, error) {
+func Get(cfgFile string, marshaler Marshaler) (*Environment, error) {
 
 	if len(cfgFile) < 1 {
 		return nil, errors.New("empty config path")
@@ -68,7 +66,7 @@ func Get(cfgFile string, marshaler Marshaler) (*Config, error) {
 		return nil, errors.Wrapf(err, "can't read config file from '%s'", cfgFile)
 	}
 
-	cfg := Config{marshaler: marshaler}
+	cfg := Environment{marshaler: marshaler}
 	err = marshaler.Unmarshal(data, &cfg.data)
 	if err != nil {
 		return nil, errors.Wrapf(err, "can't .Unmarshal('%s') from config '%s'", data, cfgFile)
@@ -78,7 +76,7 @@ func Get(cfgFile string, marshaler Marshaler) (*Config, error) {
 }
 
 //// Key ...
-//func (c *Config) Key(key string, errs common.multipleErrors) (string, common.multipleErrors) {
+//func (c *Environment) Key(key string, errs common.multipleErrors) (string, common.multipleErrors) {
 //	if c == nil {
 //		return "", append(errs, ErrNoConfig)
 //	}
@@ -89,7 +87,7 @@ func Get(cfgFile string, marshaler Marshaler) (*Config, error) {
 //}
 //
 //// IsTrue ...
-//func (c *Config) IsTrue(key string, errs common.multipleErrors) (bool, common.multipleErrors) {
+//func (c *Environment) IsTrue(key string, errs common.multipleErrors) (bool, common.multipleErrors) {
 //	if c == nil {
 //		return false, append(errs, ErrNoConfig)
 //	}

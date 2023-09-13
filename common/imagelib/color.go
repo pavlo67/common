@@ -7,7 +7,7 @@ import (
 )
 
 type PixDelta = int16
-type PixSum = uint32
+type PixSum = int32
 
 const PixMax = 0xFF
 
