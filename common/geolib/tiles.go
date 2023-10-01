@@ -23,19 +23,19 @@ func (xyRanges XYRanges) Key() string {
 
 func (xyRanges XYRanges) Area() Area {
 	return Area{
-		Tile{X: xyRanges.XT[0], Y: xyRanges.YT[0], Zoom: xyRanges.Zoom}.Point(),
-		Tile{X: xyRanges.XT[1] + 1, Y: xyRanges.YT[1] + 1, Zoom: xyRanges.Zoom}.Point(),
+		Tile{X: xyRanges.XT[0], Y: xyRanges.YT[0], Zoom: xyRanges.Zoom}.LeftTop(),
+		Tile{X: xyRanges.XT[1] + 1, Y: xyRanges.YT[1] + 1, Zoom: xyRanges.Zoom}.LeftTop(),
 	}
 }
 
-func (xyRanges XYRanges) Point() Point {
-	return Tile{X: xyRanges.XT[0], Y: xyRanges.YT[0], Zoom: xyRanges.Zoom}.Point()
+func (xyRanges XYRanges) LeftTop() Point {
+	return Tile{X: xyRanges.XT[0], Y: xyRanges.YT[0], Zoom: xyRanges.Zoom}.LeftTop()
 }
 
 // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
 // left-top corner of the tile
 
-func (tile Tile) Point() Point {
+func (tile Tile) LeftTop() Point {
 	n := math.Pow(2, float64(tile.Zoom))
 	latAngle := math.Atan(math.Sinh(math.Pi * (1 - 2*float64(tile.Y)/n)))
 

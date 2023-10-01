@@ -1,0 +1,29 @@
+### data sources ----------------------------------------------------
+
+db_sqlite:
+  path: /home/pavlo/0/programmae/_test/common/test.sqlite
+
+
+### services --------------------------------------------------------
+
+server_http:
+  host: http://localhost
+  port: 3001
+
+auth_http:
+  host: http://localhost
+  port: 3001
+
+auth_jwt:
+  key_path: ./
+
+### actors ----------------------------------------------------------
+
+actors:
+  - identity:
+      nickname: admin
+      roles:
+        - admin
+    creds:
+      nickname: admin
+      password: admin

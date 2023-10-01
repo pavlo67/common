@@ -8,7 +8,7 @@ import (
 )
 
 func TestRequest(t *testing.T) {
-	//_, cfg, l := apps.PrepareTests(t, "../../_environments/", "test", "request.log")
+	//_, cfg, l := apps.PrepareTests(t, "../../_envs/", "test", "request.log")
 	//require.NotNil(t, cfg)
 
 	url := "http://google.com/"

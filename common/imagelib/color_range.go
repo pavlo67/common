@@ -1,9 +1,17 @@
 package imagelib
 
-import "image/color"
+import (
+	"fmt"
+	"image/color"
+)
 
 type ColorRange struct {
 	ColorMin, ColorMax color.RGBA
+}
+
+func (cr ColorRange) String() string {
+	return fmt.Sprintf("%d_%d_%d-%d_%d_%d", cr.ColorMin.R, cr.ColorMin.G, cr.ColorMin.B, cr.ColorMax.R, cr.ColorMax.G, cr.ColorMax.B)
+
 }
 
 func CorrectColorsRanges(colorRanges []ColorRange, rangeMax uint8) []ColorRange {

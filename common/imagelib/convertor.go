@@ -15,7 +15,7 @@ const ChRed = 0
 const ChGreen = 1
 const ChBlue = 2
 
-const onImageToGray = "on imagelib.ImageToGray()"
+const onImageToGray = "on ImageToGray()"
 
 func ImageToGray(img image.Image) (*image.Gray, error) {
 	if img == nil {
@@ -58,7 +58,7 @@ func ImageToGrayCopied(img image.Image) *image.Gray {
 	return gray
 }
 
-const onImageToRGBA = "on imagelib.ImageToRGBA()"
+const onImageToRGBA = "on ImageToRGBA()"
 
 func ImageToRGBA(img image.Image) (*image.RGBA, error) {
 	if img == nil {

@@ -42,7 +42,7 @@ func (ashs *authServerHTTPStarter) Name() string {
 
 const onRun = "on authServerHTTPStarter.Run()"
 
-func (ashs *authServerHTTPStarter) Run(_ *config.Environment, options common.Map, joinerOp joiner.Operator, l_ logger.Operator) error {
+func (ashs *authServerHTTPStarter) Run(_ *config.Envs, options common.Map, joinerOp joiner.Operator, l_ logger.Operator) error {
 
 	l = l_
 

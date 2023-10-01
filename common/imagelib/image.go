@@ -23,23 +23,23 @@ type GetImage struct {
 	ImageMasks []GetMask
 }
 
-func (imageOp *GetImage) Bounds() image.Rectangle {
-	if imageOp == nil || len(imageOp.Images) < 1 {
+func (op *GetImage) Bounds() image.Rectangle {
+	if op == nil || len(op.Images) < 1 {
 		return image.Rectangle{}
 	}
 
-	return imageOp.Images[0].Bounds()
+	return op.Images[0].Bounds()
 }
 
 const onImage = "on Imager.Imager()"
 
-func (imageOp *GetImage) Image() (image.Image, string, error) {
-	if imageOp == nil || len(imageOp.Images) < 1 {
-		return nil, "", fmt.Errorf(onImage + ": imageOp == nil || len(imageOp.Images) == 0")
+func (op *GetImage) Image() (image.Image, string, error) {
+	if op == nil || len(op.Images) < 1 {
+		return nil, "", fmt.Errorf(onImage + ": op == nil || len(op.Images) == 0")
 	}
 
-	img := ImageToRGBACopied(imageOp.Images[0])
-	for _, imgToAdd := range imageOp.Images[1:] {
+	img := ImageToRGBACopied(op.Images[0])
+	for _, imgToAdd := range op.Images[1:] {
 		rect := imgToAdd.Bounds()
 		for x := rect.Min.X; x < rect.Max.X; x++ {
 			for y := rect.Min.Y; y < rect.Max.Y; y++ {
@@ -50,7 +50,7 @@ func (imageOp *GetImage) Image() (image.Image, string, error) {
 
 	var info string
 	var mask Mask
-	for i, maskI := range imageOp.ImageMasks {
+	for i, maskI := range op.ImageMasks {
 		colorNamed := maskI.Color()
 		if colorNamed == nil || colorNamed.Color == nil {
 			colorNamed = &RoundAbout[i%len(RoundAbout)]

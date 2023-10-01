@@ -4,9 +4,8 @@ import (
 	"image"
 	"math"
 
+	"github.com/pavlo67/common/common/mathlib/plane"
 	"golang.org/x/image/colornames"
-
-	"github.com/pavlo67/common/common/mathlib/geometry"
 )
 
 // ----------------------------------------------------------------
@@ -44,7 +43,7 @@ func GrayFromPoints(points []image.Point, rect *image.Rectangle) image.Gray {
 	return gray
 }
 
-func GrayFromPoints2(points2 []geometry.Point2, rect *image.Rectangle) image.Gray {
+func GrayFromPoints2(points2 []plane.Point2, rect *image.Rectangle) image.Gray {
 	if len(points2) < 1 {
 		return image.Gray{}
 	}

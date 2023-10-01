@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"image/color"
 
-	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/imagelib"
+
+	"github.com/pavlo67/common/common"
 )
 
 var _ Operator = &lowChannelFilter{}

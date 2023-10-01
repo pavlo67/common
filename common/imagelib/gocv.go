@@ -9,9 +9,10 @@ import (
 	"golang.org/x/image/colornames"
 
 	"github.com/pavlo67/common/common/errors"
+	"github.com/pavlo67/common/common/mathlib/plane"
 )
 
-const onContourToGrayscale = "on imagelib.ContourToGrayscale()"
+const onContourToGrayscale = "on ContourToGrayscale()"
 
 type ContourImage struct {
 	Contour gocv.PointVector
@@ -68,7 +69,7 @@ func ContourAreaPix(contour gocv.PointVector) (float64, float64) {
 	return contourArea, math.Sqrt(4 * contourArea / math.Pi)
 }
 
-const onResizeToRange = "on imagelib.ResizeToRange()"
+const onResizeToRange = "on ResizeToRange()"
 
 func ResizeToRange(imgRGB image.RGBA, dpm float64, dpmRange [2]float64) (*image.RGBA, float64, error) {
 	if !(dpm > 0 && !math.IsInf(dpm, 1)) {
@@ -88,7 +89,7 @@ func ResizeToRange(imgRGB image.RGBA, dpm float64, dpmRange [2]float64) (*image.
 	return imgRGBResized, dpm * resizeRatio, nil
 }
 
-const onResize = "on imagelib.Resize()"
+const onResize = "on Resize()"
 
 func Resize(imgRGB image.RGBA, ratio float64) (*image.RGBA, float64, error) {
 	if ratio == 1 || ratio == 0 {
@@ -121,11 +122,11 @@ func Resize(imgRGB image.RGBA, ratio float64) (*image.RGBA, float64, error) {
 	return rgbaResized, ratio, nil
 }
 
-const onRotateResized = "on imagelib.RotateResized()"
+const onRotateResized = "on RotateResized()"
 
-func RotateResized(imgRGB image.RGBA, angle float64, targetSide int) (*image.RGBA, float64, error) {
+func RotateResized(imgRGB image.RGBA, angle plane.Rotation, targetSide int) (*image.RGBA, float64, error) {
 
-	if math.IsNaN(angle) || math.IsInf(angle, 0) {
+	if math.IsNaN(float64(angle)) || math.IsInf(float64(angle), 0) {
 		return nil, 0, fmt.Errorf("wrong rotation angle (%f) / "+onRotateResized, angle)
 	}
 
@@ -178,7 +179,7 @@ func RotateResized(imgRGB image.RGBA, angle float64, targetSide int) (*image.RGB
 	matForRotate := gocv.NewMat()
 	defer matForRotate.Close()
 
-	angleDegrees := angle * 180 / math.Pi
+	angleDegrees := float64(angle * 180 / math.Pi)
 
 	m := gocv.GetRotationMatrix2D(center, angleDegrees, scale2)
 
@@ -210,7 +211,7 @@ func RotateResized(imgRGB image.RGBA, angle float64, targetSide int) (*image.RGB
 
 }
 
-const onRotate = "on imagelib.Rotate()"
+const onRotate = "on Rotate()"
 
 func Rotate(imgRGB image.RGBA, angle float64) (*image.RGBA, error) {
 
@@ -248,7 +249,7 @@ func Rotate(imgRGB image.RGBA, angle float64) (*image.RGBA, error) {
 	return imgRGBRotated, nil
 }
 
-const onTranspose = "on imagelib.Transpose()"
+const onTranspose = "on Transpose()"
 
 func Transpose(rgb image.RGBA) (*image.RGBA, error) {
 

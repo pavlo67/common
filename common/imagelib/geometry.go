@@ -4,14 +4,14 @@ import (
 	"image"
 	"math"
 
-	"github.com/pavlo67/common/common/mathlib/geometry"
+	"github.com/pavlo67/common/common/mathlib/plane"
 )
 
 type Bounded interface {
 	Bounds() image.Rectangle
 }
 
-func RectangleAround(rect image.Rectangle, marginPix float64, pts ...geometry.Point2) image.Rectangle {
+func RectangleAround(rect image.Rectangle, marginPix float64, pts ...plane.Point2) image.Rectangle {
 	if len(pts) < 1 {
 		return image.Rectangle{}
 	}
@@ -36,12 +36,12 @@ func RectangleAround(rect image.Rectangle, marginPix float64, pts ...geometry.Po
 	}
 
 	return rect.Intersect(image.Rectangle{
-		Min: geometry.Point2{minX - marginPix, minY - marginPix}.ImagePoint(),
-		Max: geometry.Point2{maxX + marginPix, maxY + marginPix}.ImagePoint()})
+		Min: plane.Point2{minX - marginPix, minY - marginPix}.ImagePoint(),
+		Max: plane.Point2{maxX + marginPix, maxY + marginPix}.ImagePoint()})
 }
 
-func PolyChain(points []image.Point) geometry.PolyChain {
-	polyChain := make(geometry.PolyChain, len(points))
+func PolyChain(points []image.Point) plane.PolyChain {
+	polyChain := make(plane.PolyChain, len(points))
 	for i, p := range points {
 		polyChain[i].X, polyChain[i].Y = float64(p.X), float64(p.Y)
 	}
@@ -77,9 +77,9 @@ func Direction(el1, el2 image.Point) float64 {
 	return -180 + direction_
 }
 
-func Center(points ...image.Point) geometry.Point2 {
+func Center(points ...image.Point) plane.Point2 {
 	if len(points) < 1 {
-		return geometry.Point2{math.NaN(), math.NaN()}
+		return plane.Point2{math.NaN(), math.NaN()}
 	}
 	var x, y float64
 	for _, element := range points {
@@ -89,7 +89,7 @@ func Center(points ...image.Point) geometry.Point2 {
 
 	n := float64(len(points))
 
-	return geometry.Point2{X: x / n, Y: y / n}
+	return plane.Point2{X: x / n, Y: y / n}
 }
 
 //func AverageAlongOx(points2 []numlib.Point2) ([]image.ImagePoint, image.Rect) {

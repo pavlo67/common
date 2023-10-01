@@ -3,12 +3,18 @@ package imagelib
 import (
 	"image"
 	"image/color"
+	"log"
 	"math"
 
-	"github.com/pavlo67/common/common/mathlib/geometry"
-
 	"golang.org/x/image/draw"
+
+	"github.com/pavlo67/common/common/mathlib/plane"
 )
+
+// DEPRECATED???
+type ImageSet interface {
+	Set(x, y int, c color.Color)
+}
 
 // GetMask ------------------------------------------------------------------------------
 
@@ -21,6 +27,7 @@ type GetMask interface {
 type MaskOneColor struct {
 	Color  color.Color
 	Points []image.Point
+	Marker
 }
 
 type Mask []MaskOneColor
@@ -33,22 +40,46 @@ func (mask Mask) ShowOnRGBA(rgb image.RGBA) {
 	}
 }
 
-type ImageSet interface {
-	Set(x, y int, c color.Color)
-}
-
 func (mask Mask) ShowOn(img image.Image) {
-	imgSet, _ := img.(ImageSet)
-	if imgSet != nil {
+	drawImg, _ := img.(draw.Image)
+	if drawImg != nil {
 		for _, maskOneColor := range mask {
 			for _, p := range maskOneColor.Points {
-				imgSet.Set(p.X, p.Y, maskOneColor.Color)
+				drawImg.Set(p.X, p.Y, maskOneColor.Color)
+			}
+			if maskOneColor.Marker != nil {
+				maskOneColor.Marker.Mark(drawImg, maskOneColor.Color)
 			}
 		}
 	}
 }
 
-func Line(s geometry.LineSegment, width int) []image.Point {
+// Marker -------------------------------------------------------------------------------
+
+type Marker interface {
+	Mark(draw.Image, color.Color)
+}
+
+var _ Marker = &MarkerText{}
+var _ Marker = MarkerText{}
+
+type MarkerText struct {
+	DPI      float64
+	Size     float64
+	Spacing  float64
+	FontFile string
+	Text     []string
+	image.Point
+	// logger.Operator
+}
+
+func (mt MarkerText) Mark(drawImg draw.Image, clr color.Color) {
+	if _, err := Write(drawImg, mt.Point, mt.DPI, mt.Size, mt.Spacing, mt.FontFile, clr, mt.Text); err != nil {
+		log.Printf("ERROR: on MarkerText.Mark(): %s", err)
+	}
+}
+
+func Line(s plane.Segment, width int) []image.Point {
 	begin, end := s[0].ImagePoint(), s[1].ImagePoint()
 
 	var wMin int
@@ -172,7 +203,7 @@ func AddVLine(img draw.Image, x, y1, y2 int, clr color.Color) {
 	}
 }
 
-func AddLine(img draw.Image, ls geometry.LineSegment, clr color.Color) {
+func AddLine(img draw.Image, ls plane.Segment, clr color.Color) {
 	x1Int, y1Int, x2Int, y2Int := int(math.Round(ls[0].X)), int(math.Round(ls[0].Y)), int(math.Round(ls[1].X)), int(math.Round(ls[1].Y))
 
 	k := 0.

@@ -17,7 +17,7 @@ import (
 
 func TestAuthHTTP(t *testing.T) {
 
-	cfgService, l := config.PrepareTests(t, "../../../_environments/", "test", "")
+	cfgService, l := config.PrepareTests(t, "../../../_envs/", "test", "")
 	require.NotNil(t, cfgService)
 
 	starters, err := demo_settings.Starters(cfgService, true)

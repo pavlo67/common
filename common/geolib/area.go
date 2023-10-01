@@ -6,6 +6,11 @@ import (
 
 type Area [2]Point
 
+func (area Area) Center() Point {
+	direction := area[0].DirectionTo(area[1])
+	return area[0].PointAtDirection(Direction{direction.Bearing, 0.5 * direction.Distance})
+}
+
 //func (area *Area) Canon() {
 //	if area[0].Lat > area[1].Lat {
 //		area[0].Lat, area[1].Lat = area[1].Lat, area[0].Lat

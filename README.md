@@ -21,13 +21,13 @@
 
 ## Запуск демо-сервісу
 
-    cp _environments/env.yaml_example local.yaml
+    cp _envs/env.yaml_example local.yaml
     go run apps/demo/main.go
 
 ## Запуск тесту для auth_stub/auth_server_http
 
     # запустити сервер, як описано вище
-    cp _environments/env.yaml_example test.yaml
+    cp _envs/env.yaml_example test.yaml
     go test -v github.com/pavlo67/common/common/auth/auth_http
 
 

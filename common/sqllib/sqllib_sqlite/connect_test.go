@@ -13,7 +13,7 @@ func TestConnect(t *testing.T) {
 
 	cfgService, _ := config.PrepareTests(
 		t,
-		"../../../_environments/",
+		"../../../_envs/",
 		"test",
 		"", // "connect_test."+strconv.FormatInt(time.Now().Unix(), 10)+".log",
 	)

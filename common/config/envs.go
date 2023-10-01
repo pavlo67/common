@@ -3,19 +3,21 @@ package config
 import (
 	"io/ioutil"
 
+	"github.com/pavlo67/common/common/serialization"
+
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/errors"
 )
 
-type Environment struct {
+type Envs struct {
 	serviceName string
 	data        map[string]interface{}
-	marshaler   Marshaler
+	marshaler   serialization.Marshaler
 }
 
-var errNoConfig = errors.New("no config")
+var errNoEnvs = errors.New("no envs")
 
-func (c *Environment) ServiceName() string {
+func (c *Envs) ServiceName() string {
 	if c == nil {
 		return ""
 	}
@@ -23,22 +25,22 @@ func (c *Environment) ServiceName() string {
 	return c.serviceName
 }
 
-func (c *Environment) Raw(key string) (interface{}, error) {
+func (c *Envs) Raw(key string) (interface{}, error) {
 	if c == nil {
-		return nil, errNoConfig
+		return nil, errNoEnvs
 	}
 
 	valueRaw, ok := c.data[key]
 	if !ok {
-		return nil, errors.CommonError(common.NotFoundKey, common.Map{"reason": "no key in config", "key": key})
+		return nil, errors.CommonError(common.NotFoundKey, common.Map{"reason": "no key in envs", "key": key})
 	}
 
 	return valueRaw, nil
 }
 
-func (c *Environment) Value(key string, target interface{}) error {
+func (c *Envs) Value(key string, target interface{}) error {
 	if c == nil {
-		return errNoConfig
+		return errNoEnvs
 	}
 
 	if value, ok := c.data[key]; ok {
@@ -50,33 +52,33 @@ func (c *Environment) Value(key string, target interface{}) error {
 		return c.marshaler.Unmarshal(valueRaw, target)
 	}
 
-	return errors.CommonError(common.NotFoundKey, common.Map{"reason": "no key in config", "key": key})
+	return errors.CommonError(common.NotFoundKey, common.Map{"reason": "no key in envs", "key": key})
 }
 
 // -----------------------------------------------------------------------------
 
-func Get(cfgFile string, marshaler Marshaler) (*Environment, error) {
+func Get(envsFile string, marshaler serialization.Marshaler) (*Envs, error) {
 
-	if len(cfgFile) < 1 {
-		return nil, errors.New("empty config path")
+	if len(envsFile) < 1 {
+		return nil, errors.New("empty envs path")
 	}
 
-	data, err := ioutil.ReadFile(cfgFile)
+	data, err := ioutil.ReadFile(envsFile)
 	if err != nil {
-		return nil, errors.Wrapf(err, "can't read config file from '%s'", cfgFile)
+		return nil, errors.Wrapf(err, "can't read envs file from '%s'", envsFile)
 	}
 
-	cfg := Environment{marshaler: marshaler}
+	cfg := Envs{marshaler: marshaler}
 	err = marshaler.Unmarshal(data, &cfg.data)
 	if err != nil {
-		return nil, errors.Wrapf(err, "can't .Unmarshal('%s') from config '%s'", data, cfgFile)
+		return nil, errors.Wrapf(err, "can't .Unmarshal('%s') from envs '%s'", data, envsFile)
 	}
 
 	return &cfg, nil
 }
 
 //// Key ...
-//func (c *Environment) Key(key string, errs common.multipleErrors) (string, common.multipleErrors) {
+//func (c *Envs) Key(key string, errs common.multipleErrors) (string, common.multipleErrors) {
 //	if c == nil {
 //		return "", append(errs, ErrNoConfig)
 //	}
@@ -87,7 +89,7 @@ func Get(cfgFile string, marshaler Marshaler) (*Environment, error) {
 //}
 //
 //// IsTrue ...
-//func (c *Environment) IsTrue(key string, errs common.multipleErrors) (bool, common.multipleErrors) {
+//func (c *Envs) IsTrue(key string, errs common.multipleErrors) (bool, common.multipleErrors) {
 //	if c == nil {
 //		return false, append(errs, ErrNoConfig)
 //	}

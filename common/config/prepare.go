@@ -12,6 +12,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/pavlo67/common/common/serialization"
+
 	"github.com/stretchr/testify/require"
 
 	"github.com/pavlo67/common/common/filelib"
@@ -30,7 +32,7 @@ func ShowVCSInfo() {
 	}
 }
 
-func PrepareApp(envPath string) (Environment, logger.Operator) {
+func PrepareApp(envPath string) (Envs, logger.Operator) {
 
 	rand.Seed(time.Now().UnixNano())
 
@@ -41,7 +43,7 @@ func PrepareApp(envPath string) (Environment, logger.Operator) {
 		configEnv = "local"
 	}
 
-	cfgServicePtr, err := Get(envPath+configEnv+".yaml", MarshalerYAML)
+	cfgServicePtr, err := Get(envPath+configEnv+".yaml", serialization.MarshalerYAML)
 	if err != nil || cfgServicePtr == nil {
 		log.Fatalf("on config.PrepareApp(%s, %s) got %#v / %s", envPath, configEnv+".yaml", cfgServicePtr, err)
 	}
@@ -49,7 +51,7 @@ func PrepareApp(envPath string) (Environment, logger.Operator) {
 	// get logger --------------------------------------------------------------------
 
 	// TODO!!! why it doesn't work??? it should be completed
-	// var loggerConfig logger.Environment
+	// var loggerConfig logger.Envs
 	// if err = cfgServicePtr.Value("logger", &loggerConfig); err != nil {
 	//	log.Fatalf("on config.PrepareApp(%s, %s) got %s reading logger config", envPath, configEnv+".yaml", err)
 	// }
@@ -82,7 +84,7 @@ func PrepareApp(envPath string) (Environment, logger.Operator) {
 	return *cfgServicePtr, l
 }
 
-func PrepareTests(t *testing.T, envPath, configEnv, logfile string) (Environment, logger.Operator) {
+func PrepareTests(t *testing.T, envPath, configEnv, logfile string) (Envs, logger.Operator) {
 
 	os.Setenv("ENV", configEnv)
 
@@ -99,7 +101,7 @@ func PrepareTests(t *testing.T, envPath, configEnv, logfile string) (Environment
 	require.NoError(t, err)
 	require.NotNil(t, l)
 
-	cfgServicePtr, err := Get(envPath+configEnv+".yaml", MarshalerYAML)
+	cfgServicePtr, err := Get(envPath+configEnv+".yaml", serialization.MarshalerYAML)
 	require.NoError(t, err)
 	require.NotNil(t, cfgServicePtr)
 

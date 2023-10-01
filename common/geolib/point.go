@@ -4,9 +4,8 @@ import (
 	"math"
 
 	geo "github.com/kellydunn/golang-geo"
+	"github.com/pavlo67/common/common/mathlib/plane"
 	// geo "github.com/billups/golang-geo"
-
-	"github.com/pavlo67/common/common/mathlib/geometry"
 )
 
 type Point struct {
@@ -16,6 +15,12 @@ type Point struct {
 type Direction struct {
 	Bearing
 	Distance float64
+}
+
+func (dir Direction) Moving() plane.Point2 {
+	localAngle := dir.Bearing.OxyAngle()
+
+	return plane.Point2{dir.Distance * math.Cos(localAngle), dir.Distance * math.Sin(localAngle)}
 }
 
 // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
@@ -51,7 +56,7 @@ func (p Point) MovedAt(dx, dy float64) Point {
 
 	dxKm, dyKm := dx*0.001, dy*0.001
 
-	bearing := BearingFromGeometry(geometry.Point2{dxKm, dyKm}.Rotation())
+	bearing := BearingFromGeometry(plane.Point2{dxKm, dyKm}.Rotation())
 
 	geoPoint := p.Geo()
 
@@ -80,4 +85,12 @@ func (p Point) DistanceTo(p1 Point) float64 {
 
 	// geoPoint.GreatCircleDistance(&geoPoint1) returns distance in kilometers
 	return 1000 * geoPoint.GreatCircleDistance(&geoPoint1)
+}
+
+func (p Point) DirectionTo(p1 Point) Direction {
+	geoPoint, geoPoint1 := p.Geo(), p1.Geo()
+	return Direction{
+		Bearing(geoPoint.BearingTo(&geoPoint1)),
+		1000 * geoPoint.GreatCircleDistance(&geoPoint1),
+	}
 }

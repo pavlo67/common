@@ -1,4 +1,4 @@
-package geometry
+package plane
 
 type RectangleFixed struct {
 	P0, P1 Point2
@@ -22,7 +22,7 @@ type Rectangle struct {
 }
 
 func (rect Rectangle) Contains(p2 Point2) bool {
-	p2Rotated := RotateAround(p2, rect.Point2, -rect.Rotation)
+	p2Rotated := p2.RotateAround(rect.Point2, -rect.Rotation)
 	return p2Rotated.X >= rect.Point2.X-rect.HalfSideX && p2Rotated.X <= rect.Point2.X+rect.HalfSideX &&
 		p2Rotated.Y >= rect.Point2.Y-rect.HalfSideY && p2Rotated.Y <= rect.Point2.Y+rect.HalfSideY
 }
@@ -37,10 +37,10 @@ func (rect Rectangle) Outer(margin float64) Rectangle {
 
 //func (rect Rectangle) Intersection(pCh PolyChain) PolyChain {
 //
-//	log.Fatal("on geometry.Rectangle.Intersects()")
+//	log.Fatal("on Rectangle.Intersects()")
 //
 //	//for _, p := range pCh {
-//	//	p2Rot := geometry.RotateByAngle(p, -rect.Rotation)
+//	//	p2Rot := RotateByAngle(p, -rect.Rotation)
 //	//	if p2Rot.XT >= rect.Min.XT && p2Rot.XT <= rect.MaxIn.XT && p2Rot.YT >= rect.Min.YT && p2Rot.YT <= rect.MaxIn.YT {
 //	//		return true
 //	//	}
@@ -50,7 +50,7 @@ func (rect Rectangle) Outer(margin float64) Rectangle {
 //
 //func (rect Rectangle) IntersectionArea(rect1 Rectangle) float64 {
 //
-//	log.Fatal("on geometry.Rectangle.IntersectionArea()")
+//	log.Fatal("on Rectangle.IntersectionArea()")
 //
 //	return 0
 //}
@@ -61,7 +61,7 @@ func (rect Rectangle) Points() (p00, p01, p10, p11 Point2) {
 	}
 
 	p00Fixed, p01Fixed := Point2{-rect.HalfSideX, -rect.HalfSideY}, Point2{-rect.HalfSideX, rect.HalfSideY}
-	p00_, p01_ := RotateByAngle(p00Fixed, rect.Rotation), RotateByAngle(p01Fixed, rect.Rotation)
+	p00_, p01_ := p00Fixed.RotateByAngle(rect.Rotation), p01Fixed.RotateByAngle(rect.Rotation)
 
 	return Point2{p00_.X + rect.Point2.X, p00_.Y + rect.Point2.Y},
 		Point2{p01_.X + rect.Point2.X, p01_.Y + rect.Point2.Y},

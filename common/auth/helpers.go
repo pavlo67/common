@@ -9,7 +9,7 @@ import (
 	"github.com/pavlo67/common/common/rbac"
 )
 
-func Auth(env config.Environment, authOp Operator, role rbac.Role) (actor *Actor, err error) {
+func Auth(env config.Envs, authOp Operator, role rbac.Role) (actor *Actor, err error) {
 
 	var actors []Actor
 

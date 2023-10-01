@@ -27,7 +27,7 @@ func (ahs *authstubStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ahs *authstubStarter) Run(cfg *config.Environment, options common.Map, joinerOp joiner.Operator, l_ logger.Operator) error {
+func (ahs *authstubStarter) Run(cfg *config.Envs, options common.Map, joinerOp joiner.Operator, l_ logger.Operator) error {
 	l = l_
 
 	if err := cfg.Value("actors", &ahs.defaultActors); err != nil {

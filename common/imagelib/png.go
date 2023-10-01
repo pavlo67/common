@@ -18,7 +18,7 @@ import (
 //	Imager() (image.Imager, error)
 //}
 
-const onSavePNG = "on imagelib.SavePNG()"
+const onSavePNG = "on SavePNG()"
 
 func SavePNG(img image.Image, filename string) error {
 	if img == nil {

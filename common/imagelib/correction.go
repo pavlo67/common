@@ -13,7 +13,7 @@ func CorrectChannels(imgRGB image.RGBA, dr, dg, db int8) image.RGBA {
 			rgba, _ := imgRGB.At(x, y).(color.RGBA)
 
 			//if rgba == nil {
-			//	log.Fatal("rgba == nil / on imagelib.CorrectChannels()")
+			//	log.Fatal("rgba == nil / on CorrectChannels()")
 			//}
 
 			r1 := int(rgba.R) + int(dr)

@@ -32,7 +32,7 @@ func (cps *connectPgStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (cps *connectPgStarter) Run(cfg *config.Environment, options common.Map, joinerOp joiner.Operator, l_ logger.Operator) error {
+func (cps *connectPgStarter) Run(cfg *config.Envs, options common.Map, joinerOp joiner.Operator, l_ logger.Operator) error {
 	l = l_
 
 	if err := cfg.Value(options.StringDefault("db_key", "db_pg"), &cps.cfgPg); err != nil {

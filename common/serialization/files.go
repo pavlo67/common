@@ -7,14 +7,13 @@ import (
 	"os"
 	"regexp"
 
-	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/filelib"
 )
 
 const onSave = "on serialization.Save()"
 
-func Save(filename string, marshaler config.Marshaler, data interface{}) error {
+func Save(data interface{}, marshaler Marshaler, filename string) error {
 	dataBytes, err := marshaler.Marshal(data)
 	if err != nil {
 		return fmt.Errorf("saving %#v got: %s / "+onSave, data, err)
@@ -29,7 +28,7 @@ func Save(filename string, marshaler config.Marshaler, data interface{}) error {
 
 const onRead = "on serialization.Read()"
 
-func Read(filename string, marshaler config.Marshaler, data interface{}) error {
+func Read(filename string, marshaler Marshaler, data interface{}) error {
 	dataBytes, err := os.ReadFile(filename)
 	if err != nil {
 		return fmt.Errorf("reading %s got: %s / "+onRead, filename, err)
@@ -44,7 +43,7 @@ func Read(filename string, marshaler config.Marshaler, data interface{}) error {
 
 const onSavePart = "on serialization.SavePart()"
 
-func SavePart(filename string, marshaler config.Marshaler, data interface{}) error {
+func SavePart(data interface{}, marshaler Marshaler, filename string) error {
 
 	logData, err := marshaler.Marshal(data)
 	if err != nil {
@@ -58,7 +57,7 @@ func SavePart(filename string, marshaler config.Marshaler, data interface{}) err
 
 const onReadPart = "on serialization.ReadPart()"
 
-func ReadPart(filename string, n int, marshaler config.Marshaler, data interface{}) error {
+func ReadPart(filename string, n int, marshaler Marshaler, data interface{}) error {
 	dataBytes, err := os.ReadFile(filename)
 	if err != nil {
 		return fmt.Errorf("reading %s got: %s / "+onReadPart, filename, err)

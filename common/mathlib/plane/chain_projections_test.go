@@ -1,4 +1,4 @@
-package geometry
+package plane
 
 import (
 	"math"
@@ -59,8 +59,8 @@ func TestProjectionsOnPolyChain(t *testing.T) {
 	}
 }
 
-// geometry.PolyChain{geometry.Point2{X:556, Y:355}, geometry.Point2{X:559, Y:355}, geometry.Point2{X:562, Y:355}, geometry.Point2{X:565, Y:355}, geometry.Point2{X:568,
-//	Y:355}, geometry.Point2{X:571, Y:355}, geometry.Point2} / 3)
+// PolyChain{Point2{X:556, Y:355}, Point2{X:559, Y:355}, Point2{X:562, Y:355}, Point2{X:565, Y:355}, Point2{X:568,
+//	Y:355}, Point2{X:571, Y:355}, Point2} / 3)
 
 func CheckProjections(t *testing.T, expected, got []ProjectionOnPolyChainDirected) {
 	require.Equalf(t, len(expected), len(got), "expected: %v, got: %#v", expected, got)

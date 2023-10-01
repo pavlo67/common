@@ -5,7 +5,7 @@ import (
 	"image"
 )
 
-const onComposeImages = "on imagelib.ComposeImages()"
+const onComposeImages = "on ComposeImages()"
 
 func ComposeImages(imgs [][]image.Image) (*image.RGBA, error) {
 	if len(imgs) < 1 || len(imgs[0]) < 1 {

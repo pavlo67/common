@@ -1,7 +1,7 @@
 # Environments
-_environments/*.json5
-_environments/*.yaml
-_environments/*.yml
+_envs/*.json5
+_envs/*.yaml
+_envs/*.yml
 .env
 .env.local
 .env.*.local

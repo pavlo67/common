@@ -1,4 +1,4 @@
-package geometry
+package plane
 
 import (
 	"math"
@@ -17,7 +17,7 @@ func DistanceToPolyChain(p Point2, pCh PolyChain) (float64, ProjectionOnPolyChai
 	if len(pCh) < 1 {
 		return math.NaN(), ProjectionOnPolyChain{N: -1, Position: math.NaN(), Point2: Point2{math.NaN(), math.NaN()}}
 	} else if len(pCh) == 1 {
-		return Distance(p, pCh[0]), ProjectionOnPolyChain{Point2: pCh[0]}
+		return p.DistanceTo(pCh[0]), ProjectionOnPolyChain{Point2: pCh[0]}
 	}
 
 	minDist := math.Inf(1)
@@ -27,12 +27,12 @@ func DistanceToPolyChain(p Point2, pCh PolyChain) (float64, ProjectionOnPolyChai
 
 	// POINTS:
 	for i, pI := range pCh[:len(pCh)-1] {
-		dist, position := DistanceToLineSegment(p, LineSegment{pI, pCh[i+1]})
+		dist, position := p.DistanceToSegment(Segment{pI, pCh[i+1]})
 		if dist >= minDist {
 			continue
 		}
 
-		if segmentLength := Distance(pI, pCh[i+1]); segmentLength <= 0 {
+		if segmentLength := pI.DistanceTo(pCh[i+1]); segmentLength <= 0 {
 			pPr, n, position = pI, i, 0
 		} else if position >= segmentLength {
 			pPr, n, position = pCh[i+1], i+1, 0
@@ -85,7 +85,7 @@ func ProjectionsOnPolyChain(polyChain PolyChain, p Point2, distanceMax float64) 
 		return nil
 
 	} else if len(polyChain) == 1 {
-		if distance := Distance(p, polyChain[0]); distance <= distanceMax {
+		if distance := p.DistanceTo(polyChain[0]); distance <= distanceMax {
 			return []ProjectionOnPolyChainDirected{{
 				Distance:              distance,
 				ProjectionOnPolyChain: ProjectionOnPolyChain{Point2: polyChain[0]},
@@ -99,7 +99,7 @@ func ProjectionsOnPolyChain(polyChain PolyChain, p Point2, distanceMax float64) 
 
 	for n := 0; n < len(polyChain)-1; n++ {
 		pn := polyChain[n]
-		dist, position := DistanceToLineSegment(p, LineSegment{pn, polyChain[n+1]})
+		dist, position := p.DistanceToSegment(Segment{pn, polyChain[n+1]})
 
 		// log.Print(dist, distanceMax)
 
@@ -107,7 +107,7 @@ func ProjectionsOnPolyChain(polyChain PolyChain, p Point2, distanceMax float64) 
 			continue
 		}
 
-		segmLen := Distance(pn, polyChain[n+1])
+		segmLen := pn.DistanceTo(polyChain[n+1])
 		if position < segmLen {
 			projections = append(projections, ProjectionOnPolyChainDirected{dist, 0, ProjectionOnPolyChain{
 				n, position, Point2{pn.X + (polyChain[n+1].X-pn.X)*position/segmLen, pn.Y + (polyChain[n+1].Y-pn.Y)*position/segmLen}}})
@@ -121,7 +121,7 @@ func ProjectionsOnPolyChain(polyChain PolyChain, p Point2, distanceMax float64) 
 }
 
 // we check the ray directed from ls[1] to infinity
-func SegmentProjectionOnPolyChain(polyChain PolyChain, ls LineSegment, distanceMax float64) *ProjectionOnPolyChainDirected {
+func SegmentProjectionOnPolyChain(polyChain PolyChain, ls Segment, distanceMax float64) *ProjectionOnPolyChainDirected {
 	//log.Printf("%v + %v", polyChain, ls)
 
 	if len(polyChain) < 1 {
@@ -129,10 +129,10 @@ func SegmentProjectionOnPolyChain(polyChain PolyChain, ls LineSegment, distanceM
 
 	}
 
-	segmLen := Distance(ls[0], ls[1])
+	segmLen := ls[0].DistanceTo(ls[1])
 
 	if len(polyChain) == 1 {
-		distance0, distance1 := Distance(polyChain[0], ls[0]), Distance(polyChain[0], ls[1])
+		distance0, distance1 := polyChain[0].DistanceTo(ls[0]), polyChain[0].DistanceTo(ls[1])
 		if math.Abs(segmLen+distance1-distance0) <= mathlib.Eps {
 			return &ProjectionOnPolyChainDirected{Distance: distance1, ProjectionOnPolyChain: ProjectionOnPolyChain{Point2: polyChain[0]}}
 		}
@@ -142,19 +142,19 @@ func SegmentProjectionOnPolyChain(polyChain PolyChain, ls LineSegment, distanceM
 	var pr *ProjectionOnPolyChainDirected
 
 	for n, pn := range polyChain[:len(polyChain)-1] {
-		if p := DividedByLine(pn, polyChain[n+1], ls); p != nil {
+		if p := ls.DivideByLine(pn, polyChain[n+1]); p != nil {
 
 			//log.Print(*p)
 
-			if distance1 := Distance(*p, ls[1]); distance1 <= distanceMax && (pr == nil || distance1 < pr.Distance) {
+			if distance1 := p.DistanceTo(ls[1]); distance1 <= distanceMax && (pr == nil || distance1 < pr.Distance) {
 
-				distance0 := Distance(*p, ls[0])
+				distance0 := p.DistanceTo(ls[0])
 
 				//log.Print(distance0, distance1, segmLen)
 
 				if math.Abs(segmLen+distance1-distance0) <= mathlib.Eps {
-					position := Distance(pn, *p)
-					if position >= Distance(pn, polyChain[n+1]) {
+					position := p.DistanceTo(pn)
+					if position >= pn.DistanceTo(polyChain[n+1]) {
 						pr = &ProjectionOnPolyChainDirected{
 							Distance:              distance1,
 							ProjectionOnPolyChain: ProjectionOnPolyChain{N: n + 1, Point2: *p}}

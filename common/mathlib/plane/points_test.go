@@ -1,8 +1,10 @@
-package geometry
+package plane
 
 import (
 	"math"
 	"testing"
+
+	"github.com/pavlo67/common/common/mathlib"
 
 	"github.com/stretchr/testify/require"
 )
@@ -50,7 +52,7 @@ func TestRotateByAngle(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := RotateByAngle(tt.args.p, tt.args.addAngle); Distance(got, tt.want) > eps {
+			if got := tt.args.p.RotateByAngle(tt.args.addAngle); got.DistanceTo(tt.want) > mathlib.Eps {
 				t.Errorf("RotateByAngle() = %v, wantDistance %v", got, tt.want)
 			}
 		})
@@ -132,7 +134,7 @@ func TestRotateWithRatio(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := RotateWithRatio(tt.args.p, tt.args.ratio); Distance(got, tt.want) > eps {
+			if got := tt.args.p.RotateWithRatio(tt.args.ratio); got.DistanceTo(tt.want) > mathlib.Eps {
 				t.Errorf("RotateByAngle() = %v, wantDistance %v", got, tt.want)
 			}
 		})
@@ -142,7 +144,7 @@ func TestRotateWithRatio(t *testing.T) {
 func TestTurnAroundAxis(t *testing.T) {
 	type args struct {
 		p    Point2
-		axis LineSegment
+		axis Segment
 	}
 	tests := []struct {
 		name string
@@ -151,33 +153,33 @@ func TestTurnAroundAxis(t *testing.T) {
 	}{
 		{
 			name: "Oy/Ox",
-			args: args{p: Point2{0, 1}, axis: LineSegment{Point2{0, 0}, Point2{1, 0}}},
+			args: args{p: Point2{0, 1}, axis: Segment{Point2{0, 0}, Point2{1, 0}}},
 			want: Point2{0, -1},
 		},
 		{
 			name: "Ox/Oy",
-			args: args{p: Point2{-1, 1}, axis: LineSegment{Point2{0, -5}, Point2{0, 1}}},
+			args: args{p: Point2{-1, 1}, axis: Segment{Point2{0, -5}, Point2{0, 1}}},
 			want: Point2{1, 1},
 		},
 		{
 			name: "Oy/45",
-			args: args{p: Point2{0, 1}, axis: LineSegment{Point2{-3, -3}, Point2{0, 0}}},
+			args: args{p: Point2{0, 1}, axis: Segment{Point2{-3, -3}, Point2{0, 0}}},
 			want: Point2{1, 0},
 		},
 		{
 			name: "Oy/45-1",
-			args: args{p: Point2{0, 1}, axis: LineSegment{Point2{-3, -4}, Point2{0, -1}}},
+			args: args{p: Point2{0, 1}, axis: Segment{Point2{-3, -4}, Point2{0, -1}}},
 			want: Point2{2, -1},
 		},
 		{
 			name: "Ox/-45",
-			args: args{p: Point2{1, 0}, axis: LineSegment{Point2{0, 0}, Point2{1, -1}}},
+			args: args{p: Point2{1, 0}, axis: Segment{Point2{0, 0}, Point2{1, -1}}},
 			want: Point2{0, -1},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := TurnAroundAxis(tt.args.axis, tt.args.p); Distance(got, tt.want) > eps {
+			if got := tt.args.axis.TurnAroundAxis(tt.args.p); got.DistanceTo(tt.want) > mathlib.Eps {
 				t.Errorf("TurnAroundAxis() = %v, wantDistance %v", got, tt.want)
 			}
 		})
@@ -205,14 +207,14 @@ func TestAngle2(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Angle2(tt.args.v0, tt.args.v1); math.Abs(got-tt.want) > eps {
-				t.Errorf("Angle2() = %v, wantDistance %v", got, tt.want)
+			if got := tt.args.v0.AnglesDelta(tt.args.v1); math.Abs(got-tt.want) > mathlib.Eps {
+				t.Errorf("AnglesDelta() = %v, wantDistance %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestAngle(t *testing.T) {
+func TestRotation(t *testing.T) {
 	type args struct {
 		p Point2
 	}
@@ -233,7 +235,7 @@ func TestAngle(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.args.p.Rotation(); math.Abs(float64(got-tt.want)) > eps {
+			if got := tt.args.p.Rotation(); math.Abs(float64(got-tt.want)) > mathlib.Eps {
 				t.Errorf("Rotation() = %v, wantDistance %v", got, tt.want)
 			}
 		})
@@ -261,7 +263,7 @@ func TestAngle(t *testing.T) {
 //	}
 //	for _, tt := range tests {
 //		t.Run(tt.name, func(t *testing.T) {
-//			if got := Angle1(tt.args.p); math.Abs(got-tt.wantDistance) > eps {
+//			if got := Angle1(tt.args.p); math.Abs(got-tt.wantDistance) > Eps {
 //				t.Errorf("Rotation() = %v, wantDistance %v", got, tt.wantDistance)
 //			}
 //		})
@@ -272,65 +274,65 @@ func TestDistanceToLine(t *testing.T) {
 	tests := []struct {
 		name string
 		p    Point2
-		line LineSegment
+		line Segment
 		want float64
 	}{
 		{
 			name: "1",
 			p:    Point2{38, 57.5},
-			line: LineSegment{Point2{11.666666666666666, 38.666666666666664}, Point2{165.33333333333331, 38.5}},
+			line: Segment{Point2{11.666666666666666, 38.666666666666664}, Point2{165.33333333333331, 38.5}},
 			want: 18.861883338267475,
 		},
 		{
 			name: "2",
 			p:    Point2{25.333333333333332, 4.666666666666667},
-			line: LineSegment{Point2{11.666666666666666, 38.666666666666664}, Point2{165.33333333333331, 38.5}},
+			line: Segment{Point2{11.666666666666666, 38.666666666666664}, Point2{165.33333333333331, 38.5}},
 			want: 33.98515716183312,
 		},
 		{
 			name: "3",
 			p:    Point2{25.333333333333332, 4.5},
-			line: LineSegment{Point2{11.666666666666666, 38.5}, Point2{165.33333333333331, 38.5}},
+			line: Segment{Point2{11.666666666666666, 38.5}, Point2{165.33333333333331, 38.5}},
 			want: 34,
 		},
 		{
 			name: "4",
 			p:    Point2{25.3, 4.5},
-			line: LineSegment{Point2{11, 38.5}, Point2{11, 48.5}},
+			line: Segment{Point2{11, 38.5}, Point2{11, 48.5}},
 			want: 14.3,
 		},
 		{
 			name: "5",
 			p:    Point2{1, 1},
-			line: LineSegment{Point2{2, 2}, Point2{2, 4}},
+			line: Segment{Point2{2, 2}, Point2{2, 4}},
 			want: 1,
 		},
 		{
 			name: "5",
 			p:    Point2{1, 1},
-			line: LineSegment{Point2{2, 2}, Point2{0, 0}},
+			line: Segment{Point2{2, 2}, Point2{0, 0}},
 			want: 0,
 		},
 		{
 			name: "5",
 			p:    Point2{1, 1},
-			line: LineSegment{Point2{2, 2}, Point2{2, 2}},
+			line: Segment{Point2{2, 2}, Point2{2, 2}},
 			want: math.NaN(),
 		},
 		{
 			name: "6",
 			p:    Point2{0, 1},
-			line: LineSegment{{}, {2, 2}},
+			line: Segment{{}, {2, 2}},
 			want: math.Sqrt(2) / 2,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := DistanceToLine(tt.p, tt.line)
+			got := tt.p.DistanceToLine(tt.line)
 			if math.IsNaN(tt.want) {
 				require.Truef(t, math.IsNaN(got), "wanted: %f, gotten: %f", tt.want, got)
 			} else {
-				require.Truef(t, math.Abs(got-tt.want) < eps, "wanted: %f, gotten: %f", tt.want, got)
+				require.Truef(t, math.Abs(got-tt.want) < mathlib.Eps, "wanted: %f, gotten: %f", tt.want, got)
 			}
 		})
 	}

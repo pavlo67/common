@@ -11,7 +11,7 @@ import (
 	"github.com/pavlo67/common/common/logger"
 )
 
-func Run(starters []Component, environment *config.Environment, label string, l logger.Operator) (joiner.Operator, error) {
+func Run(starters []Component, environment *config.Envs, label string, l logger.Operator) (joiner.Operator, error) {
 	joinerOp := joiner_runtime.New(nil, l)
 
 	for _, c := range starters {
