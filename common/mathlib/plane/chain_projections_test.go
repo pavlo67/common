@@ -9,6 +9,15 @@ import (
 	"github.com/pavlo67/common/common/mathlib"
 )
 
+func TestProjectionsOnPolyChainProbe(t *testing.T) {
+	polyChain := PolyChain{{221.29971138416823, 290.62290413201606}, {238, 268.5}, {262, 252}}
+	point := Point2{237, 266}
+
+	got := ProjectionsOnPolyChain(polyChain, point, 10)
+
+	t.Logf("%#v", got)
+}
+
 func TestProjectionsOnPolyChain(t *testing.T) {
 	tests := []struct {
 		name        string

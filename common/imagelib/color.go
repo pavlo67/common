@@ -6,11 +6,6 @@ import (
 	"golang.org/x/image/colornames"
 )
 
-type PixDelta = int16
-type PixSum = int32
-
-const PixMax = 0xFF
-
 func Brightness(clr color.RGBA) uint32 {
 	return uint32(clr.R) * uint32(clr.G) * uint32(clr.B)
 }

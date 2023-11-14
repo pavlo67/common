@@ -81,3 +81,14 @@ func FileExists(path string, isDir bool) (bool, error) {
 
 	return true, nil
 }
+
+const onFileExistsAny = "on filelib.FileExistsAny()"
+
+func FileExistsAny(path string) (exists, isDir bool) {
+	fileInfo, _ := os.Stat(path)
+	if fileInfo == nil {
+		return false, false
+	}
+
+	return true, fileInfo.IsDir()
+}

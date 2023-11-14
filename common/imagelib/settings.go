@@ -7,8 +7,8 @@ import (
 )
 
 type Settings struct {
-	DPM     float64
-	Options common.Map
+	DPM     float64     `json:",omitempty"`
+	Options common.Map  `json:",omitempty"`
 }
 
 func (settings *Settings) SetOptions(key string, value interface{}) {

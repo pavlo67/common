@@ -14,9 +14,22 @@ type SubImage interface {
 	SubImage(image.Rectangle) image.Image
 }
 
+type Bounded interface {
+	Bounds() image.Rectangle
+}
+
+type Described interface {
+	Bounds() image.Rectangle
+	Description() Settings
+}
+
 // Imager -------------------------------------------------------------------------
 
 var _ Imager = &GetImage{}
+
+func GetImager(img image.Image) Imager {
+	return &GetImage{Images: []image.Image{img}}
+}
 
 type GetImage struct {
 	Images     []image.Image

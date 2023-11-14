@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"image/color"
 
-	"github.com/pavlo67/common/common/imagelib"
+	"github.com/pavlo67/common/common/imagelib/pix"
 
 	"github.com/pavlo67/common/common"
 )
@@ -14,12 +14,12 @@ var _ Operator = &lowChannelFilter{}
 type lowChannelFilter struct {
 	ch        int
 	ch1, ch2  int
-	threshold imagelib.PixDelta
+	threshold pix.ValueDelta
 }
 
 const onLowChannel = "on color_filter.LowChannel()"
 
-func LowChannel(ch int, threshold imagelib.PixDelta) (Operator, error) {
+func LowChannel(ch int, threshold pix.ValueDelta) (Operator, error) {
 	lowChannel := lowChannelFilter{ch: ch, threshold: threshold}
 
 	// lowChannel.ch1, lowChannel.ch2 = (ch + 1) %3, (ch + 2) %3
@@ -41,8 +41,8 @@ func LowChannel(ch int, threshold imagelib.PixDelta) (Operator, error) {
 func (op lowChannelFilter) Test(rgba color.RGBA) bool {
 	rgb := [3]uint8{rgba.R, rgba.G, rgba.B}
 
-	return imagelib.PixDelta(rgb[op.ch])-imagelib.PixDelta(rgb[op.ch1]) < op.threshold ||
-		imagelib.PixDelta(rgb[op.ch])-imagelib.PixDelta(rgb[op.ch2]) < op.threshold
+	return pix.ValueDelta(rgb[op.ch])-pix.ValueDelta(rgb[op.ch1]) < op.threshold ||
+		pix.ValueDelta(rgb[op.ch])-pix.ValueDelta(rgb[op.ch2]) < op.threshold
 }
 
 func (op lowChannelFilter) Info() common.Map {

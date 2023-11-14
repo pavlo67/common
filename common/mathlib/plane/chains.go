@@ -9,10 +9,10 @@ import (
 
 type PolyChain []Point2
 
-type ProjectionPolyChainOnPolyChain struct {
-	N0 int
-	ProjectionOnPolyChain
-}
+//type ProjectionPolyChainOnPolyChain struct {
+//	N0 int
+//	ProjectionOnPolyChain
+//}
 
 func (pCh PolyChain) Length() float64 {
 	length := 0.

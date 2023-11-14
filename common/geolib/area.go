@@ -1,14 +1,16 @@
 package geolib
 
-import (
-	"log"
-)
-
 type Area [2]Point
 
 func (area Area) Center() Point {
 	direction := area[0].DirectionTo(area[1])
 	return area[0].PointAtDirection(Direction{direction.Bearing, 0.5 * direction.Distance})
+}
+
+func AreaAround(point Point, radius float64) Area {
+	// TODO!!! check if radius is too large
+
+	return Area{point.MovedAt(-radius, -radius), point.MovedAt(radius, radius)}
 }
 
 //func (area *Area) Canon() {
@@ -31,11 +33,6 @@ func (area Area) XYRanges(zoom int) XYRanges {
 	}
 
 	return XYRanges{Zoom: zoom, XT: XYRange{tileMin.X, tileMax.X}, YT: XYRange{tileMin.Y, tileMax.Y}}
-}
-
-func InAreas([]Area, Area) bool {
-	log.Fatal("/crud/locations.InAreas()")
-	return false
 }
 
 type Ranges struct {

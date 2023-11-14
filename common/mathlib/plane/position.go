@@ -11,13 +11,16 @@ type Position struct {
 	Rotation
 }
 
-func (r Rotation) Sub(r1 Rotation) Rotation {
-	sub := r - r1
-	if sub > math.Pi {
-		return sub - 2*math.Pi
-	} else if sub <= -math.Pi {
-		return sub + 2*math.Pi
+func (r Rotation) Canon() Rotation {
+	if r > math.Pi {
+		return r - 2*math.Pi
+	} else if r <= -math.Pi {
+		return r + 2*math.Pi
 	}
 
-	return sub
+	return r
+}
+
+func (r Rotation) Point2(radius float64) Point2 {
+	return Point2{radius * math.Cos(float64(r)), radius * math.Sin(float64(r))}
 }

@@ -13,6 +13,8 @@ type IntersectionTestCase struct {
 
 func TestLineSegmentsIntersection(t *testing.T) {
 	testCases := []IntersectionTestCase{
+		{Segment{Point2{1, 0}, Point2{1, 1}},
+			Segment{Point2{0, 1.5}, Point2{2, 1.5}}, nil},
 		{Segment{Point2{1, 2}, Point2{1, 1}},
 			Segment{Point2{1.25, 1.5}, Point2{2, 1.5}}, nil},
 
@@ -44,7 +46,7 @@ func TestLineSegmentsIntersection(t *testing.T) {
 	for i, testCase := range testCases {
 		t.Log(i)
 		// t.Logf("%#v", testCase)
-		intersection, _ := testCase.S1.Intersection(testCase.S2)
+		intersection, _ := SegmentsIntersection(testCase.S1, testCase.S2)
 		if testCase.Intersection == nil {
 			require.Nil(t, intersection)
 		} else {

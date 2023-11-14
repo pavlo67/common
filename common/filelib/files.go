@@ -178,3 +178,14 @@ func RemoveContents(dir string) error {
 	}
 	return nil
 }
+
+const onRemoveFile = "on filelib.RemoveFile()"
+
+func RemoveFile(path string) error {
+	if fileExists, _ := FileExistsAny(path); fileExists {
+		if err := os.Remove(path); err != nil {
+			return errors.Wrap(err, onRemoveFile)
+		}
+	}
+	return nil
+}

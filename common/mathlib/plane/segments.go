@@ -19,7 +19,7 @@ func (s Segment) Middle() Point2 {
 	return Point2{(s[1].X + s[0].X) / 2, (s[1].Y + s[0].Y) / 2}
 }
 
-func (s Segment) Intersection(s1 Segment) (pCross *Point2, atEnd bool) {
+func SegmentsIntersection(s, s1 Segment) (pCross *Point2, atEnd bool) {
 	if s[1].X < s[0].X {
 		s = Segment{s[1], s[0]}
 	}
@@ -73,6 +73,11 @@ func (s Segment) Intersection(s1 Segment) (pCross *Point2, atEnd bool) {
 		}
 
 		return &s1[0], true
+	} else if math.Abs(s[0].X-s[1].X) < mathlib.Eps {
+		s, s1 = s1, s
+		r = Point2{s[1].X - s[0].X, s[1].Y - s[0].Y}
+		l = Point2{s1[1].X - s1[0].X, s1[1].Y - s1[0].Y}
+		cr = Cross(r, l)
 	}
 
 	q := Point2{s1[0].X - s[0].X, s1[0].Y - s[0].Y}
@@ -90,7 +95,7 @@ func (s Segment) Intersection(s1 Segment) (pCross *Point2, atEnd bool) {
 }
 
 func (s Segment) DistanceTo(s1 Segment) float64 {
-	if pCross, _ := s.Intersection(s1); pCross != nil {
+	if pCross, _ := SegmentsIntersection(s, s1); pCross != nil {
 		return 0
 	}
 

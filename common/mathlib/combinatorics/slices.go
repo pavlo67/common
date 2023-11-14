@@ -21,24 +21,24 @@ func Multiple[T interface{}](data [][]T) (dataMultipled [][]T) {
 	return dataMultipled
 }
 
-func CyclicSignature(data []string) string {
-	if len(data) < 1 {
-		return ""
-	}
-
-	var sign string
-	for i := range data {
-		var signOption string
-		for j := range data {
-			signOption += "_" + data[(i+j)%len(data)]
-		}
-		if i == 0 || signOption < sign {
-			sign = signOption
-		}
-	}
-
-	return sign[1:]
-}
+//func CyclicSignature(data []string) string {
+//	if len(data) < 1 {
+//		return ""
+//	}
+//
+//	var sign string
+//	for i := range data {
+//		var signOption string
+//		for j := range data {
+//			signOption += "_" + data[(i+j)%len(data)]
+//		}
+//		if i == 0 || signOption < sign {
+//			sign = signOption
+//		}
+//	}
+//
+//	return sign[1:]
+//}
 
 func Intersects[T comparable](set0, set1 []T) bool {
 

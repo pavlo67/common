@@ -13,7 +13,7 @@ type NumberedFile struct {
 	Path string
 }
 
-func NumberedFilesSequence(dir, filenameRegexp string) ([]NumberedFile, error) {
+func NumberedFilesSequence(dir, filenameRegexp string, allowLeaks bool) ([]NumberedFile, error) {
 	reFilename, err := regexp.Compile(filenameRegexp)
 	if err != nil {
 		return nil, err
@@ -34,7 +34,7 @@ func NumberedFilesSequence(dir, filenameRegexp string) ([]NumberedFile, error) {
 				return nil, fmt.Errorf("converting num (%v) from filename (%s) got: %s", matches, file.Name(), err)
 			} else if nextNum == -1 {
 				nextNum = num
-			} else if num != nextNum {
+			} else if num != nextNum && !allowLeaks {
 				return nil, fmt.Errorf("frames leak: after %d got %d", nextNum-1, num)
 			}
 			fns = append(fns, NumberedFile{num, filepath.Join(dir, file.Name())})

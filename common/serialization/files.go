@@ -99,3 +99,26 @@ func ReadAllPartsJSON(filename string, data interface{}) error {
 
 	return nil
 }
+
+const onSaveAllPartsJSON = "on serialization.SaveAllPartsJSON()"
+
+func SaveAllPartsJSON[T any](data []T, filename string) error {
+	var dataBytes []byte
+
+	for _, item := range data {
+		itemBytes, err := json.Marshal(item)
+		if err != nil {
+			return fmt.Errorf("marshaling %v got: %s / "+onSaveAllPartsJSON, item, err)
+		}
+
+		dataBytes = append(dataBytes, itemBytes...)
+		dataBytes = append(dataBytes, '\n')
+	}
+
+	err := os.WriteFile(filename, dataBytes, 0644)
+	if err != nil {
+		return errors.Wrap(err, onSaveAllPartsJSON)
+	}
+
+	return nil
+}

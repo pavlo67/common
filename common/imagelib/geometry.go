@@ -7,11 +7,30 @@ import (
 	"github.com/pavlo67/common/common/mathlib/plane"
 )
 
-type Bounded interface {
-	Bounds() image.Rectangle
+func ConvertImagePoints(points0 []image.Point, transpose bool, pMin image.Point, scale int) []image.Point {
+	points := make([]image.Point, len(points0))
+
+	for i, p := range points0 {
+		if transpose {
+			p = image.Point{p.Y, p.X}
+		}
+		points[i] = image.Point{pMin.X + scale*p.X, pMin.Y + scale*p.Y}
+	}
+
+	return points
 }
 
-func RectangleAround(rect image.Rectangle, marginPix float64, pts ...plane.Point2) image.Rectangle {
+func PointsFromPolyChain(points0 ...plane.Point2) []image.Point {
+	points := make([]image.Point, len(points0))
+
+	for i, p := range points0 {
+		points[i] = image.Point{int(math.Round(p.X)), int(math.Round(p.Y))}
+	}
+
+	return points
+}
+
+func RectangleAround(marginPix int, pts ...image.Point) image.Rectangle {
 	if len(pts) < 1 {
 		return image.Rectangle{}
 	}
@@ -35,9 +54,10 @@ func RectangleAround(rect image.Rectangle, marginPix float64, pts ...plane.Point
 		}
 	}
 
-	return rect.Intersect(image.Rectangle{
-		Min: plane.Point2{minX - marginPix, minY - marginPix}.ImagePoint(),
-		Max: plane.Point2{maxX + marginPix, maxY + marginPix}.ImagePoint()})
+	return image.Rectangle{
+		Min: image.Point{minX - marginPix, minY - marginPix},
+		Max: image.Point{maxX + 1 + marginPix, maxY + 1 + marginPix},
+	}
 }
 
 func PolyChain(points []image.Point) plane.PolyChain {
@@ -49,8 +69,8 @@ func PolyChain(points []image.Point) plane.PolyChain {
 	return polyChain
 }
 
-func Distance(el1, el2 image.Point, dpm float64) float64 {
-	return math.Sqrt(float64((el1.X-el2.X)*(el1.X-el2.X)+(el1.Y-el2.Y)*(el1.Y-el2.Y))) / dpm
+func Distance(el1, el2 image.Point) float64 {
+	return math.Sqrt(float64((el1.X-el2.X)*(el1.X-el2.X) + (el1.Y-el2.Y)*(el1.Y-el2.Y)))
 }
 
 func Direction(el1, el2 image.Point) float64 {

@@ -19,10 +19,23 @@ func (bearing Bearing) Canon() Bearing {
 	return bearing
 }
 
-func BearingFromGeometry(rotation plane.Rotation) Bearing {
+func DirectionBearingFromRotation(rotation plane.Rotation) Bearing {
 	//angle := float64(rotation.Rotation + rotation.Rotation)
 
 	bearingDegrees := 90 - (180 * rotation / math.Pi)
+
+	for bearingDegrees >= 360 {
+		bearingDegrees -= 360
+	}
+	for bearingDegrees < 0 {
+		bearingDegrees += 360
+	}
+
+	return Bearing(bearingDegrees)
+}
+
+func PlaneBearingFromRotation(rotation plane.Rotation) Bearing {
+	bearingDegrees := -(180 * rotation / math.Pi)
 
 	for bearingDegrees >= 360 {
 		bearingDegrees -= 360
