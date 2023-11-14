@@ -13,11 +13,6 @@ import (
 	"github.com/pavlo67/common/common/filelib"
 )
 
-// DEPRECATED
-//type Imager interface {
-//	Imager() (image.Imager, error)
-//}
-
 const onSavePNG = "on SavePNG()"
 
 func SavePNG(img image.Image, filename string) error {

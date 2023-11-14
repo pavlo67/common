@@ -59,19 +59,17 @@ func DistanceToPolyChain(p Point2, pCh PolyChain) (float64, ProjectionOnPolyChai
 	return minDist, pr
 }
 
-const onDivideByProjection = "on AddProjectionPoint()"
-
-func AddProjectionPoint(pCh PolyChain, pr ProjectionOnPolyChain) (PolyChain, ProjectionOnPolyChain) {
+func AddProjectionPoint(pCh PolyChain, pr ProjectionOnPolyChain) (PolyChain, ProjectionOnPolyChain, bool) {
 	if pr.N < 0 {
-		return append(PolyChain{pr.Point2}, pCh...), ProjectionOnPolyChain{Point2: pr.Point2}
+		return append(PolyChain{pr.Point2}, pCh...), ProjectionOnPolyChain{Point2: pr.Point2}, true
 	} else if pr.N >= len(pCh) || (pr.N == len(pCh)-1 && pr.Position > 0) {
-		return append(pCh, pr.Point2), ProjectionOnPolyChain{N: len(pCh), Point2: pr.Point2}
+		return append(pCh, pr.Point2), ProjectionOnPolyChain{N: len(pCh), Point2: pr.Point2}, true
 	} else if pr.Position == 0 {
 		// TODO??? check if pr.Point2 == pCh[pr.N]
-		return pCh, pr
+		return pCh, pr, false
 	}
 
-	return append(pCh[:pr.N+1], append(PolyChain{pr.Point2}, pCh[pr.N+1:]...)...), ProjectionOnPolyChain{N: pr.N + 1, Point2: pr.Point2}
+	return append(pCh[:pr.N+1], append(PolyChain{pr.Point2}, pCh[pr.N+1:]...)...), ProjectionOnPolyChain{N: pr.N + 1, Point2: pr.Point2}, true
 }
 
 type ProjectionOnPolyChainDirected struct {

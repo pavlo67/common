@@ -125,6 +125,10 @@ func GetProjectionOnPolyChain(p Point2, pCh PolyChain) (float64, ProjectionOnPol
 func AveragePolyChains(pCh0, pCh1 PolyChain, distanceMaxIn float64, connectEnds bool) (
 	ok bool, pCh0Averaged PolyChain, pCh1RestsInitial []PolyChain) {
 
+	// log.Print(distanceMaxIn, pCh0, pCh1)
+	// if distanceMaxIn == 9.87053098413958 {
+	// }
+
 	var p1Averaged []int
 
 	for n0, p0 := range pCh0 {
@@ -167,7 +171,7 @@ func AveragePolyChains(pCh0, pCh1 PolyChain, distanceMaxIn float64, connectEnds 
 
 	slices.Sort(p1Averaged)
 
-	//log.Print(pCh0, pCh1)
+	// log.Print(pCh0, "\n", pCh1, "\n", p1Averaged)
 
 	var n1Prev, n1Next int
 	for _, n1 := range p1Averaged {
@@ -180,9 +184,9 @@ func AveragePolyChains(pCh0, pCh1 PolyChain, distanceMaxIn float64, connectEnds 
 		pCh1RestsInitial = append(pCh1RestsInitial, pCh1[n1Prev:])
 	}
 
-	// log.Print(pCh0, pCh1RestsInitial)
+	ok = len(p1Averaged) > 0
 
-	if connectEnds && len(pCh1RestsInitial) > 0 {
+	if ok && connectEnds && len(pCh1RestsInitial) > 0 {
 		var pCh1Rests []PolyChain
 		p00, p01 := pCh0[0], pCh0[len(pCh0)-1]
 		v0 := Point2{p01.X - p00.X, p01.Y - p00.Y}
@@ -198,7 +202,7 @@ func AveragePolyChains(pCh0, pCh1 PolyChain, distanceMaxIn float64, connectEnds 
 				}
 			} else {
 				if p01 == p11 {
-					pCh0 = append(pCh0, pCh1Rest[1:].Reversed()...)
+					pCh0 = append(pCh0, pCh1Rest.Reversed()[1:]...)
 				} else if p00 == p10 {
 					pCh0 = append(pCh0.Reversed(), pCh1Rest[1:]...)
 				} else {
@@ -209,11 +213,72 @@ func AveragePolyChains(pCh0, pCh1 PolyChain, distanceMaxIn float64, connectEnds 
 		}
 
 		if len(pCh1Rests) != len(pCh1RestsInitial) {
+			// so some non-averaged fragment of pCh1 is added to pCh0
+			// TODO!!! be careful: it looks like this operation "reverses" the original pCh0/pCh1 order because pCh1Rests contains pCh0 as the last fragment
 			return true, nil, append(pCh1Rests, pCh0)
 		}
+
 		return true, pCh0, pCh1Rests
 	}
-	return len(p1Averaged) > 0, pCh0, pCh1RestsInitial
+
+	// if distanceMaxIn == 9.87053098413958 {
+	// if ok {
+	//	log.Print(2222222222222, distanceMaxIn, pCh0, pCh1RestsInitial)
+	// }
+
+	return ok, pCh0, pCh1RestsInitial
+}
+
+//func ShortenPolyChain(pCh PolyChain, distanceMax float64) PolyChain {
+//	for i := 0; i < len(pCh)-2; i++ {
+//		for j := i + 1; j <= len(pCh); j++ {
+//			if j == len(pCh) {
+//				return append(pCh[:i+1], pCh[len(pCh)-1])
+//			} else if pCh[i].DistanceTo(pCh[j]) <= distanceMax {
+//				continue
+//			} else if j > i+2 {
+//				return append(pCh[:i+1], ShortenPolyChain(pCh[j-1:], distanceMax)...)
+//			}
+//			break
+//		}
+//	}
+//
+//	return pCh
+//}
+//
+//func ShortenPolyChainCutting(pCh PolyChain, maxDistanceToBeJoined float64) []PolyChain {
+//	for i := 0; i <= len(pCh)-3; i++ {
+//		for j := len(pCh) - 1; j >= i+2; j-- {
+//			if pCh[i].DistanceTo(pCh[j]) <= maxDistanceToBeJoined {
+//
+//				// TODO!!! fix slices if i+j < i
+//				// return append(
+//				//	ShortenPolyChainCutting(append(pCh[:i+1], pCh[j:]...), maxDistanceToBeJoined),
+//				//	ShortenPolyChainCutting(pCh[i+1:j], maxDistanceToBeJoined)...,
+//				// )
+//			}
+//		}
+//	}
+//
+//	return []PolyChain{pCh}
+//}
+
+type PolyChainsIntersection struct {
+	Point2
+	N0, N1 int
+}
+
+func PolyChainsIntersectionAny(pCh0, pCh1 PolyChain) *PolyChainsIntersection {
+	for i0 := 1; i0 < len(pCh0); i0++ {
+		s0 := Segment{pCh0[i0-1], pCh0[i0]}
+		for i1 := 1; i1 < len(pCh1); i1++ {
+			if p := SegmentsIntersection(s0, Segment{pCh1[i1-1], pCh1[i1]}); p != nil {
+				return &PolyChainsIntersection{*p, i0 - 1, i1 - 1}
+			}
+		}
+	}
+
+	return nil
 }
 
 // it's equal to append(append(...

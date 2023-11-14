@@ -1,11 +1,32 @@
 package plane
 
-type RectangleFixed struct {
-	P0, P1 Point2
+type RectangleFixed [2]Point2
+
+func RectangleAround(pts []Point2) *RectangleFixed {
+	if len(pts) < 1 {
+		return nil
+	}
+
+	minX, maxX, minY, maxY := pts[0].X, pts[0].X, pts[0].Y, pts[0].Y
+
+	for _, p := range pts[1:] {
+		if p.X <= minX {
+			minX = p.X
+		} else if p.X > maxX {
+			maxX = p.X
+		}
+		if p.Y <= minY {
+			minY = p.Y
+		} else if p.Y > maxY {
+			maxY = p.Y
+		}
+	}
+
+	return &RectangleFixed{Point2{minX, minY}, Point2{maxX, maxY}}
 }
 
 func (rectFixed RectangleFixed) Contains(p2 Point2) bool {
-	minX, maxX, minY, maxY := rectFixed.P0.X, rectFixed.P1.X, rectFixed.P0.Y, rectFixed.P1.Y
+	minX, maxX, minY, maxY := rectFixed[0].X, rectFixed[1].X, rectFixed[0].Y, rectFixed[1].Y
 	if minX > maxX {
 		minX, maxX = maxX, minX
 	}

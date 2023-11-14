@@ -7,6 +7,12 @@ import (
 	"github.com/pavlo67/common/common/mathlib/plane"
 )
 
+// ...image.Point ----------------------------------------------------------
+
+func Distance(el1, el2 image.Point) float64 {
+	return math.Sqrt(float64((el1.X-el2.X)*(el1.X-el2.X) + (el1.Y-el2.Y)*(el1.Y-el2.Y)))
+}
+
 func ConvertImagePoints(points0 []image.Point, transpose bool, pMin image.Point, scale int) []image.Point {
 	points := make([]image.Point, len(points0))
 
@@ -15,16 +21,6 @@ func ConvertImagePoints(points0 []image.Point, transpose bool, pMin image.Point,
 			p = image.Point{p.Y, p.X}
 		}
 		points[i] = image.Point{pMin.X + scale*p.X, pMin.Y + scale*p.Y}
-	}
-
-	return points
-}
-
-func PointsFromPolyChain(points0 ...plane.Point2) []image.Point {
-	points := make([]image.Point, len(points0))
-
-	for i, p := range points0 {
-		points[i] = image.Point{int(math.Round(p.X)), int(math.Round(p.Y))}
 	}
 
 	return points
@@ -60,6 +56,30 @@ func RectangleAround(marginPix int, pts ...image.Point) image.Rectangle {
 	}
 }
 
+// ...plane.Point2 ---------------------------------------------------------
+
+func PointsFromPolyChain(points0 ...plane.Point2) []image.Point {
+	points := make([]image.Point, len(points0))
+
+	for i, p := range points0 {
+		points[i] = image.Point{int(math.Round(p.X)), int(math.Round(p.Y))}
+	}
+
+	return points
+}
+
+func PointFramed(p plane.Point2, rect image.Rectangle) plane.Point2 {
+	halfSideX, halfSideY := 0.5*float64(rect.Max.X-rect.Min.X), 0.5*float64(rect.Max.Y-rect.Min.Y)
+	xImg, yImg := p.X-float64(rect.Min.X), p.Y-float64(rect.Min.Y)
+
+	return plane.Point2{-halfSideX + xImg, halfSideY - yImg}
+}
+
+func Segment(p0, p1 image.Point) plane.Segment {
+	return plane.Segment{{float64(p0.X), float64(p0.Y)}, {float64(p1.X), float64(p1.Y)}}
+
+}
+
 func PolyChain(points []image.Point) plane.PolyChain {
 	polyChain := make(plane.PolyChain, len(points))
 	for i, p := range points {
@@ -67,34 +87,6 @@ func PolyChain(points []image.Point) plane.PolyChain {
 	}
 
 	return polyChain
-}
-
-func Distance(el1, el2 image.Point) float64 {
-	return math.Sqrt(float64((el1.X-el2.X)*(el1.X-el2.X) + (el1.Y-el2.Y)*(el1.Y-el2.Y)))
-}
-
-func Direction(el1, el2 image.Point) float64 {
-	dx := float64(el2.X) - float64(el1.X)
-	dy := float64(el2.Y) - float64(el1.Y)
-
-	if dx == 0 {
-		if dy > 0 {
-			return 0
-		} else if dy < 0 {
-			return 180
-		} else {
-			math.NaN()
-		}
-	}
-
-	direction_ := 180 * math.Atan(dy/dx) / math.Pi
-	if dx > 0 {
-		return direction_
-	} else if dy > 0 {
-		return 180 + direction_
-	}
-
-	return -180 + direction_
 }
 
 func Center(points ...image.Point) plane.Point2 {
@@ -111,82 +103,3 @@ func Center(points ...image.Point) plane.Point2 {
 
 	return plane.Point2{X: x / n, Y: y / n}
 }
-
-//func AverageAlongOx(points2 []numlib.Point2) ([]image.ImagePoint, image.Rect) {
-//	if len(points2) < 1 {
-//		return nil, image.Rect{}
-//	}
-//
-//	sort.Slice(points2, func(i, j int) bool { return points2[i].Position < points2[j].Position })
-//	pX := int(points2[0].Position)
-//	if points2[0].Position < 0 {
-//		pX--
-//	}
-//	xBase := -pX
-//	yBase := 0
-//	var yBaseI int
-//	for _, p := range points2 {
-//		if p.Y >= 0 {
-//			yBaseI = int(p.Y)
-//		} else {
-//			yBaseI = -int(p.Y)
-//		}
-//
-//		if yBaseI > yBase {
-//			yBase = yBaseI
-//		}
-//	}
-//
-//	points := make([]image.ImagePoint, len(points2))
-//
-//	var yPlus, yMinus []float64
-//	for _, p := range points2 {
-//		pXNext := int(p.Position)
-//		if p.Position < 0 {
-//			pXNext--
-//		}
-//		if pXNext != pX {
-//			points = append(points, AveragedPoint(pX+xBase, yBase+1, yPlus, yMinus))
-//			yPlus, yMinus, pX = nil, nil, pXNext
-//		}
-//
-//		if p.Y > 0 {
-//			yPlus = append(yPlus, p.Y)
-//		} else if p.Y < 0 {
-//			yMinus = append(yMinus, p.Y)
-//		} else {
-//			yPlus = append(yPlus, p.Y)
-//			yMinus = append(yMinus, p.Y)
-//		}
-//	}
-//	if len(yPlus)+len(yMinus) > 0 {
-//		points = append(points, AveragedPoint(pX+xBase, yBase, yPlus, yMinus))
-//	}
-//	toX := points[len(points)-1].Position + 1
-//
-//	for i := len(points) - 1; i >= 0; i-- {
-//		points = append(points, image.ImagePoint{Position: points[i].Position, Y: yBase - points[i].Y})
-//	}
-//
-//	return points, image.Rect{Max: image.ImagePoint{toX, yBase * 2}}
-//}
-//
-//func AveragedPoint(x, yBase int, yPlus, yMinus []float64) image.ImagePoint {
-//	var yPlusAvg, yMinusAvg float64
-//
-//	if len(yPlus) > 0 {
-//		for _, y := range yPlus {
-//			yPlusAvg += y
-//		}
-//		yPlusAvg /= float64(len(yPlus))
-//	}
-//
-//	if len(yMinus) > 0 {
-//		for _, y := range yMinus {
-//			yMinusAvg += y
-//		}
-//		yMinusAvg /= float64(len(yMinus))
-//	}
-//
-//	return image.ImagePoint{x, yBase + int(math.Round((yPlusAvg-yMinusAvg)/2))}
-//}

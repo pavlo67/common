@@ -10,15 +10,17 @@ import (
 
 func TestPolyChainAveragedProbe(t *testing.T) {
 	pCh0 := PolyChain{
-		{371, 76},
-		{419, 0.5},
+		{342, 162.5}, {364, 207.5},
 	}
 	pCh1 := PolyChain{
-		{409.5, 0},
-		{359, 104},
+		{335, 151}, {406.5, 302}, {403.7629562043795, 375.0206204379562},
 	}
 
-	ok, pCh0Averaged, pCh1Averaged := AveragePolyChains(pCh0, pCh1, 8.118935, true)
+	//[{341.3650461698297 162.800656946074} {363.29489523856535 207.82993665827638}]
+	//[{334.4224510771934 151.46712409917882} {337.37437836467245 156.29806754937331}]
+	//[{341.3650461698297 162.800656946074} {406.5 302} {403.7629562043795 375.0206204379562}]
+
+	ok, pCh0Averaged, pCh1Averaged := AveragePolyChains(pCh0, pCh1, 9.870530984139577, false)
 
 	t.Log(ok, "\n", pCh0Averaged, "\n", pCh1Averaged)
 }
@@ -32,7 +34,50 @@ func TestAveragePolyChains(t *testing.T) {
 		wantOk                 bool
 		wantPolyChain0Averaged PolyChain
 		wantPolyChain1Rest     []PolyChain
+		connectEnds            bool
 	}{
+		{
+			name:                   "",
+			polyChain0:             PolyChain{{472, 513}, {648, 197}},
+			polyChain1:             PolyChain{{673, 13}, {648, 197}, {472, 513}},
+			minDistance:            11,
+			wantOk:                 true,
+			wantPolyChain0Averaged: nil,
+			wantPolyChain1Rest:     []PolyChain{{{472, 513}, {648, 197}, {673, 13}}},
+			connectEnds:            true,
+		},
+
+		{
+			name:                   "",
+			polyChain0:             PolyChain{{0, 0}, {0, 2}, {0, 4}},
+			polyChain1:             PolyChain{{0, 4}, {0, 6}},
+			minDistance:            0,
+			wantOk:                 true,
+			wantPolyChain0Averaged: PolyChain{{0, 0}, {0, 2}, {0, 4}},
+			wantPolyChain1Rest:     []PolyChain{{{0, 4}, {0, 6}}},
+			connectEnds:            false,
+		},
+		{
+			name:                   "",
+			polyChain0:             PolyChain{{0, 0}, {0, 2}, {0, 4}},
+			polyChain1:             PolyChain{{0, 3}, {0, 4}, {0, 6}},
+			minDistance:            0,
+			wantOk:                 true,
+			wantPolyChain0Averaged: PolyChain{{0, 0}, {0, 2}, {0, 3}, {0, 4}},
+			wantPolyChain1Rest:     []PolyChain{{{0, 4}, {0, 6}}},
+			connectEnds:            false,
+		},
+		{
+			name:                   "",
+			polyChain0:             PolyChain{{0, 0}, {0.05, 2}, {0, 4}},
+			polyChain1:             PolyChain{{0.1, 3}, {0.1, 4}, {0.1, 6}},
+			minDistance:            0.1,
+			wantOk:                 true,
+			wantPolyChain0Averaged: PolyChain{{0, 0}, {0.05, 2}, {0.07500000000000001, 3}, {0.05, 4}},
+			wantPolyChain1Rest:     []PolyChain{{{0.05, 4}, {0.1, 6}}},
+			connectEnds:            false,
+		},
+
 		{
 			name:                   "",
 			polyChain0:             PolyChain{{0, 0}, {0, 2}, {0, 4}},
@@ -63,7 +108,7 @@ func TestAveragePolyChains(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotOk, gotAveraged, gotRest := AveragePolyChains(tt.polyChain0, tt.polyChain1, tt.minDistance, false)
+			gotOk, gotAveraged, gotRest := AveragePolyChains(tt.polyChain0, tt.polyChain1, tt.minDistance, tt.connectEnds)
 
 			if gotOk != tt.wantOk {
 				t.Errorf("AveragePolyChains() gotOk = %t, wantOk %t", gotOk, tt.wantOk)
@@ -90,7 +135,6 @@ func ComparePolyChains(pCh0, pCh1 PolyChain) bool {
 
 	return true
 }
-
 func TestCutPolyChain(t *testing.T) {
 	type args struct {
 		polyChain []Point2

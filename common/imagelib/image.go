@@ -25,18 +25,18 @@ type Described interface {
 
 // Imager -------------------------------------------------------------------------
 
-var _ Imager = &GetImage{}
+var _ Imager = &Stack{}
 
-func GetImager(img image.Image) Imager {
-	return &GetImage{Images: []image.Image{img}}
+func GetStack(img image.Image) Imager {
+	return &Stack{Images: []image.Image{img}}
 }
 
-type GetImage struct {
+type Stack struct {
 	Images     []image.Image
 	ImageMasks []GetMask
 }
 
-func (op *GetImage) Bounds() image.Rectangle {
+func (op *Stack) Bounds() image.Rectangle {
 	if op == nil || len(op.Images) < 1 {
 		return image.Rectangle{}
 	}
@@ -46,7 +46,7 @@ func (op *GetImage) Bounds() image.Rectangle {
 
 const onImage = "on Imager.Imager()"
 
-func (op *GetImage) Image() (image.Image, string, error) {
+func (op *Stack) Image() (image.Image, string, error) {
 	if op == nil || len(op.Images) < 1 {
 		return nil, "", fmt.Errorf(onImage + ": op == nil || len(op.Images) == 0")
 	}

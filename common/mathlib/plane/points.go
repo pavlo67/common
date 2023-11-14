@@ -166,3 +166,16 @@ func (p Point2) DistanceToLine(line Segment) float64 {
 
 	return math.Sqrt((pIntersect.X-p.X)*(pIntersect.X-p.X) + (pIntersect.Y-p.Y)*(pIntersect.Y-p.Y))
 }
+
+func Diameter(pts []Point2) float64 {
+	distMax := 0.
+	for i, p0 := range pts {
+		for _, p1 := range pts[i+1:] {
+			if dist := p0.DistanceTo(p1); dist > distMax {
+				distMax = dist
+			}
+		}
+	}
+
+	return distMax
+}
