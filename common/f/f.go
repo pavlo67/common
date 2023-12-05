@@ -13,3 +13,12 @@ func J(v interface{}) string {
 
 	return string(jsonBytes)
 }
+
+func JB(v interface{}) []byte {
+	jsonBytes, err := json.Marshal(v)
+	if err != nil {
+		return []byte(fmt.Sprintf("%+v", v))
+	}
+
+	return jsonBytes
+}

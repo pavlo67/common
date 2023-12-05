@@ -12,7 +12,7 @@ type ProjectionOnPolyChain struct {
 	Point2
 }
 
-func DistanceToPolyChain(p Point2, pCh PolyChain) (float64, ProjectionOnPolyChain) {
+func (p Point2) DistanceToPolyChain(pCh PolyChain) (float64, ProjectionOnPolyChain) {
 
 	if len(pCh) < 1 {
 		return math.NaN(), ProjectionOnPolyChain{N: -1, Position: math.NaN(), Point2: Point2{math.NaN(), math.NaN()}}
