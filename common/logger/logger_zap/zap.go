@@ -3,6 +3,7 @@ package logger_zap
 import (
 	"fmt"
 	"os"
+	"runtime"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -51,7 +52,8 @@ func (op *loggerZap) Image(path string, getImage imagelib.Imager) {
 	if op.cfg.SaveFiles {
 		img, info, err := getImage.Image()
 		if info != "" {
-			op.Info(info)
+			_, filename, line, _ := runtime.Caller(1)
+			op.Infof("from %s:%d: "+info, filename, line)
 		}
 		if img != nil {
 			basedPaths, err := logger.ModifyPaths([]string{path}, op.cfg.BasePath)

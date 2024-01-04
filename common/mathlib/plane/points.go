@@ -31,6 +31,7 @@ func (p Point2) Radius() float64 {
 	return math.Sqrt(p.X*p.X + p.Y*p.Y)
 }
 
+// Rotation lies in the range: -math.Pi < p.Rotation() <= math.Pi
 func (p Point2) Rotation() Rotation {
 	if p.X == 0 {
 		if p.Y > 0 {
@@ -85,10 +86,16 @@ func (p Point2) DistanceToSegment(s Segment) (distance, projectionPosition float
 	c0 := (d0 + d - d1) / (2 * math.Sqrt(d))
 
 	if reversed {
-		return math.Sqrt(d0 - c0*c0), math.Sqrt(d) - c0
+		distance, projectionPosition = math.Sqrt(d0-c0*c0), max(0, math.Sqrt(d)-c0)
 	} else {
-		return math.Sqrt(d0 - c0*c0), c0
+		distance, projectionPosition = math.Sqrt(d0-c0*c0), max(0, c0)
 	}
+
+	if math.IsNaN(distance) {
+		return 0, projectionPosition
+	}
+
+	return distance, projectionPosition
 }
 
 func (p Point2) RotateAround(center Point2, angle Rotation) Point2 {

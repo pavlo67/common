@@ -1,7 +1,7 @@
 ### data sources ----------------------------------------------------
 
 db_sqlite:
-  path: /home/pavlo/0/programmae/_test/common/test.sqlite
+  path:
 
 
 ### services --------------------------------------------------------

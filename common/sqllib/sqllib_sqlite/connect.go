@@ -5,9 +5,9 @@ import (
 	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/pkg/errors"
 
 	"github.com/pavlo67/common/common/config"
+	"github.com/pavlo67/common/common/errors"
 )
 
 func Connect(cfg config.Access) (*sql.DB, error) {

@@ -343,49 +343,6 @@ func StraightenPolyChain(pCh PolyChain, minDeviation float64) PolyChain {
 	return append(straightenedPolyChain, pCh[len(pCh)-1])
 }
 
-func ApproximatePolyChain(pCh PolyChain, minDeviation float64) PolyChain {
-	if len(pCh) <= 2 {
-		return pCh
-	}
-
-	lineSegment := Segment{pCh[0], pCh[len(pCh)-1]}
-	segmentLength := pCh[0].DistanceTo(pCh[len(pCh)-1])
-	segmentLengthSquare := segmentLength * segmentLength
-	maxDistance := minDeviation
-	var distance, ratio, maxRatio float64
-	var maxI int
-	for i := 1; i < len(pCh)-1; i++ {
-		distanceToFirst, distanceToLast := pCh[i].DistanceTo(pCh[0]), pCh[i].DistanceTo(pCh[len(pCh)-1])
-		if distanceToFirst > distanceToLast {
-			distanceToFirst, distanceToLast = distanceToLast, distanceToFirst
-		}
-
-		if distanceToFirst*distanceToFirst+segmentLengthSquare <= distanceToLast*distanceToLast {
-			distance = distanceToFirst
-		} else {
-			distance = pCh[i].DistanceToLine(lineSegment)
-		}
-
-		if distance > maxDistance {
-			maxDistance, maxI, maxRatio = distance, i, float64(i)/float64(len(pCh)-i-1)
-		} else if distance == maxDistance {
-			if i < len(pCh)-i-1 {
-				ratio = float64(i) / float64(len(pCh)-i-1)
-			} else {
-				ratio = float64(len(pCh)-i-1) / float64(i)
-			}
-			if ratio > maxRatio {
-				maxI, maxRatio = i, float64(i)/float64(len(pCh)-i-1)
-			}
-		}
-	}
-	if maxI <= 0 {
-		return lineSegment[:]
-	}
-
-	return append(ApproximatePolyChain(pCh[:maxI+1], minDeviation), ApproximatePolyChain(pCh[maxI:], minDeviation)[1:]...)
-}
-
 func CutPolyChain(pCh PolyChain, fromEndI int, axis Segment) PolyChain {
 
 	numI := len(pCh)
@@ -448,3 +405,91 @@ func CutPolyChain(pCh PolyChain, fromEndI int, axis Segment) PolyChain {
 
 	return cutted
 }
+
+func ApproximatePolyChain(pCh PolyChain, minDeviation float64) PolyChain {
+	if len(pCh) <= 2 {
+		return pCh
+	}
+
+	lineSegment := Segment{pCh[0], pCh[len(pCh)-1]}
+	segmentLength := pCh[0].DistanceTo(pCh[len(pCh)-1])
+	segmentLengthSquare := segmentLength * segmentLength
+	maxDistance := minDeviation
+	var distance, ratio, maxRatio float64
+	var maxI int
+	for i := 1; i < len(pCh)-1; i++ {
+		distanceToFirst, distanceToLast := pCh[i].DistanceTo(pCh[0]), pCh[i].DistanceTo(pCh[len(pCh)-1])
+		if distanceToFirst > distanceToLast {
+			distanceToFirst, distanceToLast = distanceToLast, distanceToFirst
+		}
+
+		if distanceToFirst*distanceToFirst+segmentLengthSquare <= distanceToLast*distanceToLast {
+			distance = distanceToFirst
+		} else {
+			distance = pCh[i].DistanceToLine(lineSegment)
+		}
+
+		if distance > maxDistance {
+			maxDistance, maxI, maxRatio = distance, i, float64(i)/float64(len(pCh)-i-1)
+		} else if distance == maxDistance {
+			if i < len(pCh)-i-1 {
+				ratio = float64(i) / float64(len(pCh)-i-1)
+			} else {
+				ratio = float64(len(pCh)-i-1) / float64(i)
+			}
+			if ratio > maxRatio {
+				maxI, maxRatio = i, float64(i)/float64(len(pCh)-i-1)
+			}
+		}
+	}
+	if maxI <= 0 {
+		return lineSegment[:]
+	}
+
+	return append(append(PolyChain{}, ApproximatePolyChain(pCh[:maxI+1], minDeviation)...),
+		ApproximatePolyChain(pCh[maxI:], minDeviation)[1:]...)
+}
+
+//
+//func ApproximatePolyChain(pCh PolyChain, minDeviation float64) PolyChain {
+//	if len(pCh) <= 2 {
+//		return pCh
+//	}
+//
+//	lineSegment := Segment{pCh[0], pCh[len(pCh)-1]}
+//	segmentLength := pCh[0].DistanceTo(pCh[len(pCh)-1])
+//	segmentLengthSquare := segmentLength * segmentLength
+//	maxDistance := minDeviation
+//	var distance, ratio, maxRatio float64
+//	var maxI int
+//	for i := 1; i < len(pCh)-1; i++ {
+//		distanceToFirst, distanceToLast := pCh[i].DistanceTo(pCh[0]), pCh[i].DistanceTo(pCh[len(pCh)-1])
+//		if distanceToFirst > distanceToLast {
+//			distanceToFirst, distanceToLast = distanceToLast, distanceToFirst
+//		}
+//
+//		if distanceToFirst*distanceToFirst+segmentLengthSquare <= distanceToLast*distanceToLast {
+//			distance = distanceToFirst
+//		} else {
+//			distance = pCh[i].DistanceToLine(lineSegment)
+//		}
+//
+//		if distance > maxDistance {
+//			maxDistance, maxI, maxRatio = distance, i, float64(i)/float64(len(pCh)-i-1)
+//		} else if distance == maxDistance {
+//			if i < len(pCh)-i-1 {
+//				ratio = float64(i) / float64(len(pCh)-i-1)
+//			} else {
+//				ratio = float64(len(pCh)-i-1) / float64(i)
+//			}
+//			if ratio > maxRatio {
+//				maxI, maxRatio = i, float64(i)/float64(len(pCh)-i-1)
+//			}
+//		}
+//	}
+//	if maxI <= 0 {
+//		return lineSegment[:]
+//	}
+//
+//	return append(ApproximatePolyChain(pCh[:maxI+1], minDeviation), ApproximatePolyChain(pCh[maxI:], minDeviation)[1:]...)
+//}

@@ -217,3 +217,32 @@ func Transpose(rgb image.RGBA) (*image.RGBA, error) {
 
 	return rgbaTransposed, nil
 }
+
+const onMorphClose = "on MorphClose()"
+
+func MorphEx(imgGray image.Gray, morphType gocv.MorphType, size int) (*image.Gray, error) {
+
+	mat, err := gocv.ImageGrayToMatGray(&imgGray)
+	if err != nil {
+		return nil, errors.Wrap(err, onMorphClose)
+	}
+	defer mat.Close()
+
+	matForTransform := gocv.NewMat()
+	defer matForTransform.Close()
+
+	morphEl := gocv.GetStructuringElement(gocv.MorphRect, image.Point{size, size})
+	gocv.MorphologyEx(mat, &matForTransform, morphType, morphEl)
+
+	imgTransformed, err := matForTransform.ToImage()
+	if err != nil {
+		return nil, errors.Wrap(err, onMorphClose)
+	}
+
+	imgGrayTransformed, ok := imgTransformed.(*image.Gray)
+	if !ok {
+		return nil, fmt.Errorf("transposed image has wrong type: %T / "+onMorphClose, imgGray)
+	}
+
+	return imgGrayTransformed, nil
+}

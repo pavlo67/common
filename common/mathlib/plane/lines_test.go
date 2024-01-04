@@ -46,7 +46,7 @@ func TestLineSegmentsIntersection(t *testing.T) {
 	for i, testCase := range testCases {
 		t.Log(i)
 		// t.Logf("%#v", testCase)
-		intersection, _ := SegmentsIntersection(testCase.S1, testCase.S2)
+		intersection := SegmentsIntersection(testCase.S1, testCase.S2)
 		if testCase.Intersection == nil {
 			require.Nil(t, intersection)
 		} else {

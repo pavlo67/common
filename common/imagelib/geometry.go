@@ -26,6 +26,11 @@ func ConvertImagePoints(points0 []image.Point, transpose bool, pMin image.Point,
 	return points
 }
 
+func RectInternal(rect image.Rectangle, margin float64) image.Rectangle {
+	marginPoint := image.Point{int(math.Ceil(margin)), int(math.Ceil(margin))}
+	return image.Rectangle{Min: rect.Min.Add(marginPoint), Max: rect.Max.Sub(marginPoint)}
+}
+
 func RectangleAround(marginPix int, pts ...image.Point) image.Rectangle {
 	if len(pts) < 1 {
 		return image.Rectangle{}

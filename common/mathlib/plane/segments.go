@@ -156,9 +156,15 @@ func (s Segment) AngleAbs(s1 Segment) float64 {
 	for angle > math.Pi {
 		angle -= math.Pi
 	}
-	if angle <= 0.5*math.Pi {
-		return angle
+
+	return angle
+}
+
+func (s Segment) AngleLinesAbs(s1 Segment) float64 {
+	angle := math.Abs(s.Vector().AnglesDelta(s1.Vector()))
+	for angle > math.Pi/2 {
+		angle -= math.Pi / 2
 	}
 
-	return math.Pi - angle
+	return angle
 }

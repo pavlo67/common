@@ -3,6 +3,7 @@ package imagelib
 import (
 	"image"
 	"image/color"
+	"math"
 	"os"
 
 	"github.com/golang/freetype"
@@ -45,6 +46,24 @@ func Write(drawImage draw.Image, point image.Point, dpi, size, spacing float64, 
 	if spacing <= 0 {
 		spacing = SpacingDefault
 	}
+
+	sizeInt, rect := int(math.Ceil(size)), drawImage.Bounds()
+
+	if point.X <= 0 {
+		point.X = 1
+	} else {
+		textSize := sizeInt * len(text) * 2 / 3
+		if point.X >= rect.Max.X-textSize {
+			point.X = rect.Max.X - textSize - 1
+		}
+	}
+	if point.Y <= 0 {
+		point.Y = 1
+	} else if point.Y >= rect.Max.Y-sizeInt {
+		point.Y = rect.Max.Y - sizeInt - 1
+	}
+
+	// fmt.Println(size, point, text)
 
 	ctx := freetype.NewContext()
 	ctx.SetDPI(dpi)

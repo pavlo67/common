@@ -28,6 +28,9 @@ func (p Point2) DistanceToPolyChain(pCh PolyChain) (float64, ProjectionOnPolyCha
 	// POINTS:
 	for i, pI := range pCh[:len(pCh)-1] {
 		dist, position := p.DistanceToSegment(Segment{pI, pCh[i+1]})
+
+		// fmt.Printf("{%g %g} {%g %g} {%g %g} --> %g\n", p.X, p.Y, pI.X, pI.Y, pCh[i+1].X, pCh[i+1].Y, dist)
+
 		if dist >= minDist {
 			continue
 		}
@@ -47,7 +50,7 @@ func (p Point2) DistanceToPolyChain(pCh PolyChain) (float64, ProjectionOnPolyCha
 		//	minDist, projections = dist, []ProjectionOnPolyChain{{n, position, pPr}}
 		//} else {
 		//	for _, pr := range projections {
-		//		if n == pr.N && position == pr.Position {
+		//		if n == pr.n && position == pr.pos {
 		//			continue POINTS
 		//		}
 		//	}
@@ -168,3 +171,88 @@ func SegmentProjectionOnPolyChain(polyChain PolyChain, ls Segment, distanceMax f
 
 	return pr
 }
+
+func EndProjection(pCh PolyChain, start bool) ProjectionOnPolyChain {
+	var pr ProjectionOnPolyChain
+	if start {
+		pr.Point2 = pCh[0]
+	} else {
+		pr.N, pr.Point2 = len(pCh)-1, pCh[len(pCh)-1]
+	}
+
+	return pr
+}
+
+func ProjectionBetween(pr0, pr1, pr ProjectionOnPolyChain) bool {
+	if pr0.N > pr1.N || (pr0.N == pr1.N && pr0.Position > pr1.Position) {
+		pr0, pr1 = pr1, pr0
+	}
+
+	return (pr.N > pr0.N || (pr.N == pr0.N && pr.Position >= pr0.Position)) &&
+		(pr.N < pr1.N || (pr.N == pr1.N && pr.Position <= pr1.Position))
+}
+
+func CutWithProjection(pCh PolyChain, pr ProjectionOnPolyChain, fromStart bool) PolyChain {
+	if pr.N < 0 || pr.N >= len(pCh) {
+		return nil
+	}
+
+	if fromStart {
+		if pr.Position == 0 {
+			return append(PolyChain{}, pCh[:pr.N+1]...)
+		}
+		return append(append(PolyChain{}, pCh[:pr.N+1]...), pr.Point2)
+	}
+	if pr.Position == 0 {
+		return append(PolyChain{}, pCh[pr.N:]...)
+	}
+	return append(PolyChain{pr.Point2}, pCh[pr.N+1:]...)
+}
+
+func CutWithProjections(pCh PolyChain, pr0, pr1 ProjectionOnPolyChain) PolyChain {
+	if pr0.N < 0 || pr0.N >= len(pCh) || pr1.N < 0 || pr1.N >= len(pCh) {
+		return nil
+	}
+
+	var reversed bool
+	if pr0.N > pr1.N || (pr0.N == pr1.N && pr0.Position > pr1.Position) {
+		reversed, pr0, pr1 = true, pr1, pr0
+
+	}
+
+	if pr1.Position == 0 {
+		pCh = append(PolyChain{}, pCh[:pr1.N+1]...)
+	} else {
+		pCh = append(append(PolyChain{}, pCh[:pr1.N+1]...), pr1.Point2)
+	}
+
+	if pr0.Position == 0 {
+		pCh = append(PolyChain{}, pCh[pr0.N:]...)
+	} else {
+		pCh = append(PolyChain{pr0.Point2}, pCh[pr0.N+1:]...)
+	}
+	if reversed {
+		return pCh.Reversed()
+	}
+
+	return pCh
+}
+
+//func DivideByProjection(pCh plane.PolyChain, pr plane.ProjectionOnPolyChain) []plane.PolyChain {
+//	if pr.n < 0 || pr.n >= len(pCh) {
+//		return nil
+//	}
+//
+//	if pr.pos > 0 {
+//		return []plane.PolyChain{
+//			append(pCh[:pr.n+1], pr.Point2).Reversed(),
+//			append(plane.PolyChain{pr.Point2}, pCh[pr.n+1:]...),
+//		}
+//	}
+//
+//	pChs := []plane.PolyChain{pCh[pr.n:]}
+//	if pr.n > 0 {
+//		pChs = append(pChs, pCh[:pr.n+1].Reversed())
+//	}
+//	return pChs
+//}
