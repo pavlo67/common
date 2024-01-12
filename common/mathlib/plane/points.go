@@ -31,7 +31,7 @@ func (p Point2) Radius() float64 {
 	return math.Sqrt(p.X*p.X + p.Y*p.Y)
 }
 
-// Rotation lies in the range: -math.Pi < p.Rotation() <= math.Pi
+// Rotation lies in the range: -math.Pi < p.OYLeftAngle() <= math.Pi
 func (p Point2) Rotation() Rotation {
 	if p.X == 0 {
 		if p.Y > 0 {

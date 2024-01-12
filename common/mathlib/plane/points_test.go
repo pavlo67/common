@@ -236,7 +236,7 @@ func TestRotation(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.args.p.Rotation(); math.Abs(float64(got-tt.want)) > mathlib.Eps {
-				t.Errorf("Rotation() = %v, wantDistance %v", got, tt.want)
+				t.Errorf("OYLeftAngle() = %v, wantDistance %v", got, tt.want)
 			}
 		})
 	}
@@ -264,7 +264,7 @@ func TestRotation(t *testing.T) {
 //	for _, tt := range tests {
 //		t.Run(tt.name, func(t *testing.T) {
 //			if got := Angle1(tt.args.p); math.Abs(got-tt.wantDistance) > Eps {
-//				t.Errorf("Rotation() = %v, wantDistance %v", got, tt.wantDistance)
+//				t.Errorf("OYLeftAngle() = %v, wantDistance %v", got, tt.wantDistance)
 //			}
 //		})
 //	}

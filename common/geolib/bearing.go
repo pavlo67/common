@@ -20,7 +20,7 @@ func (bearing Bearing) Canon() Bearing {
 }
 
 func DirectionBearingFromRotation(rotation plane.Rotation) Bearing {
-	//angle := float64(rotation.Rotation + rotation.Rotation)
+	//angle := float64(rotation.OYLeftAngle + rotation.OYLeftAngle)
 
 	bearingDegrees := 90 - (180 * rotation / math.Pi)
 
@@ -47,8 +47,9 @@ func PlaneBearingFromRotation(rotation plane.Rotation) Bearing {
 	return Bearing(bearingDegrees)
 }
 
-func (bearing Bearing) Rotation() plane.Rotation {
-	angle := plane.Rotation(-bearing * math.Pi / 180)
+// OYLeftAngle was previously named Rotation()
+func (bearing Bearing) OYLeftAngle() float64 {
+	angle := float64(-bearing * math.Pi / 180)
 	if angle <= -math.Pi {
 		return angle + 2*math.Pi
 	} else if angle > math.Pi {
@@ -58,7 +59,8 @@ func (bearing Bearing) Rotation() plane.Rotation {
 	return angle
 }
 
-func (bearing Bearing) OxyAngle() float64 {
+// OXLeftAngle was previously named OxyAngle()
+func (bearing Bearing) OXLeftAngle() float64 {
 	angle := math.Pi * (0.5 - float64(bearing)/180)
 	if angle <= -2*math.Pi {
 		return angle + 2*math.Pi

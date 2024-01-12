@@ -4,6 +4,10 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"strings"
+	"time"
+
+	"github.com/pavlo67/common/common/filelib"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -37,6 +41,21 @@ func (op *loggerZap) Comment(text string) {
 	}
 }
 
+func (op *loggerZap) SetPath(basePath string) {
+	if basePath = strings.TrimSpace(basePath); basePath == "" {
+		op.cfg.BasePath = ""
+		return
+	}
+
+	var err error
+	if basePath, err = filelib.Dir(basePath); err != nil {
+		op.Errorf("can't create basePath (%s): %s / on logger.SetPath()", basePath, err)
+		return
+	}
+
+	op.cfg.BasePath = basePath
+}
+
 func (op *loggerZap) File(path string, data []byte) {
 	if op.cfg.SaveFiles {
 		basedPaths, err := logger.ModifyPaths([]string{path}, op.cfg.BasePath)
@@ -67,9 +86,6 @@ func (op *loggerZap) Image(path string, getImage imagelib.Imager) {
 			op.Error(err)
 		}
 	}
-}
-
-func (op *loggerZap) NoOps() {
 }
 
 func (op *loggerZap) Key() string {
@@ -114,6 +130,10 @@ func New(cfg logger.Config) (logger.Operator, error) {
 	l, err := c.Build()
 	if err != nil {
 		return nil, fmt.Errorf("can't create logger (%#v --> %#v), got %s", cfg, c, err)
+	}
+
+	if cfg.Key == "" {
+		cfg.Key = time.Now().Format(time.RFC3339)[:19]
 	}
 
 	return &loggerZap{SugaredLogger: *l.Sugar(), cfg: cfg}, nil

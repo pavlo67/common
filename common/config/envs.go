@@ -10,27 +10,18 @@ import (
 )
 
 type Envs struct {
-	serviceName string
-	data        map[string]interface{}
-	marshaler   serialization.Marshaler
+	Data      common.Map
+	Marshaler serialization.Marshaler
 }
 
 var errNoEnvs = errors.New("no envs")
-
-func (c *Envs) ServiceName() string {
-	if c == nil {
-		return ""
-	}
-
-	return c.serviceName
-}
 
 func (c *Envs) Raw(key string) (interface{}, error) {
 	if c == nil {
 		return nil, errNoEnvs
 	}
 
-	valueRaw, ok := c.data[key]
+	valueRaw, ok := c.Data[key]
 	if !ok {
 		return nil, errors.CommonError(common.NotFoundKey, common.Map{"reason": "no key in envs", "key": key})
 	}
@@ -43,13 +34,13 @@ func (c *Envs) Value(key string, target interface{}) error {
 		return errNoEnvs
 	}
 
-	if value, ok := c.data[key]; ok {
-		valueRaw, err := c.marshaler.Marshal(value)
+	if value, ok := c.Data[key]; ok {
+		valueRaw, err := c.Marshaler.Marshal(value)
 		if err != nil {
 			return errors.Wrapf(err, "can't marshal value (%s / %#v) to raw bytes", key, value)
 		}
 
-		return c.marshaler.Unmarshal(valueRaw, target)
+		return c.Marshaler.Unmarshal(valueRaw, target)
 	}
 
 	return errors.CommonError(common.NotFoundKey, common.Map{"reason": "no key in envs", "key": key})
@@ -63,38 +54,16 @@ func Get(envsFile string, marshaler serialization.Marshaler) (*Envs, error) {
 		return nil, errors.New("empty envs path")
 	}
 
-	data, err := ioutil.ReadFile(envsFile)
+	dataBytes, err := ioutil.ReadFile(envsFile)
 	if err != nil {
 		return nil, errors.Wrapf(err, "can't read envs file from '%s'", envsFile)
 	}
 
-	cfg := Envs{marshaler: marshaler}
-	err = marshaler.Unmarshal(data, &cfg.data)
-	if err != nil {
-		return nil, errors.Wrapf(err, "can't .Unmarshal('%s') from envs '%s'", data, envsFile)
+	envs := Envs{Marshaler: marshaler}
+
+	if err = marshaler.Unmarshal(dataBytes, &envs.Data); err != nil {
+		return nil, errors.Wrapf(err, "can't .Unmarshal('%s') from envs '%s'", dataBytes, envsFile)
 	}
 
-	return &cfg, nil
+	return &envs, nil
 }
-
-//// Key ...
-//func (c *Envs) Key(key string, errs common.multipleErrors) (string, common.multipleErrors) {
-//	if c == nil {
-//		return "", append(errs, ErrNoConfig)
-//	}
-//	if str, ok := c.Strings[key]; ok {
-//		return str, errs
-//	}
-//	return "", append(errs, errors.Wrapf(ErrNoValue, "no data for key '%s' in config.strings in %#v", key, c))
-//}
-//
-//// IsTrue ...
-//func (c *Envs) IsTrue(key string, errs common.multipleErrors) (bool, common.multipleErrors) {
-//	if c == nil {
-//		return false, append(errs, ErrNoConfig)
-//	}
-//	if flag, ok := c.Flags[key]; ok {
-//		return flag, errs
-//	}
-//	return false, append(errs, errors.Wrapf(ErrNoValue, "no data for key '%s' in config.flags in %#v", key, c))
-//}

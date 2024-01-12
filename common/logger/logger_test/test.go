@@ -2,8 +2,10 @@ package logger_test
 
 import (
 	"fmt"
+	"github.com/pavlo67/common/common/filelib"
 	"log"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/pavlo67/common/common/imagelib"
@@ -135,6 +137,21 @@ func (op loggerTest) Comment(text string) {
 
 }
 
+func (op *loggerTest) SetPath(basePath string) {
+	if basePath = strings.TrimSpace(basePath); basePath == "" {
+		op.basePath = ""
+		return
+	}
+
+	var err error
+	if basePath, err = filelib.Dir(basePath); err != nil {
+		op.Errorf("can't create basePath (%s): %s / on logger.SetPath()", basePath, err)
+		return
+	}
+
+	op.basePath = basePath
+}
+
 func (op loggerTest) File(path string, data []byte) {
 	if op.saveFiles {
 		basedPaths, err := logger.ModifyPaths([]string{path}, op.basePath)
@@ -164,9 +181,6 @@ func (op loggerTest) Image(path string, getImage imagelib.Imager) {
 			op.Error(err)
 		}
 	}
-}
-
-func (op loggerTest) NoOps() {
 }
 
 func (op *loggerTest) Key() string {

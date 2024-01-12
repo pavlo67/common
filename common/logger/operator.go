@@ -57,25 +57,25 @@ type Operator interface {
 	Fatal(args ...interface{})
 	Fatalf(template string, args ...interface{})
 
+	Key() string
 	Comment(text string)
+
+	SetPath(basePath string)
 	File(path string, data []byte)
 	Image(path string, getImage imagelib.Imager)
-
-	Key() string
-	NoOps() // to init logger variable being unused (for possible next debug purposes)
 }
 
 // TODO!!! be careful in windows
 
 var reRootPath = regexp.MustCompile(`^/`)
 
-func ModifyPaths(paths []string, basePath0 string) ([]string, error) {
-	if basePath0 = strings.TrimSpace(basePath0); basePath0 == "" {
+func ModifyPaths(paths []string, basePath string) ([]string, error) {
+	if basePath = strings.TrimSpace(basePath); basePath == "" {
 		return paths, nil
 	}
 
-	basePath, err := filelib.Dir(basePath0)
-	if err != nil {
+	var err error
+	if basePath, err = filelib.Dir(basePath); err != nil {
 		return nil, errors.Wrapf(err, "on logger.ModifyPaths()")
 	}
 
