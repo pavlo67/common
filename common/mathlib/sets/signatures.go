@@ -1,4 +1,4 @@
-package combinatorics
+package sets
 
 func SignatureCyclicInt(values []int) []int {
 	if len(values) < 1 {

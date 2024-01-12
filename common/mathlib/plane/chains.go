@@ -1,10 +1,11 @@
 package plane
 
 import (
+	"fmt"
 	"math"
 	"slices"
 
-	"github.com/pavlo67/common/common/mathlib/combinatorics"
+	"github.com/pavlo67/common/common/mathlib/sets"
 )
 
 type PolyChain []Point2
@@ -63,7 +64,7 @@ func (pCh PolyChain) Direction(deviationMaxIn float64) *Segment {
 	return &directionLine
 }
 
-func ProjectionOnLineSegment(p Point2, ls Segment) (distance, projectionPosition float64) {
+func (p Point2) ProjectionOnLineSegment(ls Segment) (distance, projectionPosition float64) {
 	d0, d1, d := p.DistanceSquare(ls[0]), p.DistanceSquare(ls[1]), ls[0].DistanceSquare(ls[1])
 	var reversed bool
 	if d1 < d0 {
@@ -83,7 +84,7 @@ func ProjectionOnLineSegment(p Point2, ls Segment) (distance, projectionPosition
 	}
 }
 
-func GetProjectionOnPolyChain(p Point2, pCh PolyChain) (float64, ProjectionOnPolyChain) {
+func (p Point2) ProjectionOnPolyChain(pCh PolyChain) (float64, ProjectionOnPolyChain) {
 
 	if len(pCh) < 1 {
 		return math.NaN(), ProjectionOnPolyChain{N: -1, Position: math.NaN(), Point2: Point2{math.NaN(), math.NaN()}}
@@ -102,7 +103,7 @@ func GetProjectionOnPolyChain(p Point2, pCh PolyChain) (float64, ProjectionOnPol
 
 	// POINTS:
 	for i, pI := range pCh[:len(pCh)-1] {
-		dist, position := ProjectionOnLineSegment(p, Segment{pI, pCh[i+1]})
+		dist, position := p.ProjectionOnLineSegment(Segment{pI, pCh[i+1]})
 		if dist >= minDist || math.IsNaN(dist) {
 			continue
 		}
@@ -132,7 +133,7 @@ func AveragePolyChains(pCh0, pCh1 PolyChain, distanceMaxIn float64, connectEnds 
 	var p1Averaged []int
 
 	for n0, p0 := range pCh0 {
-		if dist, pr := GetProjectionOnPolyChain(p0, pCh1); dist <= distanceMaxIn {
+		if dist, pr := p0.ProjectionOnPolyChain(pCh1); dist <= distanceMaxIn {
 			pCh0[n0] = Point2{0.5 * (pr.X + p0.X), 0.5 * (pr.Y + p0.Y)}
 			if pr.Position == 0 {
 				pCh1[pr.N] = pCh0[n0]
@@ -152,11 +153,11 @@ func AveragePolyChains(pCh0, pCh1 PolyChain, distanceMaxIn float64, connectEnds 
 	}
 
 	for n1, p1 := range pCh1 {
-		if combinatorics.In(p1Averaged, n1) {
+		if sets.In(p1Averaged, n1) {
 			continue
 		}
 
-		if dist, pr := GetProjectionOnPolyChain(p1, pCh0); dist <= distanceMaxIn {
+		if dist, pr := p1.ProjectionOnPolyChain(pCh0); dist <= distanceMaxIn {
 			pCh1[n1] = Point2{0.5 * (pr.X + p1.X), 0.5 * (pr.Y + p1.Y)}
 			if pr.Position == 0 {
 				pCh0[pr.N] = pCh1[n1]
@@ -229,40 +230,6 @@ func AveragePolyChains(pCh0, pCh1 PolyChain, distanceMaxIn float64, connectEnds 
 	return ok, pCh0, pCh1RestsInitial
 }
 
-//func ShortenPolyChain(pCh PolyChain, distanceMax float64) PolyChain {
-//	for i := 0; i < len(pCh)-2; i++ {
-//		for j := i + 1; j <= len(pCh); j++ {
-//			if j == len(pCh) {
-//				return append(pCh[:i+1], pCh[len(pCh)-1])
-//			} else if pCh[i].DistanceTo(pCh[j]) <= distanceMax {
-//				continue
-//			} else if j > i+2 {
-//				return append(pCh[:i+1], ShortenPolyChain(pCh[j-1:], distanceMax)...)
-//			}
-//			break
-//		}
-//	}
-//
-//	return pCh
-//}
-//
-//func ShortenPolyChainCutting(pCh PolyChain, maxDistanceToBeJoined float64) []PolyChain {
-//	for i := 0; i <= len(pCh)-3; i++ {
-//		for j := len(pCh) - 1; j >= i+2; j-- {
-//			if pCh[i].DistanceTo(pCh[j]) <= maxDistanceToBeJoined {
-//
-//				// TODO!!! fix slices if i+j < i
-//				// return append(
-//				//	ShortenPolyChainCutting(append(pCh[:i+1], pCh[j:]...), maxDistanceToBeJoined),
-//				//	ShortenPolyChainCutting(pCh[i+1:j], maxDistanceToBeJoined)...,
-//				// )
-//			}
-//		}
-//	}
-//
-//	return []PolyChain{pCh}
-//}
-
 type PolyChainsIntersection struct {
 	Point2
 	N0, N1 int
@@ -303,7 +270,7 @@ func PolyChainsIntersectionAny(pCh0, pCh1 PolyChain) *PolyChainsIntersection {
 //}
 //pCh0 = pCh0New
 
-func ShortenPolyChain(pCh PolyChain, maxDistanceToBeJoined float64) PolyChain {
+func (pCh PolyChain) Shorten(maxDistanceToBeJoined float64) PolyChain {
 	for i := 0; i <= len(pCh)-3; i++ {
 		for j := len(pCh) - 1; j >= i+2; j-- {
 			if pCh[i].DistanceTo(pCh[j]) <= maxDistanceToBeJoined {
@@ -316,7 +283,7 @@ func ShortenPolyChain(pCh PolyChain, maxDistanceToBeJoined float64) PolyChain {
 	return pCh
 }
 
-func StraightenPolyChain(pCh PolyChain, minDeviation float64) PolyChain {
+func (pCh PolyChain) Straighten(minDeviation float64) PolyChain {
 	if len(pCh) <= 2 {
 		return pCh
 	}
@@ -343,7 +310,7 @@ func StraightenPolyChain(pCh PolyChain, minDeviation float64) PolyChain {
 	return append(straightenedPolyChain, pCh[len(pCh)-1])
 }
 
-func CutPolyChain(pCh PolyChain, fromEndI int, axis Segment) PolyChain {
+func (pCh PolyChain) Cut(fromEndI int, axis Segment) PolyChain {
 
 	numI := len(pCh)
 
@@ -406,7 +373,7 @@ func CutPolyChain(pCh PolyChain, fromEndI int, axis Segment) PolyChain {
 	return cutted
 }
 
-func ApproximatePolyChain(pCh PolyChain, minDeviation float64) PolyChain {
+func (pCh PolyChain) Approximate(minDeviation float64) PolyChain {
 	if len(pCh) <= 2 {
 		return pCh
 	}
@@ -446,50 +413,53 @@ func ApproximatePolyChain(pCh PolyChain, minDeviation float64) PolyChain {
 		return lineSegment[:]
 	}
 
-	return append(append(PolyChain{}, ApproximatePolyChain(pCh[:maxI+1], minDeviation)...),
-		ApproximatePolyChain(pCh[maxI:], minDeviation)[1:]...)
+	return append(append(PolyChain{}, pCh[:maxI+1].Approximate(minDeviation)...), pCh[maxI:].Approximate(minDeviation)[1:]...)
 }
 
-//
-//func ApproximatePolyChain(pCh PolyChain, minDeviation float64) PolyChain {
-//	if len(pCh) <= 2 {
-//		return pCh
-//	}
-//
-//	lineSegment := Segment{pCh[0], pCh[len(pCh)-1]}
-//	segmentLength := pCh[0].DistanceTo(pCh[len(pCh)-1])
-//	segmentLengthSquare := segmentLength * segmentLength
-//	maxDistance := minDeviation
-//	var distance, ratio, maxRatio float64
-//	var maxI int
-//	for i := 1; i < len(pCh)-1; i++ {
-//		distanceToFirst, distanceToLast := pCh[i].DistanceTo(pCh[0]), pCh[i].DistanceTo(pCh[len(pCh)-1])
-//		if distanceToFirst > distanceToLast {
-//			distanceToFirst, distanceToLast = distanceToLast, distanceToFirst
-//		}
-//
-//		if distanceToFirst*distanceToFirst+segmentLengthSquare <= distanceToLast*distanceToLast {
-//			distance = distanceToFirst
-//		} else {
-//			distance = pCh[i].DistanceToLine(lineSegment)
-//		}
-//
-//		if distance > maxDistance {
-//			maxDistance, maxI, maxRatio = distance, i, float64(i)/float64(len(pCh)-i-1)
-//		} else if distance == maxDistance {
-//			if i < len(pCh)-i-1 {
-//				ratio = float64(i) / float64(len(pCh)-i-1)
-//			} else {
-//				ratio = float64(len(pCh)-i-1) / float64(i)
-//			}
-//			if ratio > maxRatio {
-//				maxI, maxRatio = i, float64(i)/float64(len(pCh)-i-1)
-//			}
-//		}
-//	}
-//	if maxI <= 0 {
-//		return lineSegment[:]
-//	}
-//
-//	return append(ApproximatePolyChain(pCh[:maxI+1], minDeviation), ApproximatePolyChain(pCh[maxI:], minDeviation)[1:]...)
-//}
+func (pCh PolyChain) Filter() PolyChain {
+	if len(pCh) < 2 {
+		return pCh
+	}
+	var pChNew PolyChain
+
+I:
+	for i := 0; i < len(pCh); {
+		pChNew = append(pChNew, pCh[i])
+		for j := i + 1; j < len(pCh); j++ {
+			if pCh[j] != pCh[i] {
+				i = j
+				continue I
+			}
+		}
+		break
+	}
+
+	return pChNew
+}
+
+func (pCh PolyChain) ShortenWithTheSamePoints(maxDistanceToBeJoined float64) PolyChain {
+	for i := 0; i <= len(pCh)-3; i++ {
+		for j := len(pCh) - 1; j >= i+2; j-- {
+			if pCh[i].DistanceTo(pCh[j]) <= maxDistanceToBeJoined {
+				for k := i + 1; k < j; k++ {
+					pCh[k] = pCh[i]
+				}
+				break
+			}
+		}
+	}
+
+	return pCh
+}
+
+func (pCh PolyChain) ShortString() string {
+	if len(pCh) < 1 {
+		return "[]"
+	}
+	var pChStr string
+	for _, p := range pCh {
+		pChStr += fmt.Sprintf(" {%.1f %.1f}", p.X, p.Y)
+	}
+
+	return "[" + pChStr[1:] + "]"
+}

@@ -48,7 +48,7 @@ func (c Contour) Approximate(deviationMax float64) Contour {
 	pCh0 := PolyChain(c[i0 : i1+1])
 	pCh1 := append(PolyChain(c[i1:]), PolyChain(c[:i0+1])...)
 
-	pCh0Approx, pCh1Approx := ApproximatePolyChain(pCh0, deviationMax), ApproximatePolyChain(pCh1, deviationMax)
+	pCh0Approx, pCh1Approx := pCh0.Approximate(deviationMax), pCh1.Approximate(deviationMax)
 
 	return Contour(append(pCh0Approx, pCh1Approx[1:len(pCh1Approx)-1]...))
 }

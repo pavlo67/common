@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/pavlo67/common/common/mathlib/combinatorics"
+	"github.com/pavlo67/common/common/mathlib/sets"
 )
 
 func Confirm(question string) bool {
@@ -17,5 +17,5 @@ func Confirm(question string) bool {
 	text = strings.Replace(text, "\n", "", -1)
 	text = strings.Replace(text, "\r", "", -1)
 
-	return combinatorics.In([]string{"y", "yes"}, strings.ToLower(strings.TrimSpace(text)))
+	return sets.In([]string{"y", "yes"}, strings.ToLower(strings.TrimSpace(text)))
 }

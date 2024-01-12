@@ -1,4 +1,4 @@
-package combinatorics
+package sets
 
 func In[T comparable](ints []T, i T) bool {
 	for _, s := range ints {

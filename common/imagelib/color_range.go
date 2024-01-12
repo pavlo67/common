@@ -5,9 +5,9 @@ import (
 	"image"
 	"image/color"
 
-	"github.com/pavlo67/common/common/imagelib/pix"
+	"github.com/pavlo67/common/common/mathlib/sets"
 
-	"github.com/pavlo67/common/common/mathlib/combinatorics"
+	"github.com/pavlo67/common/common/imagelib/pix"
 )
 
 type ColorRange struct {
@@ -20,9 +20,9 @@ func (cr ColorRange) String() string {
 }
 
 func ColorRangesIntersect(cr0, cr1 ColorRange) bool {
-	return combinatorics.Intersect(cr0.ColorMin.R, cr0.ColorMax.R, cr1.ColorMin.R, cr1.ColorMax.R) &&
-		combinatorics.Intersect(cr0.ColorMin.G, cr0.ColorMax.G, cr1.ColorMin.G, cr1.ColorMax.G) &&
-		combinatorics.Intersect(cr0.ColorMin.B, cr0.ColorMax.B, cr1.ColorMin.B, cr1.ColorMax.B)
+	return sets.Intersect(cr0.ColorMin.R, cr0.ColorMax.R, cr1.ColorMin.R, cr1.ColorMax.R) &&
+		sets.Intersect(cr0.ColorMin.G, cr0.ColorMax.G, cr1.ColorMin.G, cr1.ColorMax.G) &&
+		sets.Intersect(cr0.ColorMin.B, cr0.ColorMax.B, cr1.ColorMin.B, cr1.ColorMax.B)
 
 }
 
@@ -125,7 +125,7 @@ COLOR_RANGE:
 }
 
 func CheckRange(cMin, cMax, cNewMin, cNewMax uint8, rangeMax uint8) []uint8 {
-	connRange := combinatorics.Connection(cMin, cMax, cNewMin, cNewMax)
+	connRange := sets.Connection(cMin, cMax, cNewMin, cNewMax)
 	if connRange != nil && connRange[1]-connRange[0] <= rangeMax {
 		return []uint8{connRange[0], connRange[1]}
 	}

@@ -1,4 +1,4 @@
-package combinatorics
+package sets
 
 func Multiple[T interface{}](data [][]T) (dataMultipled [][]T) {
 

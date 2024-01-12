@@ -168,12 +168,35 @@ func AddLine(img draw.Image, ls plane.Segment, clr color.Color) {
 	}
 }
 
-func AddRectangle(img draw.Image, rect image.Rectangle, clr color.Color) {
-	AddHLine(img, rect.Min.X, rect.Min.Y, rect.Max.X, clr)
-	AddHLine(img, rect.Min.X, rect.Max.Y, rect.Max.X, clr)
-	AddVLine(img, rect.Min.X, rect.Min.Y, rect.Max.Y, clr)
-	AddVLine(img, rect.Max.X, rect.Min.Y, rect.Max.Y, clr)
+//func AddRectangle(img draw.Image, rect image.Rectangle, clr color.Color) {
+//	AddHLine(img, rect.Min.X, rect.Min.Y, rect.Max.X, clr)
+//	AddHLine(img, rect.Min.X, rect.Max.Y, rect.Max.X, clr)
+//	AddVLine(img, rect.Min.X, rect.Min.Y, rect.Max.Y, clr)
+//	AddVLine(img, rect.Max.X, rect.Min.Y, rect.Max.Y, clr)
+//
+//}
 
+func AddRectangle(img draw.Image, rect image.Rectangle, clr color.Color, width int) {
+	if width <= 1 {
+		AddHLine(img, rect.Min.X, rect.Min.Y, rect.Max.X, clr)
+		AddHLine(img, rect.Min.X, rect.Max.Y, rect.Max.X, clr)
+		AddVLine(img, rect.Min.X, rect.Min.Y, rect.Max.Y, clr)
+		AddVLine(img, rect.Max.X, rect.Min.Y, rect.Max.Y, clr)
+
+	} else {
+		segments := []plane.Segment{
+			{{float64(rect.Min.X), float64(rect.Min.Y)}, {float64(rect.Min.X), float64(rect.Max.Y)}},
+			{{float64(rect.Max.X), float64(rect.Min.Y)}, {float64(rect.Max.X), float64(rect.Max.Y)}},
+			{{float64(rect.Min.X), float64(rect.Min.Y)}, {float64(rect.Max.X), float64(rect.Min.Y)}},
+			{{float64(rect.Min.X), float64(rect.Max.Y)}, {float64(rect.Max.X), float64(rect.Max.Y)}},
+		}
+		for _, segment := range segments {
+			for _, p := range Line(segment, width) {
+				img.Set(p.X, p.Y, clr)
+			}
+		}
+
+	}
 }
 
 //// Marker -------------------------------------------------------------------------------

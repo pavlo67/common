@@ -32,7 +32,7 @@ func ShowVCSInfo() {
 	}
 }
 
-func PrepareApp(envPath string) (Envs, logger.Operator) {
+func PrepareApp(envPath, logPath string) (Envs, logger.Operator) {
 
 	rand.Seed(time.Now().UnixNano())
 
@@ -50,29 +50,25 @@ func PrepareApp(envPath string) (Envs, logger.Operator) {
 
 	// get logger --------------------------------------------------------------------
 
-	// TODO!!! why it doesn't work??? it should be completed
-	// var loggerConfig logger.Envs
-	// if err = cfgServicePtr.Value("logger", &loggerConfig); err != nil {
-	//	log.Fatalf("on config.PrepareApp(%s, %s) got %s reading logger config", envPath, configEnv+".yaml", err)
-	// }
-
 	var saveFiles bool
 	if err = cfgServicePtr.Value("logger_save_files", &saveFiles); err != nil {
-		log.Fatalf("on config.PrepareApp(%s, %s) got %s reading 'logger_save_files'", envPath, configEnv+".yaml", err)
-	}
-	var basePath0 string
-	if err = cfgServicePtr.Value("logger_path", &basePath0); err != nil {
-		log.Fatalf("on config.PrepareApp(%s, %s) got %s reading 'logger_path'", envPath, configEnv+".yaml", err)
+		fmt.Fprintf(os.Stderr, "on config.PrepareApp(%s, %s) got %s reading 'logger_save_files'", envPath, configEnv+".yaml", err)
 	}
 
-	basePath, err := filelib.Dir(basePath0)
+	if logPath == "" {
+		if err = cfgServicePtr.Value("logger_path", &logPath); err != nil {
+			log.Fatalf("on config.PrepareApp(%s, %s) got %s reading 'logger_path'", envPath, configEnv+".yaml", err)
+		}
+	}
+
+	logPath, err = filelib.Dir(logPath)
 	if err != nil {
-		log.Fatalf("on config.PrepareApp(%s, %s): can't create base path (%s): %s", envPath, configEnv+".yaml", basePath0, err)
+		log.Fatalf("on config.PrepareApp(%s, %s): can't create log path (%s): %s", envPath, configEnv+".yaml", logPath, err)
 	}
 
 	loggerConfig := logger.Config{
 		Key:       strconv.FormatInt(time.Now().Unix(), 10),
-		BasePath:  basePath,
+		BasePath:  logPath,
 		SaveFiles: saveFiles,
 	}
 

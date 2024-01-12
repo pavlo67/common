@@ -1,4 +1,4 @@
-package combinatorics
+package sets
 
 func Intersect[T int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64 | float32 | float64](from1, to1, from2, to2 T) bool {
 	if from1 < from2 {

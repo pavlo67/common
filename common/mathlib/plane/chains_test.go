@@ -137,7 +137,7 @@ func ComparePolyChains(pCh0, pCh1 PolyChain) bool {
 }
 func TestCutPolyChain(t *testing.T) {
 	type args struct {
-		polyChain []Point2
+		polyChain PolyChain
 		endI      int
 		axis      Segment
 	}
@@ -181,7 +181,7 @@ func TestCutPolyChain(t *testing.T) {
 		{
 			name: "",
 			args: args{
-				polyChain: []Point2{{-1, -1}, {1, 1}, {1, -1}},
+				polyChain: PolyChain{{-1, -1}, {1, 1}, {1, -1}},
 				endI:      1,
 				axis:      Segment{Point2{X: 0, Y: 0}, Point2{X: 1, Y: 0}},
 			},
@@ -191,7 +191,7 @@ func TestCutPolyChain(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := CutPolyChain(tt.args.polyChain, tt.args.endI, tt.args.axis); !ComparePolyChains(got, tt.want) {
+			if got := tt.args.polyChain.Cut(tt.args.endI, tt.args.axis); !ComparePolyChains(got, tt.want) {
 				t.Errorf("CutPolyChain() = %v, wantPolyChain %v", got, tt.want)
 			}
 		})
@@ -236,7 +236,7 @@ func TestApproximatePolyChain(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ApproximatePolyChain(tt.pts2, tt.maxDeviation); !reflect.DeepEqual(got, tt.want) {
+			if got := tt.pts2.Approximate(tt.maxDeviation); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("ApproximatePolyChain() = %v, wantDistance %v", got, tt.want)
 			}
 		})
@@ -499,6 +499,37 @@ func TestDistanceToLineSegment(t *testing.T) {
 			}
 			if math.Abs(gotPosition-tt.wantPosition) > mathlib.Eps {
 				t.Errorf("DistanceToSegment() gotPosition = %v, wantDistance %v", gotPosition, tt.wantPosition)
+			}
+		})
+	}
+}
+
+func TestFilterPolyChain(t *testing.T) {
+	tests := []struct {
+		name      string
+		pCh       PolyChain
+		pChWanted PolyChain
+	}{
+		{
+			name:      "",
+			pCh:       PolyChain{{1, 1}, {1, 1}, {1, 0}, {1, 0}, {1, 0}, {1, 0}, {1, 0}},
+			pChWanted: PolyChain{{1, 1}, {1, 0}},
+		},
+		{
+			name:      "",
+			pCh:       PolyChain{{1, 2}, {1, 1}, {1, 0}, {1, 0}, {1, 0}, {3, 1}, {1, 0}, {1, 0}},
+			pChWanted: PolyChain{{1, 2}, {1, 1}, {1, 0}, {3, 1}, {1, 0}},
+		},
+		{
+			name:      "",
+			pCh:       PolyChain{{1, 2}, {1, 1}, {1, 0}, {3, 1}, {1, 0}},
+			pChWanted: PolyChain{{1, 2}, {1, 1}, {1, 0}, {3, 1}, {1, 0}},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.pCh.Filter(); !reflect.DeepEqual(got, tt.pChWanted) {
+				t.Errorf("FilterPolyChain() = %v, pChWanted %v", got, tt.pChWanted)
 			}
 		})
 	}
