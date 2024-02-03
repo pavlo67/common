@@ -123,6 +123,21 @@ func (p Point2) ProjectionOnPolyChain(pCh PolyChain) (float64, ProjectionOnPolyC
 	return minDist, pr
 }
 
+func (pCh PolyChain) DistanceTo(pCh1 PolyChain, distanceMax float64) (dist float64, pr, pr1 *ProjectionOnPolyChain) {
+	for n0, p0 := range pCh {
+		if dist_, pr_ := p0.DistanceToPolyChain(pCh1); dist_ <= distanceMax {
+			return dist_, &ProjectionOnPolyChain{N: n0, Point2: p0}, &pr_
+		}
+	}
+	for n1, p1 := range pCh1 {
+		if dist_, pr_ := p1.DistanceToPolyChain(pCh); dist_ <= distanceMax {
+			return dist_, &pr_, &ProjectionOnPolyChain{N: n1, Point2: p1}
+		}
+	}
+
+	return math.NaN(), nil, nil
+}
+
 func AveragePolyChains(pCh0, pCh1 PolyChain, distanceMaxIn float64, connectEnds bool) (
 	ok bool, pCh0Averaged PolyChain, pCh1RestsInitial []PolyChain) {
 

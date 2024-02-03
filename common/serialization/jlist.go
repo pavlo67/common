@@ -4,10 +4,69 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"os"
+	"regexp"
+
 	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/filelib"
-	"os"
 )
+
+const onJSONList = "on serialization.JSONList()"
+
+func JSONList[T any](list []T, prefix, indent string) ([]byte, error) {
+	prefixBytes, indentBytes := []byte(prefix), []byte(indent)
+
+	jsonBytes := []byte{'[', '\n'}
+
+	for i, item := range list {
+		itemBytes, err := json.Marshal(item)
+		if err != nil {
+			return nil, errors.Wrap(err, onJSONList)
+		}
+
+		if i > 0 {
+			jsonBytes = append(append(jsonBytes, ','), prefixBytes...)
+		}
+		jsonBytes = append(append(jsonBytes, indentBytes...), itemBytes...)
+	}
+
+	return append(jsonBytes, '\n', ']'), nil
+}
+
+const onSavePart = "on serialization.SavePart()"
+
+func SavePart(data interface{}, marshaler Marshaler, filename string) error {
+
+	logData, err := marshaler.Marshal(data)
+	if err != nil {
+		return errors.Wrap(err, onSavePart)
+	} else if err = filelib.AppendFile(filename, append(logData, '\n')); err != nil {
+		return errors.Wrap(err, onSavePart)
+	}
+
+	return nil
+}
+
+const onReadPart = "on serialization.ReadPart()"
+
+func ReadPart(filename string, n int, marshaler Marshaler, data interface{}) error {
+	dataBytes, err := os.ReadFile(filename)
+	if err != nil {
+		return fmt.Errorf("reading %s got: %s / "+onReadPart, filename, err)
+	}
+	lines := bytes.Split(dataBytes, []byte{'\n'})
+	if n < 0 || n >= len(lines) {
+		return fmt.Errorf("wrong n (%d) to get from %d lines / "+onReadPart, n, len(lines))
+	}
+
+	if err := marshaler.Unmarshal(lines[n], data); err != nil {
+		return fmt.Errorf("unmarshaling %s got: %s / "+onReadPart, dataBytes, err)
+	}
+
+	return nil
+}
+
+var reEmptyLine = regexp.MustCompile(`^\s*$`)
 
 const onReadAllPartsJSON = "on serialization.ReadAllPartsJSON()"
 
@@ -61,27 +120,4 @@ func SaveAllPartsJSON[T any](data []T, filename string) error {
 	}
 
 	return nil
-}
-
-const onJSONList = "on serialization.JSONList()"
-
-func JSONList[T any](list []T, prefix, indent string) ([]byte, error) {
-	prefixBytes, indentBytes := []byte(prefix), []byte(indent)
-
-	jsonBytes := []byte{'[', '\n'}
-
-	for i, item := range list {
-		itemBytes, err := json.Marshal(item)
-		if err != nil {
-			return nil, errors.Wrap(err, onJSONList)
-		}
-
-		if i > 0 {
-			jsonBytes = append(append(jsonBytes, ','), prefixBytes...)
-		}
-		jsonBytes = append(append(jsonBytes, indentBytes...), itemBytes...)
-	}
-
-	return append(jsonBytes, '\n', ']'), nil
-
 }

@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"time"
@@ -34,6 +35,43 @@ func CorrectFileName(name string) string {
 	name = rePoint.ReplaceAllLiteralString(name, "_")
 	name = reSpecials.ReplaceAllLiteralString(name, "_")
 	return name
+}
+
+const onCopyDirEntries = "on filelib.CopyDirEntries()"
+
+func CopyDirEntries(path, targetPath string, reStr string, removeOrigin bool) error {
+
+	re, err := regexp.Compile(reStr)
+	if err != nil {
+		return fmt.Errorf("wrong reStr: '%s'"+onCopyDirEntries, reStr)
+	}
+
+	targetPath, err = Dir(targetPath)
+	if err != nil {
+		return fmt.Errorf("targetPath is wrong: %s / "+onCopyDirEntries, err)
+	}
+
+	dirEntries, err := List(path, re)
+	if err != nil {
+		return fmt.Errorf("%s / "+onCopyDirEntries, err)
+	}
+
+	// log.Printf("'%s' / %#v --> %s", reStr, re, dirEntries)
+
+	for _, dirEntry := range dirEntries {
+		if removeOrigin {
+			err = os.Rename(dirEntry, filepath.Join(targetPath, filepath.Base(dirEntry)))
+		} else {
+			err = CopyFile(dirEntry, filepath.Join(targetPath, filepath.Base(dirEntry)))
+		}
+
+		if err != nil {
+			return fmt.Errorf("%s / "+onCopyDirEntries, err)
+		}
+
+	}
+
+	return nil
 }
 
 func BackupFile(fileName string) error {

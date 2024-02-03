@@ -10,12 +10,12 @@ import (
 	"github.com/pavlo67/common/common/errors"
 )
 
-const onSearchByRegexp = "on filelib.SearchByRegexp()"
+const onSearch = "on filelib.Search()"
 
-func SearchByRegexp(path string, re regexp.Regexp, getFirst bool) ([]string, error) {
+func Search(path string, re regexp.Regexp, getFirst bool) ([]string, error) {
 	dirEntries, err := os.ReadDir(path)
 	if err != nil {
-		return nil, errors.Wrap(err, onSearchByRegexp)
+		return nil, errors.Wrap(err, onSearch)
 	}
 
 	names := make([]string, len(dirEntries))
@@ -36,10 +36,12 @@ func SearchByRegexp(path string, re regexp.Regexp, getFirst bool) ([]string, err
 	return matches, nil
 }
 
-func ListByRegexp(path string, re regexp.Regexp) ([]string, error) {
+const onList = "on filelib.List()"
+
+func List(path string, re *regexp.Regexp) ([]string, error) {
 	dirEntries, err := os.ReadDir(path)
 	if err != nil {
-		return nil, errors.Wrap(err, onSearchByRegexp)
+		return nil, errors.Wrap(err, onList)
 	}
 
 	names := make([]string, len(dirEntries))
@@ -48,11 +50,10 @@ func ListByRegexp(path string, re regexp.Regexp) ([]string, error) {
 	}
 
 	slices.Sort(names)
-	// sort.Slice(names, func(i, j int) bool { return names[i] < names[j] })
 
 	var namesListed []string
 	for _, name := range names {
-		if re.MatchString(name) {
+		if re == nil || re.MatchString(name) {
 			namesListed = append(namesListed, filepath.Join(path, name))
 		}
 	}

@@ -1,5 +1,7 @@
 package geolib
 
+import "github.com/pavlo67/common/common/mathlib/plane"
+
 type Area [2]Point
 
 func (area Area) Center() Point {
@@ -10,7 +12,7 @@ func (area Area) Center() Point {
 func AreaAround(point Point, radius float64) Area {
 	// TODO!!! check if radius is too large
 
-	return Area{point.MovedAt(-radius, -radius), point.MovedAt(radius, radius)}
+	return Area{point.MovedAt(plane.Point2{-radius, -radius}), point.MovedAt(plane.Point2{radius, radius})}
 }
 
 //func (area *Area) Canon() {

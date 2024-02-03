@@ -49,12 +49,12 @@ func (p Point) Geo() geo.Point {
 	return *geo.NewPoint(float64(p.Lat), float64(p.Lon))
 }
 
-func (p Point) MovedAt(dx, dy float64) Point {
-	if dx == 0 && dy == 0 {
+func (p Point) MovedAt(point2 plane.Point2) Point {
+	if point2.X == 0 && point2.Y == 0 {
 		return p
 	}
 
-	dxKm, dyKm := dx*0.001, dy*0.001
+	dxKm, dyKm := point2.X*0.001, point2.Y*0.001
 
 	bearing := DirectionBearingFromRotation(plane.Point2{dxKm, dyKm}.Rotation())
 

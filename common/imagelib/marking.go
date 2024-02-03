@@ -4,86 +4,13 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
-	"log"
 	"math"
 
 	"github.com/pavlo67/common/common/mathlib/plane"
 )
 
-var _ GetMask = &TextGetMask{}
-var _ GetMask = TextGetMask{}
-
-type TextGetMask struct {
-	*ColorNamed
-	Point     image.Point
-	Segments  []plane.Segment
-	LineWidth int
-	FontFile  string
-	Label     string
-	Title     string
-	Text      string
-}
-
-func (textGetMask TextGetMask) Color() *ColorNamed {
-	return textGetMask.ColorNamed
-}
-
-func (textGetMask TextGetMask) Mask(clr color.Color) Mask {
-	if textGetMask.FontFile == "" {
-		return nil
-	}
-
-	var points []image.Point
-	for _, segment := range textGetMask.Segments {
-		points = append(points, Line(segment, textGetMask.LineWidth)...)
-	}
-
-	return Mask{
-		MaskOneColor{
-			Color:  clr,
-			Points: points,
-			Marker: &MarkerText{
-				FontFile: textGetMask.FontFile,
-				Text:     []string{textGetMask.Label},
-				Point:    textGetMask.Point,
-			},
-		},
-	}
-}
-
-func (textGetMask TextGetMask) Info(colorNamed ColorNamed) string {
-
-	var title string
-	if textGetMask.Title != "" {
-		title = "\n" + textGetMask.Title + "\n"
-	}
-
-	return title + textGetMask.Text
-}
-
-// ----------------------------------
-
 type Marker interface {
 	Mark(draw.Image, color.Color)
-}
-
-var _ Marker = &MarkerText{}
-var _ Marker = MarkerText{}
-
-type MarkerText struct {
-	DPI      float64
-	Size     float64
-	Spacing  float64
-	FontFile string
-	Text     []string
-	image.Point
-}
-
-func (mt MarkerText) Mark(drawImg draw.Image, clr color.Color) {
-
-	if _, err := Write(drawImg, mt.Point, mt.DPI, mt.Size, mt.Spacing, mt.FontFile, clr, mt.Text); err != nil {
-		log.Printf("ERROR: on MarkerText.Mark(): %s", err)
-	}
 }
 
 func Line(s plane.Segment, width int) []image.Point {

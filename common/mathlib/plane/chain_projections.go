@@ -192,22 +192,36 @@ func ProjectionBetween(pr0, pr1, pr ProjectionOnPolyChain) bool {
 		(pr.N < pr1.N || (pr.N == pr1.N && pr.Position <= pr1.Position))
 }
 
-func CutWithProjection(pCh PolyChain, pr ProjectionOnPolyChain, fromStart bool) PolyChain {
-	if pr.N < 0 || pr.N >= len(pCh) {
-		return nil
+func CutWithProjection(pCh PolyChain, pr ProjectionOnPolyChain) (head, tail PolyChain) {
+	if pr.N < 0 {
+		return nil, pCh
+	} else if pr.N >= len(pCh) {
+		return pCh, nil
 	}
 
-	if fromStart {
-		if pr.Position == 0 {
-			return append(PolyChain{}, pCh[:pr.N+1]...)
-		}
-		return append(append(PolyChain{}, pCh[:pr.N+1]...), pr.Point2)
-	}
 	if pr.Position == 0 {
-		return append(PolyChain{}, pCh[pr.N:]...)
+		return pCh[:pr.N], pCh[pr.N:]
 	}
-	return append(PolyChain{pr.Point2}, pCh[pr.N+1:]...)
+
+	return pCh[:pr.N+1], append(PolyChain{pr.Point2}, pCh[pr.N+1:]...)
 }
+
+//func CutWithProjection(pCh PolyChain, pr ProjectionOnPolyChain, fromStart bool) PolyChain {
+//	if pr.N < 0 || pr.N >= len(pCh) {
+//		return nil
+//	}
+//
+//	if fromStart {
+//		if pr.Position == 0 {
+//			return append(PolyChain{}, pCh[:pr.N+1]...)
+//		}
+//		return append(append(PolyChain{}, pCh[:pr.N+1]...), pr.Point2)
+//	}
+//	if pr.Position == 0 {
+//		return append(PolyChain{}, pCh[pr.N:]...)
+//	}
+//	return append(PolyChain{pr.Point2}, pCh[pr.N+1:]...)
+//}
 
 func CutWithProjections(pCh PolyChain, pr0, pr1 ProjectionOnPolyChain) PolyChain {
 	if pr0.N < 0 || pr0.N >= len(pCh) || pr1.N < 0 || pr1.N >= len(pCh) {
