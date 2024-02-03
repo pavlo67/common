@@ -21,7 +21,7 @@ type loggerZap struct {
 	cfg logger.Config
 }
 
-func (op *loggerZap) Comment(text string) {
+func (op loggerZap) Comment(text string) {
 	for _, commentPath := range append(op.cfg.OutputPaths, op.cfg.ErrorPaths...) {
 		if commentPath == "stdout" {
 			fmt.Fprintf(os.Stdout, "\n%s\n", text)
@@ -42,6 +42,9 @@ func (op *loggerZap) Comment(text string) {
 }
 
 func (op *loggerZap) SetPath(basePath string) {
+	if op == nil {
+		return
+	}
 	if basePath = strings.TrimSpace(basePath); basePath == "" {
 		op.cfg.BasePath = ""
 		return
@@ -56,7 +59,7 @@ func (op *loggerZap) SetPath(basePath string) {
 	op.cfg.BasePath = basePath
 }
 
-func (op *loggerZap) File(path string, data []byte) {
+func (op loggerZap) File(path string, data []byte) {
 	if op.cfg.SaveFiles {
 		basedPaths, err := logger.ModifyPaths([]string{path}, op.cfg.BasePath)
 		if err != nil {
@@ -67,7 +70,7 @@ func (op *loggerZap) File(path string, data []byte) {
 	}
 }
 
-func (op *loggerZap) Image(path string, getImage imagelib.Imager) {
+func (op loggerZap) Image(path string, getImage imagelib.Imager) {
 	if op.cfg.SaveFiles {
 		img, info, err := getImage.Image()
 		if info != "" {
@@ -88,7 +91,14 @@ func (op *loggerZap) Image(path string, getImage imagelib.Imager) {
 	}
 }
 
-func (op *loggerZap) Key() string {
+func (op *loggerZap) SetKey(key string) {
+	if op == nil {
+		return
+	}
+	op.cfg.Key = key
+}
+
+func (op loggerZap) Key() string {
 	return op.cfg.Key
 }
 

@@ -57,6 +57,7 @@ type Operator interface {
 	Fatal(args ...interface{})
 	Fatalf(template string, args ...interface{})
 
+	SetKey(key string)
 	Key() string
 	Comment(text string)
 

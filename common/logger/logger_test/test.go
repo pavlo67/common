@@ -2,11 +2,12 @@ package logger_test
 
 import (
 	"fmt"
-	"github.com/pavlo67/common/common/filelib"
 	"log"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/pavlo67/common/common/filelib"
 
 	"github.com/pavlo67/common/common/imagelib"
 
@@ -138,6 +139,10 @@ func (op loggerTest) Comment(text string) {
 }
 
 func (op *loggerTest) SetPath(basePath string) {
+	if op == nil {
+		return
+	}
+
 	if basePath = strings.TrimSpace(basePath); basePath == "" {
 		op.basePath = ""
 		return
@@ -183,6 +188,13 @@ func (op loggerTest) Image(path string, getImage imagelib.Imager) {
 	}
 }
 
-func (op *loggerTest) Key() string {
+func (op *loggerTest) SetKey(key string) {
+	if op == nil {
+		return
+	}
+	op.key = key
+}
+
+func (op loggerTest) Key() string {
 	return op.key
 }
