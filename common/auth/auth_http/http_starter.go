@@ -47,13 +47,15 @@ func (ahs *authHTTPStarter) Run(cfg *config.Envs, options common.Map, joinerOp j
 	}
 	ignoreAbsent, _ := options["ignore_absent"].(bool)
 
+	logFilePath, _ := options["log_file"].(string)
+
 	if err := ahs.serverConfig.CompleteDirectly(auth_server_http.Endpoints, access.Host, access.Port, ignoreAbsent); err != nil {
 		return err
 	}
 
 	ahs.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))
 
-	authOp, err := New(ahs.serverConfig)
+	authOp, err := New(ahs.serverConfig, logFilePath)
 	if err != nil {
 		return errors.Wrap(err, "can't init *authHTTP{} as auth.Operator")
 	}

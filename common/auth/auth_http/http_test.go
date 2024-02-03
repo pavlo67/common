@@ -27,6 +27,7 @@ func TestAuthHTTP(t *testing.T) {
 		starter.Component{Starter(), common.Map{
 			// "prefix":        demo_server_http.PrefixREST,
 			"server_config": demo.ServerConfig,
+			"log_file":      "test_auth_http_requests.log",
 		}},
 	)
 

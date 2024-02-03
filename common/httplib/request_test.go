@@ -16,7 +16,7 @@ func TestRequest(t *testing.T) {
 	var responseData []byte
 	l := logger_test.New(t, "", "", false, nil)
 
-	err := Request(nil, url, method, nil, nil, &responseData, l)
+	err := Request(nil, url, method, nil, nil, &responseData, l, "")
 	require.NoError(t, err)
 
 	// t.Logf("%s")

@@ -26,16 +26,15 @@
 
 ## Запуск тесту для auth_stub/auth_server_http (в його виводі можна глянути логи доступу до сервера):
 
-    # запустити сервер, як описано вище
     cp _envs/env.yaml_example test.yaml
     go test -v github.com/pavlo67/common/common/auth/auth_http
-
+    # лог http-запитів тесту зберігається в common/auth/auth_http/test_auth_http_requests.log    
 
 ## Swagger
 
 При дефолтних настройках доступний за адресою http://localhost:3001/backend/api-docs
 
-Що туди передавати (приклад в логах при запуску тесту для auth_stub/auth_server_http):
+Що туди передавати (повний приклад є в логах при запуску тесту для auth_stub/auth_server_http):
 
     {"nickname":"admin","password":"admin"}
 

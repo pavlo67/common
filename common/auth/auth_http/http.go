@@ -15,13 +15,15 @@ var _ auth.Operator = &authHTTP{}
 
 type authHTTP struct {
 	serverConfig server_http.Config
+	logFilePath  string
 }
 
 const onNew = "on authHTTP.New()"
 
-func New(serverConfig server_http.Config) (auth.Operator, error) {
+func New(serverConfig server_http.Config, logFilePath string) (auth.Operator, error) {
 	authOp := authHTTP{
 		serverConfig: serverConfig,
+		logFilePath:  logFilePath,
 	}
 
 	return &authOp, nil
@@ -37,7 +39,7 @@ func (authOp *authHTTP) SetCreds(actor auth.Actor, toSet auth.Creds) (*auth.Cred
 	}
 
 	var creds *auth.Creds
-	if err := httplib.Request(nil, serverURL, ep.Method, server_http.SetCreds(actor.Creds), requestBody, &creds, l); err != nil {
+	if err := httplib.Request(nil, serverURL, ep.Method, server_http.SetCreds(actor.Creds), requestBody, &creds, l, authOp.logFilePath); err != nil {
 		return nil, err
 	}
 
@@ -57,7 +59,7 @@ func (authOp *authHTTP) Authenticate(toAuth auth.Creds) (*auth.Actor, error) {
 	}
 
 	var actor *auth.Actor
-	if err = httplib.Request(nil, serverURL, ep.Method, nil, requestBody, &actor, l); err != nil {
+	if err = httplib.Request(nil, serverURL, ep.Method, nil, requestBody, &actor, l, authOp.logFilePath); err != nil {
 		return nil, err
 	}
 

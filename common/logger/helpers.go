@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/pavlo67/common/common/filelib"
 )
 
 // const onLogTimestamp = "on logger.LogTimestamp()"
@@ -23,8 +25,8 @@ import (
 
 const MaxLoggedDataLength = 20000
 
-func LogRequest(l Operator, method, path string, reqHeaders http.Header, reqBody []byte, respHeaders http.Header, respBody []byte, bodyErr error,
-	status int) {
+func LogRequest(method, path string, reqHeaders http.Header, reqBody []byte, respHeaders http.Header, respBody []byte, bodyErr error,
+	status int, logFile string) {
 	if len(reqBody) > MaxLoggedDataLength {
 		reqBody = reqBody[:MaxLoggedDataLength]
 	}
@@ -40,7 +42,10 @@ func LogRequest(l Operator, method, path string, reqHeaders http.Header, reqBody
 		data = fmt.Sprintf("\nERROR: %s", bodyErr) + data
 	}
 
-	l.Info(data)
+	fmt.Println(data)
+	if logFile != "" {
+		filelib.AppendFile(logFile, []byte(data+"\n"))
+	}
 }
 
 //func Log(l Operator, data string, isError bool, message string) {

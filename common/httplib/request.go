@@ -26,7 +26,7 @@ type ResponseBinary struct {
 
 var reBinary = regexp.MustCompile(`^image/`)
 
-func Request(client *http.Client, serverURL, method string, header http.Header, requestData, responseData interface{}, l logger.Operator) error {
+func Request(client *http.Client, serverURL, method string, header http.Header, requestData, responseData interface{}, l logger.Operator, logFile string) error {
 	if client == nil {
 		client = &http.Client{}
 	}
@@ -63,7 +63,7 @@ func Request(client *http.Client, serverURL, method string, header http.Header, 
 
 	req, err := http.NewRequest(method, serverURL, requestBodyReader)
 	if err != nil || req == nil {
-		logger.LogRequest(l, method, serverURL, nil, requestBody, nil, nil, err, 0)
+		logger.LogRequest(method, serverURL, nil, requestBody, nil, nil, err, 0, logFile)
 		return fmt.Errorf(onRequest+": can't create request %s %s, got %#v, %s", method, serverURL, req, err)
 	} else if req.Body != nil {
 		defer Close(req.Body, client, nil)
@@ -85,7 +85,7 @@ func Request(client *http.Client, serverURL, method string, header http.Header, 
 			responseBody, _ = ioutil.ReadAll(resp.Body)
 		}
 
-		logger.LogRequest(l, method, serverURL, req.Header, requestBody, responseHeaders, responseBody, err, statusCode)
+		logger.LogRequest(method, serverURL, req.Header, requestBody, responseHeaders, responseBody, err, statusCode, logFile)
 		return fmt.Errorf(onRequest+": can't %s %s, got %s", method, serverURL, err)
 	}
 
@@ -99,7 +99,7 @@ func Request(client *http.Client, serverURL, method string, header http.Header, 
 	if !reBinary.MatchString(resp.Header.Get("Content-Type")) {
 		responseBodyToLog = responseBody
 	}
-	logger.LogRequest(l, method, serverURL, req.Header, requestBody, resp.Header, responseBodyToLog, err, resp.StatusCode)
+	logger.LogRequest(method, serverURL, req.Header, requestBody, resp.Header, responseBodyToLog, err, resp.StatusCode, logFile)
 	if err != nil {
 		return fmt.Errorf(onRequest+": can't read body from %s %s, got %s", method, serverURL, err)
 	}
