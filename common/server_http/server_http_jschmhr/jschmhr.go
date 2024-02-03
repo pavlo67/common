@@ -1,6 +1,7 @@
 package server_http_jschmhr
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -76,6 +77,14 @@ func (s *serverHTTPJschmhr) Start() error {
 	return s.httpServer.ListenAndServe()
 }
 
+func (s *serverHTTPJschmhr) Shutdown(ctx context.Context) error {
+	if s == nil {
+		return errors.New("no serverOp to shutting down")
+	}
+
+	return s.Shutdown(ctx)
+}
+
 func (s *serverHTTPJschmhr) Addr() (port int, https bool) {
 	return s.port, s.tlsCertFile != "" && s.tlsKeyFile != ""
 }
@@ -133,7 +142,7 @@ func (s *serverHTTPJschmhr) HandleEndpoint(key server_http.EndpointKey, serverPa
 
 		responseData, err := endpoint.WorkerHTTP(s, r, params, identity)
 		if err != nil {
-			l.Error(err)
+			l.Warn(err)
 		}
 
 		if responseData.MIMEType != "" {

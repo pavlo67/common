@@ -12,6 +12,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/pavlo67/common/common/colorize"
+
 	"github.com/pavlo67/common/common/serialization"
 
 	"github.com/stretchr/testify/require"
@@ -52,12 +54,12 @@ func PrepareApp(envPath, logPath string) (Envs, logger.Operator) {
 
 	var saveFiles bool
 	if err = cfgServicePtr.Value("logger_save_files", &saveFiles); err != nil {
-		fmt.Fprintf(os.Stderr, "on config.PrepareApp(%s, %s) got %s reading 'logger_save_files'", envPath, configEnv+".yaml", err)
+		fmt.Fprintf(os.Stderr, colorize.Red+"on config.PrepareApp(%s, %s), reading of 'logger_save_files' key produces the error: %s\n"+colorize.Reset, envPath, configEnv+".yaml", err)
 	}
 
 	if logPath == "" {
 		if err = cfgServicePtr.Value("logger_path", &logPath); err != nil {
-			log.Fatalf("on config.PrepareApp(%s, %s) got %s reading 'logger_path'", envPath, configEnv+".yaml", err)
+			fmt.Fprintf(os.Stderr, colorize.Red+"on config.PrepareApp(%s, %s), reading of 'logger_path' key produces the error: %s\n"+colorize.Reset, envPath, configEnv+".yaml", err)
 		}
 	}
 

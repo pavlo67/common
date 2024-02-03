@@ -121,7 +121,7 @@ const onAuthenticate = "on authstub.Authenticate()"
 func (authOp *authstub) Authenticate(toAuth auth.Creds) (*auth.Actor, error) {
 	nickname := toAuth[auth.CredsNickname]
 
-	l.Infof("ACTORS: %#v", authOp.actors)
+	// l.Infof("ACTORS: %#v", authOp.actors)
 
 	l.Infof("TO AUTH: %s / %#v", nickname, toAuth)
 

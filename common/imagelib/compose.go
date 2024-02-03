@@ -5,6 +5,8 @@ import (
 	"image"
 )
 
+// TODO!!! be careful: imgs [][]image.Image is a list of image rows so it's related to the next indexing: imgs[y][x]
+
 const onComposeImages = "on ComposeImages()"
 
 func ComposeImages(imgs [][]image.Image) (*image.RGBA, error) {

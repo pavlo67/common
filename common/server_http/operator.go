@@ -1,6 +1,7 @@
 package server_http
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/pavlo67/common/common/auth"
@@ -31,4 +32,5 @@ type Operator interface {
 
 	Start() error
 	Addr() (port int, https bool)
+	Shutdown(ctx context.Context) error
 }

@@ -1,7 +1,14 @@
+### logger ----------------------------------------------------------
+
+logger_path:
+logger_save_files: false
+
+
 ### data sources ----------------------------------------------------
 
 db_sqlite:
-  path:
+  # path: ~/0/programmae/common/common/sqllib/sqllib_sqlite/test_db/test.sqlite
+  path: /home/pavlo/0/partner/vision/_maps/navigation.sqlite
 
 
 ### services --------------------------------------------------------
