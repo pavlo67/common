@@ -1,13 +1,15 @@
-package imagelib
+package opencvlib
 
 import (
 	"fmt"
 	"image"
 	"math"
 
-	"github.com/pavlo67/common/common/errors"
-	"github.com/pavlo67/common/common/mathlib/plane"
 	"gocv.io/x/gocv"
+
+	"github.com/pavlo67/common/common/errors"
+	"github.com/pavlo67/common/common/imagelib"
+	"github.com/pavlo67/common/common/mathlib/plane"
 )
 
 const onResizeToRange = "on ResizeToRange()"
@@ -146,7 +148,7 @@ func RotateResized(imgRGB image.RGBA, angle plane.Rotation, targetSide int) (*im
 		imgRGBFinal, _ = imgRGBRotated.SubImage(image.Rectangle{image.Point{0, -delta2}, image.Point{sideX, -delta2 + targetSide}}).(*image.RGBA)
 	}
 
-	imgRGBFinal.Rect = Normalize(imgRGBFinal.Rect)
+	imgRGBFinal.Rect = imagelib.Normalize(imgRGBFinal.Rect)
 
 	return imgRGBFinal, scale1 * scale2, nil
 

@@ -4,22 +4,22 @@ import (
 	"testing"
 	"time"
 
-	"github.com/pavlo67/common/apps/demo"
-
 	"github.com/stretchr/testify/require"
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/auth"
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/starter"
+
+	"github.com/pavlo67/common/apps/demo"
 )
 
 func TestAuthHTTP(t *testing.T) {
 
-	cfgService, l := config.PrepareTests(t, "../../../_envs/", "test", "")
-	require.NotNil(t, cfgService)
+	envs, l := config.PrepareTests(t, "../../../_envs/", "")
+	require.NotNil(t, envs)
 
-	starters, err := demo.Components(cfgService, true)
+	starters, err := demo.Components(envs, true)
 	require.NoError(t, err)
 
 	starters = append(
@@ -31,7 +31,7 @@ func TestAuthHTTP(t *testing.T) {
 		}},
 	)
 
-	joinerOp, err := starter.Run(starters, &cfgService, "CLI BUILD FOR TEST", l)
+	joinerOp, err := starter.Run(starters, &envs, "CLI BUILD FOR TEST", l)
 	require.NoError(t, err)
 	require.NotNil(t, joinerOp)
 	defer joinerOp.CloseAll()

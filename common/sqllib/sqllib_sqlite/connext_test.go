@@ -11,15 +11,14 @@ import (
 
 func TestConnect(t *testing.T) {
 
-	cfgService, _ := config.PrepareTests(
+	envs, _ := config.PrepareTests(
 		t,
 		"../../../_envs/",
-		"test",
 		"", // "connect_test."+strconv.FormatInt(time.Now().Unix(), 10)+".log",
 	)
 
 	//var cfgSqlite config.Access
-	//err := cfgService.Value("sqllib_sqlite", &cfgSqlite)
+	//err := envs.Value("sqllib_sqlite", &cfgSqlite)
 	//require.NoError(t, err)
 	//
 	//cfgSqlite.Path, err = filelib.Dir(cfgSqlite.Path)
@@ -29,7 +28,7 @@ func TestConnect(t *testing.T) {
 	//cfgSqlite.Path += "test_connect.sqlite"
 
 	var cfgSqlite config.Access
-	err := cfgService.Value("db_sqlite", &cfgSqlite)
+	err := envs.Value("db_sqlite", &cfgSqlite)
 	require.NoError(t, err)
 
 	db, err := Connect(cfgSqlite)

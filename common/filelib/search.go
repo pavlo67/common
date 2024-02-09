@@ -44,9 +44,12 @@ func List(path string, re *regexp.Regexp) ([]string, error) {
 		return nil, errors.Wrap(err, onList)
 	}
 
-	names := make([]string, len(dirEntries))
-	for i, dirEntry := range dirEntries {
-		names[i] = dirEntry.Name()
+	var names []string
+	for _, dirEntry := range dirEntries {
+		if dirEntry.IsDir() {
+			continue
+		}
+		names = append(names, dirEntry.Name())
 	}
 
 	slices.Sort(names)

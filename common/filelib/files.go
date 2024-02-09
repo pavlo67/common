@@ -40,7 +40,6 @@ func CorrectFileName(name string) string {
 const onCopyDirEntries = "on filelib.CopyDirEntries()"
 
 func CopyDirEntries(path, targetPath string, reStr string, removeOrigin bool) error {
-
 	re, err := regexp.Compile(reStr)
 	if err != nil {
 		return fmt.Errorf("wrong reStr: '%s'"+onCopyDirEntries, reStr)
@@ -55,8 +54,6 @@ func CopyDirEntries(path, targetPath string, reStr string, removeOrigin bool) er
 	if err != nil {
 		return fmt.Errorf("%s / "+onCopyDirEntries, err)
 	}
-
-	// log.Printf("'%s' / %#v --> %s", reStr, re, dirEntries)
 
 	for _, dirEntry := range dirEntries {
 		if removeOrigin {

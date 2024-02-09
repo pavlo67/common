@@ -108,3 +108,16 @@ func Center(points ...image.Point) plane.Point2 {
 
 	return plane.Point2{X: x / n, Y: y / n}
 }
+
+func CenterImage(points ...image.Point) image.Point {
+	if len(points) < 1 {
+		return image.Point{-1, -1}
+	}
+	var x, y int
+	for _, element := range points {
+		x += element.X
+		y += element.Y
+	}
+
+	return image.Point{X: x / len(points), Y: y / len(points)}
+}

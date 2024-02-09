@@ -5,10 +5,10 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"path/filepath"
 	"regexp"
 	"runtime/debug"
 	"strconv"
-	"strings"
 	"testing"
 	"time"
 
@@ -82,27 +82,70 @@ func PrepareApp(envPath, logPath string) (Envs, logger.Operator) {
 	return *cfgServicePtr, l
 }
 
-func PrepareTests(t *testing.T, envPath, configEnv, logfile string) (Envs, logger.Operator) {
+func PrepareTests(t *testing.T, envPath, logFile string) (Envs, logger.Operator) {
 
+	configEnv := "test"
 	os.Setenv("ENV", configEnv)
 
-	var logPath []string
-	if logfile = strings.TrimSpace(logfile); logfile != "" {
-		logPath = []string{logfile}
+	envsPtr, err := Get(envPath+configEnv+".yaml", serialization.MarshalerYAML)
+	require.NoError(t, err)
+	require.NotNil(t, envsPtr)
+
+	var loggerFiles []string
+	if logFile != "" {
+		loggerFiles = append(loggerFiles, logFile)
 	}
 
+	var loggerSaveFiles bool
+	if err = envsPtr.Value("logger_save_files", &loggerSaveFiles); err != nil {
+		fmt.Fprintf(os.Stderr, colorize.Red+"on config.PrepareApp(%s, %s), reading of 'logger_save_files' key produces the error: %s\n"+colorize.Reset, envPath, configEnv+".yaml", err)
+	}
+
+	var loggerPath string
+	if err = envsPtr.Value("logger_path", &loggerPath); err != nil {
+		fmt.Fprintf(os.Stderr, colorize.Red+"on config.PrepareApp(%s, %s), reading of 'logger_path' key produces the error: %s\n"+colorize.Reset, envPath, configEnv+".yaml", err)
+	}
+
+	logKey := time.Now().Format(time.RFC3339)[:19]
+	logPath, err := filelib.Dir(filepath.Join(loggerPath, logKey))
+	require.NoError(t, err)
+
 	l, err := logger_zap.New(logger.Config{
+		Key:         logKey,
+		BasePath:    logPath,
+		SaveFiles:   loggerSaveFiles,
 		LogLevel:    logger.TraceLevel,
-		OutputPaths: append(logPath, "stdout"),
-		ErrorPaths:  append(logPath, "stderr"),
-	}) // TODO!!! don't comment it (is required for tested components)
+		OutputPaths: append(loggerFiles, "stdout"),
+		ErrorPaths:  append(loggerFiles, "stderr"),
+	})
 	require.NoError(t, err)
 	require.NotNil(t, l)
 
-	cfgServicePtr, err := Get(envPath+configEnv+".yaml", serialization.MarshalerYAML)
-	require.NoError(t, err)
-	require.NotNil(t, cfgServicePtr)
-
-	return *cfgServicePtr, l
+	return *envsPtr, l
 
 }
+
+//func PrepareTests(t *testing.T, envPath, configEnv, logfile string) (Envs, logger.Operator) {
+//
+//	os.Setenv("ENV", configEnv)
+//
+//	var logPath []string
+//	if logfile = strings.TrimSpace(logfile); logfile != "" {
+//		logPath = []string{logfile}
+//	}
+//
+//	l, err := logger_zap.New(logger.Config{
+//		LogLevel:    logger.TraceLevel,
+//		OutputPaths: append(logPath, "stdout"),
+//		ErrorPaths:  append(logPath, "stderr"),
+//	}) // TODO!!! don't comment it (is required for tested components)
+//	require.NoError(t, err)
+//	require.NotNil(t, l)
+//
+//	cfgServicePtr, err := Get(envPath+configEnv+".yaml", serialization.MarshalerYAML)
+//	require.NoError(t, err)
+//	require.NotNil(t, cfgServicePtr)
+//
+//	return *cfgServicePtr, l
+//
+//}

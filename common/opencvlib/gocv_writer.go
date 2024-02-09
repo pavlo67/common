@@ -1,4 +1,4 @@
-package videolib
+package opencvlib
 
 import (
 	"regexp"
