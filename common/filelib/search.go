@@ -38,7 +38,7 @@ func Search(path string, re regexp.Regexp, getFirst bool) ([]string, error) {
 
 const onList = "on filelib.List()"
 
-func List(path string, re *regexp.Regexp) ([]string, error) {
+func List(path string, re *regexp.Regexp, getDirs, getFiles bool) ([]string, error) {
 	dirEntries, err := os.ReadDir(path)
 	if err != nil {
 		return nil, errors.Wrap(err, onList)
@@ -46,7 +46,7 @@ func List(path string, re *regexp.Regexp) ([]string, error) {
 
 	var names []string
 	for _, dirEntry := range dirEntries {
-		if dirEntry.IsDir() {
+		if (dirEntry.IsDir() && !getDirs) || (!dirEntry.IsDir() && !getFiles) {
 			continue
 		}
 		names = append(names, dirEntry.Name())

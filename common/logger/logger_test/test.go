@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/pavlo67/common/common/filelib"
+	"github.com/pavlo67/common/common/pnglib"
 
-	"github.com/pavlo67/common/common/imagelib"
+	"github.com/pavlo67/common/common/filelib"
 
 	"github.com/pavlo67/common/common/logger"
 )
@@ -168,7 +168,7 @@ func (op loggerTest) File(path string, data []byte) {
 	}
 }
 
-func (op loggerTest) Image(path string, getImage imagelib.Imager) {
+func (op loggerTest) Image(path string, getImage logger.GetImage) {
 	if op.saveFiles {
 		img, info, err := getImage.Image()
 		if info != "" {
@@ -178,7 +178,7 @@ func (op loggerTest) Image(path string, getImage imagelib.Imager) {
 			basedPaths, err := logger.ModifyPaths([]string{path}, op.basePath)
 			if err != nil {
 				op.Error(err)
-			} else if err = imagelib.SavePNG(img, basedPaths[0]); err != nil {
+			} else if err = pnglib.Save(img, basedPaths[0]); err != nil {
 				op.Error(err)
 			}
 		}

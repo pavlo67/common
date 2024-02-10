@@ -37,22 +37,22 @@ func CorrectFileName(name string) string {
 	return name
 }
 
-const onCopyDirEntries = "on filelib.CopyDirEntries()"
+const onCopyFiles = "on filelib.CopyFiles()"
 
-func CopyDirEntries(path, targetPath string, reStr string, removeOrigin bool) error {
+func CopyFiles(path, targetPath string, reStr string, removeOrigin bool) error {
 	re, err := regexp.Compile(reStr)
 	if err != nil {
-		return fmt.Errorf("wrong reStr: '%s'"+onCopyDirEntries, reStr)
+		return fmt.Errorf("wrong reStr: '%s'"+onCopyFiles, reStr)
 	}
 
 	targetPath, err = Dir(targetPath)
 	if err != nil {
-		return fmt.Errorf("targetPath is wrong: %s / "+onCopyDirEntries, err)
+		return fmt.Errorf("targetPath is wrong: %s / "+onCopyFiles, err)
 	}
 
-	dirEntries, err := List(path, re)
+	dirEntries, err := List(path, re, false, true)
 	if err != nil {
-		return fmt.Errorf("%s / "+onCopyDirEntries, err)
+		return fmt.Errorf("%s / "+onCopyFiles, err)
 	}
 
 	for _, dirEntry := range dirEntries {
@@ -63,7 +63,7 @@ func CopyDirEntries(path, targetPath string, reStr string, removeOrigin bool) er
 		}
 
 		if err != nil {
-			return fmt.Errorf("%s / "+onCopyDirEntries, err)
+			return fmt.Errorf("%s / "+onCopyFiles, err)
 		}
 
 	}

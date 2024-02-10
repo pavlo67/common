@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"image"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -8,7 +9,6 @@ import (
 	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/filelib"
 
-	"github.com/pavlo67/common/common/imagelib"
 	"github.com/pavlo67/common/common/joiner"
 )
 
@@ -33,6 +33,11 @@ const WarnLevel Level = 1
 const ErrorLevel Level = 2
 const FatalLevel Level = 4
 
+type GetImage interface {
+	Image() (image.Image, string, error)
+	Bounds() image.Rectangle
+}
+
 type Operator interface {
 	Debug(args ...interface{})
 	Debugf(template string, args ...interface{})
@@ -56,7 +61,7 @@ type Operator interface {
 
 	SetPath(basePath string)
 	File(path string, data []byte)
-	Image(path string, getImage imagelib.Imager)
+	Image(path string, getImage GetImage)
 }
 
 // TODO!!! be careful in windows
