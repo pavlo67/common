@@ -23,7 +23,7 @@ import (
 //	//}
 //}
 
-const MaxLoggedDataLength = 20000
+var MaxLoggedDataLength = 20000
 
 func LogRequest(method, path string, reqHeaders http.Header, reqBody []byte, respHeaders http.Header, respBody []byte, bodyErr error,
 	status int, logFile string) {

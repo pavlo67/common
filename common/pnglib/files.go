@@ -2,6 +2,7 @@ package pnglib
 
 import (
 	"image"
+	_ "image/gif"
 	_ "image/jpeg"
 	"image/png"
 	"os"
