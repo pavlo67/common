@@ -12,7 +12,7 @@ type Transformation struct {
 
 const onCalculateRotationAndScale = "on CalculateRotationAndScale()"
 
-func CalculateRotationAndScale(pts []Transformation, rotDeviationMax, scaleDeviationMax float64) (Rotation, float64, error) {
+func CalculateRotationAndScale(pts []Transformation, rotDeviationMax, scaleDeviationMax float64) (LeftAngleFromOx, float64, error) {
 	if len(pts) != 3 {
 		return 0, 0, fmt.Errorf("wrong points (%d), must be 3 items exactly / "+onCalculateRotationAndScale, len(pts))
 	}
@@ -32,10 +32,10 @@ func CalculateRotationAndScale(pts []Transformation, rotDeviationMax, scaleDevia
 	//fmt.Printf("rotInn: %v\n", rotInn)
 	//fmt.Printf("rotOut: %v\n", rotOut)
 
-	var rotDeltaSum Rotation
+	var rotDeltaSum LeftAngleFromOx
 	var scalesSum float64
 
-	rotDeltas := make([]Rotation, len(pts))
+	rotDeltas := make([]LeftAngleFromOx, len(pts))
 	scales := make([]float64, len(pts))
 
 	for i := 0; i < len(cOut); i++ {
@@ -45,7 +45,7 @@ func CalculateRotationAndScale(pts []Transformation, rotDeviationMax, scaleDevia
 		scalesSum += scales[i]
 	}
 
-	rotDeltaAvg := (rotDeltaSum / Rotation(len(pts))).Canon()
+	rotDeltaAvg := (rotDeltaSum / LeftAngleFromOx(len(pts))).Canon()
 	scaleAvg := scalesSum / float64(len(pts))
 
 	if scaleAvg <= 0 {

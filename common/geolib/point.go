@@ -56,7 +56,7 @@ func (p Point) MovedAt(point2 plane.Point2) Point {
 
 	dxKm, dyKm := point2.X*0.001, point2.Y*0.001
 
-	bearing := DirectionBearingFromRotation(plane.Point2{dxKm, dyKm}.Rotation())
+	bearing := PointBearing(plane.Point2{dxKm, dyKm})
 
 	geoPoint := p.Geo()
 

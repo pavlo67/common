@@ -43,7 +43,7 @@ type Rectangle struct {
 }
 
 func (rect Rectangle) Contains(p2 Point2) bool {
-	p2Rotated := p2.RotateAround(rect.Point2, -rect.Rotation)
+	p2Rotated := p2.RotateAround(rect.Point2, -rect.LeftAngleFromOx)
 	return p2Rotated.X >= rect.Point2.X-rect.HalfSideX && p2Rotated.X <= rect.Point2.X+rect.HalfSideX &&
 		p2Rotated.Y >= rect.Point2.Y-rect.HalfSideY && p2Rotated.Y <= rect.Point2.Y+rect.HalfSideY
 }
@@ -82,7 +82,7 @@ func (rect Rectangle) Points() (p00, p01, p10, p11 Point2) {
 	}
 
 	p00Fixed, p01Fixed := Point2{-rect.HalfSideX, -rect.HalfSideY}, Point2{-rect.HalfSideX, rect.HalfSideY}
-	p00_, p01_ := p00Fixed.RotateByAngle(rect.Rotation), p01Fixed.RotateByAngle(rect.Rotation)
+	p00_, p01_ := p00Fixed.RotateByAngle(rect.LeftAngleFromOx), p01Fixed.RotateByAngle(rect.LeftAngleFromOx)
 
 	return Point2{p00_.X + rect.Point2.X, p00_.Y + rect.Point2.Y},
 		Point2{p01_.X + rect.Point2.X, p01_.Y + rect.Point2.Y},
