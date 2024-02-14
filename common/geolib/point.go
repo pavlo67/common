@@ -18,7 +18,7 @@ type Direction struct {
 }
 
 func (dir Direction) Moving() plane.Point2 {
-	localAngle := dir.Bearing.OXLeftAngle()
+	localAngle := dir.Bearing.LeftAngleFromOx()
 
 	return plane.Point2{dir.Distance * math.Cos(localAngle), dir.Distance * math.Sin(localAngle)}
 }

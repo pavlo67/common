@@ -45,8 +45,8 @@ func PlaneBearing(rotation plane.LeftAngleFromOx) Bearing {
 	return Bearing(bearingDegrees)
 }
 
-// OYLeftAngle was previously named LeftAngleFromOx()
-func (bearing Bearing) OYLeftAngle() float64 {
+// LeftAngleFromOy was previously named LeftAngleFromOx()
+func (bearing Bearing) LeftAngleFromOy() float64 {
 	angle := float64(-bearing * math.Pi / 180)
 	if angle <= -math.Pi {
 		return angle + 2*math.Pi
@@ -57,9 +57,9 @@ func (bearing Bearing) OYLeftAngle() float64 {
 	return angle
 }
 
-// OXLeftAngle was previously named OxyAngle()
-func (bearing Bearing) OXLeftAngle() float64 {
-	angle := math.Pi * (0.5 - float64(bearing)/180)
+// LeftAngleFromOx was previously named OxyAngle()
+func (bearing Bearing) LeftAngleFromOx() plane.LeftAngleFromOx {
+	angle := math.Pi * (0.5 - plane.LeftAngleFromOx(bearing)/180)
 	if angle <= -2*math.Pi {
 		return angle + 2*math.Pi
 	} else if angle > 2*math.Pi {

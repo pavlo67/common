@@ -61,7 +61,7 @@ func (rect Rectangle) Outer(margin float64) Rectangle {
 //	log.Fatal("on Rectangle.Intersects()")
 //
 //	//for _, p := range pCh {
-//	//	p2Rot := RotateByAngle(p, -rect.OYLeftAngle)
+//	//	p2Rot := RotateByAngle(p, -rect.LeftAngleFromOy)
 //	//	if p2Rot.XT >= rect.Min.XT && p2Rot.XT <= rect.MaxIn.XT && p2Rot.YT >= rect.Min.YT && p2Rot.YT <= rect.MaxIn.YT {
 //	//		return true
 //	//	}
