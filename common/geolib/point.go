@@ -18,9 +18,7 @@ type Direction struct {
 }
 
 func (dir Direction) Moving() plane.Point2 {
-	localAngle := float64(dir.Bearing.LeftAngleFromOx())
-
-	return plane.Point2{dir.Distance * math.Cos(localAngle), dir.Distance * math.Sin(localAngle)}
+	return dir.Bearing.Point(dir.Distance)
 }
 
 // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
@@ -56,7 +54,7 @@ func (p Point) MovedAt(point2 plane.Point2) Point {
 
 	dxKm, dyKm := point2.X*0.001, point2.Y*0.001
 
-	bearing := PointBearing(plane.Point2{dxKm, dyKm})
+	bearing := BearingFromPoint(plane.Point2{dxKm, dyKm})
 
 	geoPoint := p.Geo()
 

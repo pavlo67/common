@@ -31,22 +31,22 @@ func (p Point2) Radius() float64 {
 	return math.Sqrt(p.X*p.X + p.Y*p.Y)
 }
 
-// LeftAngleFromOx lies in the range: -math.Pi < p.LeftAngleFromOy() <= math.Pi
-func (p Point2) LeftAngleFromOx() LeftAngleFromOx {
+// LeftAngle lies in the range: -math.Pi < p.LeftAngle() <= math.Pi
+func (p Point2) LeftAngleFromOx() LeftAngle {
 	if p.X == 0 {
 		if p.Y > 0 {
 			return math.Pi / 2
 		} else if p.Y < 0 {
 			return -math.Pi / 2
 		} else {
-			return LeftAngleFromOx(math.NaN())
+			return LeftAngle(math.NaN())
 		}
 	} else if p.X >= 0 {
-		return LeftAngleFromOx(math.Atan(p.Y / p.X))
+		return LeftAngle(math.Atan(p.Y / p.X))
 	} else if p.Y >= 0 {
-		return LeftAngleFromOx(math.Atan(p.Y/p.X) + math.Pi)
+		return LeftAngle(math.Atan(p.Y/p.X) + math.Pi)
 	} else {
-		return LeftAngleFromOx(math.Atan(p.Y/p.X) - math.Pi)
+		return LeftAngle(math.Atan(p.Y/p.X) - math.Pi)
 	}
 }
 
@@ -98,14 +98,14 @@ func (p Point2) DistanceToSegment(s Segment) (distance, projectionPosition float
 	return distance, projectionPosition
 }
 
-func (p Point2) RotateAround(center Point2, angle LeftAngleFromOx) Point2 {
+func (p Point2) RotateAround(center Point2, angle LeftAngle) Point2 {
 	pToCenter := Point2{p.X - center.X, p.Y - center.Y}
 	pToCenterRotated := pToCenter.RotateByAngle(angle)
 
 	return Point2{pToCenterRotated.X + center.X, pToCenterRotated.Y + center.Y}
 }
 
-func (p Point2) RotateByAngle(addAngle LeftAngleFromOx) Point2 {
+func (p Point2) RotateByAngle(addAngle LeftAngle) Point2 {
 	angle := p.LeftAngleFromOx()
 	r := math.Sqrt(p.X*p.X + p.Y*p.Y)
 

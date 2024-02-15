@@ -6,6 +6,7 @@ import (
 	"github.com/pavlo67/common/common/mathlib/plane"
 )
 
+// Bearing if a "right-angle" in degrees
 type Bearing Degrees
 
 func (bearing Bearing) Canon() Bearing {
@@ -19,7 +20,7 @@ func (bearing Bearing) Canon() Bearing {
 	return bearing
 }
 
-func PointBearing(point plane.Point2) Bearing {
+func BearingFromPoint(point plane.Point2) Bearing {
 	bearingDegrees := 90 - (180 * point.LeftAngleFromOx() / math.Pi)
 
 	for bearingDegrees >= 360 {
@@ -32,7 +33,7 @@ func PointBearing(point plane.Point2) Bearing {
 	return Bearing(bearingDegrees)
 }
 
-func PlaneBearing(rotation plane.LeftAngleFromOx) Bearing {
+func BearingFromLeftAngle(rotation plane.LeftAngle) Bearing {
 	bearingDegrees := -(180 * rotation / math.Pi)
 
 	for bearingDegrees >= 360 {
@@ -45,9 +46,9 @@ func PlaneBearing(rotation plane.LeftAngleFromOx) Bearing {
 	return Bearing(bearingDegrees)
 }
 
-// LeftAngleFromOy was previously named LeftAngleFromOx()
-func (bearing Bearing) LeftAngleFromOy() float64 {
-	angle := float64(-bearing * math.Pi / 180)
+// LeftAngle is measured from Oy (as well as Bearing itself)
+func (bearing Bearing) LeftAngle() plane.LeftAngle {
+	angle := plane.LeftAngle(-bearing * math.Pi / 180)
 	if angle <= -math.Pi {
 		return angle + 2*math.Pi
 	} else if angle > math.Pi {
@@ -57,14 +58,6 @@ func (bearing Bearing) LeftAngleFromOy() float64 {
 	return angle
 }
 
-// LeftAngleFromOx was previously named OxyAngle()
-func (bearing Bearing) LeftAngleFromOx() plane.LeftAngleFromOx {
-	angle := math.Pi * (0.5 - plane.LeftAngleFromOx(bearing)/180)
-	if angle <= -2*math.Pi {
-		return angle + 2*math.Pi
-	} else if angle > 2*math.Pi {
-		return angle - 2*math.Pi
-	}
-
-	return angle
+func (bearing Bearing) Point(radius float64) plane.Point2 {
+	return (math.Pi * (0.5 - plane.LeftAngle(bearing)/180)).Point2(radius)
 }

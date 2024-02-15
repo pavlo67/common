@@ -2,8 +2,8 @@ package plane
 
 type Contour PolyChain
 
-func (c Contour) Rotations() []LeftAngleFromOx {
-	rotations := make([]LeftAngleFromOx, len(c))
+func (c Contour) Rotations() []LeftAngle {
+	rotations := make([]LeftAngle, len(c))
 
 	for i, p := range c {
 		rotations[i] = c[(i+1)%len(c)].Sub(p).LeftAngleFromOx()
