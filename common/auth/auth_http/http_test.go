@@ -1,6 +1,7 @@
 package auth_http
 
 import (
+	"os"
 	"testing"
 	"time"
 
@@ -15,8 +16,10 @@ import (
 )
 
 func TestAuthHTTP(t *testing.T) {
+	err := os.Chdir("../../../")
+	require.NoError(t, err)
 
-	envs, l := config.PrepareTests(t, "../../../_envs/", "")
+	envs, l := config.PrepareTests(t, "_envs/", "")
 	require.NotNil(t, envs)
 
 	starters, err := demo.Components(envs, true)

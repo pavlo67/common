@@ -20,7 +20,7 @@ func TestOperator(t *testing.T) {
 	//require.NoError(t, err)
 	//require.NotNil(t, l)
 
-	//configPath := filelib.CurrentPath() + "../../../environments/" + serviceName + "." + env + ".yaml"
+	//configPath := "../../../environments/" + serviceName + "." + env + ".yaml"
 	//cfg, err := config.Get(configPath, serializer.MarshalerYAML)
 	//require.NoError(t, err)
 	//require.NotNil(t, cfg)

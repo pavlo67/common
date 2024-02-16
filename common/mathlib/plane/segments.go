@@ -22,6 +22,23 @@ func (s Segment) Middle() Point2 {
 	return Point2{(s[1].X + s[0].X) / 2, (s[1].Y + s[0].Y) / 2}
 }
 
+func (segment Segment) Paired(distanceToRight float64) Segment {
+	if segment[0] == segment[1] || distanceToRight == 0 {
+		return segment
+	}
+
+	direction := segment[1].Sub(segment[0])
+	dirRadius := direction.Radius()
+	dirDistance := Point2{direction.X * distanceToRight / dirRadius, direction.Y * distanceToRight / dirRadius}
+	angle := LeftAngle(math.Pi * 0.5)
+	if distanceToRight < 0 {
+		angle = -angle
+	}
+
+	dirToTheSide := dirDistance.RotateByAngle(angle)
+	return Segment{segment[0].Add(dirToTheSide), segment[1].Add(dirToTheSide)}
+}
+
 func SegmentGoOutCircle(s Segment, p Point2, r float64) *Point2 {
 	if s[0].DistanceTo(p) > r || s[1].DistanceTo(p) <= r {
 		return nil

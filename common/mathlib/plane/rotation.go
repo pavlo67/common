@@ -11,16 +11,16 @@ type Position struct {
 	LeftAngle
 }
 
-func (r LeftAngle) Canon() LeftAngle {
-	if r > math.Pi {
-		return r - 2*math.Pi
-	} else if r <= -math.Pi {
-		return r + 2*math.Pi
+func (leftAngle LeftAngle) Canon() LeftAngle {
+	if leftAngle > math.Pi {
+		return leftAngle - 2*math.Pi
+	} else if leftAngle <= -math.Pi {
+		return leftAngle + 2*math.Pi
 	}
 
-	return r
+	return leftAngle
 }
 
-func (r LeftAngle) Point2(radius float64) Point2 {
-	return Point2{radius * math.Cos(float64(r)), radius * math.Sin(float64(r))}
+func (leftAngle LeftAngle) Point2(radius float64) Point2 {
+	return Point2{radius * math.Cos(float64(leftAngle)), radius * math.Sin(float64(leftAngle))}
 }

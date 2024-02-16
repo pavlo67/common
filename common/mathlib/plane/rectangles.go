@@ -56,6 +56,14 @@ func (rect Rectangle) Outer(margin float64) Rectangle {
 	}
 }
 
+func (rect Rectangle) Sides() [2]Segment {
+
+	p00 := Point2{rect.HalfSideX, rect.HalfSideY}.RotateByAngle(rect.LeftAngle)
+	p10 := Point2{-p00.X, -p00.Y}
+
+	return [2]Segment{{p00, Point2{-p00.Y, p00.X}}, {p10, Point2{-p10.Y, p10.X}}}
+}
+
 //func (rect Rectangle) Intersection(pCh PolyChain) PolyChain {
 //
 //	log.Fatal("on Rectangle.Intersects()")

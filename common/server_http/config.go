@@ -3,7 +3,7 @@ package server_http
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/pavlo67/common/common"
@@ -143,8 +143,8 @@ func (c Config) InitSwagger(isHTTPS bool, swaggerStaticFilePath string, l logger
 	if err != nil {
 		return err
 	}
-	if err = ioutil.WriteFile(swaggerStaticFilePath, swaggerJSON, 0644); err != nil {
-		return fmt.Errorf("on ioutil.WriteFile(%s, %s, 0755): %s", swaggerStaticFilePath, swaggerJSON, err)
+	if err = os.WriteFile(swaggerStaticFilePath, swaggerJSON, 0644); err != nil {
+		return fmt.Errorf("on ioutil.WriteFile(%s, %s, 0644): %s", swaggerStaticFilePath, swaggerJSON, err)
 	}
 	l.Infof("%d bytes are written into %s", len(swaggerJSON), swaggerStaticFilePath)
 

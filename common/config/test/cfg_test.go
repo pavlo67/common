@@ -50,7 +50,7 @@ package cfg
 //	//	},
 //	//}
 //
-//	cfg, err := config.Get(filelib.CurrentPath() + "cfg_test.json5")
+//	cfg, err := config.Get("cfg_test.json5")
 //	if err != nil {
 //		t.Fatal(err)
 //	}

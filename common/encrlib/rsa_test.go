@@ -2,7 +2,7 @@ package encrlib
 
 //func TestNewRSAPrivateKey(t *testing.T) {
 //
-//	pathToStore := filelib.CurrentPath() + "test_rsa_key_" + strconv.FormatInt(time.Now().UnixNano(), 10) + ".test"
+//	pathToStore := "test_rsa_key_" + strconv.FormatInt(time.Now().UnixNano(), 10) + ".test"
 //	privateKey, err := NewRSAPrivateKey(pathToStore)
 //	require.NoError(t, err)
 //	require.NotNil(t, privateKey)
