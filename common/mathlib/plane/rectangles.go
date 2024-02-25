@@ -42,8 +42,16 @@ type Rectangle struct {
 	HalfSideX, HalfSideY float64
 }
 
+func (rect Rectangle) Sides() [2]Segment {
+
+	p00 := Point2{rect.HalfSideX, rect.HalfSideY}.RotateByAngle(rect.XToYAngle)
+	p01 := Point2{-rect.HalfSideX, rect.HalfSideY}.RotateByAngle(rect.XToYAngle)
+
+	return [2]Segment{{rect.Point2.Add(p00), rect.Point2.Add(p01)}, {rect.Point2.Sub(p00), rect.Point2.Sub(p01)}}
+}
+
 func (rect Rectangle) Contains(p2 Point2) bool {
-	p2Rotated := p2.RotateAround(rect.Point2, -rect.LeftAngle)
+	p2Rotated := p2.RotateAround(rect.Point2, -rect.XToYAngle)
 	return p2Rotated.X >= rect.Point2.X-rect.HalfSideX && p2Rotated.X <= rect.Point2.X+rect.HalfSideX &&
 		p2Rotated.Y >= rect.Point2.Y-rect.HalfSideY && p2Rotated.Y <= rect.Point2.Y+rect.HalfSideY
 }
@@ -56,20 +64,12 @@ func (rect Rectangle) Outer(margin float64) Rectangle {
 	}
 }
 
-func (rect Rectangle) Sides() [2]Segment {
-
-	p00 := Point2{rect.HalfSideX, rect.HalfSideY}.RotateByAngle(rect.LeftAngle)
-	p10 := Point2{-p00.X, -p00.Y}
-
-	return [2]Segment{{p00, Point2{-p00.Y, p00.X}}, {p10, Point2{-p10.Y, p10.X}}}
-}
-
 //func (rect Rectangle) Intersection(pCh PolyChain) PolyChain {
 //
 //	log.Fatal("on Rectangle.Intersects()")
 //
 //	//for _, p := range pCh {
-//	//	p2Rot := RotateByAngle(p, -rect.LeftAngle)
+//	//	p2Rot := RotateByAngle(p, -rect.XToYAngle)
 //	//	if p2Rot.XT >= rect.Min.XT && p2Rot.XT <= rect.MaxIn.XT && p2Rot.YT >= rect.Min.YT && p2Rot.YT <= rect.MaxIn.YT {
 //	//		return true
 //	//	}
@@ -90,7 +90,7 @@ func (rect Rectangle) Points() (p00, p01, p10, p11 Point2) {
 	}
 
 	p00Fixed, p01Fixed := Point2{-rect.HalfSideX, -rect.HalfSideY}, Point2{-rect.HalfSideX, rect.HalfSideY}
-	p00_, p01_ := p00Fixed.RotateByAngle(rect.LeftAngle), p01Fixed.RotateByAngle(rect.LeftAngle)
+	p00_, p01_ := p00Fixed.RotateByAngle(rect.XToYAngle), p01Fixed.RotateByAngle(rect.XToYAngle)
 
 	return Point2{p00_.X + rect.Point2.X, p00_.Y + rect.Point2.Y},
 		Point2{p01_.X + rect.Point2.X, p01_.Y + rect.Point2.Y},

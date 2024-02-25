@@ -31,27 +31,27 @@ func (p Point2) Radius() float64 {
 	return math.Sqrt(p.X*p.X + p.Y*p.Y)
 }
 
-// LeftAngle lies in the range: -math.Pi < p.LeftAngle() <= math.Pi
-func (p Point2) LeftAngleFromOx() LeftAngle {
+// XToYAngle lies in the range: -math.Pi < p.XToYAngle() <= math.Pi
+func (p Point2) XToYAngleFromOx() XToYAngle {
 	if p.X == 0 {
 		if p.Y > 0 {
 			return math.Pi / 2
 		} else if p.Y < 0 {
 			return -math.Pi / 2
 		} else {
-			return LeftAngle(math.NaN())
+			return XToYAngle(math.NaN())
 		}
 	} else if p.X >= 0 {
-		return LeftAngle(math.Atan(p.Y / p.X))
+		return XToYAngle(math.Atan(p.Y / p.X))
 	} else if p.Y >= 0 {
-		return LeftAngle(math.Atan(p.Y/p.X) + math.Pi)
+		return XToYAngle(math.Atan(p.Y/p.X) + math.Pi)
 	} else {
-		return LeftAngle(math.Atan(p.Y/p.X) - math.Pi)
+		return XToYAngle(math.Atan(p.Y/p.X) - math.Pi)
 	}
 }
 
 func (p Point2) AnglesDelta(p1 Point2) float64 {
-	angle := p1.LeftAngleFromOx() - p.LeftAngleFromOx()
+	angle := p1.XToYAngleFromOx() - p.XToYAngleFromOx()
 	if angle > math.Pi {
 		return float64(angle - 2*math.Pi)
 	} else if angle <= -math.Pi {
@@ -98,22 +98,22 @@ func (p Point2) DistanceToSegment(s Segment) (distance, projectionPosition float
 	return distance, projectionPosition
 }
 
-func (p Point2) RotateAround(center Point2, angle LeftAngle) Point2 {
+func (p Point2) RotateAround(center Point2, angle XToYAngle) Point2 {
 	pToCenter := Point2{p.X - center.X, p.Y - center.Y}
 	pToCenterRotated := pToCenter.RotateByAngle(angle)
 
 	return Point2{pToCenterRotated.X + center.X, pToCenterRotated.Y + center.Y}
 }
 
-func (p Point2) RotateByAngle(addAngle LeftAngle) Point2 {
-	angle := p.LeftAngleFromOx()
+func (p Point2) RotateByAngle(addAngle XToYAngle) Point2 {
+	angle := p.XToYAngleFromOx()
 	r := math.Sqrt(p.X*p.X + p.Y*p.Y)
 
 	return Point2{r * math.Cos(float64(angle+addAngle)), r * math.Sin(float64(angle+addAngle))}
 }
 
 func (p Point2) RotateWithRatio(ratio float64) Point2 {
-	angle := p.LeftAngleFromOx()
+	angle := p.XToYAngleFromOx()
 	r := math.Sqrt(p.X*p.X + p.Y*p.Y)
 
 	return Point2{r * math.Cos(float64(angle)*ratio), r * math.Sin(float64(angle)*ratio)}

@@ -21,7 +21,7 @@ func (bearing Bearing) Canon() Bearing {
 }
 
 func BearingFromPoint(point plane.Point2) Bearing {
-	bearingDegrees := 90 - (180 * point.LeftAngleFromOx() / math.Pi)
+	bearingDegrees := 90 - (180 * point.XToYAngleFromOx() / math.Pi)
 
 	for bearingDegrees >= 360 {
 		bearingDegrees -= 360
@@ -33,7 +33,7 @@ func BearingFromPoint(point plane.Point2) Bearing {
 	return Bearing(bearingDegrees)
 }
 
-func BearingFromLeftAngle(rotation plane.LeftAngle) Bearing {
+func BearingFromXToYAngle(rotation plane.XToYAngle) Bearing {
 	bearingDegrees := -(180 * rotation / math.Pi)
 
 	for bearingDegrees >= 360 {
@@ -46,9 +46,9 @@ func BearingFromLeftAngle(rotation plane.LeftAngle) Bearing {
 	return Bearing(bearingDegrees)
 }
 
-// LeftAngle is measured from Oy (as well as Bearing itself)
-func (bearing Bearing) LeftAngle() plane.LeftAngle {
-	angle := plane.LeftAngle(-bearing * math.Pi / 180)
+// XToYAngle is measured from Oy (as well as Bearing itself)
+func (bearing Bearing) XToYAngle() plane.XToYAngle {
+	angle := plane.XToYAngle(-bearing * math.Pi / 180)
 	if angle <= -math.Pi {
 		return angle + 2*math.Pi
 	} else if angle > math.Pi {
@@ -59,5 +59,5 @@ func (bearing Bearing) LeftAngle() plane.LeftAngle {
 }
 
 func (bearing Bearing) Point(radius float64) plane.Point2 {
-	return (math.Pi * (0.5 - plane.LeftAngle(bearing)/180)).Point2(radius)
+	return (math.Pi * (0.5 - plane.XToYAngle(bearing)/180)).Point2(radius)
 }
