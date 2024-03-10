@@ -3,6 +3,8 @@ package geolib
 import (
 	"math"
 
+	"github.com/pavlo67/common/common/mathlib"
+
 	geo "github.com/kellydunn/golang-geo"
 	"github.com/pavlo67/common/common/mathlib/plane"
 	// geo "github.com/billups/golang-geo"
@@ -20,6 +22,8 @@ type Direction struct {
 func (dir Direction) Moving() plane.Point2 {
 	return dir.Bearing.Point(dir.Distance)
 }
+
+const StepDistanceEps = 1e-2
 
 // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
 
@@ -43,16 +47,33 @@ func (p Point) Tile(zoom int) Tile {
 	return tile
 }
 
+func (p Point) MovedBeared(bearing Bearing, moving plane.Point2) Point {
+	var geoPointStepped Point
+
+	if moving.Radius() <= StepDistanceEps {
+		geoPointStepped = p
+
+	} else {
+		stepBeared := moving.RotateByAngle(bearing.XToYAngle())
+		geoPointStepped = p.MovedAt(stepBeared)
+
+	}
+
+	return Point{
+		Degrees(mathlib.Round(float64(geoPointStepped.Lat), 6)),
+		Degrees(mathlib.Round(float64(geoPointStepped.Lon), 6))}
+}
+
 func (p Point) Geo() geo.Point {
 	return *geo.NewPoint(float64(p.Lat), float64(p.Lon))
 }
 
-func (p Point) MovedAt(point2 plane.Point2) Point {
-	if point2.X == 0 && point2.Y == 0 {
+func (p Point) MovedAt(moving plane.Point2) Point {
+	if moving.X == 0 && moving.Y == 0 {
 		return p
 	}
 
-	dxKm, dyKm := point2.X*0.001, point2.Y*0.001
+	dxKm, dyKm := moving.X*0.001, moving.Y*0.001
 
 	bearing := BearingFromPoint(plane.Point2{dxKm, dyKm})
 

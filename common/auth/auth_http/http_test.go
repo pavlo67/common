@@ -16,6 +16,7 @@ import (
 )
 
 func TestAuthHTTP(t *testing.T) {
+
 	err := os.Chdir("../../../")
 	require.NoError(t, err)
 

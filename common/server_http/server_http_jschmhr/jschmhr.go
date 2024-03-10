@@ -51,6 +51,10 @@ func New(port int, tlsCertFile, tlsKeyFile string, secretENVs []string) (server_
 			ReadTimeout:    60 * time.Second,
 			WriteTimeout:   60 * time.Second,
 			MaxHeaderBytes: 1 << 20,
+
+			// ReadHeaderTimeout:            60 * time.Second,
+			// IdleTimeout:                  60 * time.Second,
+			// DisableGeneralOptionsHandler: false,
 		},
 		httpServeMux: router,
 		port:         port,
@@ -119,6 +123,11 @@ func (s *serverHTTPJschmhr) HandleEndpoint(key server_http.EndpointKey, serverPa
 
 	handler := func(w http.ResponseWriter, r *http.Request, paramsHR httprouter.Params) {
 
+		w.Header().Set("Access-Control-Allow-Origin", server_http.CORSAllowOrigin)
+		w.Header().Set("Access-Control-Allow-Headers", server_http.CORSAllowHeaders)
+		w.Header().Set("Access-Control-Allow-Methods", server_http.CORSAllowMethods)
+		w.Header().Set("Access-Control-Allow-Credentials", server_http.CORSAllowCredentials)
+
 		var identity *auth.Identity
 		if s.onRequest != nil {
 			var err error
@@ -134,11 +143,6 @@ func (s *serverHTTPJschmhr) HandleEndpoint(key server_http.EndpointKey, serverPa
 				params[p.Key] = p.Value
 			}
 		}
-
-		w.Header().Set("Access-Control-Allow-Origin", server_http.CORSAllowOrigin)
-		w.Header().Set("Access-Control-Allow-Headers", server_http.CORSAllowHeaders)
-		w.Header().Set("Access-Control-Allow-Methods", server_http.CORSAllowMethods)
-		w.Header().Set("Access-Control-Allow-Credentials", server_http.CORSAllowCredentials)
 
 		responseData, err := endpoint.WorkerHTTP(s, r, params, identity)
 		if err != nil {
@@ -159,8 +163,8 @@ func (s *serverHTTPJschmhr) HandleEndpoint(key server_http.EndpointKey, serverPa
 			w.WriteHeader(http.StatusOK)
 		}
 
-		if _, err := w.Write(responseData.Data); err != nil {
-			l.Error("can't write response", err)
+		if _, err = w.Write(responseData.Data); err != nil {
+			l.Error("can't write response: ", err)
 		}
 	}
 

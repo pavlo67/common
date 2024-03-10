@@ -14,6 +14,7 @@ import (
 const onSave = "on pnglib.Save()"
 
 func Save(img image.Image, filename string) error {
+
 	if img == nil {
 		return errors.New("img == nil / " + onSave)
 	}

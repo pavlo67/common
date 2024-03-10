@@ -20,6 +20,17 @@ func (bearing Bearing) Canon() Bearing {
 	return bearing
 }
 
+func (bearing Bearing) CanonTo180() Bearing {
+	for bearing > 180 {
+		bearing -= 360
+	}
+	for bearing <= -180 {
+		bearing += 360
+	}
+
+	return bearing
+}
+
 func BearingFromPoint(point plane.Point2) Bearing {
 	bearingDegrees := 90 - (180 * point.XToYAngleFromOx() / math.Pi)
 

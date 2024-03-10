@@ -30,14 +30,27 @@ func (segment Segment) Paired(distanceToRight float64) Segment {
 	direction := segment[1].Sub(segment[0])
 	dirRadius := direction.Radius()
 	dirDistance := Point2{direction.X * distanceToRight / dirRadius, direction.Y * distanceToRight / dirRadius}
-	angle := XToYAngle(math.Pi * 0.5)
-	if distanceToRight < 0 {
-		angle = -angle
-	}
 
-	dirToTheSide := dirDistance.RotateByAngle(angle)
+	dirToTheSide := dirDistance.RotateByAngle(XToYAngle(math.Pi * 0.5))
 	return Segment{segment[0].Add(dirToTheSide), segment[1].Add(dirToTheSide)}
 }
+
+//func (segment Segment) Paired(distanceToRight float64) Segment {
+//	if segment[0] == segment[1] || distanceToRight == 0 {
+//		return segment
+//	}
+//
+//	direction := segment[1].Sub(segment[0])
+//	dirRadius := direction.Radius()
+//	dirDistance := Point2{direction.X * distanceToRight / dirRadius, direction.Y * distanceToRight / dirRadius}
+//	angle := XToYAngle(math.Pi * 0.5)
+//	if distanceToRight < 0 {
+//		angle = -angle
+//	}
+//
+//	dirToTheSide := dirDistance.RotateByAngle(angle)
+//	return Segment{segment[0].Add(dirToTheSide), segment[1].Add(dirToTheSide)}
+//}
 
 func SegmentGoOutCircle(s Segment, p Point2, r float64) *Point2 {
 	if s[0].DistanceTo(p) > r || s[1].DistanceTo(p) <= r {

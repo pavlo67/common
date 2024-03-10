@@ -8,7 +8,7 @@ logger_save_files: false
 
 db_sqlite:
   # path: ~/0/programmae/common/common/sqllib/sqllib_sqlite/test_db/test.sqlite
-  path: /home/pavlo/0/partner/vision/_maps/navigation.sqlite
+  path: /home/pavlo/0/programmae/common/_envs/db/test.sqlite
 
 
 ### services --------------------------------------------------------
