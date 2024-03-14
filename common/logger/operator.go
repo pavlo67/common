@@ -6,6 +6,8 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/pavlo67/common/common"
+
 	"github.com/pavlo67/common/common/errors"
 	"github.com/pavlo67/common/common/filelib"
 
@@ -34,7 +36,7 @@ const ErrorLevel Level = 2
 const FatalLevel Level = 4
 
 type GetImage interface {
-	Image() (image.Image, string, error)
+	Image(opts common.Map) (image.Image, string, error)
 	Bounds() image.Rectangle
 }
 
@@ -61,7 +63,7 @@ type Operator interface {
 
 	SetPath(basePath string)
 	File(path string, data []byte)
-	Image(path string, getImage GetImage)
+	Image(path string, getImage GetImage, opts common.Map)
 }
 
 // TODO!!! be careful in windows

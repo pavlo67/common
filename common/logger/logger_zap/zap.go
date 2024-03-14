@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pavlo67/common/common"
+
 	"github.com/pavlo67/common/common/pnglib"
 
 	"github.com/pavlo67/common/common/filelib"
@@ -71,9 +73,9 @@ func (op loggerZap) File(path string, data []byte) {
 	}
 }
 
-func (op loggerZap) Image(path string, getImage logger.GetImage) {
+func (op loggerZap) Image(path string, getImage logger.GetImage, opts common.Map) {
 	if op.cfg.SaveFiles {
-		img, info, err := getImage.Image()
+		img, info, err := getImage.Image(opts)
 		if info != "" {
 			_, filename, line, _ := runtime.Caller(1)
 			op.Infof("from %s:%d: "+info, filename, line)
