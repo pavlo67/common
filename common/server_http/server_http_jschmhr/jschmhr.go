@@ -164,7 +164,7 @@ func (s *serverHTTPJschmhr) HandleEndpoint(key server_http.EndpointKey, serverPa
 		}
 
 		if _, err = w.Write(responseData.Data); err != nil {
-			l.Error("can't write response: ", err)
+			l.Errorf("can't write response (%s): %s", serverPath, err)
 		}
 	}
 

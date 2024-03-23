@@ -43,7 +43,7 @@ func (segment Segment) Paired(distanceToRight float64) Segment {
 //	direction := segment[1].Sub(segment[0])
 //	dirRadius := direction.Radius()
 //	dirDistance := Point2{direction.X * distanceToRight / dirRadius, direction.Y * distanceToRight / dirRadius}
-//	angle := XToYAngle(math.Pi * 0.5)
+//	angle := XToYAngleFromOy(math.Pi * 0.5)
 //	if distanceToRight < 0 {
 //		angle = -angle
 //	}

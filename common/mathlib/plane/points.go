@@ -31,7 +31,7 @@ func (p Point2) Radius() float64 {
 	return math.Sqrt(p.X*p.X + p.Y*p.Y)
 }
 
-// XToYAngle lies in the range: -math.Pi < p.XToYAngle() <= math.Pi
+// XToYAngle lies in the range: -math.Pi < p.XToYAngleFromOy() <= math.Pi
 func (p Point2) XToYAngleFromOx() XToYAngle {
 	if p.X == 0 {
 		if p.Y > 0 {

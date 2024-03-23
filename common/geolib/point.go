@@ -10,6 +10,8 @@ import (
 	// geo "github.com/billups/golang-geo"
 )
 
+const Eps = 1.
+
 type Point struct {
 	Lat, Lon Degrees
 }
@@ -54,7 +56,7 @@ func (p Point) MovedBeared(bearing Bearing, moving plane.Point2) Point {
 		geoPointStepped = p
 
 	} else {
-		stepBeared := moving.RotateByAngle(bearing.XToYAngle())
+		stepBeared := moving.RotateByAngle(bearing.XToYAngleFromOy())
 		geoPointStepped = p.MovedAt(stepBeared)
 
 	}
@@ -112,4 +114,10 @@ func (p Point) DirectionTo(p1 Point) Direction {
 		Bearing(geoPoint.BearingTo(&geoPoint1)),
 		1000 * geoPoint.GreatCircleDistance(&geoPoint1),
 	}
+}
+
+func (geoPoint Point) MissFrom(geoPointReal Point) (missPoint plane.Point2, miss float64, bearing Bearing) {
+	missDirection := geoPointReal.DirectionTo(geoPoint)
+
+	return missDirection.Moving(), missDirection.Distance, missDirection.Bearing
 }

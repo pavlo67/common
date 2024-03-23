@@ -44,7 +44,7 @@ func BearingFromPoint(point plane.Point2) Bearing {
 	return Bearing(bearingDegrees)
 }
 
-func BearingFromXToYAngle(rotation plane.XToYAngle) Bearing {
+func BearingFromXToYAngleFromOy(rotation plane.XToYAngle) Bearing {
 	bearingDegrees := -(180 * rotation / math.Pi)
 
 	for bearingDegrees >= 360 {
@@ -57,8 +57,8 @@ func BearingFromXToYAngle(rotation plane.XToYAngle) Bearing {
 	return Bearing(bearingDegrees)
 }
 
-// XToYAngle is measured from Oy (as well as Bearing itself)
-func (bearing Bearing) XToYAngle() plane.XToYAngle {
+// XToYAngleFromOy is calculated from Oy (as well as Bearing itself)
+func (bearing Bearing) XToYAngleFromOy() plane.XToYAngle {
 	angle := plane.XToYAngle(-bearing * math.Pi / 180)
 	if angle <= -math.Pi {
 		return angle + 2*math.Pi
