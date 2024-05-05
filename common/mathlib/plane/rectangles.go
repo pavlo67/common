@@ -2,9 +2,31 @@ package plane
 
 type RectangleFixed [2]Point2
 
-func RectangleAround(pts []Point2) *RectangleFixed {
+//	func RectangleAround(pts []Point2) *RectangleFixed {
+//		if len(pts) < 1 {
+//			return nil
+//		}
+//
+//		minX, maxX, minY, maxY := pts[0].X, pts[0].X, pts[0].Y, pts[0].Y
+//
+//		for _, p := range pts[1:] {
+//			if p.X <= minX {
+//				minX = p.X
+//			} else if p.X > maxX {
+//				maxX = p.X
+//			}
+//			if p.Y <= minY {
+//				minY = p.Y
+//			} else if p.Y > maxY {
+//				maxY = p.Y
+//			}
+//		}
+//
+//		return &RectangleFixed{Point2{minX, minY}, Point2{maxX, maxY}}
+//	}
+func RectangleAround(pts ...Point2) RectangleFixed {
 	if len(pts) < 1 {
-		return nil
+		return RectangleFixed{}
 	}
 
 	minX, maxX, minY, maxY := pts[0].X, pts[0].X, pts[0].Y, pts[0].Y
@@ -22,7 +44,7 @@ func RectangleAround(pts []Point2) *RectangleFixed {
 		}
 	}
 
-	return &RectangleFixed{Point2{minX, minY}, Point2{maxX, maxY}}
+	return RectangleFixed{Point2{minX, minY}, Point2{maxX, maxY}}
 }
 
 func (rectFixed RectangleFixed) Contains(p2 Point2) bool {

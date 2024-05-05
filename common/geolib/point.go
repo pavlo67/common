@@ -10,7 +10,7 @@ import (
 	// geo "github.com/billups/golang-geo"
 )
 
-const Eps = 1.
+const DistanceEps = 1.
 
 type Point struct {
 	Lat, Lon Degrees

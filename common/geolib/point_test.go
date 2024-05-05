@@ -54,14 +54,14 @@ func TestPoint_MovedBeared(t *testing.T) {
 
 			// t.Logf("tt.p: %+v, movingGeo: %v, pMoved: %+v, pMovedDirect: %+v", tt.p, movingGeo, pMoved, pMovedDirect)
 
-			require.Truef(t, math.Abs(tt.p.DistanceTo(pMoved)-movingGeo.Radius()) < Eps,
+			require.Truef(t, math.Abs(tt.p.DistanceTo(pMoved)-movingGeo.Radius()) < DistanceEps,
 				"tt.p.DistanceTo(pMoved): %f, movingGeo.Radius(): %f", tt.p.DistanceTo(pMoved), movingGeo.Radius())
 
-			require.Truef(t, math.Abs(pMoved.DistanceTo(pMovedDirect)) < Eps,
+			require.Truef(t, math.Abs(pMoved.DistanceTo(pMovedDirect)) < DistanceEps,
 				"pMoved.DistanceTo(pMovedDirect): %f", pMoved.DistanceTo(pMovedDirect))
 
 			//if !math.IsNaN(float64(movingGeoXToYAngleFromOx)) {
-			//	require.Truef(t, math.Abs(float64(stepGeoXToYAngleFromOy-geoPointInitial.BearingTo(*geoPoint).XToYAngle().Canon())) < Eps,
+			//	require.Truef(t, math.Abs(float64(stepGeoXToYAngleFromOy-geoPointInitial.BearingTo(*geoPoint).XToYAngle().Canon())) < DistanceEps,
 			//		"stepGeoXToYAngleFromOy: %f, geoPointInitial.BearingTo(*geoPoint): %f, geoPointInitial.BearingTo(*geoPoint).XToYAngle(): %f",
 			//		stepGeoXToYAngleFromOy, geoPointInitial.BearingTo(*geoPoint), geoPointInitial.BearingTo(*geoPoint).XToYAngle().Canon())
 			//}
@@ -69,7 +69,7 @@ func TestPoint_MovedBeared(t *testing.T) {
 			movingReturn := plane.Point2{}.Sub(tt.moving)
 			geoPointReturn := pMoved.MovedBeared(tt.bearing, movingReturn)
 
-			require.Truef(t, tt.p.DistanceTo(geoPointReturn) < Eps,
+			require.Truef(t, tt.p.DistanceTo(geoPointReturn) < DistanceEps,
 				"tt.p.DistanceTo(geoPointReturn): %f", tt.p.DistanceTo(geoPointReturn))
 
 		})

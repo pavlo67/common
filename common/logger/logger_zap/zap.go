@@ -3,29 +3,25 @@ package logger_zap
 import (
 	"fmt"
 	"os"
-	"runtime"
 	"strings"
 	"time"
-
-	"github.com/pavlo67/common/common"
-
-	"github.com/pavlo67/common/common/pnglib"
-
-	"github.com/pavlo67/common/common/filelib"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
+	"github.com/pavlo67/common/common"
+	"github.com/pavlo67/common/common/filelib"
 	"github.com/pavlo67/common/common/logger"
+	"github.com/pavlo67/common/common/pnglib"
 )
 
 type loggerZap struct {
 	zap.SugaredLogger
-	cfg logger.Config
+	logger.Config
 }
 
 func (op loggerZap) Comment(text string) {
-	for _, commentPath := range append(op.cfg.OutputPaths, op.cfg.ErrorPaths...) {
+	for _, commentPath := range append(op.Config.OutputPaths, op.Config.ErrorPaths...) {
 		if commentPath == "stdout" {
 			fmt.Fprintf(os.Stdout, "\n%s\n", text)
 		} else if commentPath == "stderr" {
@@ -49,7 +45,7 @@ func (op *loggerZap) SetPath(basePath string) {
 		return
 	}
 	if basePath = strings.TrimSpace(basePath); basePath == "" {
-		op.cfg.BasePath = ""
+		op.Config.BasePath = ""
 		return
 	}
 
@@ -59,29 +55,33 @@ func (op *loggerZap) SetPath(basePath string) {
 		return
 	}
 
-	op.cfg.BasePath = basePath
+	op.Config.BasePath = basePath
 }
 
 func (op loggerZap) File(path string, data []byte) {
-	if op.cfg.SaveFiles {
-		basedPaths, err := logger.ModifyPaths([]string{path}, op.cfg.BasePath)
+	if op.Config.SaveFiles {
+		basedPaths, err := logger.ModifyPaths([]string{path}, op.Config.BasePath)
 		if err != nil {
 			op.Error(err)
 		} else if err := os.WriteFile(basedPaths[0], data, 0644); err != nil {
 			op.Errorf("CAN'T WRITE TO FILE %s: %s", path, err)
+		} else {
+			op.Infof("FILE IS WRITTEN  %s", basedPaths[0])
 		}
 	}
 }
 
 func (op loggerZap) Image(path string, getImage logger.GetImage, opts common.Map) {
-	if op.cfg.SaveFiles {
+	if op.Config.SaveFiles {
 		img, info, err := getImage.Image(opts)
 		if info != "" {
-			_, filename, line, _ := runtime.Caller(1)
-			op.Infof("from %s:%d: "+info, filename, line)
+			op.File(path+".info", []byte(info))
+
+			//_, filename, line, _ := runtime.Caller(1)
+			//op.Infof("from %s:%d: "+info, filename, line)
 		}
 		if img != nil {
-			basedPaths, err := logger.ModifyPaths([]string{path}, op.cfg.BasePath)
+			basedPaths, err := logger.ModifyPaths([]string{path}, op.Config.BasePath)
 			if err != nil {
 				op.Error(err)
 			} else if err = pnglib.Save(img, basedPaths[0]); err != nil {
@@ -98,11 +98,11 @@ func (op *loggerZap) SetKey(key string) {
 	if op == nil {
 		return
 	}
-	op.cfg.Key = key
+	op.Config.Key = key
 }
 
 func (op loggerZap) Key() string {
-	return op.cfg.Key
+	return op.Config.Key
 }
 
 var _ logger.Operator = &loggerZap{}
@@ -149,7 +149,7 @@ func New(cfg logger.Config) (logger.Operator, error) {
 		cfg.Key = time.Now().Format(time.RFC3339)[:19]
 	}
 
-	return &loggerZap{SugaredLogger: *l.Sugar(), cfg: cfg}, nil
+	return &loggerZap{SugaredLogger: *l.Sugar(), Config: cfg}, nil
 }
 
 func zapLevel(level logger.Level) zapcore.Level {
