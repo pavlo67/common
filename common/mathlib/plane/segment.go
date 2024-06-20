@@ -35,24 +35,58 @@ func (segment Segment) Paired(distanceToRight float64) Segment {
 	return Segment{segment[0].Add(dirToTheSide), segment[1].Add(dirToTheSide)}
 }
 
-//func (segment Segment) Paired(distanceToRight float64) Segment {
-//	if segment[0] == segment[1] || distanceToRight == 0 {
-//		return segment
-//	}
-//
-//	direction := segment[1].Sub(segment[0])
-//	dirRadius := direction.Radius()
-//	dirDistance := Point2{direction.X * distanceToRight / dirRadius, direction.Y * distanceToRight / dirRadius}
-//	angle := XToYAngleFromOy(math.Pi * 0.5)
-//	if distanceToRight < 0 {
-//		angle = -angle
-//	}
-//
-//	dirToTheSide := dirDistance.RotateByAngle(angle)
-//	return Segment{segment[0].Add(dirToTheSide), segment[1].Add(dirToTheSide)}
-//}
+// we check the ray directed from ls[1] to infinity
+func (ls Segment) ProjectionOnPolyChain(pCh PolyChain, distanceMax float64) *ProjectionOnPolyChainDirected {
+	//log.Printf("%v + %v", pCh, ls)
 
-func SegmentGoOutCircle(s Segment, p Point2, r float64) *Point2 {
+	if len(pCh) < 1 {
+		return nil
+
+	}
+
+	segmLen := ls[0].DistanceTo(ls[1])
+
+	if len(pCh) == 1 {
+		distance0, distance1 := pCh[0].DistanceTo(ls[0]), pCh[0].DistanceTo(ls[1])
+		if math.Abs(segmLen+distance1-distance0) <= mathlib.Eps {
+			return &ProjectionOnPolyChainDirected{Distance: distance1, ProjectionOnPolyChain: ProjectionOnPolyChain{Point2: pCh[0]}}
+		}
+		return nil
+	}
+
+	var pr *ProjectionOnPolyChainDirected
+
+	for n, pn := range pCh[:len(pCh)-1] {
+		if p := ls.DivideByLine(pn, pCh[n+1]); p != nil {
+
+			//log.Print(*p)
+
+			if distance1 := p.DistanceTo(ls[1]); distance1 <= distanceMax && (pr == nil || distance1 < pr.Distance) {
+
+				distance0 := p.DistanceTo(ls[0])
+
+				//log.Print(distance0, distance1, segmLen)
+
+				if math.Abs(segmLen+distance1-distance0) <= mathlib.Eps {
+					position := p.DistanceTo(pn)
+					if position >= pn.DistanceTo(pCh[n+1]) {
+						pr = &ProjectionOnPolyChainDirected{
+							Distance:              distance1,
+							ProjectionOnPolyChain: ProjectionOnPolyChain{N: n + 1, Point2: *p}}
+					} else {
+						pr = &ProjectionOnPolyChainDirected{
+							Distance:              distance1,
+							ProjectionOnPolyChain: ProjectionOnPolyChain{N: n, Position: position, Point2: *p}}
+					}
+				}
+			}
+		}
+	}
+
+	return pr
+}
+
+func (s Segment) GoOutCircle(p Point2, r float64) *Point2 {
 	if s[0].DistanceTo(p) > r || s[1].DistanceTo(p) <= r {
 		return nil
 	}
@@ -69,12 +103,12 @@ func SegmentGoOutCircle(s Segment, p Point2, r float64) *Point2 {
 		return &Point2{s[0].X + dx*roots[1], s[0].Y + dy*roots[1]}
 	}
 
-	log.Printf("wrong roots: %v for s = %v, p = %v, r = %g / on SegmentGoOutCircle()", *roots, s, p, r)
+	log.Printf("wrong roots: %v for s = %v, p = %v, r = %g / on s.GoOutCircle()", *roots, s, p, r)
 
 	return nil
 }
 
-func SegmentsIntersection(s, s1 Segment) (pCross *Point2) {
+func (s Segment) Intersection(s1 Segment) (pCross *Point2) {
 	if s[1].X < s[0].X {
 		s[0], s[1] = s[1], s[0]
 	}
@@ -169,7 +203,7 @@ func SegmentsIntersection(s, s1 Segment) (pCross *Point2) {
 }
 
 func (s Segment) DistanceTo(s1 Segment) float64 {
-	if pCross := SegmentsIntersection(s, s1); pCross != nil {
+	if pCross := s.Intersection(s1); pCross != nil {
 		return 0
 	}
 

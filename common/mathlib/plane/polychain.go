@@ -31,19 +31,20 @@ func (pCh PolyChain) Reversed() PolyChain {
 	return polyChainReversed
 }
 
-func (pCh PolyChain) Direction(deviationMaxIn float64) *Segment {
+func (pCh PolyChain) Direction(deviationMaxIn float64) (*Segment, int) {
 	if len(pCh) < 2 {
-		return nil
+		return nil, 0
 	}
 
 	pEnd := pCh[len(pCh)-1]
 	directionLine := Segment{pCh[len(pCh)-2], pEnd}
+	n := 1
 
 	for i := len(pCh) - 3; i >= 0; i-- {
 		directionLineNext := Segment{Segment{pCh[i], pCh[i+1]}.Middle(), pEnd}
 		for j := i + 1; j < len(pCh)-1; j++ {
 			if pCh[j].DistanceToLine(directionLineNext) > deviationMaxIn {
-				return &directionLine
+				return &directionLine, n
 			}
 		}
 		directionLine = directionLineNext
@@ -51,76 +52,19 @@ func (pCh PolyChain) Direction(deviationMaxIn float64) *Segment {
 		directionLineNext = Segment{pCh[i], pEnd}
 		for j := i + 1; j < len(pCh)-1; j++ {
 			if pCh[j].DistanceToLine(directionLineNext) > deviationMaxIn {
-				return &directionLine
+				return &directionLine, n
 			}
 		}
 		directionLine = directionLineNext
+		n++
+
 	}
 
 	if directionLine[0] == directionLine[1] {
-		return nil
+		return nil, 0
 	}
 
-	return &directionLine
-}
-
-func (p Point2) ProjectionOnLineSegment(ls Segment) (distance, projectionPosition float64) {
-	d0, d1, d := p.DistanceSquare(ls[0]), p.DistanceSquare(ls[1]), ls[0].DistanceSquare(ls[1])
-	var reversed bool
-	if d1 < d0 {
-		d0, d1 = d1, d0
-		reversed = true
-	}
-	if d0+d < d1 {
-		return math.NaN(), math.NaN()
-	}
-
-	c0 := (d0 + d - d1) / (2 * math.Sqrt(d))
-
-	if reversed {
-		return math.Sqrt(d0 - c0*c0), math.Sqrt(d) - c0
-	} else {
-		return math.Sqrt(d0 - c0*c0), c0
-	}
-}
-
-func (p Point2) ProjectionOnPolyChain(pCh PolyChain) (float64, ProjectionOnPolyChain) {
-
-	if len(pCh) < 1 {
-		return math.NaN(), ProjectionOnPolyChain{N: -1, Position: math.NaN(), Point2: Point2{math.NaN(), math.NaN()}}
-	} else if len(pCh) == 1 {
-		return p.DistanceTo(pCh[0]), ProjectionOnPolyChain{Point2: pCh[0]}
-	}
-
-	minDist := math.Inf(1)
-	pr := ProjectionOnPolyChain{
-		N:        -1,
-		Position: math.NaN(),
-		Point2:   Point2{math.NaN(), math.NaN()},
-	}
-	var n int
-	var pPr Point2
-
-	// POINTS:
-	for i, pI := range pCh[:len(pCh)-1] {
-		dist, position := p.ProjectionOnLineSegment(Segment{pI, pCh[i+1]})
-		if dist >= minDist || math.IsNaN(dist) {
-			continue
-		}
-
-		if segmentLength := pI.DistanceTo(pCh[i+1]); segmentLength <= 0 {
-			pPr, n, position = pI, i, 0
-		} else if position >= segmentLength {
-			pPr, n, position = pCh[i+1], i+1, 0
-		} else {
-			dx, dy := pCh[i+1].X-pI.X, pCh[i+1].Y-pI.Y
-			pPr, n = Point2{pI.X + dx*position/segmentLength, pI.Y + dy*position/segmentLength}, i
-		}
-
-		minDist, pr = dist, ProjectionOnPolyChain{n, position, pPr}
-	}
-
-	return minDist, pr
+	return &directionLine, n
 }
 
 func (pCh PolyChain) DistanceTo(pCh1 PolyChain, distanceMax float64) (dist float64, pr, pr1 *ProjectionOnPolyChain) {
@@ -138,7 +82,7 @@ func (pCh PolyChain) DistanceTo(pCh1 PolyChain, distanceMax float64) (dist float
 	return math.NaN(), nil, nil
 }
 
-func AveragePolyChains(pCh0, pCh1 PolyChain, distanceMaxIn float64, connectEnds bool) (
+func (pCh0 PolyChain) AverageWithAnother(pCh1 PolyChain, distanceMaxIn float64, connectEnds bool) (
 	ok bool, pCh0Averaged PolyChain, pCh1RestsInitial []PolyChain) {
 
 	// log.Print(distanceMaxIn, pCh0, pCh1)
@@ -243,24 +187,6 @@ func AveragePolyChains(pCh0, pCh1 PolyChain, distanceMaxIn float64, connectEnds 
 	// }
 
 	return ok, pCh0, pCh1RestsInitial
-}
-
-type PolyChainsIntersection struct {
-	Point2
-	N0, N1 int
-}
-
-func PolyChainsIntersectionAny(pCh0, pCh1 PolyChain) *PolyChainsIntersection {
-	for i0 := 1; i0 < len(pCh0); i0++ {
-		s0 := Segment{pCh0[i0-1], pCh0[i0]}
-		for i1 := 1; i1 < len(pCh1); i1++ {
-			if p := SegmentsIntersection(s0, Segment{pCh1[i1-1], pCh1[i1]}); p != nil {
-				return &PolyChainsIntersection{*p, i0 - 1, i1 - 1}
-			}
-		}
-	}
-
-	return nil
 }
 
 // it's equal to append(append(...
@@ -477,4 +403,30 @@ func (pCh PolyChain) ShortString() string {
 	}
 
 	return "[" + pChStr[1:] + "]"
+}
+
+func (pCh PolyChain) Insert(point Point2) (_ PolyChain, addedToStart, addedToFinish bool) {
+	if len(pCh) < 1 {
+		return PolyChain{point}, true, true
+	} else if len(pCh) == 1 {
+		return PolyChain{pCh[0], point}, false, true
+	}
+
+	distMin, iMin := math.Inf(1), -1
+	for i := 1; i < len(pCh); i++ {
+		dist, _ := point.ProjectionOnLineSegment(Segment{pCh[i-1], pCh[i]})
+		if !math.IsNaN(dist) && dist < distMin {
+			iMin = i
+		}
+	}
+
+	if iMin > 0 {
+		return append(pCh[:iMin], append(PolyChain{point}, pCh[iMin:]...)...), false, false
+	}
+
+	if pCh[0].DistanceTo(point) < pCh[len(pCh)-1].DistanceTo(point) {
+		return append(PolyChain{point}, pCh...), true, false
+	}
+
+	return append(PolyChain{}, append(pCh, point)...), false, true
 }

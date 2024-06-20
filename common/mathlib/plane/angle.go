@@ -24,3 +24,32 @@ func (xToYAngle XToYAngle) Canon() XToYAngle {
 func (xToYAngle XToYAngle) Point2(radius float64) Point2 {
 	return Point2{radius * math.Cos(float64(xToYAngle)), radius * math.Sin(float64(xToYAngle))}
 }
+
+// XToYAngle lies in the range: -math.Pi < p.XToYAngleFromOy() <= math.Pi
+func (p Point2) XToYAngleFromOx() XToYAngle {
+	if p.X == 0 {
+		if p.Y > 0 {
+			return math.Pi / 2
+		} else if p.Y < 0 {
+			return -math.Pi / 2
+		} else {
+			return XToYAngle(math.NaN())
+		}
+	} else if p.X >= 0 {
+		return XToYAngle(math.Atan(p.Y / p.X))
+	} else if p.Y >= 0 {
+		return XToYAngle(math.Atan(p.Y/p.X) + math.Pi)
+	} else {
+		return XToYAngle(math.Atan(p.Y/p.X) - math.Pi)
+	}
+}
+
+func (p Point2) AnglesDelta(p1 Point2) float64 {
+	angle := p1.XToYAngleFromOx() - p.XToYAngleFromOx()
+	if angle > math.Pi {
+		return float64(angle - 2*math.Pi)
+	} else if angle <= -math.Pi {
+		return float64(angle + 2*math.Pi)
+	}
+	return float64(angle)
+}

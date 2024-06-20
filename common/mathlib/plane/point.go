@@ -31,33 +31,13 @@ func (p Point2) Radius() float64 {
 	return math.Sqrt(p.X*p.X + p.Y*p.Y)
 }
 
-// XToYAngle lies in the range: -math.Pi < p.XToYAngleFromOy() <= math.Pi
-func (p Point2) XToYAngleFromOx() XToYAngle {
-	if p.X == 0 {
-		if p.Y > 0 {
-			return math.Pi / 2
-		} else if p.Y < 0 {
-			return -math.Pi / 2
-		} else {
-			return XToYAngle(math.NaN())
-		}
-	} else if p.X >= 0 {
-		return XToYAngle(math.Atan(p.Y / p.X))
-	} else if p.Y >= 0 {
-		return XToYAngle(math.Atan(p.Y/p.X) + math.Pi)
-	} else {
-		return XToYAngle(math.Atan(p.Y/p.X) - math.Pi)
+func (p Point2) OnRay(r float64) Point2 {
+	r0 := p.Radius()
+	if r0 == 0 {
+		return Point2{}
 	}
-}
 
-func (p Point2) AnglesDelta(p1 Point2) float64 {
-	angle := p1.XToYAngleFromOx() - p.XToYAngleFromOx()
-	if angle > math.Pi {
-		return float64(angle - 2*math.Pi)
-	} else if angle <= -math.Pi {
-		return float64(angle + 2*math.Pi)
-	}
-	return float64(angle)
+	return Point2{p.X * r / r0, p.Y * r / r0}
 }
 
 func (p Point2) DistanceTo(p1 Point2) float64 {

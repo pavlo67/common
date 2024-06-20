@@ -20,7 +20,7 @@ func TestPolyChainAveragedProbe(t *testing.T) {
 	//[{334.4224510771934 151.46712409917882} {337.37437836467245 156.29806754937331}]
 	//[{341.3650461698297 162.800656946074} {406.5 302} {403.7629562043795 375.0206204379562}]
 
-	ok, pCh0Averaged, pCh1Averaged := AveragePolyChains(pCh0, pCh1, 9.870530984139577, false)
+	ok, pCh0Averaged, pCh1Averaged := pCh0.AverageWithAnother(pCh1, 9.870530984139577, false)
 
 	t.Log(ok, "\n", pCh0Averaged, "\n", pCh1Averaged)
 }
@@ -108,16 +108,16 @@ func TestAveragePolyChains(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotOk, gotAveraged, gotRest := AveragePolyChains(tt.polyChain0, tt.polyChain1, tt.minDistance, tt.connectEnds)
+			gotOk, gotAveraged, gotRest := tt.polyChain0.AverageWithAnother(tt.polyChain1, tt.minDistance, tt.connectEnds)
 
 			if gotOk != tt.wantOk {
-				t.Errorf("AveragePolyChains() gotOk = %t, wantOk %t", gotOk, tt.wantOk)
+				t.Errorf("AverageWithAnother() gotOk = %t, wantOk %t", gotOk, tt.wantOk)
 			}
 			if !reflect.DeepEqual(gotAveraged, tt.wantPolyChain0Averaged) {
-				t.Errorf("AveragePolyChains() gotAveraged = %v, wantAveraged %v", gotAveraged, tt.wantPolyChain0Averaged)
+				t.Errorf("AverageWithAnother() gotAveraged = %v, wantAveraged %v", gotAveraged, tt.wantPolyChain0Averaged)
 			}
 			if !reflect.DeepEqual(gotRest, tt.wantPolyChain1Rest) {
-				t.Errorf("AveragePolyChains() gotRest = %v, wantRest %v", gotRest, tt.wantPolyChain1Rest)
+				t.Errorf("AverageWithAnother() gotRest = %v, wantRest %v", gotRest, tt.wantPolyChain1Rest)
 			}
 		})
 	}
@@ -283,16 +283,16 @@ func TestApproximatePolyChain(t *testing.T) {
 //	}
 //	for _, tt := range tests {
 //		t.Run(tt.name, func(t *testing.T) {
-//			gotOk, gotAveraged, gotRest := AveragePolyChains(tt.polyChain0, tt.polyChain1, tt.minDistance)
+//			gotOk, gotAveraged, gotRest := AverageWithAnother(tt.polyChain0, tt.polyChain1, tt.minDistance)
 //
 //			if gotOk != tt.wantOk {
-//				t.Errorf("AveragePolyChains() gotOk = %t, wantOk %t", gotOk, tt.wantOk)
+//				t.Errorf("AverageWithAnother() gotOk = %t, wantOk %t", gotOk, tt.wantOk)
 //			}
 //			if !reflect.DeepEqual(gotAveraged, tt.wantPolyChain0Averaged) {
-//				t.Errorf("AveragePolyChains() gotAveraged = %v, wantAveraged %v", gotAveraged, tt.wantPolyChain0Averaged)
+//				t.Errorf("AverageWithAnother() gotAveraged = %v, wantAveraged %v", gotAveraged, tt.wantPolyChain0Averaged)
 //			}
 //			if !reflect.DeepEqual(gotRest, tt.wantPolyChain1Rest) {
-//				t.Errorf("AveragePolyChains() gotRest = %v, wantRest %v", gotRest, tt.wantPolyChain1Rest)
+//				t.Errorf("AverageWithAnother() gotRest = %v, wantRest %v", gotRest, tt.wantPolyChain1Rest)
 //			}
 //		})
 //	}
