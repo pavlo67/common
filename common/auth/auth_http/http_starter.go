@@ -33,7 +33,7 @@ func (ahs *authHTTPStarter) Name() string {
 //} else if endpointsPtr, ok := options["endpoints"].(*server_http.Endpoints); ok {
 //	ihs.endpoints = *endpointsPtr
 
-func (ahs *authHTTPStarter) Run(cfg *config.Envs, options common.Map, joinerOp joiner.Operator, l_ logger.Operator) error {
+func (ahs *authHTTPStarter) Run(cfg *config.Envs, options common.Map, joinerOp joiner.Operator, l_ logger.OperatorJ) error {
 	l = l_
 
 	var access config.Access

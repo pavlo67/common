@@ -3,8 +3,9 @@ package logger
 import (
 	"image"
 	"path/filepath"
-	"regexp"
 	"strings"
+
+	"github.com/pavlo67/common/common/mathlib/sets"
 
 	"github.com/pavlo67/common/common"
 
@@ -66,28 +67,36 @@ type Operator interface {
 	Image(path string, getImage GetImage, opts common.Map)
 }
 
-// TODO!!! be careful in windows
+type OperatorJ interface {
+	Operator
 
-var reRootPath = regexp.MustCompile(`^/`)
+	J() (_ Operator, outputPaths []string, _ error)
+}
 
-func ModifyPaths(paths []string, basePath string) ([]string, error) {
-	if basePath = strings.TrimSpace(basePath); basePath == "" {
-		return paths, nil
-	}
+func ModifiedPaths(paths []string, basePath, systemStream string) ([]string, error) {
+	basePath = strings.TrimSpace(basePath)
 
-	var err error
-	if basePath, err = filelib.Dir(basePath); err != nil {
-		return nil, errors.Wrapf(err, "on logger.ModifyPaths()")
-	}
-
-	modifiedPaths := make([]string, len(paths))
-
-	for i, path := range paths {
-		if path == "stdin" || path == "stdout" || path == "stderr" || reRootPath.MatchString(path) {
-			modifiedPaths[i] = path
-		} else {
-			modifiedPaths[i] = filepath.Join(basePath, path)
+	if basePath != "" {
+		var err error
+		if basePath, err = filelib.Dir(basePath); err != nil {
+			return nil, errors.Wrapf(err, "on logger.ModifiedPaths()")
 		}
+	}
+
+	var modifiedPaths []string
+
+	for _, path := range paths {
+		if path == "stdin" || path == "stdout" || path == "stderr" {
+			continue
+		} else if filepath.IsAbs(path) || basePath == "" {
+			modifiedPaths = append(modifiedPaths, path)
+		} else {
+			modifiedPaths = append(modifiedPaths, filepath.Join(basePath, path))
+		}
+	}
+
+	if systemStream != "" && !sets.In(modifiedPaths, systemStream) {
+		return append(modifiedPaths, systemStream), nil
 	}
 
 	return modifiedPaths, nil

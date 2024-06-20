@@ -161,7 +161,7 @@ func (op *loggerTest) SetPath(basePath string) {
 
 func (op loggerTest) File(path string, data []byte) {
 	if op.saveFiles {
-		basedPaths, err := logger.ModifyPaths([]string{path}, op.basePath)
+		basedPaths, err := logger.ModifiedPaths([]string{path}, op.basePath, "")
 		if err != nil {
 			op.Error(err)
 		} else if err := os.WriteFile(basedPaths[0], data, 0644); err != nil {
@@ -197,7 +197,7 @@ func (op loggerTest) Image(path string, getImage logger.GetImage, opts common.Ma
 			op.Info(info)
 		}
 		if img != nil {
-			basedPaths, err := logger.ModifyPaths([]string{path}, op.basePath)
+			basedPaths, err := logger.ModifiedPaths([]string{path}, op.basePath, "")
 			if err != nil {
 				op.Error(err)
 			} else if err = imagelib.Save(img, basedPaths[0]); err != nil {

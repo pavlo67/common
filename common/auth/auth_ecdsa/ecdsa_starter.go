@@ -27,7 +27,7 @@ func (ss *auth_ecdsa) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (ss *auth_ecdsa) Run(cfg *config.Envs, options common.Map, joinerOp joiner.Operator, l_ logger.Operator) error {
+func (ss *auth_ecdsa) Run(cfg *config.Envs, options common.Map, joinerOp joiner.Operator, l_ logger.OperatorJ) error {
 	l = l_
 
 	ss.interfaceKey = joiner.InterfaceKey(options.StringDefault("interface_key", string(InterfaceKey)))

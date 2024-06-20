@@ -9,7 +9,7 @@ import (
 
 type Operator interface {
 	Name() string
-	Run(*config.Envs, common.Map, joiner.Operator, logger.Operator) error
+	Run(*config.Envs, common.Map, joiner.Operator, logger.OperatorJ) error
 }
 
 type Component struct {

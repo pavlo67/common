@@ -24,7 +24,7 @@ func (shjs *server_http_jschmhrStarter) Name() string {
 	return logger.GetCallInfo().PackageName
 }
 
-func (shjs *server_http_jschmhrStarter) Run(cfg *config.Envs, options common.Map, joinerOp joiner.Operator, l_ logger.Operator) error {
+func (shjs *server_http_jschmhrStarter) Run(cfg *config.Envs, options common.Map, joinerOp joiner.Operator, l_ logger.OperatorJ) error {
 	l = l_
 	interfaceKey := joiner.InterfaceKey(options.StringDefault("interface_key", string(server_http.InterfaceKey)))
 

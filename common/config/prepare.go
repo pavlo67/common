@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"runtime/debug"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -32,7 +33,7 @@ func ShowVCSInfo() {
 	}
 }
 
-func PrepareApp(envPath, logPath string) (Envs, logger.Operator) {
+func PrepareApp(envPath, logPath string) (Envs, logger.OperatorJ) {
 
 	rand.Seed(time.Now().UnixNano())
 
@@ -80,7 +81,7 @@ func PrepareApp(envPath, logPath string) (Envs, logger.Operator) {
 	return *envs, l
 }
 
-func PrepareTests(t *testing.T, envPath, logFile string) (Envs, logger.Operator) {
+func PrepareTests(t *testing.T, envPath, logFile string) (Envs, logger.OperatorJ) {
 
 	configEnv := "test"
 	os.Setenv("ENV", configEnv)
@@ -89,33 +90,32 @@ func PrepareTests(t *testing.T, envPath, logFile string) (Envs, logger.Operator)
 	require.NoError(t, err)
 	require.NotNil(t, envsPtr)
 
-	var loggerFiles []string
-	if logFile != "" {
-		loggerFiles = append(loggerFiles, logFile)
+	cfg := logger.Config{
+		Key:      strings.ReplaceAll(time.Now().Format(time.RFC3339)[:19], ":", "_"),
+		LogLevel: logger.TraceLevel,
 	}
 
-	var loggerSaveFiles bool
-	if err = envsPtr.Value("logger_save_files", &loggerSaveFiles); err != nil {
+	if logFile != "" {
+		cfg.OutputPaths = []string{logFile}
+		cfg.ErrorPaths = []string{logFile}
+	}
+
+	if err = envsPtr.Value("logger_save_files", &cfg.SaveFiles); err != nil {
 		fmt.Fprintf(os.Stderr, colorize.Red+"on PrepareApp(%s, %s), reading of 'logger_save_files' key produces the error: %s\n"+colorize.Reset, envPath, configEnv+".yaml", err)
 	}
 
-	var loggerPath string
-	if err = envsPtr.Value("logger_path", &loggerPath); err != nil {
-		fmt.Fprintf(os.Stderr, colorize.Red+"on PrepareApp(%s, %s), reading of 'logger_path' key produces the error: %s\n"+colorize.Reset, envPath, configEnv+".yaml", err)
+	if logFile != "" || cfg.SaveFiles {
+		var loggerPath string
+		if err = envsPtr.Value("logger_path", &loggerPath); err != nil {
+			fmt.Fprintf(os.Stderr, colorize.Red+"on PrepareApp(%s, %s), reading of 'logger_path' key produces the error: %s\n"+colorize.Reset, envPath, configEnv+".yaml", err)
+		}
+		cfg.BasePath, err = filelib.Dir(filepath.Join(loggerPath, cfg.Key))
+		require.NoError(t, err)
 	}
 
-	logKey := time.Now().Format(time.RFC3339)[:19]
-	logPath, err := filelib.Dir(filepath.Join(loggerPath, logKey))
-	require.NoError(t, err)
+	// log.Fatalf("%+v", cfg)
 
-	l, err := logger_zap.New(logger.Config{
-		Key:         logKey,
-		BasePath:    logPath,
-		SaveFiles:   loggerSaveFiles,
-		LogLevel:    logger.TraceLevel,
-		OutputPaths: append(loggerFiles, "stdout"),
-		ErrorPaths:  append(loggerFiles, "stderr"),
-	})
+	l, err := logger_zap.New(cfg)
 	require.NoError(t, err)
 	require.NotNil(t, l)
 
