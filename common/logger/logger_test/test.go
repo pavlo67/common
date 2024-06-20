@@ -9,7 +9,7 @@ import (
 
 	"github.com/pavlo67/common/common"
 
-	"github.com/pavlo67/common/common/pnglib"
+	"github.com/pavlo67/common/common/imagelib"
 
 	"github.com/pavlo67/common/common/filelib"
 
@@ -180,7 +180,7 @@ func (op loggerTest) File(path string, data []byte) {
 //			basedPaths, err := logger.ModifyPaths([]string{path}, op.basePath)
 //			if err != nil {
 //				op.Error(err)
-//			} else if err = pnglib.Save(img, basedPaths[0]); err != nil {
+//			} else if err = imagelib.Save(img, basedPaths[0]); err != nil {
 //				op.Error(err)
 //			}
 //		}
@@ -200,7 +200,7 @@ func (op loggerTest) Image(path string, getImage logger.GetImage, opts common.Ma
 			basedPaths, err := logger.ModifyPaths([]string{path}, op.basePath)
 			if err != nil {
 				op.Error(err)
-			} else if err = pnglib.Save(img, basedPaths[0]); err != nil {
+			} else if err = imagelib.Save(img, basedPaths[0]); err != nil {
 				op.Error(err)
 			}
 		}

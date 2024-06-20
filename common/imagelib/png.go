@@ -1,4 +1,4 @@
-package pnglib
+package imagelib
 
 import (
 	"image"
@@ -11,7 +11,7 @@ import (
 	"github.com/pavlo67/common/common/filelib"
 )
 
-const onSave = "on pnglib.Save()"
+const onSave = "on imagelib.Save()"
 
 func Save(img image.Image, filename string) error {
 

@@ -2,6 +2,8 @@ package db_sqlite
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/config"
 	"github.com/pavlo67/common/common/errors"
@@ -9,7 +11,6 @@ import (
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/sqllib/sqllib_sqlite"
 	"github.com/pavlo67/common/common/starter"
-	"os"
 )
 
 const InterfaceKey joiner.InterfaceKey = "db_sqlite"

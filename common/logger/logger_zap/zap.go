@@ -11,8 +11,8 @@ import (
 
 	"github.com/pavlo67/common/common"
 	"github.com/pavlo67/common/common/filelib"
+	"github.com/pavlo67/common/common/imagelib"
 	"github.com/pavlo67/common/common/logger"
-	"github.com/pavlo67/common/common/pnglib"
 )
 
 type loggerZap struct {
@@ -84,7 +84,7 @@ func (op loggerZap) Image(path string, getImage logger.GetImage, opts common.Map
 			basedPaths, err := logger.ModifyPaths([]string{path}, op.Config.BasePath)
 			if err != nil {
 				op.Error(err)
-			} else if err = pnglib.Save(img, basedPaths[0]); err != nil {
+			} else if err = imagelib.Save(img, basedPaths[0]); err != nil {
 				op.Error(err)
 			}
 		}
