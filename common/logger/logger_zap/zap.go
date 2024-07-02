@@ -162,15 +162,23 @@ func (op *loggerZap) SetPath(basePath string) {
 	op.Config.BasePath = basePath
 }
 
-func (op loggerZap) File(path string, data []byte) {
+func (op loggerZap) File(path string, append bool, data []byte) {
 	if op.Config.SaveFiles {
 		basedPaths, err := logger.ModifiedPaths([]string{path}, op.Config.BasePath, "")
 		if err != nil {
 			op.Error(err)
-		} else if err := os.WriteFile(basedPaths[0], data, 0644); err != nil {
-			op.Errorf("CAN'T WRITE TO FILE %s: %s", path, err)
 		} else {
-			op.Infof("FILE IS WRITTEN  %s", basedPaths[0])
+			if append {
+				err = filelib.AppendFile(basedPaths[0], data)
+			} else {
+				err = os.WriteFile(basedPaths[0], data, 0644)
+				op.Infof("FILE IS WRITTEN  %s", basedPaths[0])
+			}
+
+			if err != nil {
+				op.Errorf("CAN'T WRITE TO FILE %s: %s", path, err)
+			}
+
 		}
 	}
 }
@@ -179,7 +187,7 @@ func (op loggerZap) Image(path string, getImage logger.GetImage, opts common.Map
 	if op.Config.SaveFiles {
 		img, info, err := getImage.Image(opts)
 		if info != "" {
-			op.File(path+".info", []byte(info))
+			op.File(path+".info", false, []byte(info))
 
 			//_, filename, line, _ := runtime.Caller(1)
 			//op.Infof("from %s:%d: "+info, filename, line)

@@ -166,13 +166,21 @@ func (op *loggerTest) SetPath(basePath string) {
 	op.basePath = basePath
 }
 
-func (op loggerTest) File(path string, data []byte) {
+func (op loggerTest) File(path string, append bool, data []byte) {
 	if op.saveFiles {
 		basedPaths, err := logger.ModifiedPaths([]string{path}, op.basePath, "")
 		if err != nil {
 			op.Error(err)
-		} else if err := os.WriteFile(basedPaths[0], data, 0644); err != nil {
-			op.Errorf("CAN'T WRITE TO FILE %s: %s", path, err)
+		} else {
+			if append {
+				err = filelib.AppendFile(basedPaths[0], data)
+			} else {
+				err = os.WriteFile(basedPaths[0], data, 0644)
+			}
+
+			if err != nil {
+				op.Errorf("CAN'T WRITE TO FILE %s: %s", path, err)
+			}
 		}
 	}
 }

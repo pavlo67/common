@@ -65,7 +65,7 @@ type Operator interface {
 	SetPath(basePath string)
 	Path() string
 
-	File(path string, data []byte)
+	File(path string, append bool, data []byte)
 	Image(path string, getImage GetImage, opts common.Map)
 }
 
