@@ -3,7 +3,7 @@ package geolib
 import (
 	"math"
 
-	"github.com/pavlo67/common/common/mathlib"
+	"github.com/pavlo67/common/common/mathlib/numbers"
 
 	geo "github.com/kellydunn/golang-geo"
 	"github.com/pavlo67/common/common/mathlib/plane"
@@ -62,8 +62,8 @@ func (p Point) MovedBeared(bearing Bearing, moving plane.Point2) Point {
 	}
 
 	return Point{
-		Degrees(mathlib.Round(float64(geoPointStepped.Lat), 6)),
-		Degrees(mathlib.Round(float64(geoPointStepped.Lon), 6))}
+		Degrees(numbers.Round(float64(geoPointStepped.Lat), 6)),
+		Degrees(numbers.Round(float64(geoPointStepped.Lon), 6))}
 }
 
 func (p Point) Geo() geo.Point {

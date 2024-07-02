@@ -140,6 +140,13 @@ func (op loggerTest) Comment(text string) {
 
 }
 
+func (op *loggerTest) Path() string {
+	if op == nil {
+		return ""
+	}
+	return op.basePath
+}
+
 func (op *loggerTest) SetPath(basePath string) {
 	if op == nil {
 		return
@@ -180,7 +187,7 @@ func (op loggerTest) File(path string, data []byte) {
 //			basedPaths, err := logger.ModifyPaths([]string{path}, op.basePath)
 //			if err != nil {
 //				op.Error(err)
-//			} else if err = imagelib.Save(img, basedPaths[0]); err != nil {
+//			} else if err = imagelib.SavePNG(img, basedPaths[0]); err != nil {
 //				op.Error(err)
 //			}
 //		}
@@ -200,7 +207,7 @@ func (op loggerTest) Image(path string, getImage logger.GetImage, opts common.Ma
 			basedPaths, err := logger.ModifiedPaths([]string{path}, op.basePath, "")
 			if err != nil {
 				op.Error(err)
-			} else if err = imagelib.Save(img, basedPaths[0]); err != nil {
+			} else if err = imagelib.SavePNG(img, basedPaths[0]); err != nil {
 				op.Error(err)
 			}
 		}

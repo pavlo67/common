@@ -1,4 +1,4 @@
-package algebra
+package numbers
 
 import (
 	"math"

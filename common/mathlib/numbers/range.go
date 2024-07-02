@@ -1,4 +1,4 @@
-package mathlib
+package numbers
 
 type Range [2]float64
 

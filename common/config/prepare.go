@@ -15,7 +15,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/pavlo67/common/common/colorize"
+	"github.com/pavlo67/common/common/cli"
 	"github.com/pavlo67/common/common/filelib"
 	"github.com/pavlo67/common/common/logger"
 	"github.com/pavlo67/common/common/logger/logger_zap"
@@ -53,12 +53,12 @@ func PrepareApp(envPath, logPath string) (Envs, logger.OperatorJ) {
 
 	var saveFiles bool
 	if err = envs.Value("logger_save_files", &saveFiles); err != nil {
-		fmt.Fprintf(os.Stderr, colorize.Red+"on PrepareApp(%s, %s), reading of 'logger_save_files' key produces the error: %s\n"+colorize.Reset, envPath, configEnv+".yaml", err)
+		fmt.Fprintf(os.Stderr, cli.Red+"on PrepareApp(%s, %s), reading of 'logger_save_files' key produces the error: %s\n"+cli.Reset, envPath, configEnv+".yaml", err)
 	}
 
 	if logPath == "" {
 		if err = envs.Value("logger_path", &logPath); err != nil {
-			fmt.Fprintf(os.Stderr, colorize.Red+"on PrepareApp(%s, %s), reading of 'logger_path' key produces the error: %s\n"+colorize.Reset, envPath, configEnv+".yaml", err)
+			fmt.Fprintf(os.Stderr, cli.Red+"on PrepareApp(%s, %s), reading of 'logger_path' key produces the error: %s\n"+cli.Reset, envPath, configEnv+".yaml", err)
 		}
 	}
 
@@ -101,13 +101,13 @@ func PrepareTests(t *testing.T, envPath, logFile string) (Envs, logger.OperatorJ
 	}
 
 	if err = envsPtr.Value("logger_save_files", &cfg.SaveFiles); err != nil {
-		fmt.Fprintf(os.Stderr, colorize.Red+"on PrepareApp(%s, %s), reading of 'logger_save_files' key produces the error: %s\n"+colorize.Reset, envPath, configEnv+".yaml", err)
+		fmt.Fprintf(os.Stderr, cli.Red+"on PrepareApp(%s, %s), reading of 'logger_save_files' key produces the error: %s\n"+cli.Reset, envPath, configEnv+".yaml", err)
 	}
 
 	if logFile != "" || cfg.SaveFiles {
 		var loggerPath string
 		if err = envsPtr.Value("logger_path", &loggerPath); err != nil {
-			fmt.Fprintf(os.Stderr, colorize.Red+"on PrepareApp(%s, %s), reading of 'logger_path' key produces the error: %s\n"+colorize.Reset, envPath, configEnv+".yaml", err)
+			fmt.Fprintf(os.Stderr, cli.Red+"on PrepareApp(%s, %s), reading of 'logger_path' key produces the error: %s\n"+cli.Reset, envPath, configEnv+".yaml", err)
 		}
 		cfg.BasePath, err = filelib.Dir(filepath.Join(loggerPath, cfg.Key))
 		require.NoError(t, err)

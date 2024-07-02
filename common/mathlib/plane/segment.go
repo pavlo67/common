@@ -4,7 +4,7 @@ import (
 	"log"
 	"math"
 
-	"github.com/pavlo67/common/common/mathlib/algebra"
+	"github.com/pavlo67/common/common/mathlib/numbers"
 
 	"github.com/pavlo67/common/common/mathlib"
 )
@@ -94,7 +94,7 @@ func (s Segment) GoOutCircle(p Point2, r float64) *Point2 {
 	x0, y0, dx, dy := s[0].X-p.X, s[0].Y-p.Y, s[1].X-s[0].X, s[1].Y-s[0].Y
 	a, b, c := dx*dx+dy*dy, 2*(dx*x0+dy*y0), x0*x0+y0*y0-r*r
 
-	roots := algebra.QuadraticEquation(a, b, c)
+	roots := numbers.QuadraticEquation(a, b, c)
 	if roots == nil {
 		return nil
 	} else if roots[0] >= 0 && roots[0] <= 1 {

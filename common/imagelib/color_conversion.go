@@ -6,10 +6,9 @@ import (
 	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
-)
 
-const NumColorsRGB = 3
-const NumColorsRGBA = 4
+	"github.com/pavlo67/common/common/imagelib/coloring"
+)
 
 const ChRed = 0
 const ChGreen = 1
@@ -104,7 +103,7 @@ func ImageToRGBACopied(img image.Image) *image.RGBA {
 const onRGBToGray = "on RGBToGray()"
 
 func RGBToGray(rgba image.RGBA, colorNum int) (*image.Gray, error) {
-	if colorNum >= NumColorsRGB {
+	if colorNum >= coloring.NumColorsRGB {
 		return nil, fmt.Errorf(onRGBToGray+": wrong color to get: %d", colorNum)
 	}
 
@@ -124,7 +123,7 @@ func RGBToGray(rgba image.RGBA, colorNum int) (*image.Gray, error) {
 			rgbaStride := (y-rgba.Rect.Min.Y)*rgba.Stride + colorNum
 			grayStride := y * xWidth
 			for x := 0; x < xWidth; x++ {
-				gray.Pix[grayStride+x] = rgba.Pix[rgbaStride+(x-rgba.Rect.Min.X)*NumColorsRGBA]
+				gray.Pix[grayStride+x] = rgba.Pix[rgbaStride+(x-rgba.Rect.Min.X)*coloring.NumColorsRGBA]
 			}
 		}
 	} else {

@@ -137,6 +137,13 @@ func (op loggerZap) Comment(text string) {
 	}
 }
 
+func (op *loggerZap) Path() string {
+	if op == nil {
+		return ""
+	}
+	return op.Config.BasePath
+}
+
 func (op *loggerZap) SetPath(basePath string) {
 	if op == nil {
 		return
@@ -181,7 +188,7 @@ func (op loggerZap) Image(path string, getImage logger.GetImage, opts common.Map
 			basedPaths, err := logger.ModifiedPaths([]string{path}, op.Config.BasePath, "")
 			if err != nil {
 				op.Error(err)
-			} else if err = imagelib.Save(img, basedPaths[0]); err != nil {
+			} else if err = imagelib.SavePNG(img, basedPaths[0]); err != nil {
 				op.Error(err)
 			}
 		}
