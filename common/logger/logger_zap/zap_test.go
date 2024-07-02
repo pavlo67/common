@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestLoggerZapJ(t *testing.T) {
+func TestLoggerJ(t *testing.T) {
 
 	testKey := "testKey"
 	cfg := logger.Config{
@@ -23,6 +23,24 @@ func TestLoggerZapJ(t *testing.T) {
 	require.NotNil(t, lj)
 
 	logger.TestJ(t, lj)
+
+}
+
+func TestLoggerFile(t *testing.T) {
+
+	testKey := "testKey"
+	cfg := logger.Config{
+		Key:         testKey,
+		LogLevel:    logger.InfoLevel,
+		SaveFiles:   true,
+		OutputPaths: []string{fmt.Sprintf("%d.log", time.Now().Unix())},
+	}
+
+	lj, err := New(cfg)
+	require.NoError(t, err)
+	require.NotNil(t, lj)
+
+	lj.File(fmt.Sprintf("tracking/%04d.info", 1), true, []byte("aaa"))
 
 }
 
