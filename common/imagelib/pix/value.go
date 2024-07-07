@@ -3,8 +3,9 @@ package pix
 import "image"
 
 type Value = uint8
-type ValueSum = uint32  // TODO!!! be careful
 type ValueDelta = int16 // TODO!!! be careful
+type ValueSum = int32   // TODO!!! be careful
+type ValueSumSigned = ValueSum
 
 const ValueMax Value = 0xFF
 const ValueMiddle Value = 0x7F

@@ -19,10 +19,9 @@ func SavePNG(img image.Image, filename string) error {
 		return errors.New("img == nil / " + onSavePNG)
 	}
 
-	if path := filepath.Dir(filename); path != "" && path != "." && path != ".." {
-		if _, err := filelib.Dir(path); err != nil {
-			return errors.Wrapf(err, "can't create dir '%s' / "+onSavePNG, path)
-		}
+	path := filepath.Dir(filename)
+	if _, err := filelib.Dir(path); err != nil {
+		return errors.Wrapf(err, "can't create dir '%s' / "+onSavePNG, path)
 	}
 
 	resFile, err := os.Create(filename)

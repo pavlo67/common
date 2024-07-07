@@ -2,14 +2,15 @@ package imagelib
 
 import (
 	"fmt"
-	pnm "github.com/jbuchbinder/gopnm"
-	"github.com/pavlo67/common/common/filelib"
 	"image"
 	"io"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
+
+	pnm "github.com/jbuchbinder/gopnm"
+	"github.com/pavlo67/common/common/filelib"
 
 	"github.com/pkg/errors"
 )
@@ -127,10 +128,11 @@ const onSavePGM = "on imagelib.SavePGM()"
 func SavePGM(img image.Image, filename string) error {
 	if img == nil {
 		return errors.New("img == nil / " + onSavePGM)
-	} else if path := filepath.Dir(filename); path != "" && path != "." && path != ".." {
-		if _, err := filelib.Dir(path); err != nil {
-			return errors.Wrapf(err, "can't create dir '%s' / "+onSavePGM, path)
-		}
+	}
+
+	path := filepath.Dir(filename)
+	if _, err := filelib.Dir(path); err != nil {
+		return errors.Wrapf(err, "can't create dir '%s' / "+onSavePGM, path)
 	}
 
 	resFile, err := os.Create(filename)

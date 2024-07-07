@@ -3,6 +3,7 @@ package logger_zap
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -162,21 +163,28 @@ func (op *loggerZap) SetPath(basePath string) {
 	op.Config.BasePath = basePath
 }
 
-func (op loggerZap) File(path string, append bool, data []byte) {
+func (op loggerZap) File(path string, appending bool, data []byte) {
 	if op.Config.SaveFiles {
 		basedPaths, err := logger.ModifiedPaths([]string{path}, op.Config.BasePath, "")
 		if err != nil {
 			op.Error(err)
 		} else {
-			if append {
+			if appending {
 				err = filelib.AppendFile(basedPaths[0], data)
 			} else {
-				err = os.WriteFile(basedPaths[0], data, 0644)
-				op.Infof("FILE IS WRITTEN  %s", basedPaths[0])
+				filename := basedPaths[0]
+				basedPath := filepath.Dir(filename)
+				if _, err = filelib.Dir(basedPath); err != nil {
+					op.Error(err)
+				} else {
+					err = os.WriteFile(filename, data, 0644)
+				}
 			}
 
 			if err != nil {
 				op.Errorf("CAN'T WRITE TO FILE %s: %s", path, err)
+			} else if !appending {
+				op.Infof("FILE IS WRITTEN  %s", basedPaths[0])
 			}
 
 		}

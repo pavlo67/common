@@ -125,7 +125,7 @@ const maxRetries = 10
 
 func Dir(path string) (string, error) {
 	path = strings.TrimSpace(path)
-	if path == "" {
+	if path == "" || path == "." || path == ".." {
 		return "", nil
 	}
 
