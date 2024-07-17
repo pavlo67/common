@@ -8,7 +8,7 @@ import (
 	"github.com/pavlo67/common/common/errors"
 )
 
-type Code = uint16
+type Code = uint32
 
 // implementations of Sensor must be thread-safe
 type Sensor interface {
