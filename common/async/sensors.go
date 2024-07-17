@@ -10,8 +10,8 @@ import (
 
 type Code = uint16
 
-// implementations of Item must be thread-safe
-type Item interface {
+// implementations of Sensor must be thread-safe
+type Sensor interface {
 	Code() (_, _ Code)
 	Set(_ time.Time, data interface{}) error
 	Check() *time.Time
@@ -19,7 +19,7 @@ type Item interface {
 
 // GenericSensor ------------------------------------------------------------------------------------------
 
-var _ Item = NewGenericSensor[int](1, 1)
+var _ Sensor = NewGenericSensor[int](1, 1)
 
 func NewGenericSensor[S any](c0, c1 Code) *GenericSensor[S] {
 	return &GenericSensor[S]{c0: c0, c1: c1, m: &sync.Mutex{}}
