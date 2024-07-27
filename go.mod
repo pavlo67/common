@@ -11,7 +11,6 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.0
 	go.uber.org/zap v1.16.0
-	gocv.io/x/gocv v0.33.0
 	golang.org/x/image v0.9.0
 	golang.org/x/text v0.11.0
 	gopkg.in/square/go-jose.v2 v2.5.1

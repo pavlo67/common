@@ -110,7 +110,7 @@ const CredsRolesJSON CredsType = "roles_json"
 //		}
 //	}
 //
-//	return authOp.senderOp.Send(message)
+//	return authOp.senderOp.Set(message)
 //}
 
 //var reEmailToLogin1 = regexp.MustCompile(`@.*`)

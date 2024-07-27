@@ -25,7 +25,7 @@ import (
 func ShowVCSInfo() {
 	if bi, ok := debug.ReadBuildInfo(); ok && bi != nil {
 		for _, s := range bi.Settings {
-			if ok, _ := regexp.MatchString(`^vcs\.`, s.Key); ok {
+			if ok, _ = regexp.MatchString(`^vcs\.`, s.Key); ok {
 				fmt.Printf("%s\t%s\n", s.Key, s.Value)
 			}
 		}
@@ -44,7 +44,7 @@ func PrepareApp(envPath, logPath string) (Envs, logger.OperatorJ) {
 		configEnv = "local"
 	}
 
-	envs, err := Get(envPath+configEnv+".yaml", serialization.MarshalerYAML)
+	envs, err := Get(filepath.Join(envPath, configEnv+".yaml"), serialization.MarshalerYAML)
 	if err != nil || envs == nil {
 		log.Fatalf("on PrepareApp(%s, %s) got %#v / %s", envPath, configEnv+".yaml", envs, err)
 	}
@@ -86,7 +86,7 @@ func PrepareTests(t *testing.T, envPath, logFile string) (Envs, logger.OperatorJ
 	configEnv := "test"
 	os.Setenv("ENV", configEnv)
 
-	envsPtr, err := Get(envPath+configEnv+".yaml", serialization.MarshalerYAML)
+	envsPtr, err := Get(filepath.Join(envPath, configEnv+".yaml"), serialization.MarshalerYAML)
 	require.NoError(t, err)
 	require.NotNil(t, envsPtr)
 
