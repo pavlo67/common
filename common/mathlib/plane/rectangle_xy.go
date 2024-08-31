@@ -133,3 +133,11 @@ func (rectXY RectangleXY) ImageRectangle() image.Rectangle {
 		Max: image.Point{int(math.Round(rectXY.X + rectXY.HalfSideX)), int(math.Round(rectXY.Y + rectXY.HalfSideY))},
 	}
 }
+
+func RectangleXYFromImageRectangle(rect image.Rectangle) RectangleXY {
+	return RectangleXY{
+		Point2:    Point2{0.5 * float64(rect.Min.X+rect.Max.X), 0.5 * float64(rect.Min.Y+rect.Max.Y)},
+		HalfSideX: 0.5 * math.Abs(float64(rect.Max.X-rect.Min.X)),
+		HalfSideY: 0.5 * math.Abs(float64(rect.Max.Y-rect.Min.Y)),
+	}
+}

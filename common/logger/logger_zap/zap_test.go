@@ -40,7 +40,7 @@ func TestLoggerFile(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, lj)
 
-	lj.File(fmt.Sprintf("tracking/%04d.info", 1), true, []byte("aaa"))
+	lj.File(fmt.Sprintf("tracking/%04d.txt", 1), true, []byte("aaa"))
 
 }
 

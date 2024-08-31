@@ -195,7 +195,7 @@ func (op loggerZap) Image(path string, getImage logger.GetImage, opts common.Map
 	if op.Config.SaveFiles {
 		img, info, err := getImage.Image(opts)
 		if info != "" {
-			op.File(path+".info", false, []byte(info))
+			op.File(path+".txt", false, []byte(info))
 
 			//_, filename, line, _ := runtime.Caller(1)
 			//op.Infof("from %s:%d: "+info, filename, line)
