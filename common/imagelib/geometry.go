@@ -138,10 +138,11 @@ func CenterImage(points ...image.Point) image.Point {
 // Angle — це кут напряму до точки, яка на зображенні має v пікселів відхилення від центру
 // vMax, angleMax — відхилення/кут деякої иншої точки на зображенні (береться крайня точка фрейму)
 func Angle(v, vMax, angleMax float64) float64 {
-	// vMax = r * math.Sin(angleMax)
-	// v    = r * math.Sin(angle)
-	// math.Sin(angle) = v * math.Sin(angleMax) / vMax
+	// d - "відстань" до цілі (проєкція в площині Oxy)
+	// vMax = d * math.Tan(angleMax)
+	// v    = d * math.Tan(angle)
+	// math.Tan(angle) = v * math.Tan(angleMax) / vMax
 
-	return math.Asin(math.Sin(angleMax) * v / vMax)
+	return math.Atan(math.Tan(angleMax) * v / vMax)
 	// return angleMax * v / vMax  // approximately...
 }

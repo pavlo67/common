@@ -108,7 +108,7 @@ func CheckInterface(intrfc interface{}, ptrToInterface interface{}) bool {
 
 func (j *joinerRuntime) CloseAll() {
 	if j == nil {
-		log.Print("on ActorKey.Close(): null ActorKey item")
+		log.Print("on joinerRuntime.CloseAll(): j == nil")
 		return
 	}
 
@@ -118,7 +118,7 @@ func (j *joinerRuntime) CloseAll() {
 		if closer, _ := closerComponent.Interface.(joiner.Closer); closer != nil {
 			err := closer.Close()
 			if err != nil {
-				log.Print("on ActorKey.Close(): ", err)
+				log.Print("on joinerRuntime.CloseAll(): ", err)
 			}
 		}
 	}
