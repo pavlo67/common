@@ -77,11 +77,11 @@ func CheckProjections(t *testing.T, expected, got []ProjectionOnPolyChainDirecte
 	for i, e := range expected {
 		g := got[i]
 		require.Equalf(t, e.N, g.N, "#d: %v vs %v", i, e, g)
-		require.Truef(t, math.Abs(e.Position-g.Position) <= mathlib.Eps, "#d: %v vs %v", i, e, g)
-		require.Truef(t, math.Abs(e.Distance-g.Distance) <= mathlib.Eps, "#d: %v vs %v", i, e, g)
-		require.Truef(t, math.Abs(e.Angle-g.Angle) <= mathlib.Eps, "#d: %v vs %v", i, e, g)
-		require.Truef(t, math.Abs(e.X-g.X) <= mathlib.Eps, "#d: %v vs %v", i, e, g)
-		require.Truef(t, math.Abs(e.Y-g.Y) <= mathlib.Eps, "#d: %v vs %v", i, e, g)
+		require.Truef(t, math.Abs(e.Position-g.Position) <= mathlib.EPS, "#d: %v vs %v", i, e, g)
+		require.Truef(t, math.Abs(e.Distance-g.Distance) <= mathlib.EPS, "#d: %v vs %v", i, e, g)
+		require.Truef(t, math.Abs(e.Angle-g.Angle) <= mathlib.EPS, "#d: %v vs %v", i, e, g)
+		require.Truef(t, math.Abs(e.X-g.X) <= mathlib.EPS, "#d: %v vs %v", i, e, g)
+		require.Truef(t, math.Abs(e.Y-g.Y) <= mathlib.EPS, "#d: %v vs %v", i, e, g)
 
 	}
 }

@@ -31,7 +31,7 @@ func TestDegrees_DMS(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.degrees.DMS(); !(got.D == tt.want.D && got.M == tt.want.M && math.Abs(got.S-tt.want.S) <= mathlib.Eps) {
+			if got := tt.degrees.DMS(); !(got.D == tt.want.D && got.M == tt.want.M && math.Abs(got.S-tt.want.S) <= mathlib.EPS) {
 				t.Errorf("DMS() = %v, want %v", got, tt.want)
 			}
 		})

@@ -20,8 +20,9 @@ func PrepareTmpFS(path string, sizeMb int) error {
 		cmd = exec.Command("sudo", "umount", path)
 		cmd.Stdout = &stdout
 		cmd.Stderr = &stderr
-		_ = cmd.Run()
-		fmt.Println(stdout.String(), "\n", stderr.String())
+		if err := cmd.Run(); err != nil {
+			fmt.Println(stderr.String())
+		}
 	}
 
 	// sudo mount -t tmpfs -o size=1024M tmpfs /media/ramdisk
@@ -32,7 +33,8 @@ func PrepareTmpFS(path string, sizeMb int) error {
 	if err := cmd.Run(); err != nil {
 		return err
 	}
-	fmt.Println(stdout.String(), "\n", stderr.String())
+
+	fmt.Printf("PREPARED TEMPORARY FS IN %s FOR %dMB\n", path, sizeMb)
 
 	return nil
 }

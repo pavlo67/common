@@ -33,7 +33,7 @@ func ShowVCSInfo() {
 	}
 }
 
-func PrepareApp(envPath, logPath string) (Envs, logger.OperatorJ) {
+func PrepareApp(envPath, logPath, logFile string) (Envs, logger.OperatorJ) {
 
 	rand.Seed(time.Now().UnixNano())
 
@@ -44,7 +44,7 @@ func PrepareApp(envPath, logPath string) (Envs, logger.OperatorJ) {
 		configEnv = "local"
 	}
 
-	envs, err := Get(filepath.Join(envPath, configEnv+".yaml"), serialization.MarshalerYAML)
+	envs, err := Get(envPath+configEnv+".yaml", serialization.MarshalerYAML)
 	if err != nil || envs == nil {
 		log.Fatalf("on PrepareApp(%s, %s) got %#v / %s", envPath, configEnv+".yaml", envs, err)
 	}
@@ -67,13 +67,18 @@ func PrepareApp(envPath, logPath string) (Envs, logger.OperatorJ) {
 		log.Fatalf("on PrepareApp(%s, %s): can't create log path (%s): %s", envPath, configEnv+".yaml", logPath, err)
 	}
 
-	loggerConfig := logger.Config{
+	cfg := logger.Config{
 		Key:       strconv.FormatInt(time.Now().Unix(), 10),
 		BasePath:  logPath,
 		SaveFiles: saveFiles,
 	}
 
-	l, err := logger_zap.New(loggerConfig)
+	if logFile != "" {
+		cfg.OutputPaths = []string{logFile}
+		cfg.ErrorPaths = []string{logFile}
+	}
+
+	l, err := logger_zap.New(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}

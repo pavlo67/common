@@ -48,7 +48,7 @@ func (ls Segment) ProjectionOnPolyChain(pCh PolyChain, distanceMax float64) *Pro
 
 	if len(pCh) == 1 {
 		distance0, distance1 := pCh[0].DistanceTo(ls[0]), pCh[0].DistanceTo(ls[1])
-		if math.Abs(segmLen+distance1-distance0) <= mathlib.Eps {
+		if math.Abs(segmLen+distance1-distance0) <= mathlib.EPS {
 			return &ProjectionOnPolyChainDirected{Distance: distance1, ProjectionOnPolyChain: ProjectionOnPolyChain{Point2: pCh[0]}}
 		}
 		return nil
@@ -67,7 +67,7 @@ func (ls Segment) ProjectionOnPolyChain(pCh PolyChain, distanceMax float64) *Pro
 
 				//log.Print(distance0, distance1, segmLen)
 
-				if math.Abs(segmLen+distance1-distance0) <= mathlib.Eps {
+				if math.Abs(segmLen+distance1-distance0) <= mathlib.EPS {
 					position := p.DistanceTo(pn)
 					if position >= pn.DistanceTo(pCh[n+1]) {
 						pr = &ProjectionOnPolyChainDirected{
@@ -118,7 +118,7 @@ func (s Segment) Intersection(s1 Segment) (pCross *Point2) {
 	if s1[0].X < s[0].X {
 		s, s1 = s1, s
 	}
-	if s1[0].X-s[1].X >= mathlib.Eps {
+	if s1[0].X-s[1].X >= mathlib.EPS {
 		return nil
 	}
 
@@ -127,10 +127,10 @@ func (s Segment) Intersection(s1 Segment) (pCross *Point2) {
 
 	cr := Cross(r, l)
 
-	if cr > -mathlib.Eps && cr < mathlib.Eps {
+	if cr > -mathlib.EPS && cr < mathlib.EPS {
 		// vertical segments
-		if math.Abs(Cross(r, Point2{0, 1})) < mathlib.Eps {
-			if s[1].X-s1[0].X >= mathlib.Eps {
+		if math.Abs(Cross(r, Point2{0, 1})) < mathlib.EPS {
+			if s[1].X-s1[0].X >= mathlib.EPS {
 				return nil
 			}
 
@@ -158,12 +158,12 @@ func (s Segment) Intersection(s1 Segment) (pCross *Point2) {
 		// compare s1[0].Y and corresponding point on s
 		k := r.Y / r.X
 		s01Y := s[0].Y + k*(s1[0].X-s[0].X)
-		if math.Abs(s01Y/math.Sqrt(1+k*k)) >= mathlib.Eps {
+		if math.Abs(s01Y/math.Sqrt(1+k*k)) >= mathlib.EPS {
 			return nil
 		}
 
 		return &s1[0]
-		//} else if math.Abs(s[0].X-s[1].X) < mathlib.Eps {
+		//} else if math.Abs(s[0].X-s[1].X) < mathlib.EPS {
 		//
 		//	s, s1 = s1, s
 		//	r = Point2{s[1].X - s[0].X, s[1].Y - s[0].Y}
@@ -177,7 +177,7 @@ func (s Segment) Intersection(s1 Segment) (pCross *Point2) {
 	xIntersect := s[0].X + t*r.X
 	yIntersect := s[0].Y + t*r.Y
 
-	if math.Abs(s[0].X-s[1].X) < mathlib.Eps {
+	if math.Abs(s[0].X-s[1].X) < mathlib.EPS {
 		s0Y, s1Y := s[0].Y, s[1].Y
 		if s0Y > s1Y {
 			s0Y, s1Y = s1Y, s0Y

@@ -11,7 +11,7 @@ func DPM(lat Degrees, zoom int) float64 {
 	n := math.Pow(2, float64(zoom))
 	mpd := 156543.03 * math.Cos(float64(lat)*math.Pi/180) / n // resolution: meters per dot (mpd)
 
-	if mpd <= mathlib.Eps {
+	if mpd <= mathlib.EPS {
 		return math.Inf(1)
 	}
 

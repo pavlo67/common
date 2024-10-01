@@ -21,7 +21,7 @@ func (s Segment) LinesIntersection(s1 Segment) *Point2 {
 	l := Point2{s1[1].X - s1[0].X, s1[1].Y - s1[0].Y}
 
 	cr := Cross(r, l)
-	if cr > -mathlib.Eps && cr < mathlib.Eps {
+	if cr > -mathlib.EPS && cr < mathlib.EPS {
 		// lines are about parallel (they may be collinear!)
 		return nil
 	}

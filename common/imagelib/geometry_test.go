@@ -32,7 +32,7 @@ func TestAngle(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Angle(tt.v, tt.vMax, tt.angleMax); math.Abs(got-tt.want) > mathlib.Eps {
+			if got := Angle(tt.v, tt.vMax, tt.angleMax); math.Abs(got-tt.want) > mathlib.EPS {
 				t.Errorf("Angle() = %v, want %v", got, tt.want)
 			}
 		})

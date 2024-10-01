@@ -395,7 +395,7 @@ func TestDistanceToPolyChain(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			gotDistance, gotProjections := tt.p.DistanceToPolyChain(tt.polyChain)
 
-			if math.Abs(gotDistance-tt.wantDistance) > mathlib.Eps {
+			if math.Abs(gotDistance-tt.wantDistance) > mathlib.EPS {
 				t.Errorf("TestDistanceToPolyChain() gotDistance = %f, wantDistance %f", gotDistance, tt.wantDistance)
 			}
 			if !reflect.DeepEqual(gotProjections, tt.wantProjection) {
@@ -494,10 +494,10 @@ func TestDistanceToLineSegment(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			gotDistance, gotPosition := tt.p.DistanceToSegment(tt.ls)
-			if math.Abs(gotDistance-tt.wantDistance) > mathlib.Eps {
+			if math.Abs(gotDistance-tt.wantDistance) > mathlib.EPS {
 				t.Errorf("DistanceToSegment() gotDistance = %v, wantDistance %v", gotDistance, tt.wantDistance)
 			}
-			if math.Abs(gotPosition-tt.wantPosition) > mathlib.Eps {
+			if math.Abs(gotPosition-tt.wantPosition) > mathlib.EPS {
 				t.Errorf("DistanceToSegment() gotPosition = %v, wantDistance %v", gotPosition, tt.wantPosition)
 			}
 		})

@@ -52,7 +52,7 @@ func TestRotateByAngle(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.args.p.RotateByAngle(tt.args.addAngle); got.DistanceTo(tt.want) > mathlib.Eps {
+			if got := tt.args.p.RotateByAngle(tt.args.addAngle); got.DistanceTo(tt.want) > mathlib.EPS {
 				t.Errorf("RotateByAngle() = %v, wantDistance %v", got, tt.want)
 			}
 		})
@@ -134,7 +134,7 @@ func TestRotateWithRatio(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.args.p.RotateWithRatio(tt.args.ratio); got.DistanceTo(tt.want) > mathlib.Eps {
+			if got := tt.args.p.RotateWithRatio(tt.args.ratio); got.DistanceTo(tt.want) > mathlib.EPS {
 				t.Errorf("RotateByAngle() = %v, wantDistance %v", got, tt.want)
 			}
 		})
@@ -179,7 +179,7 @@ func TestTurnAroundAxis(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.args.axis.TurnAroundAxis(tt.args.p); got.DistanceTo(tt.want) > mathlib.Eps {
+			if got := tt.args.axis.TurnAroundAxis(tt.args.p); got.DistanceTo(tt.want) > mathlib.EPS {
 				t.Errorf("TurnAroundAxis() = %v, wantDistance %v", got, tt.want)
 			}
 		})
@@ -207,7 +207,7 @@ func TestAngle2(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.args.v0.AnglesDelta(tt.args.v1); math.Abs(got-tt.want) > mathlib.Eps {
+			if got := tt.args.v0.AnglesDelta(tt.args.v1); math.Abs(got-tt.want) > mathlib.EPS {
 				t.Errorf("AnglesDelta() = %v, wantDistance %v", got, tt.want)
 			}
 		})
@@ -235,7 +235,7 @@ func TestRotation(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.args.p.XToYAngleFromOx(); math.Abs(float64(got-tt.want)) > mathlib.Eps {
+			if got := tt.args.p.XToYAngleFromOx(); math.Abs(float64(got-tt.want)) > mathlib.EPS {
 				t.Errorf("XToYAngleFromOy() = %v, wantDistance %v", got, tt.want)
 			}
 		})
@@ -332,7 +332,7 @@ func TestDistanceToLine(t *testing.T) {
 			if math.IsNaN(tt.want) {
 				require.Truef(t, math.IsNaN(got), "wanted: %f, gotten: %f", tt.want, got)
 			} else {
-				require.Truef(t, math.Abs(got-tt.want) < mathlib.Eps, "wanted: %f, gotten: %f", tt.want, got)
+				require.Truef(t, math.Abs(got-tt.want) < mathlib.EPS, "wanted: %f, gotten: %f", tt.want, got)
 			}
 		})
 	}
