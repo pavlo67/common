@@ -1,0 +1,69 @@
+# Environments
+_env/*.json5
+_env/*.yaml
+_env/*.yml
+.env
+.env.local
+.env.*.local
+*.key
+
+
+# Dependencies
+node_modules
+vendor
+
+# Test files & executables
+demo
+bin/*
+*.bin
+build
+dist
+coverage
+*.test
+
+# Data files
+*.jlist
+**/_processing/*
+**/_processing_test/*
+*.pdf
+*.PDF
+*.png
+*.PNG
+*.bmp
+*.BMP
+*.tif
+*.TIF
+*.jpg
+*.jpeg
+*.JPG
+*.JPEG
+*.gif
+*.GIF
+*.mp3
+*.MP3
+*.mp4
+*.MP4
+*.mpg
+*.MPG
+*.zip
+*.ZIP
+*.csv
+*.CSV
+*.7z
+*.7Z
+*.pgm
+
+# Log files & reports
+*.xls*
+*.log*
+_logs/*
+
+# IDE & editor temporary files & configs
+_crawler/*
+.DS_Store
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
