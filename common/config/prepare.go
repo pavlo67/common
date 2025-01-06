@@ -44,7 +44,7 @@ func PrepareApp(envPath, logPath, logFile string) (Envs, logger.OperatorJ) {
 		configEnv = "local"
 	}
 
-	envs, err := Get(envPath+configEnv+".yaml", serialization.MarshalerYAML)
+	envs, err := Get(filepath.Join(envPath, configEnv+".yaml"), serialization.MarshalerYAML)
 	if err != nil || envs == nil {
 		log.Fatalf("on PrepareApp(%s, %s) got %#v / %s", envPath, configEnv+".yaml", envs, err)
 	}

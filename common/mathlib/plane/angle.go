@@ -44,8 +44,13 @@ func (p Point2) XToYAngleFromOx() XToYAngle {
 	}
 }
 
+// DEPRECATED
 func (p Point2) AnglesDelta(p1 Point2) float64 {
-	angle := p1.XToYAngleFromOx() - p.XToYAngleFromOx()
+	return -p.AngleFrom(p1)
+}
+
+func (p Point2) AngleFrom(p1 Point2) float64 {
+	angle := p.XToYAngleFromOx() - p1.XToYAngleFromOx()
 	if angle > math.Pi {
 		return float64(angle - 2*math.Pi)
 	} else if angle <= -math.Pi {

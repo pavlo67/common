@@ -62,6 +62,8 @@ func New(cfg logger.Config) (logger.OperatorJ, error) {
 		return nil, fmt.Errorf("can't create logger (%#v --> %#v), got %s", cfg, c, err)
 	}
 
+	fmt.Printf("LOGS WILL BE STORED INTO %v, ERROR LOGS: %v\n", c.OutputPaths, c.ErrorOutputPaths)
+
 	return &loggerZap{SugaredLogger: *l.Sugar(), Config: cfg}, nil
 
 }
@@ -96,8 +98,6 @@ func (op *loggerZap) J() (_ logger.Operator, outputPaths []string, _ error) {
 		if err != nil {
 			return nil, nil, fmt.Errorf("can't create logger (%#v --> %#v), got %s", cfg, c, err)
 		}
-
-		fmt.Printf("LOGS WILL BE STORED INTO %v, ERROR LOGS: %v\n", c.OutputPaths, c.ErrorOutputPaths)
 
 		op.j, outputPaths = &loggerZap{SugaredLogger: *l.Sugar(), Config: cfg}, c.OutputPaths
 	}
