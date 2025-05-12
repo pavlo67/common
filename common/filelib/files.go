@@ -40,9 +40,14 @@ func CorrectFileName(name string) string {
 const onCopyFiles = "on filelib.CopyFiles()"
 
 func CopyFiles(path, targetPath string, reStr string, removeOrigin bool) error {
-	re, err := regexp.Compile(reStr)
-	if err != nil {
-		return fmt.Errorf("wrong reStr: '%s'"+onCopyFiles, reStr)
+	var re *regexp.Regexp
+	var err error
+
+	if len(reStr) > 0 {
+		re, err = regexp.Compile(reStr)
+		if err != nil {
+			return fmt.Errorf("wrong reStr: '%s'"+onCopyFiles, reStr)
+		}
 	}
 
 	targetPath, err = Dir(targetPath)
@@ -110,56 +115,6 @@ func CopyFileConverted(src, dst string, perm fs.FileMode, convert Convert) error
 	return os.WriteFile(dst, data, perm)
 }
 
-//func CopyFile(src, dst string) error {
-//	// TODO??? check if src and dst are the same
-//
-//	in, err := os.Open(src)
-//	if err != nil {
-//		return err
-//	}
-//	defer func() {
-//		if err := in.Close(); err != nil {
-//			fmt.Fprintf(os.Stderr, "error closing %s: %s", src, err)
-//		}
-//	}()
-//
-//	out, err := os.Create(dst)
-//	if err != nil {
-//		return err
-//	}
-//	defer func() {
-//		if err := out.Close(); err != nil {
-//			fmt.Fprintf(os.Stderr, "error closing %s: %s", dst, err)
-//		}
-//	}()
-//
-//	if _, err = io.Copy(out, in); err != nil {
-//		return err
-//	}
-//
-//	return out.Sync()
-//}
-
-//type Convert func(data []byte) ([]byte, error)
-//
-//func CopyFileConverted(src, dst string, perm fs.FileMode, convert Convert) error {
-//	// TODO??? check if src and dst are the same
-//
-//	data, err := os.ReadFile(src)
-//	if err != nil {
-//		return err
-//	}
-//
-//	if convert != nil {
-//		data, err = convert(data)
-//		if err != nil {
-//			return err
-//		}
-//	}
-//
-//	return os.WriteFile(dst, data, perm)
-//}
-
 func CopyFile(src, dst string) error {
 	// TODO??? check if src and dst are the same
 
@@ -168,7 +123,7 @@ func CopyFile(src, dst string) error {
 		return err
 	}
 	defer func() {
-		if err := in.Close(); err != nil {
+		if err = in.Close(); err != nil {
 			fmt.Fprintf(os.Stderr, "error closing %s: %s", src, err)
 		}
 	}()
@@ -178,7 +133,7 @@ func CopyFile(src, dst string) error {
 		return err
 	}
 	defer func() {
-		if err := out.Close(); err != nil {
+		if err = out.Close(); err != nil {
 			fmt.Fprintf(os.Stderr, "error closing %s: %s", dst, err)
 		}
 	}()
